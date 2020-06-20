@@ -6,6 +6,7 @@
 
 - Golang
 - Telegram bot
+- Telegram channel (optional)
 
 ## Installation
 
@@ -40,6 +41,24 @@ Use "wayback [command] --help" for more information about a command.
 $ wayback telegram -t YOUR-BOT-TOKEN
 ```
 
+Publish message to your Telegram channel at the same time:
+
+```sh
+$ wayback telegram
+A CLI tool for wayback webpages on Telegram bot.
+
+Usage:
+  wayback telegram [flags]
+
+Flags:
+  -c, --chatid string   Channel ID. default: ""
+  -d, --debug           Enable debug mode. default: false
+  -h, --help            help for telegram
+  -t, --token string    Telegram bot API Token, required.
+
+$ wayback telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNAME
+```
+
 Also can run with debug mode:
 
 ```sh
@@ -50,7 +69,8 @@ $ wayback telegram -t YOUR-BOT-TOKEN -d
 
 ```sh
 $ docker pull wabarc/wayback
-$ docker run -d wabarc/wayback telegram -t YOUR-BOT-TOKEN
+$ docker run -d wabarc/wayback telegram -t YOUR-BOT-TOKEN # without telegram channel
+$ docker run -d wabarc/wayback telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNAME # with telegram channel
 ```
 
 ## TODO
@@ -65,6 +85,7 @@ $ docker run -d wabarc/wayback telegram -t YOUR-BOT-TOKEN
 - [Bots: An introduction for developers](https://core.telegram.org/bots)
 - [How do I create a bot?](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
 - [An example bot](http://t.me/wabarc_bot)
+- [An example channel](http://t.me/wbrc_channel)
 
 ## License
 

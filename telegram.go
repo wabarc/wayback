@@ -64,6 +64,11 @@ func (cfg *Config) Telegram() {
 			msg.ReplyToMessageID = update.Message.MessageID
 
 			bot.Send(msg)
+
+			if len(cfg.ChatID) > 0 {
+				msg = tgbotapi.NewMessageToChannel("@"+cfg.ChatID, replyText)
+				bot.Send(msg)
+			}
 		}
 	}
 }
