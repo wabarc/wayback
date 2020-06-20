@@ -87,6 +87,10 @@ $ docker run -d wabarc/wayback telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNA
 - [An example bot](http://t.me/wabarc_bot)
 - [An example channel](http://t.me/wbrc_channel)
 
+## Related projects
+
+- duty-machine: <https://github.com/duty-machine/duty-machine>
+
 ## License
 
 Permissive GPL 3.0 license, see the [LICENSE](https://github.com/wabarc/wayback/blob/master/LICENSE) file for details.
