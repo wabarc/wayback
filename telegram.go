@@ -15,9 +15,9 @@ type Message struct {
 	URL      [][]string
 }
 
-const tmpl = `{{range $i, $name := .Archiver}}{{$name}}:
+const tmpl = `{{range $i, $name := .Archiver}}<b>{{ $name }}</b>:
 {{ range $url := index $.URL $i -}}
-* {{ $url }}
+• {{ $url }}
 {{end}}
 {{end}}`
 
@@ -62,11 +62,13 @@ func (cfg *Config) Telegram() {
 			replyText := message(vars)
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			msg.ReplyToMessageID = update.Message.MessageID
+			msg.ParseMode = "html"
 
 			bot.Send(msg)
 
 			if len(cfg.ChatID) > 0 {
 				msg = tgbotapi.NewMessageToChannel("@"+cfg.ChatID, replyText)
+				msg.ParseMode = "html"
 				bot.Send(msg)
 			}
 		}
