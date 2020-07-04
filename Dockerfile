@@ -13,10 +13,11 @@ FROM alpine:3.12
 
 LABEL maintainer "WaybackBot <wabarc@tutanota.com>"
 COPY --from=builder /wayback /usr/local/bin
-RUN apk update && apk add ca-certificates
+RUN apk update && apk add ca-certificates tor
+RUN mv /etc/tor/torrc.sample /etc/tor/torrc
 
-USER nobody
-WORKDIR /usr/local/bin
+USER tor
+WORKDIR /tmp
 
 ENTRYPOINT ["/usr/local/bin/wayback"]
 

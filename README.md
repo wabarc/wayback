@@ -34,7 +34,10 @@ Available Commands:
   telegram    A CLI tool for wayback webpages on Telegram bot.
 
 Flags:
-  -h, --help   help for wayback
+  -h, --help          help for wayback
+      --host string   IPFS daemon host. (default "127.0.0.1")
+      --port uint     IPFS daemon port. (default 5001)
+      --tor           Saving webpage use tor proxy.
 
 Use "wayback [command] --help" for more information about a command.
 
@@ -77,8 +80,8 @@ $ docker run -d wabarc/wayback telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNA
 
 [Archive.org](https://web.archive.org/) and [Archive.today](https://archive.today/) are currently supported, the next step mind support the followings platform:
 
-- [IPFS](https://ipfs.io/)
-- [ZeroNet](https://zeronet.io/)
+- [x] [IPFS](https://ipfs.io/)
+- [ ] [ZeroNet](https://zeronet.io/)
 
 ## Telegram bot
 

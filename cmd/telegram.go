@@ -21,7 +21,8 @@ var (
 				os.Exit(0)
 			}
 
-			wbrc := wayback.NewConfig(token, debug, chatid)
+			ipfs := &wayback.IPFS{Host: host, Port: port, UseTor: tor}
+			wbrc := wayback.NewConfig(token, debug, chatid, ipfs)
 
 			wbrc.Telegram()
 		},
