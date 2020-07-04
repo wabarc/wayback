@@ -4,7 +4,7 @@
 FROM golang:1.14-alpine AS builder
 RUN apk update && apk add --no-cache build-base ca-certificates
 COPY . /tmp/wayback
-RUN cd /tmp/wayback && make build && mv ./bin/wayback /wayback
+RUN cd /tmp/wayback && make linux-amd64 && mv ./bin/wayback-linux-amd64 /wayback
 
 ############################
 # STEP 2 build a small image
