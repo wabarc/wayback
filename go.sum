@@ -1007,8 +1007,8 @@ github.com/wabarc/archive.org v0.1.0 h1:1fx+j1yZzaF51aIB3OGKi+MbqktbCCTQ61UTpNHS
 github.com/wabarc/archive.org v0.1.0/go.mod h1:IGjN8dSX65a0qdRL9FdfV5k3aKOwbvDBqibZ9hkI1Dc=
 github.com/wabarc/obelisk v0.0.0-20200703142927-b75ec5557781 h1:1F8x878em6V4kheBFnLpyt1FvLQ/9J4YBQSwzo4jj9c=
 github.com/wabarc/obelisk v0.0.0-20200703142927-b75ec5557781/go.mod h1:hUOSLtkWv8O5PKgn4SmFKlfOcJLLsDQyVtJRmHS7Zzs=
-github.com/wabarc/wbipfs v0.0.0-20200704155612-6ac39276732b h1:X9X1cvBBXs27TYs9NJPpu0Y7G6fxI9BE5mIK/Pid1Zw=
-github.com/wabarc/wbipfs v0.0.0-20200704155612-6ac39276732b/go.mod h1:3xcgDp2vfORR4pndmxSvyKZmUe9IvgjXw5fj+phTqTM=
+github.com/wabarc/wbipfs v0.0.0-20200705052929-7c55ed6e0a4b h1:YCGq0d5MjsFts8hALtng01+6YJfS+MoTMUvHbBd6Rk0=
+github.com/wabarc/wbipfs v0.0.0-20200705052929-7c55ed6e0a4b/go.mod h1:3xcgDp2vfORR4pndmxSvyKZmUe9IvgjXw5fj+phTqTM=
 github.com/wangjia184/sortedset v0.0.0-20160527075905-f5d03557ba30/go.mod h1:YkocrP2K2tcw938x9gCOmT5G5eCD6jsTz0SZuyAqwIE=
 github.com/warpfork/go-wish v0.0.0-20180510122957-5ad1f5abf436/go.mod h1:x6AKhvSSexNrVSrViXSHUEbICjmGXhtgABaHIySUSGw=
 github.com/warpfork/go-wish v0.0.0-20190328234359-8b3e70f8e830 h1:8kxMKmKzXXL4Ru1nyhvdms/JjWt+3YLpvRb/bAjO/y0=
