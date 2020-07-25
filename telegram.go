@@ -34,7 +34,7 @@ func (cfg *Config) Telegram() {
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
+	u.Timeout = 600
 
 	updates, err := bot.GetUpdatesChan(u)
 	if err != nil {
@@ -43,7 +43,7 @@ func (cfg *Config) Telegram() {
 
 	iaWbrc := &ia.Archiver{}
 	isWbrc := &is.Archiver{}
-	ipfsWbrc := &wbipfs.Archiver{IPFSHost: cfg.IPFS.Host, IPFSPort: cfg.IPFS.Port, UseTor: cfg.IPFS.UseTor}
+	ipfsWbrc := &wbipfs.Archiver{IPFSHost: cfg.IPFS.Host, IPFSPort: cfg.IPFS.Port, IPFSMode: "pinner", UseTor: cfg.IPFS.UseTor}
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
