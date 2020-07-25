@@ -11,10 +11,13 @@ RUN cd /tmp/wayback && make linux-amd64 && mv ./bin/wayback-linux-amd64 /wayback
 ############################
 FROM alpine:3.12
 
-LABEL maintainer "WaybackBot <wabarc@tutanota.com>"
+LABEL maintainer "WaybackBot <wabarc@tuta.io>"
 COPY --from=builder /wayback /usr/local/bin
 RUN apk update && apk add ca-certificates tor
 RUN mv /etc/tor/torrc.sample /etc/tor/torrc
+RUN echo 'ExcludeNodes {cn},{hk},{mo},{kp},{ir},{sy},{pk},{cu},{vn},{ru}' >> /etc/tor/torrc
+RUN echo 'ExcludeExitNodes {cn},{hk},{mo},{sg},{th},{pk},{by},{ru},{ir},{vn},{ph},{my},{cu}' >> /etc/tor/torrc
+RUN echo 'StrictNodes 1' >> /etc/tor/torrc
 
 USER tor
 WORKDIR /tmp
