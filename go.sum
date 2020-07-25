@@ -1003,8 +1003,8 @@ github.com/viant/assertly v0.4.8/go.mod h1:aGifi++jvCrUaklKEKT0BU95igDNaqkvz+49u
 github.com/viant/toolbox v0.24.0/go.mod h1:OxMCG57V0PXuIP2HNQrtJf2CjqdmbrOx5EkMILuUhzM=
 github.com/wabarc/archive.is v0.1.0 h1:tr8YCbWABKFWHlfehO31I2smmRyLJlYDUeupCdkvDEQ=
 github.com/wabarc/archive.is v0.1.0/go.mod h1:4kigEvgDSZ7BWr7sSS7GBM+fXjSLzuN0pMBt1V+GwXw=
-github.com/wabarc/archive.org v0.1.0 h1:1fx+j1yZzaF51aIB3OGKi+MbqktbCCTQ61UTpNHSo4I=
-github.com/wabarc/archive.org v0.1.0/go.mod h1:IGjN8dSX65a0qdRL9FdfV5k3aKOwbvDBqibZ9hkI1Dc=
+github.com/wabarc/archive.org v0.1.1 h1:+oO4ua/pQ36ehrxYXdeaEuPd/IfJFAC/Yi5uEsWRnGs=
+github.com/wabarc/archive.org v0.1.1/go.mod h1:IGjN8dSX65a0qdRL9FdfV5k3aKOwbvDBqibZ9hkI1Dc=
 github.com/wabarc/obelisk v0.0.0-20200703142927-b75ec5557781 h1:1F8x878em6V4kheBFnLpyt1FvLQ/9J4YBQSwzo4jj9c=
 github.com/wabarc/obelisk v0.0.0-20200703142927-b75ec5557781/go.mod h1:hUOSLtkWv8O5PKgn4SmFKlfOcJLLsDQyVtJRmHS7Zzs=
 github.com/wabarc/wbipfs v0.0.0-20200705052929-7c55ed6e0a4b h1:YCGq0d5MjsFts8hALtng01+6YJfS+MoTMUvHbBd6Rk0=
