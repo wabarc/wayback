@@ -88,7 +88,7 @@ $ docker run -d wabarc/wayback telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNA
 - [Bots: An introduction for developers](https://core.telegram.org/bots)
 - [How do I create a bot?](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
 - [An example bot](http://t.me/wabarc_bot)
-- [An example channel](http://t.me/wbrc_channel)
+- [An example channel](http://t.me/wabarc)
 
 ## Related projects
 
