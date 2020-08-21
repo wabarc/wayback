@@ -1,5 +1,7 @@
 # Wayback
 
+[![wayback](https://snapcraft.io/wayback/badge.svg)](https://snapcraft.io/wayback)
+
 `wabarc/wayback` is a tool that supports running as a command-line tool and docker container, purpose to snapshot webpage to time capsules.
 
 ## Installation
