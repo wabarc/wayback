@@ -1,0 +1,25 @@
+name: wayback
+
+version: 'git'
+
+summary: A toolkit to upload files to IPFS pinning services.
+
+description: |
+  A toolkit for snapshot webpage to the Wayback Machine.
+  Website https://github.com/wabarc/wayback
+
+grade: stable
+
+confinement: strict
+
+base: core18
+
+parts:
+  wayback:
+    plugin: go
+    source: https://github.com/wabarc/wayback.git
+    go-importpath: github.com/wabarc/wayback/cmd/wayback
+
+apps:
+  wayback:
+    command: wayback

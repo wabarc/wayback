@@ -8,6 +8,12 @@
 $ go get -u github.com/wabarc/wayback/cmd/wayback
 ```
 
+Using [Snapcraft](https://snapcraft.io/wayback) (on GNU/Linux)
+
+```sh
+$ sudo snap install wayback
+```
+
 ## Usage
 
 - Running as CLI command or Docker container

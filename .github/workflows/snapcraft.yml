@@ -1,0 +1,43 @@
+name: Snapcraft Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  snapcraft-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Install Snapcraft
+        run: |
+          sudo snap install snapcraft --classic
+          sudo snap install lxd
+          sudo usermod --append --groups lxd $USER
+          echo "::add-path::/snap/bin"
+          sudo chown root:root /
+          sudo /snap/bin/lxd.migrate -yes
+          sudo /snap/bin/lxd waitready
+          sudo /snap/bin/lxd init --auto
+
+      # You can now run Snapcraft shell commands
+      - name: Use Snapcraft
+        run: snapcraft --help
+
+      - name: Login snapcraft
+        run: |
+          LOGIN_FILEPATH=/tmp/credential
+          echo "${{ secrets.SNAPCRAFT_TOKEN }}" > $LOGIN_FILEPATH
+          snapcraft login --with $LOGIN_FILEPATH
+
+      - name: Build snap
+        run: sg lxd -c 'snapcraft --use-lxd'
+
+      - name: Publish snap
+        run: |
+          snapcraft push wayback_0+git.$(git rev-parse --short HEAD)_amd64.snap --release=stable,edge
+
