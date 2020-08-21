@@ -5,7 +5,7 @@
 ## Installation
 
 ```sh
-$ go get -u github.com/wabarc/wayback
+$ go get -u github.com/wabarc/wayback/cmd/wayback
 ```
 
 ## Usage
