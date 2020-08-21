@@ -162,6 +162,8 @@ github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
 github.com/go-shiori/dom v0.0.0-20200325044552-dcb2bfb8d4d8 h1:RHlAF6JCEVgw9+IW7ZcHeVPMCk7rCvOEZmxBIHkx9QE=
 github.com/go-shiori/dom v0.0.0-20200325044552-dcb2bfb8d4d8/go.mod h1:360KoNl36ftFYhjLHuEty78kWUGw8i1opEicvIDLfRk=
+github.com/go-shiori/obelisk v0.0.0-20200419085100-e22fddd84824 h1:mXlmmokM7kDCb5zLCkFXvq1pdinSL27S9iPpBZsoyvY=
+github.com/go-shiori/obelisk v0.0.0-20200419085100-e22fddd84824/go.mod h1:hUOSLtkWv8O5PKgn4SmFKlfOcJLLsDQyVtJRmHS7Zzs=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible h1:2cauKuaELYAEARXRkq2LrJ0yDDv1rW7+wrTEdVL3uaU=
 github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible/go.mod h1:qf9acutJ8cwBUhm1bqgz6Bei9/C/c93FPDljKWwsOgM=
@@ -1007,12 +1009,10 @@ github.com/wabarc/archive.org v0.1.1 h1:+oO4ua/pQ36ehrxYXdeaEuPd/IfJFAC/Yi5uEsWR
 github.com/wabarc/archive.org v0.1.1/go.mod h1:IGjN8dSX65a0qdRL9FdfV5k3aKOwbvDBqibZ9hkI1Dc=
 github.com/wabarc/ipfs-pinner v0.0.0-20200810132528-dc1681a32bd6 h1:grDWZCksq5Na+L+fUSz6lwQuLFI+mf44AoZFn9ahrXY=
 github.com/wabarc/ipfs-pinner v0.0.0-20200810132528-dc1681a32bd6/go.mod h1:WyDstbGhYaCIoA0fes9QaTD42XicANFl0UDvnevdgTY=
-github.com/wabarc/obelisk v0.0.0-20200703142927-b75ec5557781 h1:1F8x878em6V4kheBFnLpyt1FvLQ/9J4YBQSwzo4jj9c=
-github.com/wabarc/obelisk v0.0.0-20200703142927-b75ec5557781/go.mod h1:hUOSLtkWv8O5PKgn4SmFKlfOcJLLsDQyVtJRmHS7Zzs=
-github.com/wabarc/wbipfs v0.0.0-20200705052929-7c55ed6e0a4b h1:YCGq0d5MjsFts8hALtng01+6YJfS+MoTMUvHbBd6Rk0=
-github.com/wabarc/wbipfs v0.0.0-20200705052929-7c55ed6e0a4b/go.mod h1:3xcgDp2vfORR4pndmxSvyKZmUe9IvgjXw5fj+phTqTM=
-github.com/wabarc/wbipfs v0.0.0-20200810134407-331d50051b4d h1:BO0mhe/4Bddp0kkcSlBMY9PhJCpkUyyiZfYbHkTqDn4=
-github.com/wabarc/wbipfs v0.0.0-20200810134407-331d50051b4d/go.mod h1:34Zo5KEvb0hE8HxENGdDf7hd/tANc1tKGr2KIT551OI=
+github.com/wabarc/obelisk v0.0.0-20200821095614-bffd0d7f6be7 h1:w4coMvoTqtjU5ZckJmOG23uTuqNBitGdGpJIaMArcq0=
+github.com/wabarc/obelisk v0.0.0-20200821095614-bffd0d7f6be7/go.mod h1:hUOSLtkWv8O5PKgn4SmFKlfOcJLLsDQyVtJRmHS7Zzs=
+github.com/wabarc/wbipfs v0.0.0-20200821095915-3491a90e26db h1:S0GPQHHh9nlUFl99SHkLvAOy5YZMBI6PI2Z6r/FlGmo=
+github.com/wabarc/wbipfs v0.0.0-20200821095915-3491a90e26db/go.mod h1:8bSFLY06bYNq6tuTDVA5O9gTdnWj8Oi9W6RYp++grKc=
 github.com/wangjia184/sortedset v0.0.0-20160527075905-f5d03557ba30/go.mod h1:YkocrP2K2tcw938x9gCOmT5G5eCD6jsTz0SZuyAqwIE=
 github.com/warpfork/go-wish v0.0.0-20180510122957-5ad1f5abf436/go.mod h1:x6AKhvSSexNrVSrViXSHUEbICjmGXhtgABaHIySUSGw=
 github.com/warpfork/go-wish v0.0.0-20190328234359-8b3e70f8e830 h1:8kxMKmKzXXL4Ru1nyhvdms/JjWt+3YLpvRb/bAjO/y0=

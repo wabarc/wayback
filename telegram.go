@@ -7,21 +7,12 @@ import (
 	"text/template"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/wabarc/archive.is/pkg"
-	"github.com/wabarc/archive.org/pkg"
-	"github.com/wabarc/wbipfs"
 )
 
-type Message struct {
-	Archiver []string
-	URL      []map[string]string
+type collect struct {
+	Arc []string
+	Dst []map[string]string
 }
-
-const tmpl = `{{range $i, $name := .Archiver}}<b>{{ $name }}</b>:
-{{ range $url := index $.URL $i -}}
-• {{ $url }}
-{{end}}
-{{end}}`
 
 func (cfg *Config) Telegram() {
 	bot, err := tgbotapi.NewBotAPI(cfg.Token)
@@ -41,55 +32,69 @@ func (cfg *Config) Telegram() {
 		log.Panic(err)
 	}
 
-	iaWbrc := &ia.Archiver{}
-	isWbrc := &is.Archiver{}
-	ipfsWbrc := &wbipfs.Archiver{IPFSHost: cfg.IPFS.Host, IPFSPort: cfg.IPFS.Port, IPFSMode: "pinner", UseTor: cfg.IPFS.UseTor}
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
 		}
 
 		text := update.Message.Text
-		url := []string{}
+		uri := []string{}
 		re := regexp.MustCompile(`https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)`)
 		match := re.FindAllString(text, -1)
 		for _, el := range match {
-			url = append(url, el)
+			uri = append(uri, el)
 		}
-		iaURL, _ := iaWbrc.Wayback(url)
-		isURL, _ := isWbrc.Wayback(url)
-		ipfsURL, _ := ipfsWbrc.Wayback(url)
+		if len(uri) == 0 {
+			continue
+		}
 
-		if len(iaURL) > 0 || len(isURL) > 0 {
-			vars := &Message{
-				Archiver: []string{"Internet Archive", "archive.today", "IPFS(alpha)"},
-				URL:      []map[string]string{iaURL, isURL, ipfsURL},
+		c := &collect{}
+		h := Handle{URI: uri}
+		for hd, do := range cfg.handler {
+			switch {
+			case hd == "ia" && do:
+				c.Arc = append(c.Arc, "Internet Archive")
+				c.Dst = append(c.Dst, h.IA())
+			case hd == "is" && do:
+				c.Arc = append(c.Arc, "Archive Today")
+				c.Dst = append(c.Dst, h.IS())
+			case hd == "ip" && do:
+				h.IPFS = cfg.IPFS
+				c.Arc = append(c.Arc, "IPFS(beta)")
+				c.Dst = append(c.Dst, h.WBIPFS())
 			}
-			replyText := message(vars)
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
-			msg.ReplyToMessageID = update.Message.MessageID
+		}
+
+		replyText := message(c)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
+		msg.ReplyToMessageID = update.Message.MessageID
+		msg.ParseMode = "html"
+
+		bot.Send(msg)
+
+		if len(cfg.ChatID) > 0 {
+			msg = tgbotapi.NewMessageToChannel("@"+cfg.ChatID, replyText)
 			msg.ParseMode = "html"
-
 			bot.Send(msg)
-
-			if len(cfg.ChatID) > 0 {
-				msg = tgbotapi.NewMessageToChannel("@"+cfg.ChatID, replyText)
-				msg.ParseMode = "html"
-				bot.Send(msg)
-			}
 		}
 	}
 }
 
-func message(vars *Message) string {
+func message(vars *collect) string {
 	var tmplBytes bytes.Buffer
 
-	tmpl, err := template.New("message").Parse(tmpl)
+	const tmpl = `{{range $i, $name := .Arc}}<b>{{ $name }}</b>:
+{{ range $url := index $.Dst $i -}}
+• {{ $url }}
+{{end}}
+{{end}}`
+
+	tpl, err := template.New("message").Parse(tmpl)
 	if err != nil {
 		return ""
 	}
 
-	err = tmpl.Execute(&tmplBytes, vars)
+	err = tpl.Execute(&tmplBytes, vars)
 	if err != nil {
 		return ""
 	}

@@ -2,12 +2,6 @@
 
 `wabarc/wayback` is a tool that supports running as a command-line tool and docker container, purpose to snapshot webpage to time capsules.
 
-## Prerequisites
-
-- Golang
-- Telegram bot
-- Telegram channel (optional)
-
 ## Installation
 
 ```sh
@@ -16,8 +10,8 @@ $ go get -u github.com/wabarc/wayback
 
 ## Usage
 
-1. Running the command-line or Docker container.
-2. Start a chat with the bot and Send URL.
+- Running as CLI command or Docker container
+- Running with telegram bot
 
 ### Command line
 
@@ -27,53 +21,95 @@ A CLI tool for wayback webpages.
 
 Usage:
   wayback [flags]
-  wayback [command]
 
-Available Commands:
-  help        Help about any command
-  telegram    A CLI tool for wayback webpages on Telegram bot.
+Examples:
+  wayback https://www.wikipedia.org
+  wayback https://www.fsf.org https://www.eff.org
+  wayback --ia https://www.fsf.org
+  wayback --ip https://www.fsf.org
+  wayback --ia --is -d telegram -t your-telegram-bot-token
+  WAYBACK_SLOT=pinata WAYBACK_APIKEY=YOUR-PINATA-APIKEY \
+    WAYBACK_SECRET=YOUR-PINATA-SECRET wayback --ip https://www.fsf.org
 
 Flags:
-  -h, --help          help for wayback
-      --host string   IPFS daemon host. (default "127.0.0.1")
-      --port uint     IPFS daemon port. (default 5001)
-      --tor           Saving webpage use tor proxy.
+  -c, --chatid string      Channel ID. default: ""
+  -d, --daemon string      Run as daemon service.
+      --debug              Enable debug mode. default: false
+  -h, --help               help for wayback
+      --ia                 Wayback webpages to Internet Archive.
+      --ip                 Wayback webpages to IPFS. (default false)
+      --ipfs-host string   IPFS daemon host, do not require, unless enable ipfs. (default "127.0.0.1")
+  -m, --ipfs-mode string   IPFS mode. (default "pinner")
+  -p, --ipfs-port uint     IPFS daemon port. (default 5001)
+      --is                 Wayback webpages to Archive Today.
+  -t, --token string       Telegram bot API Token, required.
+      --tor                Snapshot webpage use tor proxy.
+  -v, --version            version for wayback
+```
 
-Use "wayback [command] --help" for more information about a command.
+#### Examples
 
-$ wayback telegram -t YOUR-BOT-TOKEN
+Wayback one or more url to *Internet Archive* **and** *archive.today*:
+
+```sh
+$ wayback https://www.wikipedia.org
+
+$ wayback https://www.fsf.org https://www.eff.org
+```
+
+Wayback url to *Internet Archive* **or** *archive.today* **or** *IPFS*:
+
+```sh
+// Internet Archive
+$ wayback --ia https://www.fsf.org
+
+// archive.today
+$ wayback --is https://www.fsf.org
+
+// IPFS
+$ wayback --ip https://www.fsf.org
+```
+
+For the IPFS, also can use a specific pinner service:
+
+```sh
+$ export WAYBACK_SLOT=pinata
+$ export WAYBACK_APIKEY=YOUR-PINATA-APIKEY
+$ export WAYBACK_SECRET=YOUR-PINATA-SECRET
+$ wayback --ip https://www.fsf.org
+
+// or
+
+$ WAYBACK_SLOT=pinata WAYBACK_APIKEY=YOUR-PINATA-APIKEY \
+$ WAYBACK_SECRET=YOUR-PINATA-SECRET wayback --ip https://www.fsf.org
+```
+
+TIP: [more details](https://github.com/wabarc/ipfs-pinner) about pinner service.
+
+With telegram bot:
+
+```sh
+$ wayback --ia --is --ip -d telegram -t your-telegram-bot-token
 ```
 
 Publish message to your Telegram channel at the same time:
 
 ```sh
-$ wayback telegram
-A CLI tool for wayback webpages on Telegram bot.
-
-Usage:
-  wayback telegram [flags]
-
-Flags:
-  -c, --chatid string   Channel ID. default: ""
-  -d, --debug           Enable debug mode. default: false
-  -h, --help            help for telegram
-  -t, --token string    Telegram bot API Token, required.
-
-$ wayback telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNAME
+todo
 ```
 
 Also can run with debug mode:
 
 ```sh
-$ wayback telegram -t YOUR-BOT-TOKEN -d
+$ wayback -d telegram -t YOUR-BOT-TOKEN --debug
 ```
 
 ### Docker/Podman
 
 ```sh
 $ docker pull wabarc/wayback
-$ docker run -d wabarc/wayback telegram -t YOUR-BOT-TOKEN # without telegram channel
-$ docker run -d wabarc/wayback telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNAME # with telegram channel
+$ docker run -d wabarc/wayback -d telegram -t YOUR-BOT-TOKEN # without telegram channel
+$ docker run -d wabarc/wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNAME # with telegram channel
 ```
 
 ## TODO
@@ -92,7 +128,7 @@ $ docker run -d wabarc/wayback telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNA
 
 ## Related projects
 
-- duty-machine: <https://github.com/duty-machine/duty-machine>
+- [duty-machine](https://github.com/duty-machine/duty-machine)
 
 ## License
 
