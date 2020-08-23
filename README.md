@@ -1,5 +1,10 @@
 # Wayback
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/wabarc/wayback)](https://goreportcard.com/report/github.com/wabarc/wayback)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/wabarc/wayback/Go?color=brightgreen)](https://github.com/wabarc/wayback/actions)
+[![Releases](https://img.shields.io/github/v/release/wabarc/wayback.svg?include_prereleases&color=blue)](https://github.com/wabarc/wayback/releases)
+[![LICENSE](https://img.shields.io/github/license/wabarc/wayback.svg?color=green)](https://github.com/wabarc/wayback/blob/master/LICENSE)
+[![Docker Automated build](https://img.shields.io/docker/automated/wabarc/wayback)](https://hub.docker.com/r/wabarc/wayback)
 [![wayback](https://snapcraft.io/wayback/badge.svg)](https://snapcraft.io/wayback)
 
 `wabarc/wayback` is a tool that supports running as a command-line tool and docker container, purpose to snapshot webpage to time capsules.
@@ -103,7 +108,7 @@ $ wayback --ia --is --ip -d telegram -t your-telegram-bot-token
 Publish message to your Telegram channel at the same time:
 
 ```sh
-todo
+$ wayback --ia --is --ip -d telegram -t your-telegram-bot-token -c your-telegram-channel-name
 ```
 
 Also can run with debug mode:
