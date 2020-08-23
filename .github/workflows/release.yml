@@ -49,11 +49,16 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: wayback
+        path: bin
 
     - name: Create all binary digest
       id: digest
       run: |
-        echo ::set-output name=result::$(find ./wayback* -type f -exec sha256sum {} +)
+        digest=$(find bin/wayback* -type f -exec sha256sum {} +)
+        digest="${digest//$'%'/%25}"
+        digest="${digest//$'\n'/%0A}"
+        digest="${digest//$'bin\/'}"
+        echo "::set-output name=result::$digest"
 
   release:
     name: Create and upload release
@@ -76,7 +81,9 @@ jobs:
         body: |
           **Digests in this release:**
 
+          ```
           ${{ needs.checksum.outputs.digest }}
+          ```
         draft: false
         prerelease: true
 

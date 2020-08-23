@@ -5,8 +5,8 @@ NAME = wayback
 BINDIR ?= ./bin
 PACKDIR ?= ./build/package
 VERSION := $(shell cat VERSION)
-GOBUILD := CGO_ENABLED=0 go build --ldflags="-s -w" -v
-GOFILES := $(wildcard ./cmd/*.go)
+GOBUILD := CGO_ENABLED=0 go build --ldflags="-s -w" -v -a
+GOFILES := $(wildcard ./cmd/wayback/*.go)
 PROJECT := github.com/wabarc/wayback
 PACKAGES := $(shell go list ./...)
 
@@ -102,6 +102,10 @@ $(zip_releases): %.zip : %
 all-arch: $(PLATFORM_LIST) $(WINDOWS_ARCH_LIST)
 
 releases: $(tar_releases) $(zip_releases)
+
 clean:
 	rm -f $(BINDIR)/*
+	rm -f $(PACKDIR)/*
 
+tag:
+	git tag v$(VERSION)
