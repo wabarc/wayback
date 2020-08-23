@@ -5,7 +5,7 @@ NAME = wayback
 BINDIR ?= ./bin
 PACKDIR ?= ./build/package
 VERSION := $(shell cat VERSION)
-GOBUILD := CGO_ENABLED=0 go build --ldflags="-s -w" -v -a
+GOBUILD := CGO_ENABLED=0 go build --ldflags="-s -w" -v
 GOFILES := $(wildcard ./cmd/wayback/*.go)
 PROJECT := github.com/wabarc/wayback
 PACKAGES := $(shell go list ./...)
