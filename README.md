@@ -125,6 +125,10 @@ $ docker run -d wabarc/wayback -d telegram -t YOUR-BOT-TOKEN # without telegram 
 $ docker run -d wabarc/wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNAME # with telegram channel
 ```
 
+## Deploy on Heroku
+
+See: [wabarc/on-heroku](https://github.com/wabarc/on-heroku)
+
 ## TODO
 
 [Archive.org](https://web.archive.org/) and [Archive.today](https://archive.today/) are currently supported, the next step mind support the followings platform:
@@ -142,6 +146,8 @@ $ docker run -d wabarc/wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USE
 ## Related projects
 
 - [duty-machine](https://github.com/duty-machine/duty-machine)
+- [ipfs-pinner](https://github.com/wabarc/ipfs-pinner)
+- [on-heroku](https://github.com/wabarc/on-heroku)
 
 ## License
 
