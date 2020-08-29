@@ -2,9 +2,15 @@
 # STEP 1 build executable binary
 ############################
 FROM golang:1.14-alpine AS builder
-RUN apk update && apk add --no-cache build-base ca-certificates
-COPY . /tmp/wayback
-RUN cd /tmp/wayback && make linux-amd64 && mv ./bin/wayback-linux-amd64 /wayback
+
+RUN apk update && apk add --no-cache build-base ca-certificates git
+
+ARG TARGETPLATFORM
+WORKDIR /go/src/github.com/wabarc/wayback
+
+RUN git clone --progress https://github.com/wabarc/wayback.git . \
+    && sh ./build/binary.sh $TARGETPLATFORM \
+    && mv ./bin/wayback-* /wayback
 
 ############################
 # STEP 2 build a small image

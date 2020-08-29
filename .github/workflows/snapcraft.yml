@@ -1,4 +1,4 @@
-name: Snapcraft Release
+name: Snapcraft
 
 on:
   push:
