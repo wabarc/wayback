@@ -19,7 +19,8 @@ func wbis(cmd *cobra.Command, args []string) r {
 
 func wbip(cmd *cobra.Command, args []string) r {
 	wbrc = &wayback.Handle{
-		URI: args,
+		URI:  args,
+		IPFS: new(wayback.IPFSRV),
 	}
 
 	return wbrc.WBIPFS()
