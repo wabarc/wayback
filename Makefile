@@ -11,6 +11,7 @@ PROJECT := github.com/wabarc/wayback
 PACKAGES := $(shell go list ./...)
 
 PLATFORM_LIST = \
+	darwin-386 \
 	darwin-amd64 \
 	linux-386 \
 	linux-amd64 \
@@ -24,8 +25,13 @@ PLATFORM_LIST = \
 	linux-mipsle-hardfloat \
 	linux-mips64 \
 	linux-mips64le \
+	linux-ppc64 \
+	linux-ppc64le \
+	linux-s390x \
 	freebsd-386 \
-	freebsd-amd64
+	freebsd-amd64 \
+	openbsd-386 \
+	openbsd-amd64
 
 WINDOWS_ARCH_LIST = \
 	windows-386 \
@@ -33,6 +39,9 @@ WINDOWS_ARCH_LIST = \
 
 .PHONY: all
 all: linux-amd64 darwin-amd64 windows-amd64
+
+darwin-386:
+	GOARCH=386 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 darwin-amd64:
 	GOARCH=amd64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
@@ -73,11 +82,26 @@ linux-mips64:
 linux-mips64le:
 	GOARCH=mips64le GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
+linux-ppc64:
+	GOARCH=ppc64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+
+linux-ppc64le:
+	GOARCH=ppc64le GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+
+linux-s390x:
+	GOARCH=s390x GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+
 freebsd-386:
 	GOARCH=386 GOOS=freebsd $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 freebsd-amd64:
 	GOARCH=amd64 GOOS=freebsd $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+
+openbsd-386:
+	GOARCH=386 GOOS=openbsd $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+
+openbsd-amd64:
+	GOARCH=amd64 GOOS=openbsd $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 windows-386:
 	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe $(GOFILES)
