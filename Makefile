@@ -12,7 +12,6 @@ PROJECT := github.com/wabarc/wayback
 PACKAGES := $(shell go list ./...)
 
 PLATFORM_LIST = \
-	darwin-386 \
 	darwin-amd64 \
 	linux-386 \
 	linux-amd64 \
