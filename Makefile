@@ -109,10 +109,6 @@ windows-386:
 windows-amd64:
 	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe $(GOFILES)
 
-fmt:
-	@echo "-> Running go fmt"
-	@go fmt $(PACKAGES)
-
 tar_releases := $(addsuffix .gz, $(PLATFORM_LIST))
 zip_releases := $(addsuffix .zip, $(WINDOWS_ARCH_LIST))
 
@@ -133,3 +129,11 @@ clean:
 
 tag:
 	git tag v$(VERSION)
+
+fmt:
+	@echo "-> Running go fmt"
+	@go fmt $(PACKAGES)
+
+test:
+	@echo "-> Running go test"
+	go test -v ./...
