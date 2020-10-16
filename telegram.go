@@ -53,14 +53,14 @@ func (cfg *Config) Telegram() {
 		for hd, do := range cfg.handler {
 			switch {
 			case hd == "ia" && do:
-				c.Arc = append(c.Arc, "Internet Archive")
+				c.Arc = append(c.Arc, "<a href='https://web.archive.org/'>Internet Archive</a>")
 				c.Dst = append(c.Dst, h.IA())
 			case hd == "is" && do:
-				c.Arc = append(c.Arc, "Archive Today")
+				c.Arc = append(c.Arc, "<a href='https://archive.today/'>Archive Today</a>")
 				c.Dst = append(c.Dst, h.IS())
 			case hd == "ip" && do:
 				h.IPFS = cfg.IPFS
-				c.Arc = append(c.Arc, "IPFS(beta)")
+				c.Arc = append(c.Arc, "<a href='https://ipfs.github.io/public-gateway-checker/'>IPFS</a>")
 				c.Dst = append(c.Dst, h.WBIPFS())
 			}
 		}
