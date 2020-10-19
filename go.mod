@@ -9,7 +9,7 @@ require (
 	github.com/libp2p/go-libp2p-core v0.7.0 // indirect
 	github.com/multiformats/go-multiaddr v0.3.1 // indirect
 	github.com/sirupsen/logrus v1.6.0 // indirect
-	github.com/spf13/cobra v1.1.0
+	github.com/spf13/cobra v1.1.1
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/wabarc/archive.is v1.0.2
 	github.com/wabarc/archive.org v0.1.1
