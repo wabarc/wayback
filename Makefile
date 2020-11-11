@@ -114,7 +114,7 @@ zip_releases := $(addsuffix .zip, $(WINDOWS_ARCH_LIST))
 
 $(tar_releases): %.gz : %
 	chmod +x $(BINDIR)/$(NAME)-$(basename $@)
-	tar -czf $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).tar.gz --transform "s,$(BINDIR)/,bin/," $(BINDIR)/$(NAME)-$(basename $@)
+	tar -czf $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).tar.gz --transform "s/$(notdir $(BINDIR))//g" $(BINDIR)/$(NAME)-$(basename $@)
 
 $(zip_releases): %.zip : %
 	zip -m -j $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).zip $(BINDIR)/$(NAME)-$(basename $@).exe

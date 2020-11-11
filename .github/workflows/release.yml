@@ -49,15 +49,14 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: wayback
-        path: bin
+        path: .
 
     - name: Create all binary digest
       id: digest
       run: |
-        digest=$(find bin/wayback* -type f -exec sha256sum {} +)
+        digest=$(find wayback* -type f -exec sha256sum {} +)
         digest="${digest//$'%'/%25}"
         digest="${digest//$'\n'/%0A}"
-        digest="${digest//$'bin\/'}"
         echo "::set-output name=result::$digest"
 
   release:
