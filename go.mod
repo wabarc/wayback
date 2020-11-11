@@ -13,9 +13,9 @@ require (
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/wabarc/archive.is v1.0.2
 	github.com/wabarc/archive.org v0.1.1
-	github.com/wabarc/wbipfs v0.1.1
+	github.com/wabarc/wbipfs v0.1.2-0.20201111165742-67df7bfbefe6
 	golang.org/x/net v0.0.0-20201010224723-4f7140c49acb // indirect
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
 )
 
-replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20200821095614-bffd0d7f6be7
+replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20201111154435-da60cc3d3acd
