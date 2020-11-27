@@ -2,7 +2,7 @@ export GO111MODULE = on
 export GOPROXY = https://proxy.golang.org
 
 NAME = wayback
-BINDIR ?= ./bin
+BINDIR ?= ./build/binary
 PACKDIR ?= ./build/package
 GOBUILD := CGO_ENABLED=0 go build --ldflags="-s -w" -v
 VERSION := $(shell git describe --tags `git rev-list --tags --max-count=1`)
