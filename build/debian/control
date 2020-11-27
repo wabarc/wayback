@@ -1,0 +1,12 @@
+Source: wayback
+Maintainer: Wayback Archiver <wabarc@tuta.io>
+Build-Depends: debhelper (>= 9), dh-systemd
+
+Package: wayback
+Architecture: __PKG_ARCH__
+Section: web
+Priority: optional
+Description: The wayback is a toolkit for snapshot webpage to
+ Internet Archive, archive.today, IPFS and beyond.
+Homepage: https://github.com/wabarc/wayback
+Depends: ${misc:Depends}, ${shlibs:Depends}, adduser

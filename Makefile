@@ -4,12 +4,17 @@ export GOPROXY = https://proxy.golang.org
 NAME = wayback
 BINDIR ?= ./build/binary
 PACKDIR ?= ./build/package
-GOBUILD := CGO_ENABLED=0 go build --ldflags="-s -w" -v
-VERSION := $(shell git describe --tags `git rev-list --tags --max-count=1`)
-VERSION := $(VERSION:v%=%)
-GOFILES := $(wildcard ./cmd/wayback/*.go)
+LDFLAGS := $(shell echo "-X 'wayback/version.Version=`git describe --tags --abbrev=0`'")
+LDFLAGS := $(shell echo "${LDFLAGS} -X 'wayback/version.Commit=`git rev-parse --short HEAD`'")
+LDFLAGS := $(shell echo "${LDFLAGS} -X 'wayback/version.BuildDate=`date +%FT%T%z`'")
+GOBUILD ?= CGO_ENABLED=1 go build --ldflags="-s -w ${LDFLAGS}" -v -x
+VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
+GOFILES ?= $(wildcard ./cmd/wayback/*.go)
 PROJECT := github.com/wabarc/wayback
-PACKAGES := $(shell go list ./...)
+PACKAGES ?= $(shell go list ./...)
+DOCKER ?= $(shell which docker || which podman)
+DOCKER_IMAGE := wabarc/wayback
+DEB_IMG_ARCH := amd64
 
 PLATFORM_LIST = \
 	darwin-amd64 \
@@ -37,8 +42,41 @@ WINDOWS_ARCH_LIST = \
 	windows-386 \
 	windows-amd64
 
-.PHONY: all
-all: linux-amd64 darwin-amd64 windows-amd64
+.PHONY: \
+	darwin-386 \
+	darwin-amd64 \
+	linux-386 \
+	linux-amd64 \
+	linux-armv5 \
+	linux-armv6 \
+	linux-armv7 \
+	linux-armv8 \
+	linux-mips-softfloat \
+	linux-mips-hardfloat \
+	linux-mipsle-softfloat \
+	linux-mipsle-hardfloat \
+	linux-mips64 \
+	linux-mips64le \
+	linux-ppc64 \
+	linux-ppc64le \
+	linux-s390x \
+	freebsd-386 \
+	freebsd-amd64 \
+	openbsd-386 \
+	openbsd-amd64 \
+	windows-386 \
+	windows-amd64 \
+	all-arch \
+	tar_releases \
+	zip_releases \
+	releases \
+	clean \
+	test \
+	fmt \
+	rpm \
+	debian \
+	debian-packages \
+	docker-image
 
 darwin-386:
 	GOARCH=386 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
@@ -126,9 +164,7 @@ releases: $(tar_releases) $(zip_releases)
 clean:
 	rm -f $(BINDIR)/*
 	rm -f $(PACKDIR)/*
-
-tag:
-	git tag v$(VERSION)
+	rm -rf data-dir*
 
 fmt:
 	@echo "-> Running go fmt"
@@ -137,3 +173,34 @@ fmt:
 test:
 	@echo "-> Running go test"
 	go test -v ./...
+
+docker-image:
+	@echo "-> Building docker image..."
+	@$(DOCKER) build -t $(DOCKER_IMAGE):$(VERSION) -f build/docker/Dockerfile .
+
+rpm:
+	@echo "-> Building rpm package..."
+	@$(DOCKER) build \
+		-t wayback-rpm-builder \
+		-f build/redhat/Dockerfile .
+	@$(DOCKER) run --rm \
+		-v ${PWD}/build/package:/root/rpmbuild/RPMS/x86_64 wayback-rpm-builder \
+		rpmbuild -bb --define "_wayback_version $(VERSION)" /root/rpmbuild/SPECS/wayback.spec
+
+debian:
+	@echo "-> Building deb package..."
+	@$(DOCKER) build \
+		--build-arg IMAGE_ARCH=$(DEB_IMG_ARCH) \
+		--build-arg PKG_VERSION=$(VERSION) \
+		-t $(DEB_IMG_ARCH)/wayback-deb-builder \
+		-f build/debian/Dockerfile .
+	@$(DOCKER) run --rm \
+		-v ${PWD}/build/package:/pkg \
+		$(DEB_IMG_ARCH)/wayback-deb-builder
+	@echo "-> DEB package below:"
+	@ls -h ${PWD}/build/package/*.deb
+
+debian-packages:
+	$(MAKE) debian DEB_IMG_ARCH=amd64
+	#$(MAKE) debian DEB_IMG_ARCH=arm32v7
+	#$(MAKE) debian DEB_IMG_ARCH=arm64v8

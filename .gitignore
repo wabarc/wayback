@@ -16,3 +16,6 @@
 
 /build/binary
 /build/package
+
+# Ignore Tor embedded process data directory
+**/tor-data*

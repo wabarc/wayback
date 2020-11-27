@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+set -eux pipefail
+
+WORKSPACE="/src"
+PKG_ARCH=`dpkg --print-architecture`
+PKG_DATE=`date -R`
+PKG_VERSION=`echo ${PKG_VERSION} || 0.0.1`
+
+echo "WORKSPACE=${WORKSPACE}"
+echo "PKG_VERSION=${PKG_VERSION}"
+echo "PKG_ARCH=${PKG_ARCH}"
+echo "PKG_DATE=${PKG_DATE}"
+
+cd "${WORKSPACE}" && \
+    sh "${WORKSPACE}/build/binary.sh" && \
+    mkdir -p /build/debian /pkg && \
+    cd /build && \
+    cp "${WORKSPACE}/build/binary/wayback-linux-amd64" /build/wayback && \
+    cp "${WORKSPACE}/wayback.1" /build/ && \
+    cp "${WORKSPACE}/LICENSE" /build/ && \
+    cp "${WORKSPACE}/build/systemd/wayback.service" /build/debian/ && \
+    cp "${WORKSPACE}/build/debian/compat" /build/debian/compat && \
+    cp "${WORKSPACE}/build/debian/copyright" /build/debian/copyright && \
+    cp "${WORKSPACE}/build/debian/wayback.manpages" /build/debian/wayback.manpages && \
+    cp "${WORKSPACE}/build/debian/wayback.postinst" /build/debian/wayback.postinst && \
+    cp "${WORKSPACE}/build/debian/rules" /build/debian/rules && \
+    echo "wayback (${PKG_VERSION}) experimental; urgency=low" > /build/debian/changelog && \
+    echo "  * Wayback version ${PKG_VERSION}" >> /build/debian/changelog && \
+    echo " -- Wayback Archiver <wabarc@tuta.io>  ${PKG_DATE}" >> /build/debian/changelog && \
+    sed "s/__PKG_ARCH__/${PKG_ARCH}/g" "${WORKSPACE}/build/debian/control" > /build/debian/control && \
+    dpkg-buildpackage -us -uc -b && \
+    #lintian --check --color ../*.deb && \
+    cp ../*.deb /pkg/

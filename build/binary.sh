@@ -1,18 +1,17 @@
 #!/bin/sh
 #
 # Perform package builder
-set -eu
-#set -x
+set -eux pipefail
 
 GOOS=linux
 GOARCH=amd64
 
 for arg in "$@"; do
 case $arg in
-    *arm/v7)
+    *arm/v7|*arm32v7)
         GOARCH=armv7
         ;;
-    *arm64)
+    *arm64|*arm64v8)
         GOARCH=armv8
         ;;
     *386)

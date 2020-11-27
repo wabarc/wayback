@@ -1,0 +1,151 @@
+.\" Manpage for wayback.
+.TH "WAYBACK" "1" "November, 2020" "\ \&" "\ \&"
+
+.SH NAME
+wayback \- easy and fast to wayback webpage.
+
+.SH SYNOPSIS
+\fBwayback\fR [-c|--chatid] [-d|--daemon] [--debug] [-h|--help] [--ia] [--ip] [--is]
+        [--ipfs-host] [-m|--ipfs-mode] [-p|--ipfs-port]
+        [-t|--token] [--tor] [--tor-key]
+        [-v|--version]
+
+.SH EXAMPLES
+\fBwayback\fR https://www.eff.org https://www.fsf.org
+.br
+\fBwayback\fR --ia --is -d telegram -t your-telegram-bot-token
+
+.SH DESCRIPTION
+\fBwayback\fR is a toolkit for snapshot webpage to Internet Archive, archive.today, IPFS and beyond.
+
+.SH OPTIONS
+.PP
+.B \-c, \-\-chatid
+.RS 4
+The chatid which publish message, e.g. Temegram Channel id\&.
+.RE
+.PP
+.B \-d, \-\-daemon
+.RS 4
+Run as daemon service, e.g. telegram, web\&.
+.RE
+.PP
+.B \-\-debug
+.RS 4
+Enable debug mode. default: false\&.
+.RE
+.PP
+.B \-h, \-\-help
+.RS 4
+help for wayback\&.
+.RE
+.PP
+.B \-\-ia
+.RS 4
+Wayback webpages to Internet Archive\&.
+.RE
+.PP
+.B \-\-ip
+.RS 4
+Wayback webpages to IPFS. default: false\&.
+.RE
+.PP
+.B \-\-ipfs\-host
+.RS 4
+IPFS daemon service's host, do not require, unless enable ipfs. default "127.0.0.1"\&.
+.RE
+.PP
+.B \-m, \-\-ipfs\-mode
+.RS 4
+IPFS mode for preserve webpage, currently supports are daemon and pinner, for the daemon mode which
+.br
+required run an IPFS service daemon process extra, for the pinner mode which does not require any
+.br
+third-party program. Uses pinner mode, also can take infura or pinata as pinner service,
+.br
+more detail on
+.UR
+https://github.com/wabarc/ipfs-pinner\&.
+.RE
+.PP
+.B \-p, \-\-ipfs\-port
+.RS 4
+IPFS daemon port. default 5001\&.
+.RE
+.PP
+.B \-t, \-\-token
+.RS 4
+Telegram Bot API Token\&.
+.RE
+.PP
+.B \-\-tor
+.RS 4
+Snapshot webpage via Tor proxy\&.
+.RE
+.PP
+.B \-\-tor-key
+.RS 4
+The private key for Tor hidden service\&.
+.RE
+.PP
+.B \-v, \-\-version
+.RS 4
+ version for wayback\&.
+.RE
+
+.SH ENVIRONMENT
+.TP
+.B DEBUG
+Set the value to 1 to enable debug logs\&.
+.TP
+.B LOG_TIME
+Display the date and time in log messages\&.
+.TP
+.B WAYBACK_IPFS_HOST
+IPFS daemon service's host, do not require, unless enable ipfs. default "127.0.0.1". (same as flag --ipfs-host)\&.
+.TP
+.B WAYBACK_IPFS_PORT
+IPFS daemon port. default 5001. (same as flag --ipfs-port)\&.
+.TP
+.B WAYBACK_IPFS_MODE
+IPFS mode for preserve webpage. default: "pinner". (same as flag --ipfs-mode)\&.
+.TP
+.B WAYBACK_USE_TOR
+Snapshot webpage via Tor proxy. (same as flag --tor)\&.
+.TP
+.B WAYBACK_ENABLE_IA
+Enable Internet Archive\&.
+.TP
+.B WAYBACK_ENABLE_IS
+Enable Archive Today (archive.is)\&.
+.TP
+.B WAYBACK_ENABLE_IP
+Enable IPFS\&.
+.TP
+.B WAYBACK_TELEGRAM_TOKEN
+Telegram Bot API Token. (same as flag --token)\&.
+.TP
+.B WAYBACK_TELEGRAM_CHANNEL
+The chatid which publish message. (same as flag --chatid)\&.
+.TP
+.B WAYBACK_TOR_PRIVKEY
+The private key for Tor service. (same as flag --tor-key)\&.
+.TP
+.B WAYBACK_TOR_LOCAL_PORT
+Local port of Tor service\&.
+.TP
+.B WAYBACK_TOR_REMOTE_PORTS
+Remote ports of Tor hidden service, e.g. WAYBACK_TOR_REMOTE_PORTS=80,81\&.
+
+.SH BUGS
+.P
+To view a list of known bugs, or to enter a bug report, please use
+Wayback's issue tracker: <https://github.com/wabarc/wayback/issues>
+
+.SH AUTHORS
+.P
+Wayback is written and maintained by Wayback Archiver\&.
+
+.SH "COPYRIGHT"
+.P
+Wayback is released under the terms of the GNU General Public License v3.0\&.
