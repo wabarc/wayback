@@ -3,25 +3,21 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/wabarc/wayback"
+	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/logger"
+	"github.com/wabarc/wayback/version"
 )
-
-type r = map[string]string
-
-type m struct {
-	ia r
-	is r
-	ip r
-}
 
 var (
 	ia bool
 	is bool
 	ip bool
 
-	daemon string
+	daemon []string
 
 	host string
 	port uint
@@ -31,6 +27,7 @@ var (
 	token  string
 	chatid string
 	debug  bool
+	torKey string
 
 	rootCmd = &cobra.Command{
 		Use:   "wayback",
@@ -38,20 +35,18 @@ var (
 		Example: `  wayback https://www.wikipedia.org
   wayback https://www.fsf.org https://www.eff.org
   wayback --ia https://www.fsf.org
-  wayback --ip https://www.fsf.org
   wayback --ia --is -d telegram -t your-telegram-bot-token
   WAYBACK_SLOT=pinata WAYBACK_APIKEY=YOUR-PINATA-APIKEY \
     WAYBACK_SECRET=YOUR-PINATA-SECRET wayback --ip https://www.fsf.org`,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return checkRequiredFlags(cmd, args)
+		},
 		Run: func(cmd *cobra.Command, args []string) {
-			// Assign default flags
-			assign()
 			handle(cmd, args)
 		},
-		Version: "1.0.0",
+		Version: version.Version,
 	}
 )
-
-var wbrc wayback.Broker
 
 func main() {
 	rootCmd.Execute()
@@ -61,65 +56,82 @@ func init() {
 	rootCmd.Flags().BoolVarP(&ia, "ia", "", false, "Wayback webpages to Internet Archive.")
 	rootCmd.Flags().BoolVarP(&is, "is", "", false, "Wayback webpages to Archive Today.")
 	rootCmd.Flags().BoolVarP(&ip, "ip", "", false, "Wayback webpages to IPFS. (default false)")
-	rootCmd.Flags().StringVarP(&daemon, "daemon", "d", "", "Run as daemon service.")
+	rootCmd.Flags().StringSliceVarP(&daemon, "daemon", "d", []string{}, "Run as daemon service, e.g. telegram, web")
 	rootCmd.Flags().StringVarP(&host, "ipfs-host", "", "127.0.0.1", "IPFS daemon host, do not require, unless enable ipfs.")
 	rootCmd.Flags().UintVarP(&port, "ipfs-port", "p", 5001, "IPFS daemon port.")
 	rootCmd.Flags().StringVarP(&mode, "ipfs-mode", "m", "pinner", "IPFS mode.")
-	rootCmd.Flags().BoolVarP(&tor, "tor", "", false, "Snapshot webpage use tor proxy.")
+	rootCmd.Flags().BoolVarP(&tor, "tor", "", false, "Snapshot webpage via Tor proxy.")
 
-	rootCmd.Flags().StringVarP(&token, "token", "t", "", "Telegram bot API Token, required.")
-	rootCmd.Flags().StringVarP(&chatid, "chatid", "c", "", "Channel ID. default: \"\"")
-	rootCmd.Flags().BoolVarP(&debug, "debug", "", false, "Enable debug mode. default: false")
+	rootCmd.Flags().StringVarP(&token, "token", "t", "", "Telegram Bot API Token.")
+	rootCmd.Flags().StringVarP(&chatid, "chatid", "c", "", "Telegram channel id.")
+	rootCmd.Flags().BoolVarP(&debug, "debug", "", false, "Enable debug mode. (default false)")
+	rootCmd.Flags().StringVarP(&torKey, "tor-key", "", "", "The private key for Tor service.")
 }
 
-func assign() {
-	if !ia && !is && !ip {
-		ia, is = true, true
+func checkRequiredFlags(cmd *cobra.Command, args []string) error {
+	flags := cmd.Flags()
+	for _, d := range daemon {
+		switch d {
+		case "telegram":
+			if strings.TrimSpace(token) == "" {
+				return errors.New("Token of the Telegram Bot is required to run as Telegram service.")
+			}
+		case "web":
+			if flags.Changed("tor-key") && strings.TrimSpace(torKey) == "" {
+				return errors.New("The private key for Tor service is required.")
+			}
+		}
 	}
+
+	if flags.Changed("chatid") && strings.TrimSpace(chatid) == "" {
+		return errors.New("Telegram Channel name is required with flag `--chatid` or `-c`.")
+	}
+
+	return nil
 }
 
-func output(tit string, args r) {
-	fmt.Printf("[%s]\n", tit)
-	for ori, dst := range args {
-		fmt.Printf("%s => %s", ori, dst)
-	}
-	fmt.Print("\n")
+func setToEnv() {
+	os.Setenv("WAYBACK_IPFS_HOST", host)
+	os.Setenv("WAYBACK_IPFS_PORT", fmt.Sprint(port))
+	os.Setenv("WAYBACK_IPFS_MODE", mode)
+	os.Setenv("WAYBACK_USE_TOR", fmt.Sprint(tor))
+	os.Setenv("WAYBACK_ENABLE_IA", fmt.Sprint(ia))
+	os.Setenv("WAYBACK_ENABLE_IS", fmt.Sprint(is))
+	os.Setenv("WAYBACK_ENABLE_IP", fmt.Sprint(ip))
+	os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
+	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", chatid)
 }
 
 func handle(cmd *cobra.Command, args []string) {
-	switch daemon {
-	case "telegram":
-		telegram()
+	if !ia && !is && !ip {
+		ia, is = true, true
+	}
+
+	setToEnv()
+	parser := config.NewParser()
+
+	var err error
+	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+		logger.Fatal("Parse enviroment variables or flags failed, error: %v", err)
+	}
+
+	if !config.Opts.LogTime() {
+		logger.DisableTime()
+	}
+
+	if debug || config.Opts.HasDebugMode() {
+		logger.EnableDebug()
+	}
+
+	hasDaemon := len(daemon) > 0
+	hasArgs := len(args) > 0
+	switch {
+	case hasDaemon:
+		serve(cmd, config.Opts, args)
+	case hasArgs:
+		archive(cmd, config.Opts, args)
 	default:
-		if len(args) == 0 {
-			cmd.Help()
-			os.Exit(0)
-		}
-
-		r := &m{}
-		if ia {
-			r.ia = wbia(cmd, args)
-			output("Internet Archive", r.ia)
-		}
-		if is {
-			r.is = wbis(cmd, args)
-			output("Archive Today", r.is)
-		}
-		if ip {
-			r.ip = wbip(cmd, args)
-			output("IPFS", r.ip)
-		}
+		cmd.Help()
 	}
-}
-
-func telegram() {
-	ipfs := &wayback.IPFSRV{Host: host, Port: port, Mode: mode, UseTor: tor}
-	handle := map[string]bool{
-		"ia": ia,
-		"is": is,
-		"ip": ip,
-	}
-	wbrc := wayback.NewConfig(token, debug, chatid, handle, ipfs)
-
-	wbrc.Telegram()
+	os.Exit(0)
 }

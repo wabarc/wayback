@@ -21,15 +21,21 @@ Using [Snapcraft](https://snapcraft.io/wayback) (on GNU/Linux)
 $ sudo snap install wayback
 ```
 
-## Usage
+See more on [release](https://github.com/wabarc/wayback/releases)
+
+## Feature
 
 - Running as CLI command or Docker container
 - Running with telegram bot
+- Serve as Tor hidden service
+
+## Usage
 
 ### Command line
 
 ```sh
 $ wayback -h
+
 A CLI tool for wayback webpages.
 
 Usage:
@@ -39,15 +45,14 @@ Examples:
   wayback https://www.wikipedia.org
   wayback https://www.fsf.org https://www.eff.org
   wayback --ia https://www.fsf.org
-  wayback --ip https://www.fsf.org
   wayback --ia --is -d telegram -t your-telegram-bot-token
   WAYBACK_SLOT=pinata WAYBACK_APIKEY=YOUR-PINATA-APIKEY \
     WAYBACK_SECRET=YOUR-PINATA-SECRET wayback --ip https://www.fsf.org
 
 Flags:
-  -c, --chatid string      Channel ID. default: ""
-  -d, --daemon string      Run as daemon service.
-      --debug              Enable debug mode. default: false
+  -c, --chatid string      Telegram channel id.
+  -d, --daemon strings     Run as daemon service, e.g. telegram, web
+      --debug              Enable debug mode. (default false)
   -h, --help               help for wayback
       --ia                 Wayback webpages to Internet Archive.
       --ip                 Wayback webpages to IPFS. (default false)
@@ -55,8 +60,9 @@ Flags:
   -m, --ipfs-mode string   IPFS mode. (default "pinner")
   -p, --ipfs-port uint     IPFS daemon port. (default 5001)
       --is                 Wayback webpages to Archive Today.
-  -t, --token string       Telegram bot API Token, required.
-      --tor                Snapshot webpage use tor proxy.
+  -t, --token string       Telegram Bot API Token.
+      --tor                Snapshot webpage via Tor proxy.
+      --tor-key string     The private key for Tor service.
   -v, --version            version for wayback
 ```
 
@@ -116,6 +122,100 @@ Also can run with debug mode:
 ```sh
 $ wayback -d telegram -t YOUR-BOT-TOKEN --debug
 ```
+
+Both serve on Telegram and Tor hidden service:
+
+```sh
+$ wayback -d telegram -t YOUT-BOT-TOKEN -d web
+```
+
+#### Configuration Parameters
+
+Wayback can use command flags and environment variables.
+
+##### `DEBUG`
+
+> Toggle debug mode (display all logging).
+>
+> *Disabled by default.*
+
+##### `LOG_TIME`
+
+> Display the date and time in log messages.
+>
+> *default: true*
+
+##### `WAYBACK_IPFS_HOST`
+
+> IPFS daemon service's host, do not require, unless enable ipfs.
+>
+> *default "127.0.0.1". (same as flag --ipfs-host).*
+
+##### `WAYBACK_IPFS_PORT`
+
+> IPFS daemon port.
+>
+> *default 5001. (same as flag --ipfs-port).*
+
+##### `WAYBACK_IPFS_MODE`
+
+> IPFS mode for preserve webpage.
+>
+> *default: "pinner". (same as flag --ipfs-mode).*
+
+##### `WAYBACK_USE_TOR`
+
+> Snapshot webpage via Tor proxy. (same as flag --tor).
+>
+> *default: false*
+
+##### `WAYBACK_ENABLE_IA`
+
+> Enable Internet Archive.
+>
+> *default: true*
+
+##### `WAYBACK_ENABLE_IS`
+
+> Enable Archive Today (archive.is).
+>
+> *default: true*
+
+##### `WAYBACK_ENABLE_IP`
+
+> Enable IPFS.
+>
+> *default: false*
+
+##### `WAYBACK_TELEGRAM_TOKEN`
+
+> Telegram Bot API Token.
+>
+> *default: ""* (same as flag --token).
+
+##### `WAYBACK_TELEGRAM_CHANNEL`
+
+> The chatid which publish message.
+>
+> *default: ""* (same as flag --chatid).
+
+##### `WAYBACK_TOR_PRIVKEY`
+
+> The private key for Tor service.
+>
+> *default: ""* (same as flag --tor-key).
+
+##### `WAYBACK_TOR_LOCAL_PORT`
+
+> Local port of Tor service.
+>
+> *default: 0*
+
+##### `WAYBACK_TOR_REMOTE_PORTS`
+
+> Remote ports of Tor hidden service, e.g. `WAYBACK_TOR_REMOTE_PORTS=80,81`.
+>
+> *default: 80*
 
 ### Docker/Podman
 
