@@ -18,7 +18,7 @@ jobs:
           sudo snap install snapcraft --classic
           sudo snap install lxd
           sudo usermod --append --groups lxd $USER
-          echo "::add-path::/snap/bin"
+          echo "/snap/bin" >> $GITHUB_PATH
           sudo chown root:root /
           sudo /snap/bin/lxd.migrate -yes
           sudo /snap/bin/lxd waitready

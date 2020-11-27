@@ -1,8 +1,9 @@
-name: Test
+name: Testing
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - "*"
     paths:
       - "**/*.go"
       - "go.mod"
@@ -17,7 +18,7 @@ on:
 
 jobs:
   test:
-    name: Test
+    name: Testing
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -42,5 +43,5 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: ${{ runner.os }}-go-
 
-    - name: Test
+    - name: Run test
       run: go test -v ./...
