@@ -12,12 +12,13 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 	"sync"
 
 	embedTor "github.com/cretz/bine/tor"
 	"github.com/cretz/bine/torutil/ed25519"
-	"github.com/ipsn/go-libtor"
+	// "github.com/ipsn/go-libtor"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/logger"
@@ -39,6 +40,10 @@ func (t *tor) Serve(ctx context.Context) error {
 	// Start tor with some defaults + elevated verbosity
 	logger.Info("Web: starting and registering onion service, please wait a bit...")
 
+	if _, err := exec.LookPath("tor"); err != nil {
+		logger.Fatal("%v", err)
+	}
+
 	var pvk ed25519.PrivateKey
 	if t.opts.TorPrivKey() == "" {
 		keypair, _ := ed25519.GenerateKey(rand.Reader)
@@ -53,7 +58,8 @@ func (t *tor) Serve(ctx context.Context) error {
 	}
 
 	verbose := t.opts.HasDebugMode()
-	startConf := &embedTor.StartConf{ProcessCreator: libtor.Creator, DataDir: "tor-data"}
+	// startConf := &embedTor.StartConf{ProcessCreator: libtor.Creator, DataDir: "tor-data"}
+	startConf := &embedTor.StartConf{DataDir: "tor-data"}
 	if verbose {
 		startConf.DebugWriter = os.Stdout
 	} else {

@@ -7,7 +7,7 @@ require (
 	github.com/cretz/bine v0.1.0
 	github.com/go-shiori/dom v0.0.0-20200611094855-2cf8a4b8b9eb // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
-	github.com/ipsn/go-libtor v1.0.329
+	// github.com/ipsn/go-libtor v1.0.329
 	github.com/libp2p/go-libp2p-core v0.7.0 // indirect
 	github.com/multiformats/go-multiaddr v0.3.1 // indirect
 	github.com/sirupsen/logrus v1.6.0 // indirect

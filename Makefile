@@ -7,7 +7,7 @@ PACKDIR ?= ./build/package
 LDFLAGS := $(shell echo "-X 'wayback/version.Version=`git describe --tags --abbrev=0`'")
 LDFLAGS := $(shell echo "${LDFLAGS} -X 'wayback/version.Commit=`git rev-parse --short HEAD`'")
 LDFLAGS := $(shell echo "${LDFLAGS} -X 'wayback/version.BuildDate=`date +%FT%T%z`'")
-GOBUILD ?= CGO_ENABLED=1 go build --ldflags="-s -w ${LDFLAGS}" -v -x
+GOBUILD ?= CGO_ENABLED=0 go build --ldflags="-s -w ${LDFLAGS}" -v
 VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
 GOFILES ?= $(wildcard ./cmd/wayback/*.go)
 PROJECT := github.com/wabarc/wayback
