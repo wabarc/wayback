@@ -106,7 +106,7 @@ func (c *collect) archive(t *telegram, msgid int, urls []string) (int, error) {
 	p := *c
 
 	wg := sync.WaitGroup{}
-	var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
+	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: t.opts}
 	for slot, do := range t.opts.Slots() {
 		wg.Add(1)
 		go func(slot string, do bool, c *collect) {
