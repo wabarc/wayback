@@ -23,14 +23,16 @@ LABEL maintainer "WaybackBot <wabarc@tuta.io>"
 COPY --from=builder /wayback /usr/local/bin
 RUN apk update && apk add ca-certificates tor
 RUN mv /etc/tor/torrc.sample /etc/tor/torrc
-RUN echo 'ExcludeNodes {cn},{hk},{mo},{kp},{ir},{sy},{pk},{cu},{vn},{ru}' >> /etc/tor/torrc
-RUN echo 'ExcludeExitNodes {cn},{hk},{mo},{sg},{th},{pk},{by},{ru},{ir},{vn},{ph},{my},{cu}' >> /etc/tor/torrc
+RUN echo 'ExcludeNodes {cn},{hk},{mo},{sg},{th},{pk},{by},{ru},{ir},{sy},{vn},{ph},{my},{cu},{us},{au},{ca},{nz},{gb},{fr}' >> /etc/tor/torrc
+RUN echo 'ExcludeExitNodes {cn},{hk},{mo},{sg},{th},{pk},{by},{ru},{ir},{sy},{vn},{ph},{my},{cu},{us},{au},{ca},{nz},{gb},{fr}' >> /etc/tor/torrc
 RUN echo 'StrictNodes 1' >> /etc/tor/torrc
 
-USER tor
-WORKDIR /tmp
+RUN rm -rf /var/cache/apk/*
 
-ENTRYPOINT ["/usr/local/bin/wayback"]
+#USER tor
+#WORKDIR /tmp
 
-HEALTHCHECK --interval=5s --timeout=3s --retries=12 \
-  CMD ps | awk '{print $4}' | grep wayback || exit 1
+#ENTRYPOINT ["/usr/local/bin/wayback"]
+
+#HEALTHCHECK --interval=5s --timeout=3s --retries=12 \
+#  CMD ps | awk '{print $4}' | grep wayback || exit 1
