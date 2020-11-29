@@ -99,6 +99,7 @@ linux-armv6:
 linux-armv7:
 	GOARCH=arm GOOS=linux GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
+linux-arm64: linux-armv8
 linux-armv8:
 	GOARCH=arm64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
@@ -146,6 +147,9 @@ windows-386:
 
 windows-amd64:
 	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe $(GOFILES)
+
+dragonfly-amd64:
+	GOARCH=amd64 GOOS=dragonfly $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 tar_releases := $(addsuffix .gz, $(PLATFORM_LIST))
 zip_releases := $(addsuffix .zip, $(WINDOWS_ARCH_LIST))
