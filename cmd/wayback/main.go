@@ -73,7 +73,7 @@ func checkRequiredFlags(cmd *cobra.Command, args []string) error {
 	for _, d := range daemon {
 		switch d {
 		case "telegram":
-			if strings.TrimSpace(token) == "" {
+			if flags.Changed("token") && strings.TrimSpace(token) == "" {
 				return errors.New("Token of the Telegram Bot is required to run as Telegram service.")
 			}
 		case "web":
@@ -90,16 +90,36 @@ func checkRequiredFlags(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func setToEnv() {
-	os.Setenv("WAYBACK_IPFS_HOST", host)
-	os.Setenv("WAYBACK_IPFS_PORT", fmt.Sprint(port))
-	os.Setenv("WAYBACK_IPFS_MODE", mode)
-	os.Setenv("WAYBACK_USE_TOR", fmt.Sprint(tor))
-	os.Setenv("WAYBACK_ENABLE_IA", fmt.Sprint(ia))
-	os.Setenv("WAYBACK_ENABLE_IS", fmt.Sprint(is))
-	os.Setenv("WAYBACK_ENABLE_IP", fmt.Sprint(ip))
-	os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
-	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", chatid)
+func setToEnv(cmd *cobra.Command) {
+	flags := cmd.Flags()
+
+	if flags.Changed("ia") {
+		os.Setenv("WAYBACK_ENABLE_IA", fmt.Sprint(ia))
+	}
+	if flags.Changed("is") {
+		os.Setenv("WAYBACK_ENABLE_IS", fmt.Sprint(is))
+	}
+	if flags.Changed("ip") {
+		os.Setenv("WAYBACK_ENABLE_IP", fmt.Sprint(ip))
+	}
+	if flags.Changed("token") {
+		os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
+	}
+	if flags.Changed("chatid") {
+		os.Setenv("WAYBACK_TELEGRAM_CHANNEL", chatid)
+	}
+	if flags.Changed("host") {
+		os.Setenv("WAYBACK_IPFS_HOST", host)
+	}
+	if flags.Changed("port") {
+		os.Setenv("WAYBACK_IPFS_PORT", fmt.Sprint(port))
+	}
+	if flags.Changed("mode") {
+		os.Setenv("WAYBACK_IPFS_MODE", mode)
+	}
+	if flags.Changed("tor") {
+		os.Setenv("WAYBACK_USE_TOR", fmt.Sprint(tor))
+	}
 }
 
 func handle(cmd *cobra.Command, args []string) {
@@ -107,7 +127,7 @@ func handle(cmd *cobra.Command, args []string) {
 		ia, is = true, true
 	}
 
-	setToEnv()
+	setToEnv(cmd)
 	parser := config.NewParser()
 
 	var err error

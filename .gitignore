@@ -19,3 +19,4 @@
 
 # Ignore Tor embedded process data directory
 **/tor-data*
+**/data-dir*

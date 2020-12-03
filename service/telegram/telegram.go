@@ -102,30 +102,33 @@ type collect struct {
 }
 
 func (c *collect) archive(t *telegram, msgid int, urls []string) (int, error) {
-	logger.Debug("Telegram: archives starg...")
+	logger.Debug("Telegram: archives start...")
 	p := *c
 
 	wg := sync.WaitGroup{}
 	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: t.opts}
-	for slot, do := range t.opts.Slots() {
+	for slot, arc := range t.opts.Slots() {
+		if !arc {
+			continue
+		}
 		wg.Add(1)
-		go func(slot string, do bool, c *collect) {
+		go func(slot string) {
 			defer wg.Done()
-			switch {
-			case slot == config.SLOT_IA && do:
+			switch slot {
+			case config.SLOT_IA:
 				logger.Debug("Telegram: archiving slot: %s", slot)
-				p.Arc = append(p.Arc, fmt.Sprintf("<a href='https://web.archive.org/'>%s</a>", config.SlotName(slot)))
 				p.Dst = append(p.Dst, wbrc.IA())
-			case slot == config.SLOT_IS && do:
+				p.Arc = append(p.Arc, fmt.Sprintf("<a href='https://web.archive.org/'>%s</a>", config.SlotName(slot)))
+			case config.SLOT_IS:
 				logger.Debug("Telegram: archiving slot: %s", slot)
-				p.Arc = append(p.Arc, fmt.Sprintf("<a href='https://archive.today/'>%s</a>", config.SlotName(slot)))
 				p.Dst = append(p.Dst, wbrc.IS())
-			case slot == config.SLOT_IP && do:
+				p.Arc = append(p.Arc, fmt.Sprintf("<a href='https://archive.today/'>%s</a>", config.SlotName(slot)))
+			case config.SLOT_IP:
 				logger.Debug("Telegram: archiving slot: %s", slot)
-				p.Arc = append(p.Arc, fmt.Sprintf("<a href='https://ipfs.github.io/public-gateway-checker/'>%s</a>", config.SlotName(slot)))
 				p.Dst = append(p.Dst, wbrc.IP())
+				p.Arc = append(p.Arc, fmt.Sprintf("<a href='https://ipfs.github.io/public-gateway-checker/'>%s</a>", config.SlotName(slot)))
 			}
-		}(slot, do, c)
+		}(slot)
 	}
 	wg.Wait()
 	*c = p

@@ -59,7 +59,7 @@ func (t *tor) Serve(ctx context.Context) error {
 
 	verbose := t.opts.HasDebugMode()
 	// startConf := &embedTor.StartConf{ProcessCreator: libtor.Creator, DataDir: "tor-data"}
-	startConf := &embedTor.StartConf{DataDir: "tor-data"}
+	startConf := &embedTor.StartConf{}
 	if verbose {
 		startConf.DebugWriter = os.Stdout
 	} else {
@@ -158,22 +158,25 @@ func (t *tor) archive(ctx context.Context, text string) (c *template.Collector, 
 
 	wg := sync.WaitGroup{}
 	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: t.opts}
-	for slot, do := range t.opts.Slots() {
+	for slot, arc := range t.opts.Slots() {
+		if !arc {
+			continue
+		}
 		wg.Add(1)
-		go func(slot string, do bool, c *template.Collector) {
+		go func(slot string, c *template.Collector) {
 			defer wg.Done()
-			switch {
-			case slot == config.SLOT_IA && do:
+			switch slot {
+			case config.SLOT_IA:
 				logger.Debug("Web: archiving slot: %s", slot)
 				transform(c, config.SlotName(slot), wbrc.IA())
-			case slot == config.SLOT_IS && do:
+			case config.SLOT_IS:
 				logger.Debug("Web: archiving slot: %s", slot)
 				transform(c, config.SlotName(slot), wbrc.IS())
-			case slot == config.SLOT_IP && do:
+			case config.SLOT_IP:
 				logger.Debug("Web: archiving slot: %s", slot)
 				transform(c, config.SlotName(slot), wbrc.IP())
 			}
-		}(slot, do, c)
+		}(slot, c)
 	}
 	wg.Wait()
 
