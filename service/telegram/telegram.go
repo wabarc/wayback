@@ -70,8 +70,7 @@ func (t *telegram) Serve(_ context.Context) error {
 		}
 
 		g.Go(func() error {
-			col := &collect{}
-			msgID, err := col.archive(t, update.Message.MessageID, urls)
+			col, msgID, err := archive(t, update.Message.MessageID, urls)
 			if err != nil {
 				logger.Error("Telegram: archiving failed, ", err)
 				return err
@@ -97,13 +96,12 @@ func (t *telegram) Serve(_ context.Context) error {
 }
 
 type collect struct {
-	Arc []string
-	Dst []map[string]string
+	Arc string
+	Dst map[string]string
 }
 
-func (c *collect) archive(t *telegram, msgid int, urls []string) (int, error) {
+func archive(t *telegram, msgid int, urls []string) (col []*collect, id int, err error) {
 	logger.Debug("Telegram: archives start...")
-	p := *c
 
 	wg := sync.WaitGroup{}
 	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: t.opts}
@@ -114,44 +112,47 @@ func (c *collect) archive(t *telegram, msgid int, urls []string) (int, error) {
 		wg.Add(1)
 		go func(slot string) {
 			defer wg.Done()
+			c := &collect{}
 			switch slot {
 			case config.SLOT_IA:
 				logger.Debug("Telegram: archiving slot: %s", slot)
-				p.Dst = append(p.Dst, wbrc.IA())
-				p.Arc = append(p.Arc, fmt.Sprintf("<a href='https://web.archive.org/'>%s</a>", config.SlotName(slot)))
+				c.Arc = fmt.Sprintf("<a href='https://web.archive.org/'>%s</a>", config.SlotName(slot))
+				c.Dst = wbrc.IA()
 			case config.SLOT_IS:
 				logger.Debug("Telegram: archiving slot: %s", slot)
-				p.Dst = append(p.Dst, wbrc.IS())
-				p.Arc = append(p.Arc, fmt.Sprintf("<a href='https://archive.today/'>%s</a>", config.SlotName(slot)))
+				c.Arc = fmt.Sprintf("<a href='https://archive.today/'>%s</a>", config.SlotName(slot))
+				c.Dst = wbrc.IS()
 			case config.SLOT_IP:
 				logger.Debug("Telegram: archiving slot: %s", slot)
-				p.Dst = append(p.Dst, wbrc.IP())
-				p.Arc = append(p.Arc, fmt.Sprintf("<a href='https://ipfs.github.io/public-gateway-checker/'>%s</a>", config.SlotName(slot)))
+				c.Arc = fmt.Sprintf("<a href='https://ipfs.github.io/public-gateway-checker/'>%s</a>", config.SlotName(slot))
+				c.Dst = wbrc.IP()
 			}
+			col = append(col, c)
 		}(slot)
 	}
 	wg.Wait()
-	*c = p
 
-	return msgid, nil
+	return col, msgid, nil
 }
 
-func render(vars *collect) string {
+func render(vars []*collect) string {
 	var tmplBytes bytes.Buffer
 
-	const tmpl = `{{range $i, $name := .Arc}}<b>{{ $name }}</b>:
-{{ range $url := index $.Dst $i -}}
+	const tmpl = `{{range $ := .}}<b>{{ $.Arc }}</b>:
+{{ range $url := $.Dst -}}
 • {{ $url }}
 {{end}}
 {{end}}`
 
 	tpl, err := template.New("message").Parse(tmpl)
 	if err != nil {
+		logger.Debug("Telegram: parse template failed, %v", err)
 		return ""
 	}
 
 	err = tpl.Execute(&tmplBytes, vars)
 	if err != nil {
+		logger.Debug("Telegram: execute template failed, %v", err)
 		return ""
 	}
 

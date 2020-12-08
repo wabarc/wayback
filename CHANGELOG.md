@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.4] - 2020-12-08
+
+### Fixed
+- Fix telegram message layout.
+
 ## [0.5.3] - 2020-12-03
 
 ### Fixed
