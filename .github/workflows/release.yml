@@ -6,19 +6,60 @@ on:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
-  setup:
-    name: Initial build env
-    runs-on: ubuntu-latest
-    steps:
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.15
-
   build:
-    name: Checkout, build, archive, upload
+    name: Build
+    strategy:
+      matrix:
+        os: [ linux, freebsd, openbsd, dragonfly, windows, darwin ]
+        arch: [ amd64, 386 ]
+        include:
+          - os: linux
+            arch: arm
+            arm: 5
+          - os: linux
+            arch: arm
+            arm: 6
+          - os: linux
+            arch: arm
+            arm: 7
+          - os: linux
+            arch: arm64
+          - os: linux
+            arch: mips
+            mips: softfloat
+          - os: linux
+            arch: mips
+            mips: hardfloat
+          - os: linux
+            arch: mipsle
+            mipsle: softfloat
+          - os: linux
+            arch: mipsle
+            mipsle: hardfloat
+          - os: linux
+            arch: mips64
+          - os: linux
+            arch: mips64le
+          - os: linux
+            arch: ppc64
+          - os: linux
+            arch: ppc64le
+          - os: linux
+            arch: s390x
+        exclude:
+          - os: darwin
+            arch: 386
+          - os: dragonfly
+            arch: 386
+      fail-fast: false
     runs-on: ubuntu-latest
-    needs: setup
+    env:
+      GOOS: ${{ matrix.os }}
+      GOARCH: ${{ matrix.arch }}
+      GOARM: ${{ matrix.arm }}
+      GOMIPS: ${{ matrix.mips }}
+      GOMIPS64: ${{ matrix.mips64 }}
+      GOMIPSLE: ${{ matrix.mipsle }}
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
@@ -26,11 +67,29 @@ jobs:
     - name: List checked-out code
       run: ls -al
 
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.15
+
     - name: Build fat binary
-      run: make all-arch
+      id: builder
+      run: |
+        ARGS="${GOOS}-${GOARCH}"
+        if [[ -n "${GOARM}" ]]; then
+          ARGS="${ARGS}v${GOARM}"
+        elif [[ -n "${GOMIPS}" ]]; then
+          ARGS="${ARGS}-${GOMIPS}"
+        elif [[ -n "${GOMIPS64}" ]]; then
+          ARGS="${ARGS}-${GOMIPS64}"
+        elif [[ -n "${GOMIPSLE}" ]]; then
+          ARGS="${ARGS}-${GOMIPSLE}"
+        fi
+        make ${ARGS}
+        echo "::set-output name=args::${ARGS}"
 
     - name: Archive binary
-      run: make releases
+      run: make TARGET=${{ steps.builder.outputs.args }} releases
 
     - name: Upload archived binary
       uses: actions/upload-artifact@v2
@@ -79,7 +138,7 @@ jobs:
   checksum:
     name: Get archived packages checksum
     runs-on: ubuntu-latest
-    needs: [build, debpkg, rpmpkg]
+    needs: [ build, debpkg, rpmpkg ]
     outputs:
       digest: ${{ steps.digest.outputs.result }}
     steps:
@@ -100,7 +159,7 @@ jobs:
   release:
     name: Create and upload release
     runs-on: ubuntu-latest
-    needs: [build, debpkg, rpmpkg, checksum]
+    needs: [build, checksum]
     steps:
     - name: Download math result from build and checksum jobs
       uses: actions/download-artifact@v2

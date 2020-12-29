@@ -23,7 +23,7 @@ PLATFORM_LIST = \
 	linux-armv5 \
 	linux-armv6 \
 	linux-armv7 \
-	linux-armv8 \
+	linux-arm64 \
 	linux-mips-softfloat \
 	linux-mips-hardfloat \
 	linux-mipsle-softfloat \
@@ -36,7 +36,8 @@ PLATFORM_LIST = \
 	freebsd-386 \
 	freebsd-amd64 \
 	openbsd-386 \
-	openbsd-amd64
+	openbsd-amd64 \
+	dragonfly-amd64
 
 WINDOWS_ARCH_LIST = \
 	windows-386 \
@@ -50,7 +51,7 @@ WINDOWS_ARCH_LIST = \
 	linux-armv5 \
 	linux-armv6 \
 	linux-armv7 \
-	linux-armv8 \
+	linux-arm64 \
 	linux-mips-softfloat \
 	linux-mips-hardfloat \
 	linux-mipsle-softfloat \
@@ -99,8 +100,7 @@ linux-armv6:
 linux-armv7:
 	GOARCH=arm GOOS=linux GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
-linux-arm64: linux-armv8
-linux-armv8:
+linux-arm64:
 	GOARCH=arm64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-mips-softfloat:
@@ -151,8 +151,16 @@ windows-amd64:
 dragonfly-amd64:
 	GOARCH=amd64 GOOS=dragonfly $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
+ifeq ($(TARGET),)
 tar_releases := $(addsuffix .gz, $(PLATFORM_LIST))
 zip_releases := $(addsuffix .zip, $(WINDOWS_ARCH_LIST))
+else
+ifeq ($(findstring windows,$(TARGET)),windows)
+zip_releases := $(addsuffix .zip, $(TARGET))
+else
+tar_releases := $(addsuffix .gz, $(TARGET))
+endif
+endif
 
 $(tar_releases): %.gz : %
 	chmod +x $(BINDIR)/$(NAME)-$(basename $@)

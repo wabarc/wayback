@@ -1,13 +1,16 @@
 #!/bin/sh
 #
 # Perform package builder
-set -eux pipefail
+set -eux
 
 GOOS=linux
 GOARCH=amd64
 
 for arg in "$@"; do
 case $arg in
+    *arm/v6|*arm32v6)
+        GOARCH=armv6
+        ;;
     *arm/v7|*arm32v7)
         GOARCH=armv7
         ;;
