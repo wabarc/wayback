@@ -25,12 +25,15 @@ type telegram struct {
 	opts *config.Options
 }
 
+// New telegram struct.
 func New(opts *config.Options) *telegram {
 	return &telegram{
 		opts: opts,
 	}
 }
 
+// Serve loop request message from the Telegram api server.
+// Serve always returns a nil error.
 func (t *telegram) Serve(_ context.Context) error {
 	bot, err := tgbotapi.NewBotAPI(t.opts.TelegramToken())
 	if err != nil {

@@ -221,13 +221,14 @@ Wayback can use command flags and environment variables.
 
 ```sh
 $ docker pull wabarc/wayback
-$ docker run -d wabarc/wayback -d telegram -t YOUR-BOT-TOKEN # without telegram channel
-$ docker run -d wabarc/wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNAME # with telegram channel
+$ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN # without telegram channel
+$ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNAME # with telegram channel
 ```
 
-## Deploy on Heroku
+## Deployment
 
-See: [wabarc/on-heroku](https://github.com/wabarc/on-heroku)
+- [wabarc/on-heroku](https://github.com/wabarc/on-heroku)
+- [wabarc/on-github](https://github.com/wabarc/on-github)
 
 ## TODO
 
@@ -243,11 +244,15 @@ See: [wabarc/on-heroku](https://github.com/wabarc/on-heroku)
 - [An example bot](http://t.me/wabarc_bot)
 - [An example channel](http://t.me/wabarc)
 
-## Related projects
+## F.A.Q
 
-- [duty-machine](https://github.com/duty-machine/duty-machine)
-- [ipfs-pinner](https://github.com/wabarc/ipfs-pinner)
-- [on-heroku](https://github.com/wabarc/on-heroku)
+**Q: How to keep the Tor hidden service hostname?**
+
+A: For the first time to run the `wayback` service, keep the key from the output message (the key is the part after `private key:` below) 
+and next time to run the `wayback` service to place the key to the `--tor-key` option or the `WAYBACK_TOR_PRIVKEY` environment variable.
+```
+[INFO] Web: important to keep the private key: d005473a611d2b23e54d6446dfe209cb6c52ddd698818d1233b1d750f790445fcfb5ece556fe5ee3b4724ac6bea7431898ee788c6011febba7f779c85845ae87
+```
 
 ## License
 

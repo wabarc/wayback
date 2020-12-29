@@ -10,6 +10,7 @@ import (
 	"text/template"
 )
 
+// Collect archived struct
 type Collect struct {
 	Slot string `json:"slot"`
 	Src  string `json:"src"`
@@ -20,6 +21,7 @@ type Collector []Collect
 
 var templates = template.Must(template.New("").Parse(html))
 
+// Render template with Collector
 func (c Collector) Render() ([]byte, bool) {
 	var tpl bytes.Buffer
 	if err := templates.Execute(&tpl, c); err != nil {

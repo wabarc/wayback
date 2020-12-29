@@ -12,14 +12,19 @@ import (
 	"github.com/wabarc/wbipfs"
 )
 
+// Archived returns result of wayback.
 type Archived map[string]string
 
+// Broker is interface of the wayback,
+// methods returns `Archived`.
 type Broker interface {
 	IA() Archived
 	IS() Archived
 	IP() Archived
 }
 
+// Handle URLs need to wayback and configs,
+// Opts on `github.com/wabarc/wayback/config`.
 type Handle struct {
 	URLs []string
 

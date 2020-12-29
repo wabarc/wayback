@@ -6,6 +6,7 @@ package utils // import "github.com/wabarc/wayback/utils"
 
 import "regexp"
 
+// MatchURL is extract URL from text, returns []string always.
 func MatchURL(text string) []string {
 	re := regexp.MustCompile(`https?://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,255}\.[a-z]{0,63}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)`)
 	urls := []string{}

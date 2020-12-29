@@ -30,12 +30,18 @@ type tor struct {
 	opts *config.Options
 }
 
+// New tor struct.
 func New(opts *config.Options) *tor {
 	return &tor{
 		opts: opts,
 	}
 }
 
+// Serve accepts incoming HTTP requests over Tor network, or open
+// a local port for proxy server by "WAYBACK_TOR_LOCAL_PORT" env.
+// Use "WAYBACK_TOR_PRIVKEY" to keep the Tor hidden service hostname.
+//
+// Serve always returns a nil error.
 func (t *tor) Serve(ctx context.Context) error {
 	// Start tor with some defaults + elevated verbosity
 	logger.Info("Web: starting and registering onion service, please wait a bit...")

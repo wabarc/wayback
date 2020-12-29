@@ -10,6 +10,8 @@ import (
 	"github.com/wabarc/wayback/logger"
 )
 
+// ToChannel for publish to message to Telegram channel,
+// returns boolean as result.
 func ToChannel(opts *config.Options, bot *tgbotapi.BotAPI, text string) bool {
 	if bot == nil {
 		var err error
