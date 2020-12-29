@@ -120,11 +120,16 @@ func setToEnv(cmd *cobra.Command) {
 	if flags.Changed("tor") {
 		os.Setenv("WAYBACK_USE_TOR", fmt.Sprint(tor))
 	}
+	if flags.Changed("tor-key") {
+		os.Setenv("WAYBACK_TOR_PRIVKEY", torKey)
+	}
 }
 
 func handle(cmd *cobra.Command, args []string) {
 	if !ia && !is && !ip {
 		ia, is = true, true
+		os.Setenv("WAYBACK_ENABLE_IA", "true")
+		os.Setenv("WAYBACK_ENABLE_IS", "true")
 	}
 
 	setToEnv(cmd)
