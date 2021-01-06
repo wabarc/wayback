@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.5] - 2021-01-15
+
+### Added
+- Support publish message to channel with Tor entry.
+
+### Fixed
+- Minor bugfix.
+
 ## [0.5.4] - 2020-12-08
 
 ### Fixed

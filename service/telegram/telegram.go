@@ -5,11 +5,9 @@
 package telegram // import "github.com/wabarc/wayback/sevice/telegram"
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"sync"
-	"text/template"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/wabarc/wayback"
@@ -79,7 +77,7 @@ func (t *telegram) Serve(_ context.Context) error {
 				return err
 			}
 
-			replyText := render(col)
+			replyText := publish.Render(col)
 			logger.Debug("Telegram: reply text, %s", replyText)
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 			msg.ReplyToMessageID = msgID
@@ -98,12 +96,7 @@ func (t *telegram) Serve(_ context.Context) error {
 	return nil
 }
 
-type collect struct {
-	Arc string
-	Dst map[string]string
-}
-
-func archive(t *telegram, msgid int, urls []string) (col []*collect, id int, err error) {
+func archive(t *telegram, msgid int, urls []string) (col []*publish.Collect, id int, err error) {
 	logger.Debug("Telegram: archives start...")
 
 	wg := sync.WaitGroup{}
@@ -115,7 +108,7 @@ func archive(t *telegram, msgid int, urls []string) (col []*collect, id int, err
 		wg.Add(1)
 		go func(slot string) {
 			defer wg.Done()
-			c := &collect{}
+			c := &publish.Collect{}
 			switch slot {
 			case config.SLOT_IA:
 				logger.Debug("Telegram: archiving slot: %s", slot)
@@ -136,28 +129,4 @@ func archive(t *telegram, msgid int, urls []string) (col []*collect, id int, err
 	wg.Wait()
 
 	return col, msgid, nil
-}
-
-func render(vars []*collect) string {
-	var tmplBytes bytes.Buffer
-
-	const tmpl = `{{range $ := .}}<b>{{ $.Arc }}</b>:
-{{ range $url := $.Dst -}}
-• {{ $url }}
-{{end}}
-{{end}}`
-
-	tpl, err := template.New("message").Parse(tmpl)
-	if err != nil {
-		logger.Debug("Telegram: parse template failed, %v", err)
-		return ""
-	}
-
-	err = tpl.Execute(&tmplBytes, vars)
-	if err != nil {
-		logger.Debug("Telegram: execute template failed, %v", err)
-		return ""
-	}
-
-	return tmplBytes.String()
 }

@@ -4,16 +4,38 @@
 
 package utils // import "github.com/wabarc/wayback/utils"
 
-import "regexp"
+import (
+	"net/url"
+	"regexp"
+	"strings"
+)
 
 // MatchURL is extract URL from text, returns []string always.
 func MatchURL(text string) []string {
-	re := regexp.MustCompile(`https?://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,255}\.[a-z]{0,63}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)`)
+	re := regexp.MustCompile(`https?://?[-a-zA-Z0-9@:%._\+~#=]{1,255}\.[a-z]{0,63}\b(?:[-a-zA-Z0-9@:%_\+.~#?&//=]*)`)
 	urls := []string{}
 	match := re.FindAllString(text, -1)
 	for _, el := range match {
-		urls = append(urls, el)
+		urls = append(urls, strip(el))
 	}
 
 	return urls
+}
+
+func strip(link string) string {
+	u, err := url.Parse(link)
+	if err != nil {
+		return ""
+	}
+
+	queries := u.Query()
+	for key := range queries {
+		if strings.HasPrefix(key, "utm_") || strings.HasPrefix(key, "at_custom") || strings.HasPrefix(key, "at_medium") || strings.EqualFold(key, "weibo_id") {
+			queries.Del(key)
+		}
+	}
+
+	u.RawQuery = queries.Encode()
+
+	return u.String()
 }

@@ -22,6 +22,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/logger"
+	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/template"
 	"github.com/wabarc/wayback/utils"
 )
@@ -126,7 +127,7 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 
 	logger.Debug("Web: text: %s", text)
 
-	collector, _ := t.archive(ctx, text)
+	collector, col := t.archive(ctx, text)
 	switch r.PostFormValue("data-type") {
 	case "json":
 		w.Header().Set("Content-Type", "application/json")
@@ -134,6 +135,7 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		if data, err := json.Marshal(collector); err != nil {
 			logger.Error("Web: encode for response failed, %v", err)
 		} else {
+			go publish.ToChannel(t.opts, nil, publish.Render(col))
 			w.Write(data)
 		}
 
@@ -142,6 +144,7 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		if html, ok := collector.Render(); ok {
+			go publish.ToChannel(t.opts, nil, publish.Render(col))
 			w.Write(html)
 		} else {
 			logger.Error("Web: render template for response failed")
@@ -151,15 +154,15 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 	}
 }
 
-func (t *tor) archive(ctx context.Context, text string) (c *template.Collector, err error) {
+func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector, col []*publish.Collect) {
 	logger.Debug("Web: archives start...")
-	c = &template.Collector{}
+	tc = &template.Collector{}
 
 	urls := utils.MatchURL(text)
 	if len(urls) == 0 {
-		transform(c, "", map[string]string{text: "URL no found"})
+		transform(tc, "", map[string]string{text: "URL no found"})
 		logger.Info("Web: archives failure, URL no found.")
-		return c, fmt.Errorf("Length Required")
+		return tc, []*publish.Collect{}
 	}
 
 	wg := sync.WaitGroup{}
@@ -169,24 +172,50 @@ func (t *tor) archive(ctx context.Context, text string) (c *template.Collector, 
 			continue
 		}
 		wg.Add(1)
-		go func(slot string, c *template.Collector) {
+		go func(slot string, tc *template.Collector) {
 			defer wg.Done()
+			c := &publish.Collect{}
 			switch slot {
 			case config.SLOT_IA:
 				logger.Debug("Web: archiving slot: %s", slot)
-				transform(c, config.SlotName(slot), wbrc.IA())
+				ia := wbrc.IA()
+				slotName := config.SlotName(slot)
+
+				// Data for response
+				transform(tc, slotName, ia)
+
+				// Data for publish
+				c.Arc = fmt.Sprintf("<a href='https://web.archive.org/'>%s</a>", slotName)
+				c.Dst = ia
 			case config.SLOT_IS:
 				logger.Debug("Web: archiving slot: %s", slot)
-				transform(c, config.SlotName(slot), wbrc.IS())
+				is := wbrc.IS()
+				slotName := config.SlotName(slot)
+
+				// Data for response
+				transform(tc, slotName, is)
+
+				// Data for publish
+				c.Arc = fmt.Sprintf("<a href='https://archive.today/'>%s</a>", slotName)
+				c.Dst = is
 			case config.SLOT_IP:
 				logger.Debug("Web: archiving slot: %s", slot)
-				transform(c, config.SlotName(slot), wbrc.IP())
+				ip := wbrc.IP()
+				slotName := config.SlotName(slot)
+
+				// Data for response
+				transform(tc, slotName, ip)
+
+				// Data for publish
+				c.Arc = fmt.Sprintf("<a href='https://ipfs.github.io/public-gateway-checker/'>%s</a>", slotName)
+				c.Dst = ip
 			}
-		}(slot, c)
+			col = append(col, c)
+		}(slot, tc)
 	}
 	wg.Wait()
 
-	return c, nil
+	return tc, col
 }
 
 func transform(c *template.Collector, slot string, arc map[string]string) {
