@@ -17,7 +17,7 @@ const (
 func SlotName(s string) string {
 	slots := map[string]string{
 		SLOT_IA: "Internet Archive",
-		SLOT_IS: "Archive Today",
+		SLOT_IS: "archive.today",
 		SLOT_IP: "IPFS",
 	}
 

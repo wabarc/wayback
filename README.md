@@ -21,13 +21,14 @@ Using [Snapcraft](https://snapcraft.io/wayback) (on GNU/Linux)
 $ sudo snap install wayback
 ```
 
-See more on [release](https://github.com/wabarc/wayback/releases)
+See more on [releases](https://github.com/wabarc/wayback/releases).
 
 ## Feature
 
-- Running as CLI command or Docker container
-- Running with telegram bot
+- CLI tool
+- Interactive with telegram bot
 - Serve as Tor hidden service
+- Wayback to Internet Archive, archive.today, IPFS, etc
 
 ## Usage
 
@@ -145,6 +146,9 @@ Wayback can use command flags and environment variables.
 >
 > *default: true*
 
+<details>
+<summary>more configurations</summary>
+
 ##### `WAYBACK_IPFS_HOST`
 
 > IPFS daemon service's host, do not require, unless enable ipfs.
@@ -216,6 +220,7 @@ Wayback can use command flags and environment variables.
 > Remote ports of Tor hidden service, e.g. `WAYBACK_TOR_REMOTE_PORTS=80,81`.
 >
 > *default: 80*
+</details>
 
 ### Docker/Podman
 
@@ -235,7 +240,7 @@ $ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHA
 [Archive.org](https://web.archive.org/) and [Archive.today](https://archive.today/) are currently supported, the next step mind support the followings platform:
 
 - [x] [IPFS](https://ipfs.io/)
-- [ ] [ZeroNet](https://zeronet.io/)
+- [ ] ~~[ZeroNet](https://zeronet.io/)~~
 
 ## Telegram bot
 
