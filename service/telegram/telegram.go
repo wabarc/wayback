@@ -2,7 +2,7 @@
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
-package telegram // import "github.com/wabarc/wayback/sevice/telegram"
+package telegram // import "github.com/wabarc/wayback/service/telegram"
 
 import (
 	"context"

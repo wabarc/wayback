@@ -6,4 +6,4 @@
 Package telegram implements the telegram bot daemon service.
 */
 
-package telegram // import "github.com/wabarc/wayback/sevice/telegram"
+package telegram // import "github.com/wabarc/wayback/service/telegram"
