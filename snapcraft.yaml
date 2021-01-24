@@ -8,11 +8,13 @@ description: |
   A toolkit for snapshot webpage to the Wayback Machine.
   Website https://github.com/wabarc/wayback
 
+base: core18
 grade: stable
-
 confinement: strict
 
-base: core18
+architectures:
+  #- build-on: [i386, amd64, arm64, armhf, ppc64el, s390x]
+  - build-on: [i386, amd64]
 
 parts:
   wayback:

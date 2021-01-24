@@ -1,4 +1,5 @@
 export GO111MODULE = on
+export CGO_ENABLED = 0
 export GOPROXY = https://proxy.golang.org
 
 NAME = wayback
@@ -7,7 +8,7 @@ PACKDIR ?= ./build/package
 LDFLAGS := $(shell echo "-X 'wayback/version.Version=`git describe --tags --abbrev=0`'")
 LDFLAGS := $(shell echo "${LDFLAGS} -X 'wayback/version.Commit=`git rev-parse --short HEAD`'")
 LDFLAGS := $(shell echo "${LDFLAGS} -X 'wayback/version.BuildDate=`date +%FT%T%z`'")
-GOBUILD ?= CGO_ENABLED=0 go build -trimpath --ldflags "-s -w ${LDFLAGS} -buildid=" -v
+GOBUILD ?= go build -trimpath --ldflags "-s -w ${LDFLAGS} -buildid=" -v
 VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
 GOFILES ?= $(wildcard ./cmd/wayback/*.go)
 PROJECT := github.com/wabarc/wayback
@@ -18,6 +19,7 @@ DEB_IMG_ARCH := amd64
 
 PLATFORM_LIST = \
 	darwin-amd64 \
+	#darwin-arm64 \
 	linux-386 \
 	linux-amd64 \
 	linux-armv5 \
@@ -37,11 +39,13 @@ PLATFORM_LIST = \
 	freebsd-amd64 \
 	openbsd-386 \
 	openbsd-amd64 \
-	dragonfly-amd64
+	dragonfly-amd64 \
+	android-arm64
 
 WINDOWS_ARCH_LIST = \
 	windows-386 \
-	windows-amd64
+	windows-amd64 \
+	windows-arm
 
 .PHONY: \
 	darwin-386 \
@@ -67,6 +71,9 @@ WINDOWS_ARCH_LIST = \
 	openbsd-amd64 \
 	windows-386 \
 	windows-amd64 \
+	windows-arm \
+	android-arm64 \
+	js-wasm \
 	all-arch \
 	tar_releases \
 	zip_releases \
@@ -80,77 +87,90 @@ WINDOWS_ARCH_LIST = \
 	docker-image
 
 darwin-386:
-	GOARCH=386 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=darwin GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 darwin-amd64:
-	GOARCH=amd64 GOOS=darwin $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+
+darwin-arm64:
+	env CGO_ENABLED=1 \
+	GOOS=darwin GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-386:
-	GOARCH=386 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-amd64:
-	GOARCH=amd64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-armv5:
-	GOARCH=arm GOOS=linux GOARM=5 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=arm GOARM=5 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-armv6:
-	GOARCH=arm GOOS=linux GOARM=6 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=arm GOARM=6 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-armv7:
-	GOARCH=arm GOOS=linux GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=arm GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-armv8: linux-arm64
 linux-arm64:
-	GOARCH=arm64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-mips-softfloat:
-	GOARCH=mips GOMIPS=softfloat GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=mips GOMIPS=softfloat $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-mips-hardfloat:
-	GOARCH=mips GOMIPS=hardfloat GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=mips GOMIPS=hardfloat $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-mipsle-softfloat:
-	GOARCH=mipsle GOMIPS=softfloat GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=mipsle GOMIPS=softfloat $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-mipsle-hardfloat:
-	GOARCH=mipsle GOMIPS=hardfloat GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=mipsle GOMIPS=hardfloat $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-mips64:
-	GOARCH=mips64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=mips64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-mips64le:
-	GOARCH=mips64le GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=mips64le $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-ppc64:
-	GOARCH=ppc64 GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=ppc64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-ppc64le:
-	GOARCH=ppc64le GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=ppc64le $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-s390x:
-	GOARCH=s390x GOOS=linux $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=linux GOARCH=s390x $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 freebsd-386:
-	GOARCH=386 GOOS=freebsd $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=freebsd GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 freebsd-amd64:
-	GOARCH=amd64 GOOS=freebsd $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=freebsd GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 openbsd-386:
-	GOARCH=386 GOOS=openbsd $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=openbsd GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 openbsd-amd64:
-	GOARCH=amd64 GOOS=openbsd $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=openbsd GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 windows-386:
-	GOARCH=386 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe $(GOFILES)
+	GOOS=windows GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe $(GOFILES)
 
 windows-amd64:
-	GOARCH=amd64 GOOS=windows $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe $(GOFILES)
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe $(GOFILES)
+
+windows-arm:
+	GOOS=windows GOARCH=arm $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe $(GOFILES)
 
 dragonfly-amd64:
-	GOARCH=amd64 GOOS=dragonfly $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS=dragonfly GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+
+android-arm64:
+	GOOS=android GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+
+js-wasm:
+	GOOS=js GOARCH=wasm $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 ifeq ($(TARGET),)
 tar_releases := $(addsuffix .gz, $(PLATFORM_LIST))
@@ -165,7 +185,7 @@ endif
 
 $(tar_releases): %.gz : %
 	chmod +x $(BINDIR)/$(NAME)-$(basename $@)
-	tar -czf $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).tar.gz --transform "s/$(notdir $(BINDIR))//g" $(BINDIR)/$(NAME)-$(basename $@)
+	tar -czf $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).tar.gz --transform "s/.*\///g" $(BINDIR)/$(NAME)-$(basename $@)
 
 $(zip_releases): %.zip : %
 	zip -m -j $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).zip $(BINDIR)/$(NAME)-$(basename $@).exe

@@ -13,9 +13,9 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/tdewolff/parse/v2 v2.5.7 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
-	github.com/wabarc/archive.is v1.0.3
+	github.com/wabarc/archive.is v1.1.0
 	github.com/wabarc/archive.org v1.0.3
-	github.com/wabarc/wbipfs v0.1.2-0.20201111165742-67df7bfbefe6
+	github.com/wabarc/wbipfs v0.1.2
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect

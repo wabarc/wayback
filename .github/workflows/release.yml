@@ -46,6 +46,10 @@ jobs:
             arch: ppc64le
           - os: linux
             arch: s390x
+          - os: windows
+            arch: arm
+          - os: android
+            arch: arm64
         exclude:
           - os: darwin
             arch: 386
