@@ -16,11 +16,13 @@ import (
 	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/utils"
-	"golang.org/x/sync/errgroup"
 )
 
 type telegram struct {
 	opts *config.Options
+
+	bot *tgbotapi.BotAPI
+	upd tgbotapi.Update
 }
 
 // New telegram struct.
@@ -32,71 +34,72 @@ func New(opts *config.Options) *telegram {
 
 // Serve loop request message from the Telegram api server.
 // Serve always returns a nil error.
-func (t *telegram) Serve(_ context.Context) error {
-	bot, err := tgbotapi.NewBotAPI(t.opts.TelegramToken())
-	if err != nil {
+func (t *telegram) Serve(_ context.Context) (err error) {
+	if t.bot, err = tgbotapi.NewBotAPI(t.opts.TelegramToken()); err != nil {
 		return errors.New("Initialize telegram failed, error: %v", err)
 	}
 
-	logger.Info("Telegram: authorized on account %s", bot.Self.UserName)
+	logger.Info("Telegram: authorized on account %s", t.bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 600
+	u.Timeout = 60
 
-	updates, err := bot.GetUpdatesChan(u)
+	updates, err := t.bot.GetUpdatesChan(u)
 	if err != nil {
 		return errors.New("Get telegram message channel failed, error: %v", err)
 	}
 
-	g, _ := errgroup.WithContext(context.Background())
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
 		}
 
-		message := update.Message
-		text := message.Text
-		logger.Debug("Telegram: message: %s", text)
-
-		urls := utils.MatchURL(text)
-		switch {
-		case message.IsCommand():
-			continue
-		case len(urls) == 0:
-			logger.Info("Telegram: archives failure, URL no found.")
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "URL no found.")
-			msg.ReplyToMessageID = update.Message.MessageID
-			bot.Send(msg)
-			continue
-		}
-
-		g.Go(func() error {
-			col, msgID, err := archive(t, update.Message.MessageID, urls)
-			if err != nil {
-				logger.Error("Telegram: archiving failed, ", err)
-				return err
-			}
-
-			replyText := publish.Render(col)
-			logger.Debug("Telegram: reply text, %s", replyText)
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
-			msg.ReplyToMessageID = msgID
-			msg.ParseMode = "html"
-
-			bot.Send(msg)
-
-			if t.opts.TelegramChannel() != "" {
-				logger.Debug("Telegram: publishing to channel...")
-				publish.ToChannel(t.opts, bot, replyText)
-			}
-			return nil
-		})
+		t.upd = update
+		go t.process()
 	}
 
 	return nil
 }
 
-func archive(t *telegram, msgid int, urls []string) (col []*publish.Collect, id int, err error) {
+func (t *telegram) process() {
+	bot, update := t.bot, t.upd
+	message := update.Message
+	text := message.Text
+	logger.Debug("Telegram: message: %s", text)
+
+	urls := utils.MatchURL(text)
+	switch {
+	case message.IsCommand():
+		return
+	case len(urls) == 0:
+		logger.Info("Telegram: archives failure, URL no found.")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "URL no found.")
+		msg.ReplyToMessageID = update.Message.MessageID
+		bot.Send(msg)
+		return
+	}
+
+	col, err := t.archive(urls)
+	if err != nil {
+		logger.Error("Telegram: archiving failed, ", err)
+		return
+	}
+
+	replyText := publish.Render(col)
+	logger.Debug("Telegram: reply text, %s", replyText)
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
+	msg.ReplyToMessageID = update.Message.MessageID
+	msg.ParseMode = "html"
+
+	bot.Send(msg)
+
+	if t.opts.TelegramChannel() != "" {
+		logger.Debug("Telegram: publishing to channel...")
+		publish.ToChannel(t.opts, bot, replyText)
+	}
+}
+
+func (t *telegram) archive(urls []string) (col []*publish.Collect, err error) {
 	logger.Debug("Telegram: archives start...")
 
 	wg := sync.WaitGroup{}
@@ -128,5 +131,5 @@ func archive(t *telegram, msgid int, urls []string) (col []*publish.Collect, id 
 	}
 	wg.Wait()
 
-	return col, msgid, nil
+	return col, nil
 }

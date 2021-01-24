@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.6] - 2021-01-24
+
+### Changed
+- Now available to access the archive.today's tor service if enable service of archive.today.
+- Publish multiple arch snapcraft app.
+- Refine workflows.
+
+### Fixed
+- Fix telegram user id conflict in reply.
+- Fix nil pointer dereference.
+
 ## [0.5.5] - 2021-01-15
 
 ### Added

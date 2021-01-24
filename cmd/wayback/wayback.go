@@ -23,7 +23,7 @@ func output(tit string, args map[string]string) {
 func archive(cmd *cobra.Command, opts *config.Options, args []string) {
 	archiving := func(ctx context.Context, urls []string) error {
 		g, ctx := errgroup.WithContext(ctx)
-		var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
+		var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: opts}
 
 		for slot, do := range opts.Slots() {
 			slot, do := slot, do
