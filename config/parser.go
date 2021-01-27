@@ -56,6 +56,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.slots[SLOT_IS] = parseBool(val, defEnabledIS)
 		case "WAYBACK_ENABLE_IP":
 			p.opts.slots[SLOT_IP] = parseBool(val, defEnabledIP)
+		case "WAYBACK_ENABLE_PH":
+			p.opts.slots[SLOT_PH] = parseBool(val, defEnabledPH)
 		case "WAYBACK_TELEGRAM_TOKEN":
 			p.opts.telegram.token = parseString(val, defTelegramToken)
 		case "WAYBACK_TELEGRAM_CHANNEL":
@@ -66,6 +68,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.tor.localPort = parseInt(val, defTorLocalPort)
 		case "WAYBACK_TOR_REMOTE_PORTS":
 			p.opts.tor.remotePorts = parseIntList(val, defTorRemotePorts)
+		case "WAYBACK_TORRC":
+			p.opts.tor.torrcFile = parseString(val, defTorrcFile)
 		}
 	}
 

@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2021-01-28
+
+### Add
+- Add wayback to Telegraph support.
+
+### Changed
+- Using `/etc/tor/torrc` for Tor Hidden Service via the `WAYBACK_TORRC` environment variable
+
+### Fixed
+- Minor bugfixs.
+
 ## [0.5.6] - 2021-01-24
 
 ### Changed

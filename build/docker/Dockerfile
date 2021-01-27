@@ -17,14 +17,32 @@ RUN sh ./build/binary.sh $TARGETPLATFORM \
 ############################
 # STEP 2 build a small image
 ############################
-FROM alpine:3.12
+FROM alpine:3.13
 
 LABEL maintainer "WaybackBot <wabarc@tuta.io>"
-COPY --from=builder /wayback /usr/local/bin
-RUN apk update && apk add ca-certificates tor
-RUN mv /etc/tor/torrc.sample /etc/tor/torrc
-RUN echo 'ExcludeNodes {cn},{hk},{mo},{sg},{th},{pk},{by},{ru},{ir},{sy},{vn},{ph},{my},{cu},{us},{au},{ca},{nz},{gb},{fr}' >> /etc/tor/torrc
-RUN echo 'ExcludeExitNodes {cn},{hk},{mo},{sg},{th},{pk},{by},{ru},{ir},{sy},{vn},{ph},{my},{cu},{us},{au},{ca},{nz},{gb},{fr}' >> /etc/tor/torrc
-RUN echo 'StrictNodes 1' >> /etc/tor/torrc
 
-RUN rm -rf /var/cache/apk/*
+ARG TOR_EXCLUDE_NODE="{cn},{hk},{mo},{sg},{th},{pk},{by},{ru},{ir},{sy},{vn},{ph},{my},{cu},{us},{au},{ca},{nz},{gb},{fr}"
+
+ENV BASE_DIR /wayback
+ENV PUSER wayback
+ENV PGROUP wayback
+
+WORKDIR $BASE_DIR
+
+RUN set -eux; \
+    addgroup --system ${PGROUP}; \
+    adduser --system --no-create-home --disabled-password \
+    --gecos '' --home ${BASE_DIR} --ingroup ${PGROUP} ${PUSER}; \
+    chown -R ${PUSER}:${PGROUP} "${BASE_DIR}"; \
+    chmod -R g+w "${BASE_DIR}"
+
+COPY --from=builder /wayback /usr/local/bin
+RUN apk update; \
+    apk add --no-cache ca-certificates tor; \
+    rm -rf /var/cache/apk/*; \
+    \
+    mv /etc/tor/torrc.sample /etc/tor/torrc; \
+    echo "ExcludeNodes ${TOR_EXCLUDE_NODE}" >> /etc/tor/torrc; \
+    echo "ExcludeExitNodes ${TOR_EXCLUDE_NODE}" >> /etc/tor/torrc; \
+    echo 'StrictNodes 1' >> /etc/tor/torrc; \
+    #echo 'User tor' >> /etc/tor/torrc

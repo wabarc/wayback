@@ -7,6 +7,7 @@ package wayback // import "github.com/wabarc/wayback"
 import (
 	"github.com/wabarc/archive.is/pkg"
 	"github.com/wabarc/archive.org/pkg"
+	"github.com/wabarc/telegra.ph/pkg"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wbipfs"
@@ -21,6 +22,7 @@ type Broker interface {
 	IA() Archived
 	IS() Archived
 	IP() Archived
+	PH() Archived
 }
 
 // Handle URLs need to wayback and configs,
@@ -45,7 +47,7 @@ func (h *Handle) IS() Archived {
 	wbrc := &is.Archiver{}
 	uris, err := wbrc.Wayback(h.URLs)
 	if err != nil {
-		logger.Error("Wayback %v to Archive.today failed, %v", h.URLs, err)
+		logger.Error("Wayback %v to archive.today failed, %v", h.URLs, err)
 	}
 
 	return uris
@@ -61,6 +63,16 @@ func (h *Handle) IP() Archived {
 	uris, err := wbrc.Wayback(h.URLs)
 	if err != nil {
 		logger.Error("Wayback %v to IPFS failed, %v", h.URLs, err)
+	}
+
+	return uris
+}
+
+func (h *Handle) PH() Archived {
+	wbrc := &ph.Archiver{}
+	uris, err := wbrc.Wayback(h.URLs)
+	if err != nil {
+		logger.Error("Wayback %v to Telegra.ph failed, %v", h.URLs, err)
 	}
 
 	return uris

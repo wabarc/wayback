@@ -112,19 +112,20 @@ func (t *telegram) archive(urls []string) (col []*publish.Collect, err error) {
 		go func(slot string) {
 			defer wg.Done()
 			c := &publish.Collect{}
+			logger.Debug("Telegram: archiving slot: %s", slot)
 			switch slot {
 			case config.SLOT_IA:
-				logger.Debug("Telegram: archiving slot: %s", slot)
 				c.Arc = fmt.Sprintf("<a href='https://web.archive.org/'>%s</a>", config.SlotName(slot))
 				c.Dst = wbrc.IA()
 			case config.SLOT_IS:
-				logger.Debug("Telegram: archiving slot: %s", slot)
 				c.Arc = fmt.Sprintf("<a href='https://archive.today/'>%s</a>", config.SlotName(slot))
 				c.Dst = wbrc.IS()
 			case config.SLOT_IP:
-				logger.Debug("Telegram: archiving slot: %s", slot)
 				c.Arc = fmt.Sprintf("<a href='https://ipfs.github.io/public-gateway-checker/'>%s</a>", config.SlotName(slot))
 				c.Dst = wbrc.IP()
+			case config.SLOT_PH:
+				c.Arc = fmt.Sprintf("<a href='https://telegra.ph/'>%s</a>", config.SlotName(slot))
+				c.Dst = wbrc.PH()
 			}
 			col = append(col, c)
 		}(slot)

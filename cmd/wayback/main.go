@@ -16,6 +16,7 @@ var (
 	ia bool
 	is bool
 	ip bool
+	ph bool
 
 	daemon []string
 
@@ -56,16 +57,17 @@ func init() {
 	rootCmd.Flags().BoolVarP(&ia, "ia", "", false, "Wayback webpages to Internet Archive.")
 	rootCmd.Flags().BoolVarP(&is, "is", "", false, "Wayback webpages to Archive Today.")
 	rootCmd.Flags().BoolVarP(&ip, "ip", "", false, "Wayback webpages to IPFS. (default false)")
+	rootCmd.Flags().BoolVarP(&ph, "ph", "", false, "Wayback webpages to Telegraph. (default false)")
 	rootCmd.Flags().StringSliceVarP(&daemon, "daemon", "d", []string{}, "Run as daemon service, e.g. telegram, web")
 	rootCmd.Flags().StringVarP(&host, "ipfs-host", "", "127.0.0.1", "IPFS daemon host, do not require, unless enable ipfs.")
 	rootCmd.Flags().UintVarP(&port, "ipfs-port", "p", 5001, "IPFS daemon port.")
 	rootCmd.Flags().StringVarP(&mode, "ipfs-mode", "m", "pinner", "IPFS mode.")
-	rootCmd.Flags().BoolVarP(&tor, "tor", "", false, "Snapshot webpage via Tor proxy.")
+	rootCmd.Flags().BoolVarP(&tor, "tor", "", false, "Snapshot webpage via Tor anonymity network.")
 
 	rootCmd.Flags().StringVarP(&token, "token", "t", "", "Telegram Bot API Token.")
 	rootCmd.Flags().StringVarP(&chatid, "chatid", "c", "", "Telegram channel id.")
 	rootCmd.Flags().BoolVarP(&debug, "debug", "", false, "Enable debug mode. (default false)")
-	rootCmd.Flags().StringVarP(&torKey, "tor-key", "", "", "The private key for Tor service.")
+	rootCmd.Flags().StringVarP(&torKey, "tor-key", "", "", "The private key for Tor Hidden Service.")
 }
 
 func checkRequiredFlags(cmd *cobra.Command, args []string) error {
@@ -93,6 +95,9 @@ func checkRequiredFlags(cmd *cobra.Command, args []string) error {
 func setToEnv(cmd *cobra.Command) {
 	flags := cmd.Flags()
 
+	if flags.Changed("debug") {
+		os.Setenv("DEBUG", fmt.Sprint(debug))
+	}
 	if flags.Changed("ia") {
 		os.Setenv("WAYBACK_ENABLE_IA", fmt.Sprint(ia))
 	}
@@ -101,6 +106,9 @@ func setToEnv(cmd *cobra.Command) {
 	}
 	if flags.Changed("ip") {
 		os.Setenv("WAYBACK_ENABLE_IP", fmt.Sprint(ip))
+	}
+	if flags.Changed("ph") {
+		os.Setenv("WAYBACK_ENABLE_PH", fmt.Sprint(ph))
 	}
 	if flags.Changed("token") {
 		os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
@@ -126,7 +134,7 @@ func setToEnv(cmd *cobra.Command) {
 }
 
 func handle(cmd *cobra.Command, args []string) {
-	if !ia && !is && !ip {
+	if !ia && !is && !ip && !ph {
 		ia, is = true, true
 		os.Setenv("WAYBACK_ENABLE_IA", "true")
 		os.Setenv("WAYBACK_ENABLE_IS", "true")

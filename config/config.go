@@ -11,6 +11,7 @@ const (
 	SLOT_IA = "ia"
 	SLOT_IS = "is"
 	SLOT_IP = "ip"
+	SLOT_PH = "ph"
 )
 
 // SlotName returns the descriptions of the wayback service.
@@ -19,6 +20,7 @@ func SlotName(s string) string {
 		SLOT_IA: "Internet Archive",
 		SLOT_IS: "archive.today",
 		SLOT_IP: "IPFS",
+		SLOT_PH: "Telegraph",
 	}
 
 	return slots[s]

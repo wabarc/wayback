@@ -66,7 +66,7 @@ func (t *tor) Serve(ctx context.Context) error {
 
 	verbose := t.opts.HasDebugMode()
 	// startConf := &embedTor.StartConf{ProcessCreator: libtor.Creator, DataDir: "tor-data"}
-	startConf := &embedTor.StartConf{}
+	startConf := &embedTor.StartConf{TorrcFile: t.torrc()}
 	if verbose {
 		startConf.DebugWriter = os.Stdout
 	} else {
@@ -172,12 +172,12 @@ func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector,
 			continue
 		}
 		wg.Add(1)
+		logger.Debug("Web: archiving slot: %s", slot)
 		go func(slot string, tc *template.Collector) {
 			defer wg.Done()
 			c := &publish.Collect{}
 			switch slot {
 			case config.SLOT_IA:
-				logger.Debug("Web: archiving slot: %s", slot)
 				ia := wbrc.IA()
 				slotName := config.SlotName(slot)
 
@@ -188,7 +188,6 @@ func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector,
 				c.Arc = fmt.Sprintf("<a href='https://web.archive.org/'>%s</a>", slotName)
 				c.Dst = ia
 			case config.SLOT_IS:
-				logger.Debug("Web: archiving slot: %s", slot)
 				is := wbrc.IS()
 				slotName := config.SlotName(slot)
 
@@ -199,7 +198,6 @@ func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector,
 				c.Arc = fmt.Sprintf("<a href='https://archive.today/'>%s</a>", slotName)
 				c.Dst = is
 			case config.SLOT_IP:
-				logger.Debug("Web: archiving slot: %s", slot)
 				ip := wbrc.IP()
 				slotName := config.SlotName(slot)
 
@@ -209,6 +207,16 @@ func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector,
 				// Data for publish
 				c.Arc = fmt.Sprintf("<a href='https://ipfs.github.io/public-gateway-checker/'>%s</a>", slotName)
 				c.Dst = ip
+			case config.SLOT_PH:
+				ph := wbrc.PH()
+				slotName := config.SlotName(slot)
+
+				// Data for response
+				transform(tc, slotName, ph)
+
+				// Data for publish
+				c.Arc = fmt.Sprintf("<a href='https://telegra.ph/'>%s</a>", slotName)
+				c.Dst = ph
 			}
 			col = append(col, c)
 		}(slot, tc)
@@ -224,4 +232,14 @@ func transform(c *template.Collector, slot string, arc map[string]string) {
 		p = append(p, template.Collect{Slot: slot, Src: src, Dst: dst})
 	}
 	*c = p
+}
+
+func (t *tor) torrc() string {
+	if t.opts.TorrcFile() == "" {
+		return ""
+	}
+	if _, err := os.Open(t.opts.TorrcFile()); err != nil {
+		return ""
+	}
+	return t.opts.TorrcFile()
 }

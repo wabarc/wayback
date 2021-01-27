@@ -16,12 +16,14 @@ const (
 	defEnabledIA = false
 	defEnabledIS = false
 	defEnabledIP = false
+	defEnabledPH = false
 
 	defTelegramToken   = ""
 	defTelegramChannel = ""
 
 	defTorPrivateKey = ""
 	defTorLocalPort  = 0
+	defTorrcFile     = "/etc/tor/torrc"
 )
 
 var (
@@ -49,6 +51,7 @@ type slots struct {
 	ia bool
 	is bool
 	ip bool
+	ph bool
 }
 
 type telegram struct {
@@ -61,6 +64,7 @@ type tor struct {
 
 	localPort   int
 	remotePorts []int
+	torrcFile   string
 }
 
 // NewOptions returns Options with default values.
@@ -78,6 +82,7 @@ func NewOptions() *Options {
 			SLOT_IA: defEnabledIA,
 			SLOT_IS: defEnabledIS,
 			SLOT_IP: defEnabledIP,
+			SLOT_PH: defEnabledPH,
 		},
 		telegram: &telegram{
 			token:   defTelegramToken,
@@ -87,6 +92,7 @@ func NewOptions() *Options {
 			pvk:         defTorPrivateKey,
 			localPort:   defTorLocalPort,
 			remotePorts: defTorRemotePorts,
+			torrcFile:   defTorrcFile,
 		},
 	}
 
@@ -151,4 +157,9 @@ func (o *Options) TorLocalPort() int {
 // TorRemotePorts returns the remote ports to serve the Tor hidden service on.
 func (o *Options) TorRemotePorts() []int {
 	return o.tor.remotePorts
+}
+
+// TorrcFile returns path of the torrc file to set on start Tor Hidden Service.
+func (o *Options) TorrcFile() string {
+	return o.tor.torrcFile
 }

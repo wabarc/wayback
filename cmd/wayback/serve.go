@@ -27,17 +27,16 @@ func serve(cmd *cobra.Command, opts *config.Options, args []string) {
 }
 
 func (srv *service) run(ctx context.Context, opts *config.Options) *service {
-	telegram := telegram.New(opts)
-	tor := anonymity.New(opts)
-
 	srv.errCh = make(chan error, len(daemon))
 	for _, s := range daemon {
 		switch s {
 		case "telegram":
+			telegram := telegram.New(opts)
 			go func(errCh chan error) {
 				errCh <- telegram.Serve(ctx)
 			}(srv.errCh)
 		case "web":
+			tor := anonymity.New(opts)
 			go func(errCh chan error) {
 				errCh <- tor.Serve(ctx)
 			}(srv.errCh)
