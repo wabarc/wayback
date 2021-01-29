@@ -16,8 +16,8 @@ require (
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/wabarc/archive.is v1.1.0
 	github.com/wabarc/archive.org v1.0.3
-	github.com/wabarc/screenshot v0.0.0-20210128074521-26790a41f7bd // indirect
-	github.com/wabarc/telegra.ph v0.0.0-20210127125351-c2084324e22a
+	github.com/wabarc/screenshot v0.0.0-20210130142515-2d17e804fbc9 // indirect
+	github.com/wabarc/telegra.ph v0.0.0-20210130144718-15283979a8ff
 	github.com/wabarc/wbipfs v0.1.2
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.opencensus.io v0.22.5 // indirect

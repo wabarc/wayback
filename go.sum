@@ -253,6 +253,8 @@ github.com/multiformats/go-varint v0.0.6 h1:gk85QWKxh3TazbLxED/NlDVv8+q+ReFJk7Y2
 github.com/multiformats/go-varint v0.0.6/go.mod h1:3Ls8CIEsrijN6+B7PbrXRPxHRPuXSrVKRY101jdMZYE=
 github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRWi+5nqEBWmkhHvq77mSJWrCKwh8bxhgT7d/eI7P4U=
 github.com/oklog/ulid v1.3.1/go.mod h1:CirwcVhetQ6Lv90oh/F+FBtV6XMibvdAFo93nm5qn4U=
+github.com/oliamb/cutter v0.2.2 h1:Lfwkya0HHNU1YLnGv2hTkzHfasrSMkgv4Dn+5rmlk3k=
+github.com/oliamb/cutter v0.2.2/go.mod h1:4BenG2/4GuRBDbVm/OPahDVqbrOemzpPiG5mi1iryBU=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
 github.com/onsi/ginkgo v1.7.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
 github.com/onsi/gomega v1.4.1/go.mod h1:C1qb7wdrVGGVU+Z6iS04AVkA3Q65CEZX59MT0QO5uiA=
@@ -337,8 +339,12 @@ github.com/wabarc/screenshot v0.0.0-20210127123919-7b249b9e1d08 h1:Sykq9OPY9w8yU
 github.com/wabarc/screenshot v0.0.0-20210127123919-7b249b9e1d08/go.mod h1:4UF/mOVbZmULZ4qeigCWEXlSp0wS5jtq11EdsbyyN5w=
 github.com/wabarc/screenshot v0.0.0-20210128074521-26790a41f7bd h1:8VRBx0HwC3wiosRHFZ/kIlQtHpWwJnIdpXuEPG53qrg=
 github.com/wabarc/screenshot v0.0.0-20210128074521-26790a41f7bd/go.mod h1:4UF/mOVbZmULZ4qeigCWEXlSp0wS5jtq11EdsbyyN5w=
+github.com/wabarc/screenshot v0.0.0-20210130142515-2d17e804fbc9 h1:W3mH1RmdQxymWJw8htexlMKtfZ4UiVMM2z2U1R0t2XU=
+github.com/wabarc/screenshot v0.0.0-20210130142515-2d17e804fbc9/go.mod h1:4UF/mOVbZmULZ4qeigCWEXlSp0wS5jtq11EdsbyyN5w=
 github.com/wabarc/telegra.ph v0.0.0-20210127125351-c2084324e22a h1:urtW1KUNmAxzVSSkqqaltEFtNhO6BJNrZvLfvs75NuI=
 github.com/wabarc/telegra.ph v0.0.0-20210127125351-c2084324e22a/go.mod h1:3GDRBnpkkHwBTNYe+pkNNT0RGihRX9Vy0kxBRBiuMR8=
+github.com/wabarc/telegra.ph v0.0.0-20210130144718-15283979a8ff h1:0SMNRowi9TFFxy6ULt5KlxqGvOD01zwXfYDTiBNy7+c=
+github.com/wabarc/telegra.ph v0.0.0-20210130144718-15283979a8ff/go.mod h1:/6+NvfeggdwQTO5n6EGGLa240p277+loFDU7H+Nba4M=
 github.com/wabarc/wbipfs v0.1.2 h1:Q012Xfk3FjNAInSkNWiV3qqtNMQ3UDdZBSojfD+BeMc=
 github.com/wabarc/wbipfs v0.1.2/go.mod h1:zjeZWvCyZ2MNPx0PbgwgqgbugrWz7C/Abib2fmy54qg=
 github.com/whyrusleeping/tar-utils v0.0.0-20180509141711-8c6c8ba81d5c h1:GGsyl0dZ2jJgVT+VvWBf/cNijrHRhkrTjkmp5wg7li0=
