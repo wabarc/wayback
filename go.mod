@@ -14,15 +14,14 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/tdewolff/parse/v2 v2.5.7 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
-	github.com/wabarc/archive.is v1.1.0
+	github.com/wabarc/archive.is v1.1.1
 	github.com/wabarc/archive.org v1.0.3
-	github.com/wabarc/screenshot v0.0.0-20210130142515-2d17e804fbc9 // indirect
 	github.com/wabarc/telegra.ph v0.0.0-20210130144718-15283979a8ff
 	github.com/wabarc/wbipfs v0.1.2
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
-	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
+	golang.org/x/net v0.0.0-20210119194325-5f4716e94777 // indirect
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
 )
 
