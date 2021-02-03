@@ -329,8 +329,8 @@ github.com/technoweenie/multipartstreamer v1.0.1/go.mod h1:jNVxdtShOxzAsukZwTSw6
 github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
 github.com/wabarc/archive.is v1.1.1 h1:vvLgCsUsSf/BPvcWNyi3daZAKL0L7VgWiR+vJ+Hd7UI=
 github.com/wabarc/archive.is v1.1.1/go.mod h1:XIPjk4PXXiJSV4smyvrzWeBsQkG/MZ6JQNukWSaFqAY=
-github.com/wabarc/archive.org v1.0.3 h1:YiWn7Bn6iiRfApuquYWHXW1dmz571rQ/8LyKngJSEMM=
-github.com/wabarc/archive.org v1.0.3/go.mod h1:jxYrX2hfBi/Pj8AWkp1VuvmsKUhO0mRpIy3PlYVQ9lk=
+github.com/wabarc/archive.org v1.0.4 h1:R8ZK9B6VoaSrlvRmBFcOTSEg40KdnDvi6ik4c8aArPY=
+github.com/wabarc/archive.org v1.0.4/go.mod h1:qP3/2Y83WH/PDvYnWpNqz1Xb3HMJxkTq4WJmioLAOug=
 github.com/wabarc/helper v0.0.0-20210127120855-10af37cc2616 h1:wZ5HtpmZAVUq0Im5Sm92ycJrTeLJk5lB/Kvh55Rd+Ps=
 github.com/wabarc/helper v0.0.0-20210127120855-10af37cc2616/go.mod h1:N9P4r7Rn46p4nkWtXV6ztN3p5ACVnp++bgfwjTqSxQ8=
 github.com/wabarc/ipfs-pinner v1.0.1 h1:PaWBDn1X556IyiOVd143XO9PVRjbohppA+JMJQwNBHI=

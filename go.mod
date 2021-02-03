@@ -15,7 +15,7 @@ require (
 	github.com/tdewolff/parse/v2 v2.5.7 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/wabarc/archive.is v1.1.1
-	github.com/wabarc/archive.org v1.0.3
+	github.com/wabarc/archive.org v1.0.4
 	github.com/wabarc/telegra.ph v0.0.0-20210130144718-15283979a8ff
 	github.com/wabarc/wbipfs v0.1.2
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
