@@ -10,7 +10,7 @@ require (
 	// github.com/ipsn/go-libtor v1.0.329
 	github.com/libp2p/go-libp2p-core v0.8.0 // indirect
 	github.com/multiformats/go-multiaddr v0.3.1 // indirect
-	github.com/spf13/cobra v1.1.1
+	github.com/spf13/cobra v1.1.2
 	github.com/tdewolff/parse/v2 v2.5.7 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/wabarc/archive.is v1.1.1
