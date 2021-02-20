@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3] - 2021-02-21
+
+### Changed
+- Upload image to ImgBB.
+- Set image quality to 100.
+- Upgrade Go version to 1.16
+
+### Fixed
+- Fix create telegra.ph page failure due to title too long.
+
 ## [0.6.0] - 2021-01-28
 
 ### Add
