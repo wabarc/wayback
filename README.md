@@ -164,6 +164,9 @@ You can specify configuration options either via command flags or via environmen
 | -                   | `WAYBACK_TOR_LOCAL_PORT`   | -           | Local port for Tor Hidden Service, also support for a **reverse proxy** |
 | -                   | `WAYBACK_TOR_REMOTE_PORTS` | `80`        | Remote ports for Tor Hidden Service, e.g. `WAYBACK_TOR_REMOTE_PORTS=80,81` |
 | -                   | `WAYBACK_TORRC`            | `/etc/tor/torrc` | Using `torrc` for Tor Hidden Service |
+| -                   | `WAYBACK_SLOT`             | -           | Pinning service for IPFS mode of pinner, see [ipfs-pinner](https://github.com/wabarc/ipfs-pinner#supported-pinning-services) |
+| -                   | `WAYBACK_APIKEY`           | -           | API key for pinning service                                  |
+| -                   | `WAYBACK_SECRET`           | -           | API secret for pinning service                               |
 
 ### Docker/Podman
 
