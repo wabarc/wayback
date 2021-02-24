@@ -43,8 +43,8 @@ func Render(vars []*Collect) string {
 	var tmplBytes bytes.Buffer
 
 	const tmpl = `{{range $ := .}}<b>{{ $.Arc }}</b>:
-{{ range $url := $.Dst -}}
-• {{ $url }}
+{{ range $src, $dst := $.Dst -}}
+• <a href="{{ $src }}">origin</a> - {{ $dst }}
 {{end}}
 {{end}}`
 

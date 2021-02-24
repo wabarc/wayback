@@ -343,3 +343,57 @@ func TestDefaultTorRemotePortsValue(t *testing.T) {
 		t.Fatalf(`Unexpected Tor private key, got %v instead of %v`, got, expected)
 	}
 }
+
+func TestGitHubToken(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_GITHUB_TOKEN", "github:token")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "github:token"
+	got := opts.GitHubToken()
+
+	if got != expected {
+		t.Fatalf(`Unexpected GitHub personal access token, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestGitHubOwner(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_GITHUB_OWNER", "github-owner")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "github-owner"
+	got := opts.GitHubOwner()
+
+	if got != expected {
+		t.Fatalf(`Unexpected GitHub owner, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestGitHubRepo(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_GITHUB_REPO", "github-repo")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "github-repo"
+	got := opts.GitHubRepo()
+
+	if got != expected {
+		t.Fatalf(`Unexpected GitHub repository, got %v instead of %s`, got, expected)
+	}
+}

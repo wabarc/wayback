@@ -20,6 +20,9 @@ const (
 
 	defTelegramToken   = ""
 	defTelegramChannel = ""
+	defGitHubToken     = ""
+	defGitHubOwner     = ""
+	defGitHubRepo      = ""
 
 	defTorPrivateKey = ""
 	defTorLocalPort  = 0
@@ -38,6 +41,7 @@ type Options struct {
 	ipfs     *ipfs
 	slots    map[string]bool
 	telegram *telegram
+	github   *github
 	tor      *tor
 }
 
@@ -57,6 +61,12 @@ type slots struct {
 type telegram struct {
 	token   string
 	channel string
+}
+
+type github struct {
+	token string
+	owner string
+	repo  string
 }
 
 type tor struct {
@@ -87,6 +97,11 @@ func NewOptions() *Options {
 		telegram: &telegram{
 			token:   defTelegramToken,
 			channel: defTelegramChannel,
+		},
+		github: &github{
+			token: defGitHubToken,
+			owner: defGitHubOwner,
+			repo:  defGitHubRepo,
 		},
 		tor: &tor{
 			pvk:         defTorPrivateKey,
@@ -142,6 +157,31 @@ func (o *Options) TelegramToken() string {
 // TelegramChannel returns the Telegram Channel name.
 func (o *Options) TelegramChannel() string {
 	return o.telegram.channel
+}
+
+// PublishToChannel returns whether to publish results to Telegram Channel.
+func (o *Options) PublishToChannel() bool {
+	return o.telegram.token != "" && o.telegram.channel != ""
+}
+
+// GitHubToken returns the personal access token of GitHub account.
+func (o *Options) GitHubToken() string {
+	return o.github.token
+}
+
+// GitHubOwner returns the user id of GitHub account.
+func (o *Options) GitHubOwner() string {
+	return o.github.owner
+}
+
+// GitHubRepo returns the GitHub repository which to publish results.
+func (o *Options) GitHubRepo() string {
+	return o.github.repo
+}
+
+// PublishToIssues returns whether to publish results to GitHub issues.
+func (o *Options) PublishToIssues() bool {
+	return o.github.token != "" && o.github.owner != "" && o.github.repo != ""
 }
 
 // TorPrivKey returns the private key of Tor service.

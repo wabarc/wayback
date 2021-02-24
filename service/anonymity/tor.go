@@ -135,7 +135,14 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		if data, err := json.Marshal(collector); err != nil {
 			logger.Error("Web: encode for response failed, %v", err)
 		} else {
-			go publish.ToChannel(t.opts, nil, publish.Render(col))
+			if t.opts.PublishToChannel() {
+				logger.Debug("Web: publishing to channel...")
+				go publish.ToChannel(t.opts, nil, publish.Render(col))
+			}
+			if t.opts.PublishToIssues() {
+				logger.Debug("Web: publishing to GitHub issues...")
+				go publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
+			}
 			w.Write(data)
 		}
 
@@ -144,7 +151,14 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		if html, ok := collector.Render(); ok {
-			go publish.ToChannel(t.opts, nil, publish.Render(col))
+			if t.opts.PublishToChannel() {
+				logger.Debug("Web: publishing to channel...")
+				go publish.ToChannel(t.opts, nil, publish.Render(col))
+			}
+			if t.opts.PublishToIssues() {
+				logger.Debug("Web: publishing to GitHub issues...")
+				go publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
+			}
 			w.Write(html)
 		} else {
 			logger.Error("Web: render template for response failed")

@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2021-02-24
+
+### Added
+- Add publish to GitHub Issues support.
+
+### Changed
+- Styling channel message.
+
 ## [0.6.3] - 2021-02-21
 
 ### Changed
@@ -18,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.6.0] - 2021-01-28
 
-### Add
+### Added
 - Add wayback to Telegraph support.
 
 ### Changed

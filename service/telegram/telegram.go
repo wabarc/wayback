@@ -34,7 +34,7 @@ func New(opts *config.Options) *telegram {
 
 // Serve loop request message from the Telegram api server.
 // Serve always returns a nil error.
-func (t *telegram) Serve(_ context.Context) (err error) {
+func (t *telegram) Serve(ctx context.Context) (err error) {
 	if t.bot, err = tgbotapi.NewBotAPI(t.opts.TelegramToken()); err != nil {
 		return errors.New("Initialize telegram failed, error: %v", err)
 	}
@@ -55,13 +55,13 @@ func (t *telegram) Serve(_ context.Context) (err error) {
 		}
 
 		t.upd = update
-		go t.process()
+		go t.process(ctx)
 	}
 
 	return nil
 }
 
-func (t *telegram) process() {
+func (t *telegram) process(ctx context.Context) {
 	bot, update := t.bot, t.upd
 	message := update.Message
 	text := message.Text
@@ -93,9 +93,13 @@ func (t *telegram) process() {
 
 	bot.Send(msg)
 
-	if t.opts.TelegramChannel() != "" {
+	if t.opts.PublishToChannel() {
 		logger.Debug("Telegram: publishing to channel...")
 		publish.ToChannel(t.opts, bot, replyText)
+	}
+	if t.opts.PublishToIssues() {
+		logger.Debug("Telegram: publishing to GitHub issues...")
+		publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
 	}
 }
 
