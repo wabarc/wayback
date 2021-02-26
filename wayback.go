@@ -33,6 +33,15 @@ type Handle struct {
 	Opts *config.Options
 }
 
+// Collect result that archived, Arc is name of the archive service,
+// Dst mapping the original URL and archived destination URL,
+// Ext is extra descriptions.
+type Collect struct {
+	Arc string
+	Dst map[string]string
+	Ext string
+}
+
 func (h *Handle) IA() Archived {
 	wbrc := &ia.Archiver{}
 	uris, err := wbrc.Wayback(h.URLs)

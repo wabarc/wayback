@@ -62,6 +62,14 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.telegram.token = parseString(val, defTelegramToken)
 		case "WAYBACK_TELEGRAM_CHANNEL":
 			p.opts.telegram.channel = parseString(val, defTelegramChannel)
+		case "WAYBACK_MASTODON_SERVER":
+			p.opts.mastodon.server = parseString(val, defMastodonServer)
+		case "WAYBACK_MASTODON_KEY":
+			p.opts.mastodon.clientKey = parseString(val, defMastodonClientKey)
+		case "WAYBACK_MASTODON_SECRET":
+			p.opts.mastodon.clientSecret = parseString(val, defMastodonClientSecret)
+		case "WAYBACK_MASTODON_TOKEN":
+			p.opts.mastodon.accessToken = parseString(val, defMastodonAccessToken)
 		case "WAYBACK_GITHUB_TOKEN":
 			p.opts.github.token = parseString(val, defGitHubToken)
 		case "WAYBACK_GITHUB_OWNER":

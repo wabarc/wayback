@@ -6,16 +6,15 @@ package telegram // import "github.com/wabarc/wayback/service/telegram"
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wayback/publish"
-	"github.com/wabarc/wayback/utils"
 )
 
 type telegram struct {
@@ -67,7 +66,7 @@ func (t *telegram) process(ctx context.Context) {
 	text := message.Text
 	logger.Debug("Telegram: message: %s", text)
 
-	urls := utils.MatchURL(text)
+	urls := helper.MatchURL(text)
 	switch {
 	case message.IsCommand():
 		return
@@ -81,7 +80,7 @@ func (t *telegram) process(ctx context.Context) {
 
 	col, err := t.archive(urls)
 	if err != nil {
-		logger.Error("Telegram: archiving failed, ", err)
+		logger.Error("Telegram: archives failure, ", err)
 		return
 	}
 
@@ -101,9 +100,13 @@ func (t *telegram) process(ctx context.Context) {
 		logger.Debug("Telegram: publishing to GitHub issues...")
 		publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
 	}
+	if t.opts.PublishToMastodon() {
+		mstdn := publish.NewMastodon(nil, t.opts)
+		mstdn.ToMastodon(ctx, t.opts, mstdn.Render(col), "")
+	}
 }
 
-func (t *telegram) archive(urls []string) (col []*publish.Collect, err error) {
+func (t *telegram) archive(urls []string) (col []*wayback.Collect, err error) {
 	logger.Debug("Telegram: archives start...")
 
 	wg := sync.WaitGroup{}
@@ -115,22 +118,20 @@ func (t *telegram) archive(urls []string) (col []*publish.Collect, err error) {
 		wg.Add(1)
 		go func(slot string) {
 			defer wg.Done()
-			c := &publish.Collect{}
+			c := &wayback.Collect{}
 			logger.Debug("Telegram: archiving slot: %s", slot)
 			switch slot {
 			case config.SLOT_IA:
-				c.Arc = fmt.Sprintf("<a href='https://web.archive.org/'>%s</a>", config.SlotName(slot))
 				c.Dst = wbrc.IA()
 			case config.SLOT_IS:
-				c.Arc = fmt.Sprintf("<a href='https://archive.today/'>%s</a>", config.SlotName(slot))
 				c.Dst = wbrc.IS()
 			case config.SLOT_IP:
-				c.Arc = fmt.Sprintf("<a href='https://ipfs.github.io/public-gateway-checker/'>%s</a>", config.SlotName(slot))
 				c.Dst = wbrc.IP()
 			case config.SLOT_PH:
-				c.Arc = fmt.Sprintf("<a href='https://telegra.ph/'>%s</a>", config.SlotName(slot))
 				c.Dst = wbrc.PH()
 			}
+			c.Arc = config.SlotName(slot)
+			c.Ext = config.SlotExtra(slot)
 			col = append(col, c)
 		}(slot)
 	}

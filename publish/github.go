@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/v33/github"
+	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/logger"
 )
@@ -56,10 +57,10 @@ func ToIssues(ctx context.Context, opts *config.Options, text string) bool {
 	return true
 }
 
-func (gh *GitHub) Render(vars []*Collect) string {
+func (gh *GitHub) Render(vars []*wayback.Collect) string {
 	var tmplBytes bytes.Buffer
 
-	const tmpl = `{{range $ := .}}**{{ $.Arc }}**:
+	const tmpl = `{{range $ := .}}**[{{ $.Arc }}]({{ $.Ext }})**:
 {{ range $src, $dst := $.Dst -}}
 > origin: {{ $src }}
 > archived: {{ $dst }}

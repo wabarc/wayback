@@ -4,6 +4,11 @@
 
 package config // import "github.com/wabarc/wayback/config"
 
+import (
+	"net/url"
+	"strings"
+)
+
 const (
 	defDebug    = false
 	defLogTime  = true
@@ -24,6 +29,11 @@ const (
 	defGitHubOwner     = ""
 	defGitHubRepo      = ""
 
+	defMastodonServer       = ""
+	defMastodonClientKey    = ""
+	defMastodonClientSecret = ""
+	defMastodonAccessToken  = ""
+
 	defTorPrivateKey = ""
 	defTorLocalPort  = 0
 	defTorrcFile     = "/etc/tor/torrc"
@@ -41,6 +51,7 @@ type Options struct {
 	ipfs     *ipfs
 	slots    map[string]bool
 	telegram *telegram
+	mastodon *mastodon
 	github   *github
 	tor      *tor
 }
@@ -61,6 +72,13 @@ type slots struct {
 type telegram struct {
 	token   string
 	channel string
+}
+
+type mastodon struct {
+	server       string
+	clientKey    string
+	clientSecret string
+	accessToken  string
 }
 
 type github struct {
@@ -97,6 +115,12 @@ func NewOptions() *Options {
 		telegram: &telegram{
 			token:   defTelegramToken,
 			channel: defTelegramChannel,
+		},
+		mastodon: &mastodon{
+			server:       defMastodonServer,
+			clientKey:    defMastodonClientKey,
+			clientSecret: defMastodonClientSecret,
+			accessToken:  defMastodonAccessToken,
 		},
 		github: &github{
 			token: defGitHubToken,
@@ -162,6 +186,43 @@ func (o *Options) TelegramChannel() string {
 // PublishToChannel returns whether to publish results to Telegram Channel.
 func (o *Options) PublishToChannel() bool {
 	return o.telegram.token != "" && o.telegram.channel != ""
+}
+
+// MastodonServer returns the domain of Mastodon instance.
+func (o *Options) MastodonServer() string {
+	if strings.HasPrefix(o.mastodon.server, "http://") || strings.HasPrefix(o.mastodon.server, "https://") {
+		return o.mastodon.server
+	}
+	o.mastodon.server = "http://" + o.mastodon.server
+	u, err := url.Parse(o.mastodon.server)
+	if err != nil {
+		return ""
+	}
+
+	return u.String()
+}
+
+// MastodonClientKey returns the client key of Mastodon application.
+func (o *Options) MastodonClientKey() string {
+	return o.mastodon.clientKey
+}
+
+// MastodonClientSecret returns the cilent secret of Mastodon application.
+func (o *Options) MastodonClientSecret() string {
+	return o.mastodon.clientSecret
+}
+
+// MastodonAccessToken returns the access token of Mastodon application.
+func (o *Options) MastodonAccessToken() string {
+	return o.mastodon.accessToken
+}
+
+// PublishToMastodon returns whether to publish result to Mastodon.
+func (o *Options) PublishToMastodon() bool {
+	return o.MastodonServer() != "" &&
+		o.MastodonClientKey() != "" &&
+		o.MastodonAccessToken() != "" &&
+		o.MastodonClientSecret() != ""
 }
 
 // GitHubToken returns the personal access token of GitHub account.

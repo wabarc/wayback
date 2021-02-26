@@ -9,7 +9,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -127,6 +126,22 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 
 	logger.Debug("Web: text: %s", text)
 
+	pub := func(col []*wayback.Collect) {
+		if t.opts.PublishToChannel() {
+			logger.Debug("Web: publishing to channel...")
+			publish.ToChannel(t.opts, nil, publish.Render(col))
+		}
+		if t.opts.PublishToIssues() {
+			logger.Debug("Web: publishing to GitHub issues...")
+			publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
+		}
+		if t.opts.PublishToMastodon() {
+			logger.Debug("Web: publishing to Mastodon...")
+			mstdn := publish.NewMastodon(nil, t.opts)
+			mstdn.ToMastodon(ctx, t.opts, mstdn.Render(col), "")
+		}
+	}
+
 	collector, col := t.archive(ctx, text)
 	switch r.PostFormValue("data-type") {
 	case "json":
@@ -135,14 +150,7 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		if data, err := json.Marshal(collector); err != nil {
 			logger.Error("Web: encode for response failed, %v", err)
 		} else {
-			if t.opts.PublishToChannel() {
-				logger.Debug("Web: publishing to channel...")
-				go publish.ToChannel(t.opts, nil, publish.Render(col))
-			}
-			if t.opts.PublishToIssues() {
-				logger.Debug("Web: publishing to GitHub issues...")
-				go publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
-			}
+			go pub(col)
 			w.Write(data)
 		}
 
@@ -151,14 +159,7 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		if html, ok := collector.Render(); ok {
-			if t.opts.PublishToChannel() {
-				logger.Debug("Web: publishing to channel...")
-				go publish.ToChannel(t.opts, nil, publish.Render(col))
-			}
-			if t.opts.PublishToIssues() {
-				logger.Debug("Web: publishing to GitHub issues...")
-				go publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
-			}
+			go pub(col)
 			w.Write(html)
 		} else {
 			logger.Error("Web: render template for response failed")
@@ -168,7 +169,7 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 	}
 }
 
-func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector, col []*publish.Collect) {
+func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector, col []*wayback.Collect) {
 	logger.Debug("Web: archives start...")
 	tc = &template.Collector{}
 
@@ -176,7 +177,7 @@ func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector,
 	if len(urls) == 0 {
 		transform(tc, "", map[string]string{text: "URL no found"})
 		logger.Info("Web: archives failure, URL no found.")
-		return tc, []*publish.Collect{}
+		return tc, []*wayback.Collect{}
 	}
 
 	wg := sync.WaitGroup{}
@@ -189,47 +190,35 @@ func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector,
 		logger.Debug("Web: archiving slot: %s", slot)
 		go func(slot string, tc *template.Collector) {
 			defer wg.Done()
-			c := &publish.Collect{}
+			slotName := config.SlotName(slot)
+			c := &wayback.Collect{
+				Arc: slotName,
+				Ext: config.SlotExtra(slot),
+			}
 			switch slot {
 			case config.SLOT_IA:
 				ia := wbrc.IA()
-				slotName := config.SlotName(slot)
-
 				// Data for response
 				transform(tc, slotName, ia)
-
 				// Data for publish
-				c.Arc = fmt.Sprintf("<a href='https://web.archive.org/'>%s</a>", slotName)
 				c.Dst = ia
 			case config.SLOT_IS:
 				is := wbrc.IS()
-				slotName := config.SlotName(slot)
-
 				// Data for response
 				transform(tc, slotName, is)
-
 				// Data for publish
-				c.Arc = fmt.Sprintf("<a href='https://archive.today/'>%s</a>", slotName)
 				c.Dst = is
 			case config.SLOT_IP:
 				ip := wbrc.IP()
-				slotName := config.SlotName(slot)
-
 				// Data for response
 				transform(tc, slotName, ip)
-
 				// Data for publish
-				c.Arc = fmt.Sprintf("<a href='https://ipfs.github.io/public-gateway-checker/'>%s</a>", slotName)
 				c.Dst = ip
 			case config.SLOT_PH:
 				ph := wbrc.PH()
-				slotName := config.SlotName(slot)
-
 				// Data for response
 				transform(tc, slotName, ph)
-
 				// Data for publish
-				c.Arc = fmt.Sprintf("<a href='https://telegra.ph/'>%s</a>", slotName)
 				c.Dst = ph
 			}
 			col = append(col, c)

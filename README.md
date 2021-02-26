@@ -149,7 +149,7 @@ You can specify configuration options either via command flags or via environmen
 | ------------------- | -------------------------- | ----------- | ------------------------------------------------------------ |
 | `--debug`           | `DEBUG`                    | `false`     | Enable debug mode                                            |
 | -                   | `LOG_TIME`                 | `true`      | Display the date and time in log messages                    |
-| `-d`, `--daemon`    | -                          | -           | Run as daemon service, e.g. `telegram`, `web`                |
+| `-d`, `--daemon`    | -                          | -           | Run as daemon service, e.g. `telegram`, `web`, `mastodon`    |
 | `--ia`              | `WAYBACK_ENABLE_IA`        | `true`      | Wayback webpages to **Internet Archive**                     |
 | `--is`              | `WAYBACK_ENABLE_IS`        | `true`      | Wayback webpages to **Archive Today**                        |
 | `--ip`              | `WAYBACK_ENABLE_IP`        | `false`     | Wayback webpages to **IPFS**                                 |
@@ -162,6 +162,10 @@ You can specify configuration options either via command flags or via environmen
 | -                   | `WAYBACK_GITHUB_REPO`      | -           | GitHub repository to publish results                         |
 | `-t`, `--token`     | `WAYBACK_TELEGRAM_TOKEN`   | -           | Telegram Bot API Token                                       |
 | `-c`, `--chatid`    | `WAYBACK_TELEGRAM_CHANNEL` | -           | The **Telegram Channel** name for publish archived result    |
+| -                   | `WAYBACK_MASTODON_SERVER`  | -           | Domain of Mastodon instance                                  |
+| -                   | `WAYBACK_MASTODON_KEY`     | -           | The client key of your Mastodon application                  |
+| -                   | `WAYBACK_MASTODON_SECRET`  | -           | The client secret of your Mastodon application               |
+| -                   | `WAYBACK_MASTODON_TOKEN`   | -           | The access token of your Mastodon application                |
 | `--tor`             | `WAYBACK_USE_TOR`          | `false`     | Snapshot webpage via Tor anonymity network                   |
 | `--tor-key`         | `WAYBACK_TOR_PRIVKEY`      | -           | The private key for Tor Hidden Service                       |
 | -                   | `WAYBACK_TOR_LOCAL_PORT`   | -           | Local port for Tor Hidden Service, also support for a **reverse proxy** |

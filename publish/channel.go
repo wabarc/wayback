@@ -9,14 +9,10 @@ import (
 	"text/template"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/logger"
 )
-
-type Collect struct {
-	Arc string
-	Dst map[string]string
-}
 
 // ToChannel for publish to message to Telegram channel,
 // returns boolean as result.
@@ -39,10 +35,10 @@ func ToChannel(opts *config.Options, bot *tgbotapi.BotAPI, text string) bool {
 	return true
 }
 
-func Render(vars []*Collect) string {
+func Render(vars []*wayback.Collect) string {
 	var tmplBytes bytes.Buffer
 
-	const tmpl = `{{range $ := .}}<b>{{ $.Arc }}</b>:
+	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext }}'>{{ $.Arc }}</a></b>:
 {{ range $src, $dst := $.Dst -}}
 • <a href="{{ $src }}">origin</a> - {{ $dst }}
 {{end}}

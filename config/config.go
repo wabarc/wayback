@@ -23,5 +23,25 @@ func SlotName(s string) string {
 		SLOT_PH: "Telegraph",
 	}
 
-	return slots[s]
+	if _, exist := slots[s]; exist {
+		return slots[s]
+	}
+
+	return "unknown"
+}
+
+// SlotExtra returns the extra config of wayback slot.
+func SlotExtra(s string) string {
+	extra := map[string]string{
+		SLOT_IA: "https://web.archive.org/",
+		SLOT_IS: "https://archive.today/",
+		SLOT_IP: "https://ipfs.github.io/public-gateway-checker/",
+		SLOT_PH: "https://telegra.ph/",
+	}
+
+	if _, exist := extra[s]; exist {
+		return extra[s]
+	}
+
+	return "unknown"
 }

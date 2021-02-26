@@ -23,7 +23,7 @@ func TestSlotName(t *testing.T) {
 }
 
 func TestSlotNameNotExist(t *testing.T) {
-	expected := ""
+	expected := "unknown"
 	got := SlotName("something")
 
 	if got != expected {
@@ -395,5 +395,77 @@ func TestGitHubRepo(t *testing.T) {
 
 	if got != expected {
 		t.Fatalf(`Unexpected GitHub repository, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestMastodonServer(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_MASTODON_SERVER", "https://mastodon.social")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "https://mastodon.social"
+	got := opts.MastodonServer()
+
+	if got != expected {
+		t.Fatalf(`Unexpected Mastodon instance domain, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestMastodonClientKey(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "foo"
+	got := opts.MastodonClientKey()
+
+	if got != expected {
+		t.Fatalf(`Unexpected Mastodon client key, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestMastodonClientSecret(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_MASTODON_SECRET", "foo")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "foo"
+	got := opts.MastodonClientSecret()
+
+	if got != expected {
+		t.Fatalf(`Unexpected Mastodon client secret, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestMastodonAccessToken(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_MASTODON_TOKEN", "foo")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "foo"
+	got := opts.MastodonAccessToken()
+
+	if got != expected {
+		t.Fatalf(`Unexpected Mastodon access token, got %v instead of %s`, got, expected)
 	}
 }
