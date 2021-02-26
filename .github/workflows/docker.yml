@@ -9,6 +9,7 @@ on:
 
 jobs:
   publish:
+    if: github.repository == 'wabarc/wayback'
     name: Build and push Docker image
     runs-on: ubuntu-latest
     steps:

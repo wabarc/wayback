@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
-  schedule:
-    - cron: '0 0 * * *'
 
 jobs:
   snapcraft:
@@ -13,56 +11,30 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        architecture:
-          - linux/amd64
-          - linux/386
-          #- linux/arm64
-          #- linux/arm/v7
-          #- linux/ppc64le
-          #- linux/s390x
+        platform:
+          - i386
+          - amd64
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
       - id: build
-        name: Build Snap
-        run: |
-          # Enable docker daemon support for --platform parameter
-          echo '{"experimental": true}' | sudo tee /etc/docker/daemon.json > /dev/null
-          sudo systemctl restart docker
-
-          # Configure qemu-user-static
-          docker run --rm --tty \
-            --security-opt apparmor:unconfined \
-            --cap-add SYS_ADMIN \
-            multiarch/qemu-user-static --reset -p yes
-
-          # Run snapcraft
-          docker run --rm --tty \
-            --security-opt apparmor:unconfined \
-            --cap-add SYS_ADMIN \
-            --device /dev/fuse \
-            --volume /sys \
-            --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \
-            --volume $GITHUB_WORKSPACE:$GITHUB_WORKSPACE \
-            --workdir $GITHUB_WORKSPACE \
-            --platform "${{ matrix.architecture }}" \
-            --env PLAYTEST="${{ matrix.playtest }}" \
-            diddledan/snapcraft:core18
-
-          echo ::set-output name=snap::$(find $GITHUB_WORKSPACE -maxdepth 1 -type f -name "*.snap" | head -n1)
-
-      - if: startsWith(github.ref, 'refs/tags/')
-        uses: snapcore/action-publish@v1
-        name: Release Snap
+        name: Build snap
+        uses: diddlesnaps/snapcraft-multiarch-action@v1
         with:
-          store_login: ${{ secrets.SNAPCRAFT_TOKEN }}
-          snap: ${{ steps.build.outputs.snap }}
-          release: stable,candidate,beta,edge
+          architecture: ${{ matrix.platform }}
+          snapcraft-channel: stable
 
-      - if: ${{ github.event_name == 'schedule' }}
-        uses: snapcore/action-publish@v1
-        name: Release Snap for edge channel
+      - uses: actions/upload-artifact@v2
+        with:
+          name: snap
+          path: ${{ steps.build.outputs.snap }}
+
+      - uses: snapcore/action-publish@v1
+        name: Release Snap
         with:
           store_login: ${{ secrets.SNAPCRAFT_TOKEN }}
           snap: ${{ steps.build.outputs.snap }}
