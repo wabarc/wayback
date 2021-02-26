@@ -46,7 +46,7 @@ func (m *Mastodon) ToMastodon(ctx context.Context, opts *config.Options, text, i
 		toot.InReplyToID = mstdn.ID(id)
 	}
 	if _, err := m.client.PostStatus(ctx, toot); err != nil {
-		logger.Error("%v", err)
+		logger.Error("[publish] post Mastodon status failed: %v", err)
 		return false
 	}
 
@@ -64,13 +64,13 @@ func (m *Mastodon) Render(vars []*wayback.Collect) string {
 
 	tpl, err := template.New("message").Parse(tmpl)
 	if err != nil {
-		logger.Debug("GitHub: parse template failed, %v", err)
+		logger.Debug("[publish] parse Mastodon template failed, %v", err)
 		return ""
 	}
 
 	err = tpl.Execute(&tmplBytes, vars)
 	if err != nil {
-		logger.Debug("Telegram: execute template failed, %v", err)
+		logger.Debug("[publish] execute Mastodon template failed, %v", err)
 		return ""
 	}
 

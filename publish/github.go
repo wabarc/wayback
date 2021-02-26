@@ -27,7 +27,7 @@ func NewGitHub() *GitHub {
 
 func ToIssues(ctx context.Context, opts *config.Options, text string) bool {
 	if opts.GitHubToken() == "" {
-		logger.Error("GitHub personal access token is required")
+		logger.Error("[publish] GitHub personal access token is required")
 		return false
 	}
 
@@ -41,7 +41,7 @@ func ToIssues(ctx context.Context, opts *config.Options, text string) bool {
 
 	if opts.HasDebugMode() {
 		user, _, _ := client.Users.Get(ctx, "")
-		logger.Debug("Authorized GitHub user: %v", user)
+		logger.Debug("[publish] authorized GitHub user: %v", user)
 	}
 
 	// Create an issue to GitHub
@@ -49,10 +49,10 @@ func ToIssues(ctx context.Context, opts *config.Options, text string) bool {
 	ir := &github.IssueRequest{Title: github.String(t), Body: github.String(text)}
 	issue, _, err := client.Issues.Create(ctx, opts.GitHubOwner(), opts.GitHubRepo(), ir)
 	if err != nil {
-		logger.Debug("%v", err)
+		logger.Debug("[publish] create issue failed: %v", err)
 		return false
 	}
-	logger.Debug("Created issue: %v", issue)
+	logger.Debug("[publish] created issue: %v", issue)
 
 	return true
 }
@@ -70,13 +70,13 @@ func (gh *GitHub) Render(vars []*wayback.Collect) string {
 
 	tpl, err := template.New("message").Parse(tmpl)
 	if err != nil {
-		logger.Debug("GitHub: parse template failed, %v", err)
+		logger.Debug("[publish] parse template failed, %v", err)
 		return ""
 	}
 
 	err = tpl.Execute(&tmplBytes, vars)
 	if err != nil {
-		logger.Debug("Telegram: execute template failed, %v", err)
+		logger.Debug("[publish] execute template failed, %v", err)
 		return ""
 	}
 

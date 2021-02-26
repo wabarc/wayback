@@ -38,7 +38,7 @@ func (t *telegram) Serve(ctx context.Context) (err error) {
 		return errors.New("Initialize telegram failed, error: %v", err)
 	}
 
-	logger.Info("Telegram: authorized on account %s", t.bot.Self.UserName)
+	logger.Info("[telegram] authorized on account %s", t.bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -64,14 +64,14 @@ func (t *telegram) process(ctx context.Context) {
 	bot, update := t.bot, t.upd
 	message := update.Message
 	text := message.Text
-	logger.Debug("Telegram: message: %s", text)
+	logger.Debug("[telegram] message: %s", text)
 
 	urls := helper.MatchURL(text)
 	switch {
 	case message.IsCommand():
 		return
 	case len(urls) == 0:
-		logger.Info("Telegram: archives failure, URL no found.")
+		logger.Info("[telegram] archives failure, URL no found.")
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "URL no found.")
 		msg.ReplyToMessageID = update.Message.MessageID
 		bot.Send(msg)
@@ -80,12 +80,12 @@ func (t *telegram) process(ctx context.Context) {
 
 	col, err := t.archive(urls)
 	if err != nil {
-		logger.Error("Telegram: archives failure, ", err)
+		logger.Error("[telegram] archives failure, ", err)
 		return
 	}
 
 	replyText := publish.Render(col)
-	logger.Debug("Telegram: reply text, %s", replyText)
+	logger.Debug("[telegram] reply text, %s", replyText)
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
 	msg.ReplyToMessageID = update.Message.MessageID
 	msg.ParseMode = "html"
@@ -93,11 +93,11 @@ func (t *telegram) process(ctx context.Context) {
 	bot.Send(msg)
 
 	if t.opts.PublishToChannel() {
-		logger.Debug("Telegram: publishing to channel...")
+		logger.Debug("[telegram] publishing to channel...")
 		publish.ToChannel(t.opts, bot, replyText)
 	}
 	if t.opts.PublishToIssues() {
-		logger.Debug("Telegram: publishing to GitHub issues...")
+		logger.Debug("[telegram] publishing to GitHub issues...")
 		publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
 	}
 	if t.opts.PublishToMastodon() {
@@ -107,7 +107,7 @@ func (t *telegram) process(ctx context.Context) {
 }
 
 func (t *telegram) archive(urls []string) (col []*wayback.Collect, err error) {
-	logger.Debug("Telegram: archives start...")
+	logger.Debug("[telegram] archives start...")
 
 	wg := sync.WaitGroup{}
 	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: t.opts}
@@ -119,7 +119,7 @@ func (t *telegram) archive(urls []string) (col []*wayback.Collect, err error) {
 		go func(slot string) {
 			defer wg.Done()
 			c := &wayback.Collect{}
-			logger.Debug("Telegram: archiving slot: %s", slot)
+			logger.Debug("[telegram] archiving slot: %s", slot)
 			switch slot {
 			case config.SLOT_IA:
 				c.Dst = wbrc.IA()

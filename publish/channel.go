@@ -20,7 +20,7 @@ func ToChannel(opts *config.Options, bot *tgbotapi.BotAPI, text string) bool {
 	if bot == nil {
 		var err error
 		if bot, err = tgbotapi.NewBotAPI(opts.TelegramToken()); err != nil {
-			logger.Error("Publish to Telegram Channel failed, %v", err)
+			logger.Error("[publish] post to Telegram Channel failed, %v", err)
 			return false
 		}
 	}
@@ -28,7 +28,7 @@ func ToChannel(opts *config.Options, bot *tgbotapi.BotAPI, text string) bool {
 	msg := tgbotapi.NewMessageToChannel("@"+opts.TelegramChannel(), text)
 	msg.ParseMode = "html"
 	if _, err := bot.Send(msg); err != nil {
-		logger.Error("Publish message to channel failed, %v", err)
+		logger.Error("[publish] post message to channel failed, %v", err)
 		return false
 	}
 
@@ -46,13 +46,13 @@ func Render(vars []*wayback.Collect) string {
 
 	tpl, err := template.New("message").Parse(tmpl)
 	if err != nil {
-		logger.Debug("Telegram: parse template failed, %v", err)
+		logger.Debug("[publish] parse Telegram template failed, %v", err)
 		return ""
 	}
 
 	err = tpl.Execute(&tmplBytes, vars)
 	if err != nil {
-		logger.Debug("Telegram: execute template failed, %v", err)
+		logger.Debug("[publish] execute Telegram template failed, %v", err)
 		return ""
 	}
 

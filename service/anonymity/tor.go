@@ -44,7 +44,7 @@ func New(opts *config.Options) *tor {
 // Serve always returns a nil error.
 func (t *tor) Serve(ctx context.Context) error {
 	// Start tor with some defaults + elevated verbosity
-	logger.Info("Web: starting and registering onion service, please wait a bit...")
+	logger.Info("[web] starting and registering onion service, please wait a bit...")
 
 	if _, err := exec.LookPath("tor"); err != nil {
 		logger.Fatal("%v", err)
@@ -54,11 +54,11 @@ func (t *tor) Serve(ctx context.Context) error {
 	if t.opts.TorPrivKey() == "" {
 		keypair, _ := ed25519.GenerateKey(rand.Reader)
 		pvk = keypair.PrivateKey()
-		logger.Info("Web: important to keep the private key: %s", hex.EncodeToString(pvk))
+		logger.Info("[web] important to keep the private key: %s", hex.EncodeToString(pvk))
 	} else {
 		privb, err := hex.DecodeString(t.opts.TorPrivKey())
 		if err != nil {
-			logger.Fatal("Web: the key %s is not specific", err)
+			logger.Fatal("[web] the key %s is not specific", err)
 		}
 		pvk = ed25519.PrivateKey(privb)
 	}
@@ -73,18 +73,18 @@ func (t *tor) Serve(ctx context.Context) error {
 	}
 	e, err := embedTor.Start(ctx, startConf)
 	if err != nil {
-		logger.Fatal("Web: failed to start tor: %v", err)
+		logger.Fatal("[web] failed to start tor: %v", err)
 	}
 	defer e.Close()
 
 	// Create an onion service to listen on any port but show as 80
 	onion, err := e.Listen(ctx, &embedTor.ListenConf{LocalPort: t.opts.TorLocalPort(), RemotePorts: t.opts.TorRemotePorts(), Version3: true, Key: pvk})
 	if err != nil {
-		logger.Fatal("Web: failed to create onion service: %v", err)
+		logger.Fatal("[web] failed to create onion service: %v", err)
 	}
 	defer onion.Close()
 
-	logger.Info("Web: please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
+	logger.Info("[web] please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
 
 	http.HandleFunc("/", home)
 	http.HandleFunc("/w", func(w http.ResponseWriter, r *http.Request) { t.process(w, r, ctx) })
@@ -98,45 +98,45 @@ func home(w http.ResponseWriter, r *http.Request) {
 	if html, ok := tmpl.Render(); ok {
 		w.Write(html)
 	} else {
-		logger.Error("Web: render template for home request failed")
+		logger.Error("[web] render template for home request failed")
 		http.Error(w, "Internal Server Error", 500)
 	}
 }
 
 func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Context) {
-	logger.Debug("Web: process request start...")
+	logger.Debug("[web] process request start...")
 	if r.Method != http.MethodPost {
-		logger.Info("Web: request method no specific.")
+		logger.Info("[web] request method no specific.")
 		http.Redirect(w, r, "/", 405)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		logger.Error("Web: parse form error, %v", err)
+		logger.Error("[web] parse form error, %v", err)
 		http.Redirect(w, r, "/", 400)
 		return
 	}
 
 	text := r.PostFormValue("text")
 	if len(strings.TrimSpace(text)) == 0 {
-		logger.Info("Web: post form value empty.")
+		logger.Info("[web] post form value empty.")
 		http.Redirect(w, r, "/", 411)
 		return
 	}
 
-	logger.Debug("Web: text: %s", text)
+	logger.Debug("[web] text: %s", text)
 
 	pub := func(col []*wayback.Collect) {
 		if t.opts.PublishToChannel() {
-			logger.Debug("Web: publishing to channel...")
+			logger.Debug("[web] publishing to channel...")
 			publish.ToChannel(t.opts, nil, publish.Render(col))
 		}
 		if t.opts.PublishToIssues() {
-			logger.Debug("Web: publishing to GitHub issues...")
+			logger.Debug("[web] publishing to GitHub issues...")
 			publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
 		}
 		if t.opts.PublishToMastodon() {
-			logger.Debug("Web: publishing to Mastodon...")
+			logger.Debug("[web] publishing to Mastodon...")
 			mstdn := publish.NewMastodon(nil, t.opts)
 			mstdn.ToMastodon(ctx, t.opts, mstdn.Render(col), "")
 		}
@@ -148,7 +148,7 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		w.Header().Set("Content-Type", "application/json")
 
 		if data, err := json.Marshal(collector); err != nil {
-			logger.Error("Web: encode for response failed, %v", err)
+			logger.Error("[web] encode for response failed, %v", err)
 		} else {
 			go pub(col)
 			w.Write(data)
@@ -162,7 +162,7 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 			go pub(col)
 			w.Write(html)
 		} else {
-			logger.Error("Web: render template for response failed")
+			logger.Error("[web] render template for response failed")
 		}
 
 		return
@@ -170,13 +170,13 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 }
 
 func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector, col []*wayback.Collect) {
-	logger.Debug("Web: archives start...")
+	logger.Debug("[web] archives start...")
 	tc = &template.Collector{}
 
 	urls := utils.MatchURL(text)
 	if len(urls) == 0 {
 		transform(tc, "", map[string]string{text: "URL no found"})
-		logger.Info("Web: archives failure, URL no found.")
+		logger.Info("[web] archives failure, URL no found.")
 		return tc, []*wayback.Collect{}
 	}
 
@@ -187,7 +187,7 @@ func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector,
 			continue
 		}
 		wg.Add(1)
-		logger.Debug("Web: archiving slot: %s", slot)
+		logger.Debug("[web] archiving slot: %s", slot)
 		go func(slot string, tc *template.Collector) {
 			defer wg.Done()
 			slotName := config.SlotName(slot)

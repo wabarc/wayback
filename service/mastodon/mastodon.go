@@ -50,7 +50,7 @@ func New(opts *config.Options) *mastodon {
 // Serve loop request direct messages from the Mastodon instance.
 // Serve always returns a nil error.
 func (m *mastodon) Serve(ctx context.Context) error {
-	logger.Debug("Serving Mastodon instance: %s", m.opts.MastodonServer())
+	logger.Debug("[mastodon] Serving Mastodon instance: %s", m.opts.MastodonServer())
 
 	// rcv, err := m.client.StreamingUser(ctx)
 	// if err != nil {
@@ -74,9 +74,9 @@ func (m *mastodon) Serve(ctx context.Context) error {
 	for {
 		convs, err := m.client.GetConversations(ctx, nil)
 		if err != nil {
-			logger.Error("Mastodon: Get conversations failure, err: %v", err)
+			logger.Error("[mastodon] Get conversations failure, err: %v", err)
 		}
-		logger.Debug("Conversations: %v", convs)
+		logger.Debug("[mastodon] conversations: %v", convs)
 
 		for _, conv := range convs {
 			m.status = conv.LastStatus
@@ -96,12 +96,12 @@ func (m *mastodon) Serve(ctx context.Context) error {
 
 func (m *mastodon) process(ctx context.Context) error {
 	if m.status == nil || m.convID == "" {
-		logger.Debug("Mastodon: no status or conversation")
+		logger.Debug("[mastodon] no status or conversation")
 		return fmt.Errorf("Mastodon: no status or conversation")
 	}
 
 	text := textContent(m.status.Content)
-	logger.Debug("Mastodon: convid: %s message: %s", m.convID, text)
+	logger.Debug("[mastodon] conversation id: %s message: %s", m.convID, text)
 	defer m.client.DeleteConversation(ctx, m.convID)
 	defer func() {
 		time.Sleep(time.Second)
@@ -111,27 +111,27 @@ func (m *mastodon) process(ctx context.Context) error {
 	urls := helper.MatchURL(text)
 	pub := publish.NewMastodon(m.client, m.opts)
 	if len(urls) == 0 {
-		logger.Info("Mastodon: archives failure, URL no found.")
+		logger.Info("[mastodon] archives failure, URL no found.")
 		pub.ToMastodon(ctx, m.opts, "URL no found", string(m.status.ID))
 		return fmt.Errorf("Mastodon: URL no found")
 	}
 
 	col, err := m.archive(urls)
 	if err != nil {
-		logger.Error("Mastodon: archives failure, ", err)
+		logger.Error("[mastodon] archives failure, ", err)
 		return err
 	}
 
 	replyText := pub.Render(col)
-	logger.Debug("Mastodon: reply text, %s", replyText)
+	logger.Debug("[mastodon] reply text, %s", replyText)
 	pub.ToMastodon(ctx, m.opts, replyText, string(m.status.ID))
 
 	if m.opts.PublishToChannel() {
-		logger.Debug("Mastodon: publishing to Telegram channel...")
+		logger.Debug("[mastodon] publishing to Telegram channel...")
 		publish.ToChannel(m.opts, nil, replyText)
 	}
 	if m.opts.PublishToIssues() {
-		logger.Debug("Mastodon: publishing to GitHub issues...")
+		logger.Debug("[mastodon] publishing to GitHub issues...")
 		publish.ToIssues(ctx, m.opts, publish.NewGitHub().Render(col))
 	}
 
@@ -139,7 +139,7 @@ func (m *mastodon) process(ctx context.Context) error {
 }
 
 func (m *mastodon) archive(urls []string) (col []*wayback.Collect, err error) {
-	logger.Debug("Mastodon: archives start...")
+	logger.Debug("[mastodon] archives start...")
 
 	wg := sync.WaitGroup{}
 	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: m.opts}
@@ -151,7 +151,7 @@ func (m *mastodon) archive(urls []string) (col []*wayback.Collect, err error) {
 		go func(slot string) {
 			defer wg.Done()
 			c := &wayback.Collect{}
-			logger.Debug("Mastodon: archiving slot: %s", slot)
+			logger.Debug("[mastodon] archiving slot: %s", slot)
 			switch slot {
 			case config.SLOT_IA:
 				c.Arc = config.SlotName(slot)
