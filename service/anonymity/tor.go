@@ -20,6 +20,7 @@ import (
 	// "github.com/ipsn/go-libtor"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/template"
@@ -90,7 +91,7 @@ func (t *tor) Serve(ctx context.Context) error {
 	http.HandleFunc("/w", func(w http.ResponseWriter, r *http.Request) { t.process(w, r, ctx) })
 	http.Serve(onion, nil)
 
-	return nil
+	return errors.New("done")
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -139,6 +140,11 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 			logger.Debug("[web] publishing to Mastodon...")
 			mstdn := publish.NewMastodon(nil, t.opts)
 			mstdn.ToMastodon(ctx, t.opts, mstdn.Render(col), "")
+		}
+		if t.opts.PublishToTwitter() {
+			logger.Debug("[web] publishing to Twitter...")
+			twitter := publish.NewTwitter(nil, t.opts)
+			twitter.ToTwitter(ctx, t.opts, twitter.Render(col))
 		}
 	}
 

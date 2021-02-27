@@ -57,7 +57,7 @@ func (t *telegram) Serve(ctx context.Context) (err error) {
 		go t.process(ctx)
 	}
 
-	return nil
+	return errors.New("done")
 }
 
 func (t *telegram) process(ctx context.Context) {
@@ -101,8 +101,14 @@ func (t *telegram) process(ctx context.Context) {
 		publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
 	}
 	if t.opts.PublishToMastodon() {
+		logger.Debug("[telegram] publishing to Mastodon...")
 		mstdn := publish.NewMastodon(nil, t.opts)
 		mstdn.ToMastodon(ctx, t.opts, mstdn.Render(col), "")
+	}
+	if t.opts.PublishToTwitter() {
+		logger.Debug("[telegram] publishing to Twitter...")
+		twitter := publish.NewTwitter(nil, t.opts)
+		twitter.ToTwitter(ctx, t.opts, twitter.Render(col))
 	}
 }
 

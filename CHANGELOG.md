@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add Mastodon support.
 - Supports publish toot even if the entry from Telegram Bot and Tor Hidden Service.
+- Add Twitter support.
+- Supports publish tweet even if the entry from Mastodon Bot, Telegram Bot and Tor Hidden Service.
 
 ### Changed
 - Make logs more reaadable.

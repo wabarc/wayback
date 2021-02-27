@@ -134,6 +134,11 @@ func (m *mastodon) process(ctx context.Context) error {
 		logger.Debug("[mastodon] publishing to GitHub issues...")
 		publish.ToIssues(ctx, m.opts, publish.NewGitHub().Render(col))
 	}
+	if m.opts.PublishToTwitter() {
+		logger.Debug("[mastodon] publishing to Twitter...")
+		twitter := publish.NewTwitter(nil, m.opts)
+		twitter.ToTwitter(ctx, m.opts, twitter.Render(col))
+	}
 
 	return nil
 }

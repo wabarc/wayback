@@ -70,6 +70,14 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.mastodon.clientSecret = parseString(val, defMastodonClientSecret)
 		case "WAYBACK_MASTODON_TOKEN":
 			p.opts.mastodon.accessToken = parseString(val, defMastodonAccessToken)
+		case "WAYBACK_TWITTER_CONSUMER_KEY":
+			p.opts.twitter.consumerKey = parseString(val, defTwitterConsumerKey)
+		case "WAYBACK_TWITTER_CONSUMER_SECRET":
+			p.opts.twitter.consumerSecret = parseString(val, defTwitterConsumerSecret)
+		case "WAYBACK_TWITTER_ACCESS_TOKEN":
+			p.opts.twitter.accessToken = parseString(val, defTwitterAccessToken)
+		case "WAYBACK_TWITTER_ACCESS_SECRET":
+			p.opts.twitter.accessSecret = parseString(val, defTwitterAccessSecret)
 		case "WAYBACK_GITHUB_TOKEN":
 			p.opts.github.token = parseString(val, defGitHubToken)
 		case "WAYBACK_GITHUB_OWNER":

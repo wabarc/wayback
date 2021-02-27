@@ -29,10 +29,14 @@ const (
 	defGitHubOwner     = ""
 	defGitHubRepo      = ""
 
-	defMastodonServer       = ""
-	defMastodonClientKey    = ""
-	defMastodonClientSecret = ""
-	defMastodonAccessToken  = ""
+	defMastodonServer        = ""
+	defMastodonClientKey     = ""
+	defMastodonClientSecret  = ""
+	defMastodonAccessToken   = ""
+	defTwitterConsumerKey    = ""
+	defTwitterConsumerSecret = ""
+	defTwitterAccessToken    = ""
+	defTwitterAccessSecret   = ""
 
 	defTorPrivateKey = ""
 	defTorLocalPort  = 0
@@ -52,6 +56,7 @@ type Options struct {
 	slots    map[string]bool
 	telegram *telegram
 	mastodon *mastodon
+	twitter  *twitter
 	github   *github
 	tor      *tor
 }
@@ -79,6 +84,13 @@ type mastodon struct {
 	clientKey    string
 	clientSecret string
 	accessToken  string
+}
+
+type twitter struct {
+	consumerKey    string
+	consumerSecret string
+	accessToken    string
+	accessSecret   string
 }
 
 type github struct {
@@ -121,6 +133,12 @@ func NewOptions() *Options {
 			clientKey:    defMastodonClientKey,
 			clientSecret: defMastodonClientSecret,
 			accessToken:  defMastodonAccessToken,
+		},
+		twitter: &twitter{
+			consumerKey:    defTwitterConsumerKey,
+			consumerSecret: defTwitterConsumerSecret,
+			accessToken:    defTwitterAccessToken,
+			accessSecret:   defTwitterAccessSecret,
 		},
 		github: &github{
 			token: defGitHubToken,
@@ -223,6 +241,34 @@ func (o *Options) PublishToMastodon() bool {
 		o.MastodonClientKey() != "" &&
 		o.MastodonAccessToken() != "" &&
 		o.MastodonClientSecret() != ""
+}
+
+// TwitterConsumerKey returns the consumer key of Twitter application.
+func (o *Options) TwitterConsumerKey() string {
+	return o.twitter.consumerKey
+}
+
+// TwitterConsumerSecret returns the consumer secret of Twitter application.
+func (o *Options) TwitterConsumerSecret() string {
+	return o.twitter.consumerSecret
+}
+
+// TwitterAccessToken returns the access token of Twitter application.
+func (o *Options) TwitterAccessToken() string {
+	return o.twitter.accessToken
+}
+
+// TwitterAccessSecret returns the access secret of Twitter application.
+func (o *Options) TwitterAccessSecret() string {
+	return o.twitter.accessSecret
+}
+
+// PublishToTwitter returns whether to publish result to Twitter.
+func (o *Options) PublishToTwitter() bool {
+	return o.TwitterConsumerKey() != "" &&
+		o.TwitterConsumerSecret() != "" &&
+		o.TwitterAccessToken() != "" &&
+		o.TwitterAccessSecret() != ""
 }
 
 // GitHubToken returns the personal access token of GitHub account.

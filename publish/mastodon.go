@@ -20,6 +20,11 @@ type Mastodon struct {
 }
 
 func NewMastodon(client *mstdn.Client, opts *config.Options) *Mastodon {
+	if !opts.PublishToMastodon() {
+		logger.Error("Missing required environment variable")
+		return new(Mastodon)
+	}
+
 	if client == nil && opts != nil {
 		client = mstdn.NewClient(&mstdn.Config{
 			Server:       opts.MastodonServer(),
@@ -28,6 +33,7 @@ func NewMastodon(client *mstdn.Client, opts *config.Options) *Mastodon {
 			AccessToken:  opts.MastodonAccessToken(),
 		})
 	}
+
 	return &Mastodon{client: client}
 }
 
