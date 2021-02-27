@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2021-02-27
+
 ### Added
 - Add Mastodon support.
 - Supports publish toot even if the entry from Telegram Bot and Tor Hidden Service.
