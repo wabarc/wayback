@@ -17,23 +17,23 @@ import (
 	"github.com/wabarc/wayback/publish"
 )
 
-type telegram struct {
+type Telegram struct {
 	opts *config.Options
 
 	bot *tgbotapi.BotAPI
 	upd tgbotapi.Update
 }
 
-// New telegram struct.
-func New(opts *config.Options) *telegram {
-	return &telegram{
+// New Telegram struct.
+func New(opts *config.Options) *Telegram {
+	return &Telegram{
 		opts: opts,
 	}
 }
 
 // Serve loop request message from the Telegram api server.
 // Serve always returns a nil error.
-func (t *telegram) Serve(ctx context.Context) (err error) {
+func (t *Telegram) Serve(ctx context.Context) (err error) {
 	if t.bot, err = tgbotapi.NewBotAPI(t.opts.TelegramToken()); err != nil {
 		return errors.New("Initialize telegram failed, error: %v", err)
 	}
@@ -60,7 +60,7 @@ func (t *telegram) Serve(ctx context.Context) (err error) {
 	return errors.New("done")
 }
 
-func (t *telegram) process(ctx context.Context) {
+func (t *Telegram) process(ctx context.Context) {
 	bot, update := t.bot, t.upd
 	message := update.Message
 	text := message.Text
@@ -112,7 +112,7 @@ func (t *telegram) process(ctx context.Context) {
 	}
 }
 
-func (t *telegram) archive(urls []string) (col []*wayback.Collect, err error) {
+func (t *Telegram) archive(urls []string) (col []*wayback.Collect, err error) {
 	logger.Debug("[telegram] archives start...")
 
 	wg := sync.WaitGroup{}

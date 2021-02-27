@@ -7,41 +7,45 @@ package mastodon // import "github.com/wabarc/wayback/service/mastodon"
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"strings"
 	"sync"
 	"time"
 
-	mstdn "github.com/mattn/go-mastodon"
+	"github.com/mattn/go-mastodon"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wayback/publish"
 	"golang.org/x/net/html"
 )
 
-type mastodon struct {
+type Mastodon struct {
 	sync.RWMutex
 
 	opts *config.Options
 
-	client *mstdn.Client
-	status *mstdn.Status
-	convID mstdn.ID
+	client *mastodon.Client
+	status *mastodon.Status
+	convID mastodon.ID
 
-	archiving map[mstdn.ID]bool
+	archiving map[mastodon.ID]bool
 }
 
 // New mastodon struct.
-func New(opts *config.Options) *mastodon {
-	client := mstdn.NewClient(&mstdn.Config{
+func New(opts *config.Options) *Mastodon {
+	if !opts.PublishToMastodon() {
+		logger.Fatal("Missing required environment variable")
+	}
+
+	client := mastodon.NewClient(&mastodon.Config{
 		Server:       opts.MastodonServer(),
 		ClientID:     opts.MastodonClientKey(),
 		ClientSecret: opts.MastodonClientSecret(),
 		AccessToken:  opts.MastodonAccessToken(),
 	})
-	return &mastodon{
+	return &Mastodon{
 		opts:   opts,
 		client: client,
 	}
@@ -49,7 +53,7 @@ func New(opts *config.Options) *mastodon {
 
 // Serve loop request direct messages from the Mastodon instance.
 // Serve always returns a nil error.
-func (m *mastodon) Serve(ctx context.Context) error {
+func (m *Mastodon) Serve(ctx context.Context) error {
 	logger.Debug("[mastodon] Serving Mastodon instance: %s", m.opts.MastodonServer())
 
 	// rcv, err := m.client.StreamingUser(ctx)
@@ -59,22 +63,22 @@ func (m *mastodon) Serve(ctx context.Context) error {
 	// }
 	// for e := range rcv {
 	// 	switch t := e.(type) {
-	// 	case *mstdn.UpdateEvent:
+	// 	case *mastodon.UpdateEvent:
 	// 		logger.Debug("%v", t.Status)
 
 	// 		m.status = t.Status
 	// 		go m.process(ctx)
-	// 	case *mstdn.ErrorEvent:
+	// 	case *mastodon.ErrorEvent:
 	// 		logger.Error("%v", e)
 	// 	}
 	// }
 
 	mutex := sync.RWMutex{}
-	m.archiving = make(map[mstdn.ID]bool)
+	m.archiving = make(map[mastodon.ID]bool)
 	for {
 		convs, err := m.client.GetConversations(ctx, nil)
 		if err != nil {
-			logger.Error("[mastodon] Get conversations failure, err: %v", err)
+			logger.Error("[mastodon] Get conversations failure, error: %v", err)
 		}
 		logger.Debug("[mastodon] conversations: %v", convs)
 
@@ -94,10 +98,10 @@ func (m *mastodon) Serve(ctx context.Context) error {
 	}
 }
 
-func (m *mastodon) process(ctx context.Context) error {
+func (m *Mastodon) process(ctx context.Context) error {
 	if m.status == nil || m.convID == "" {
 		logger.Debug("[mastodon] no status or conversation")
-		return fmt.Errorf("Mastodon: no status or conversation")
+		return errors.New("Mastodon: no status or conversation")
 	}
 
 	text := textContent(m.status.Content)
@@ -113,7 +117,7 @@ func (m *mastodon) process(ctx context.Context) error {
 	if len(urls) == 0 {
 		logger.Info("[mastodon] archives failure, URL no found.")
 		pub.ToMastodon(ctx, m.opts, "URL no found", string(m.status.ID))
-		return fmt.Errorf("Mastodon: URL no found")
+		return errors.New("Mastodon: URL no found")
 	}
 
 	col, err := m.archive(urls)
@@ -143,7 +147,7 @@ func (m *mastodon) process(ctx context.Context) error {
 	return nil
 }
 
-func (m *mastodon) archive(urls []string) (col []*wayback.Collect, err error) {
+func (m *Mastodon) archive(urls []string) (col []*wayback.Collect, err error) {
 	logger.Debug("[mastodon] archives start...")
 
 	wg := sync.WaitGroup{}

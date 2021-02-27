@@ -15,7 +15,7 @@ import (
 	"strings"
 	"sync"
 
-	embedTor "github.com/cretz/bine/tor"
+	"github.com/cretz/bine/tor"
 	"github.com/cretz/bine/torutil/ed25519"
 	// "github.com/ipsn/go-libtor"
 	"github.com/wabarc/wayback"
@@ -27,13 +27,13 @@ import (
 	"github.com/wabarc/wayback/utils"
 )
 
-type tor struct {
+type Tor struct {
 	opts *config.Options
 }
 
 // New tor struct.
-func New(opts *config.Options) *tor {
-	return &tor{
+func New(opts *config.Options) *Tor {
+	return &Tor{
 		opts: opts,
 	}
 }
@@ -43,7 +43,7 @@ func New(opts *config.Options) *tor {
 // Use "WAYBACK_TOR_PRIVKEY" to keep the Tor hidden service hostname.
 //
 // Serve always returns a nil error.
-func (t *tor) Serve(ctx context.Context) error {
+func (t *Tor) Serve(ctx context.Context) error {
 	// Start tor with some defaults + elevated verbosity
 	logger.Info("[web] starting and registering onion service, please wait a bit...")
 
@@ -65,21 +65,21 @@ func (t *tor) Serve(ctx context.Context) error {
 	}
 
 	verbose := t.opts.HasDebugMode()
-	// startConf := &embedTor.StartConf{ProcessCreator: libtor.Creator, DataDir: "tor-data"}
-	startConf := &embedTor.StartConf{TorrcFile: t.torrc()}
+	// startConf := &tor.StartConf{ProcessCreator: libtor.Creator, DataDir: "tor-data"}
+	startConf := &tor.StartConf{TorrcFile: t.torrc()}
 	if verbose {
 		startConf.DebugWriter = os.Stdout
 	} else {
 		startConf.ExtraArgs = []string{"--quiet"}
 	}
-	e, err := embedTor.Start(ctx, startConf)
+	e, err := tor.Start(ctx, startConf)
 	if err != nil {
 		logger.Fatal("[web] failed to start tor: %v", err)
 	}
 	defer e.Close()
 
 	// Create an onion service to listen on any port but show as 80
-	onion, err := e.Listen(ctx, &embedTor.ListenConf{LocalPort: t.opts.TorLocalPort(), RemotePorts: t.opts.TorRemotePorts(), Version3: true, Key: pvk})
+	onion, err := e.Listen(ctx, &tor.ListenConf{LocalPort: t.opts.TorLocalPort(), RemotePorts: t.opts.TorRemotePorts(), Version3: true, Key: pvk})
 	if err != nil {
 		logger.Fatal("[web] failed to create onion service: %v", err)
 	}
@@ -104,7 +104,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Context) {
+func (t *Tor) process(w http.ResponseWriter, r *http.Request, ctx context.Context) {
 	logger.Debug("[web] process request start...")
 	if r.Method != http.MethodPost {
 		logger.Info("[web] request method no specific.")
@@ -175,7 +175,7 @@ func (t *tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 	}
 }
 
-func (t *tor) archive(ctx context.Context, text string) (tc *template.Collector, col []*wayback.Collect) {
+func (t *Tor) archive(ctx context.Context, text string) (tc *template.Collector, col []*wayback.Collect) {
 	logger.Debug("[web] archives start...")
 	tc = &template.Collector{}
 
@@ -243,7 +243,7 @@ func transform(c *template.Collector, slot string, arc map[string]string) {
 	*c = p
 }
 
-func (t *tor) torrc() string {
+func (t *Tor) torrc() string {
 	if t.opts.TorrcFile() == "" {
 		return ""
 	}
