@@ -102,7 +102,7 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 			m.archiving[m.convID] = true
 			mutex.Unlock()
 		}
-		time.Sleep(3 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }
 
