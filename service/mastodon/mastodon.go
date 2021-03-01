@@ -73,6 +73,14 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 	// 	}
 	// }
 
+	// Clear notifications every 10 minutes
+	go func() {
+		for {
+			time.Sleep(10 * time.Minute)
+			m.client.ClearNotifications(ctx)
+		}
+	}()
+
 	mutex := sync.RWMutex{}
 	m.archiving = make(map[mastodon.ID]bool)
 	for {
