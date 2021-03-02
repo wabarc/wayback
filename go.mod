@@ -22,7 +22,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/tdewolff/parse/v2 v2.5.11 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
-	github.com/wabarc/archive.is v1.1.1
+	github.com/wabarc/archive.is v1.1.2
 	github.com/wabarc/archive.org v1.0.4
 	github.com/wabarc/helper v0.0.0-20210227111116-538a9d8851db
 	github.com/wabarc/telegra.ph v0.0.0-20210221072121-954117897e8e
