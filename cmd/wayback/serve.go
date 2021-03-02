@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/spf13/cobra"
 	"github.com/wabarc/wayback/config"
@@ -18,9 +21,12 @@ type service struct {
 }
 
 func serve(_ *cobra.Command, opts *config.Options, args []string) {
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
 	srv := &service{}
 	ran := srv.run(ctx, opts)
+
+	go srv.stop(cancel)
+	defer close(srv.errCh)
 
 	select {
 	case err := <-ran.err():
@@ -61,6 +67,29 @@ func (srv *service) run(ctx context.Context, opts *config.Options) *service {
 	}
 
 	return srv
+}
+
+func (srv *service) stop(cancel context.CancelFunc) {
+	signalChan := make(chan os.Signal, 1)
+
+	signal.Notify(
+		signalChan,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGQUIT,
+		syscall.SIGTERM,
+		syscall.SIGKILL,
+	)
+
+	for {
+		sig := <-signalChan
+		switch sig {
+		case os.Interrupt:
+			logger.Info("Signal SIGINT is received, probably due to `Ctrl-C`, exiting ...")
+			cancel()
+			return
+		}
+	}
 }
 
 func (s *service) err() <-chan error { return s.errCh }
