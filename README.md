@@ -13,9 +13,10 @@ Wayback is a tool that supports running as a command-line tool and docker contai
 ## Feature
 
 - CLI tool
-- Interactive with Telegram bot
 - Serve as Tor Hidden Service or local web entry
-- Wayback to Internet Archive, archive.today, IPFS, etc
+- Wayback to Internet Archive, archive.today, IPFS and Telegraph
+- Interactive with Telegram bot, Mastodon and Twitter as daemon service
+- Support publish wayback resutls to Telegram channel and GitHub Issues
 
 ## Installation
 
@@ -214,6 +215,14 @@ and next time to run the `wayback` service to place the key to the `--tor-key` o
 ```
 [INFO] Web: important to keep the private key: d005473a611d2b23e54d6446dfe209cb6c52ddd698818d1233b1d750f790445fcfb5ece556fe5ee3b4724ac6bea7431898ee788c6011febba7f779c85845ae87
 ```
+
+## Contributing
+
+We encourage all contributions to this repository! Open an issue! Or open a Pull Request!
+
+If you're interested in contributing to `wayback` itself, read our [contributing guide](./CONTRIBUTING.md) to get started.
+
+Note: All interaction here should conform to the [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## License
 
