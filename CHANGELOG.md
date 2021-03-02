@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add stale workflow.
 
 ### Changed
-- Make logs more reaadable.
+- Make logs more readable.
 - Update snapcraft workflow.
 
 ## [0.7.0] - 2021-02-24
