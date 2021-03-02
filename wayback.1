@@ -131,11 +131,49 @@ The chatid which publish message. (same as flag --chatid)\&.
 .B WAYBACK_TOR_PRIVKEY
 The private key for Tor service. (same as flag --tor-key)\&.
 .TP
+.B WAYBACK_MASTODON_SERVER
+Domain of Mastodon instance\&.
+.TP
+.B WAYBACK_MASTODON_KEY
+The client key of your Mastodon application\&.
+.TP
+.B WAYBACK_MASTODON_SECRET
+The client secret of your Mastodon application\&.
+.TP
+.B WAYBACK_MASTODON_TOKEN
+The access token of your Mastodon application\&.
+.TP
+.B WAYBACK_TWITTER_CONSUMER_KEY
+The customer key of your Twitter application\&.
+.TP
+.B WAYBACK_TWITTER_CONSUMER_SECRET
+The customer secret of your Twitter application\&.
+.TP
+.B WAYBACK_TWITTER_ACCESS_TOKEN
+The access token of your Twitter application\&.
+.TP
+.B WAYBACK_TWITTER_ACCESS_SECRET
+The access secret of your Twitter application\&.
+.TP
 .B WAYBACK_TOR_LOCAL_PORT
 Local port of Tor service\&.
 .TP
 .B WAYBACK_TOR_REMOTE_PORTS
 Remote ports of Tor hidden service, e.g. WAYBACK_TOR_REMOTE_PORTS=80,81\&.
+.TP
+.B WAYBACK_TORRC
+Using torrc for Tor Hidden Service. default: "/etc/tor/torrc"\&.
+.TP
+.B WAYBACK_SLOT
+Pinning service for IPFS mode of pinner, see
+.UR
+https://github.com/wabarc/ipfs-pinner#supported-pinning-services\&.
+.TP
+.B WAYBACK_APIKEY
+API key for pinning service\&.
+.TP
+.B WAYBACK_SECRET
+API secret for pinning service\&.
 
 .SH BUGS
 .P
