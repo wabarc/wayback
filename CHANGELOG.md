@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2021-03-02
+
+### Added
+- Clear Mastodon notifications every 10 minutes.
+- Handle os signal.
+
+### Changed
+- Adjust request Mastodon API interval to 5 seconds.
+- Upgrade RPM builder Go version to 1.16
+
+### Fixed
+- Fix nil pointer dereference of archive.today.
+
 ## [0.8.0] - 2021-02-27
 
 ### Added
