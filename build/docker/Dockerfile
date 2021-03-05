@@ -21,7 +21,8 @@ FROM alpine:3.13
 
 LABEL maintainer "WaybackBot <wabarc@tuta.io>"
 
-ARG TOR_EXCLUDE_NODE="{cn},{hk},{mo},{sg},{th},{pk},{by},{ru},{ir},{sy},{vn},{ph},{my},{cu},{us},{au},{ca},{nz},{gb},{fr}"
+ARG TOR_EXCLUDE_NODE="{cn},{hk},{mo},{sg},{th},{pk},{by},{ru},{ir},{sy},{vn},{ph},{my},{cu}"
+ARG TOR_EXCLUDE_EXIT_NODE="{cn},{hk},{mo},{sg},{kp},{th},{pk},{by},{ru},{ir},{sy},{vn},{ph},{my},{cu},{au},{ca},{nz},{gb},{us},{fr},{dk},{nl},{no},{be},{de},{it},{es}"
 
 ENV BASE_DIR /wayback
 ENV PUSER wayback
@@ -43,6 +44,6 @@ RUN apk update; \
     \
     mv /etc/tor/torrc.sample /etc/tor/torrc; \
     echo "ExcludeNodes ${TOR_EXCLUDE_NODE}" >> /etc/tor/torrc; \
-    echo "ExcludeExitNodes ${TOR_EXCLUDE_NODE}" >> /etc/tor/torrc; \
+    echo "ExcludeExitNodes ${TOR_EXCLUDE_EXIT_NODE}" >> /etc/tor/torrc; \
     echo 'StrictNodes 1' >> /etc/tor/torrc; \
     #echo 'User tor' >> /etc/tor/torrc
