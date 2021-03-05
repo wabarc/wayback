@@ -66,7 +66,7 @@ func (t *Tor) Serve(ctx context.Context) error {
 
 	verbose := t.opts.HasDebugMode()
 	// startConf := &tor.StartConf{ProcessCreator: libtor.Creator, DataDir: "tor-data"}
-	startConf := &tor.StartConf{TorrcFile: t.torrc()}
+	startConf := &tor.StartConf{TorrcFile: t.torrc(), TempDataDirBase: os.TempDir()}
 	if verbose {
 		startConf.DebugWriter = os.Stdout
 	} else {
