@@ -15,9 +15,8 @@ import (
 func output(tit string, args map[string]string) {
 	fmt.Printf("[%s]\n", tit)
 	for ori, dst := range args {
-		fmt.Printf("%s => %s", ori, dst)
+		fmt.Printf("%s => %s\n", ori, dst)
 	}
-	fmt.Print("\n")
 }
 
 func archive(cmd *cobra.Command, opts *config.Options, args []string) {
