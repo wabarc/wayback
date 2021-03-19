@@ -53,10 +53,7 @@ func TestProcess(t *testing.T) {
 	}
 
 	for _, conv := range convs {
-		m.status = conv.LastStatus
-		m.convID = conv.ID
-
-		if err = m.process(ctx); err != nil {
+		if err = m.process(ctx, conv); err != nil {
 			t.Fatalf("should not be fail: %v", err)
 		}
 	}

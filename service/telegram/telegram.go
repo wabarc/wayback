@@ -21,7 +21,6 @@ type Telegram struct {
 	opts *config.Options
 
 	bot *tgbotapi.BotAPI
-	upd tgbotapi.Update
 }
 
 // New Telegram struct.
@@ -32,7 +31,7 @@ func New(opts *config.Options) *Telegram {
 }
 
 // Serve loop request message from the Telegram api server.
-// Serve always returns a nil error.
+// Serve always returns an error.
 func (t *Telegram) Serve(ctx context.Context) (err error) {
 	if t.bot, err = tgbotapi.NewBotAPI(t.opts.TelegramToken()); err != nil {
 		return errors.New("Initialize telegram failed, error: %v", err)
@@ -53,15 +52,14 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 			continue
 		}
 
-		t.upd = update
-		go t.process(ctx)
+		go t.process(ctx, update)
 	}
 
 	return errors.New("done")
 }
 
-func (t *Telegram) process(ctx context.Context) {
-	bot, update := t.bot, t.upd
+func (t *Telegram) process(ctx context.Context, update tgbotapi.Update) {
+	bot := t.bot
 	message := update.Message
 	text := message.Text
 	logger.Debug("[telegram] message: %s", text)
@@ -72,8 +70,8 @@ func (t *Telegram) process(ctx context.Context) {
 		return
 	case len(urls) == 0:
 		logger.Info("[telegram] archives failure, URL no found.")
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "URL no found.")
-		msg.ReplyToMessageID = update.Message.MessageID
+		msg := tgbotapi.NewMessage(message.Chat.ID, "URL no found.")
+		msg.ReplyToMessageID = message.MessageID
 		bot.Send(msg)
 		return
 	}
@@ -86,8 +84,8 @@ func (t *Telegram) process(ctx context.Context) {
 
 	replyText := publish.Render(col)
 	logger.Debug("[telegram] reply text, %s", replyText)
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, replyText)
-	msg.ReplyToMessageID = update.Message.MessageID
+	msg := tgbotapi.NewMessage(message.Chat.ID, replyText)
+	msg.ReplyToMessageID = message.MessageID
 	msg.ParseMode = "html"
 
 	bot.Send(msg)

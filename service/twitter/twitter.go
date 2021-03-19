@@ -24,10 +24,8 @@ type Twitter struct {
 
 	opts   *config.Options
 	client *twitter.Client
-	msg    *twitter.DirectMessageEventMessage
 
 	archiving map[string]bool
-	eventID   string
 }
 
 // New returns Twitter struct.
@@ -75,9 +73,7 @@ func (t *Twitter) Serve(ctx context.Context) error {
 			if _, exist := t.archiving[event.ID]; exist {
 				continue
 			}
-			t.msg = event.Message
-			t.eventID = event.ID
-			go t.process(ctx)
+			go t.process(ctx, event)
 
 			mutex.Lock()
 			t.archiving[event.ID] = true
@@ -87,21 +83,22 @@ func (t *Twitter) Serve(ctx context.Context) error {
 	}
 }
 
-func (t *Twitter) process(ctx context.Context) error {
-	if t.msg == nil || t.eventID == "" {
+func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent) error {
+	msg := event.Message
+	if msg == nil || event.ID == "" {
 		logger.Debug("[twitter] no direct message")
 		return errors.New("Twitter: no direct message")
 	}
-	logger.Debug("[twitter] message event, event id: %s", t.eventID)
-	logger.Debug("[twitter] message event, message data: %v", t.msg.Data)
+	logger.Debug("[twitter] message event, event id: %s", event.ID)
+	logger.Debug("[twitter] message event, message data: %v", msg.Data)
 
-	text := t.msg.Data.Text
-	logger.Debug("[twitter] message event id: %s message: %s", t.eventID, text)
+	text := msg.Data.Text
+	logger.Debug("[twitter] message event id: %s message: %s", event.ID, text)
 	defer func() {
 		// Destroy Direct Message
-		t.client.DirectMessages.EventsDestroy(t.eventID)
+		t.client.DirectMessages.EventsDestroy(event.ID)
 		time.Sleep(time.Second)
-		delete(t.archiving, t.eventID)
+		delete(t.archiving, event.ID)
 	}()
 
 	urls := helper.MatchURL(text)
@@ -126,12 +123,12 @@ func (t *Twitter) process(ctx context.Context) error {
 	replyText := pub.Render(col)
 	logger.Debug("[twitter] reply text, %s", replyText)
 
-	event, _, err := t.client.DirectMessages.EventsNew(&twitter.DirectMessageEventsNewParams{
+	ev, _, err := t.client.DirectMessages.EventsNew(&twitter.DirectMessageEventsNewParams{
 		Event: &twitter.DirectMessageEvent{
 			Type: "message_create",
 			Message: &twitter.DirectMessageEventMessage{
 				Target: &twitter.DirectMessageTarget{
-					RecipientID: t.msg.SenderID,
+					RecipientID: msg.SenderID,
 				},
 				Data: &twitter.DirectMessageData{
 					Text: replyText,
@@ -139,16 +136,16 @@ func (t *Twitter) process(ctx context.Context) error {
 			},
 		},
 	})
-	logger.Debug("[twitter] reply event: %v", event)
+	logger.Debug("[twitter] reply event: %v", ev)
 	if err != nil {
-		logger.Debug("[twitter] reply error: %v", event, err)
+		logger.Debug("[twitter] reply error: %v", ev, err)
 		return err
 	}
 
 	go func() {
 		// Destroy Direct Message
 		time.Sleep(time.Second)
-		t.client.DirectMessages.EventsDestroy(event.ID)
+		t.client.DirectMessages.EventsDestroy(ev.ID)
 	}()
 
 	pub.ToTwitter(ctx, t.opts, replyText)
@@ -160,6 +157,11 @@ func (t *Twitter) process(ctx context.Context) error {
 	if t.opts.PublishToIssues() {
 		logger.Debug("[twitter] publishing to GitHub issues...")
 		publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
+	}
+	if t.opts.PublishToMastodon() {
+		logger.Debug("[twitter] publishing to Mastodon...")
+		mstdn := publish.NewMastodon(nil, t.opts)
+		mstdn.ToMastodon(ctx, t.opts, mstdn.Render(col), "")
 	}
 
 	return nil

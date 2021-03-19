@@ -24,11 +24,8 @@ import (
 type Mastodon struct {
 	sync.RWMutex
 
-	opts *config.Options
-
+	opts   *config.Options
 	client *mastodon.Client
-	status *mastodon.Status
-	convID mastodon.ID
 
 	archiving map[mastodon.ID]bool
 }
@@ -54,6 +51,10 @@ func New(opts *config.Options) *Mastodon {
 // Serve loop request direct messages from the Mastodon instance.
 // Serve always returns a nil error.
 func (m *Mastodon) Serve(ctx context.Context) error {
+	if m.client == nil {
+		return errors.New("Must initialize Mastodon client.")
+	}
+
 	logger.Debug("[mastodon] Serving Mastodon instance: %s", m.opts.MastodonServer())
 
 	// rcv, err := m.client.StreamingUser(ctx)
@@ -91,40 +92,38 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 		logger.Debug("[mastodon] conversations: %v", convs)
 
 		for _, conv := range convs {
-			m.status = conv.LastStatus
-			m.convID = conv.ID
-			if _, exist := m.archiving[m.convID]; exist {
+			if _, exist := m.archiving[conv.ID]; exist {
 				continue
 			}
-			go m.process(ctx)
+			go m.process(ctx, conv)
 
 			mutex.Lock()
-			m.archiving[m.convID] = true
+			m.archiving[conv.ID] = true
 			mutex.Unlock()
 		}
 		time.Sleep(5 * time.Second)
 	}
 }
 
-func (m *Mastodon) process(ctx context.Context) error {
-	if m.status == nil || m.convID == "" {
+func (m *Mastodon) process(ctx context.Context, conv *mastodon.Conversation) error {
+	if conv.LastStatus == nil || conv.ID == "" {
 		logger.Debug("[mastodon] no status or conversation")
 		return errors.New("Mastodon: no status or conversation")
 	}
 
-	text := textContent(m.status.Content)
-	logger.Debug("[mastodon] conversation id: %s message: %s", m.convID, text)
-	defer m.client.DeleteConversation(ctx, m.convID)
+	text := textContent(conv.LastStatus.Content)
+	logger.Debug("[mastodon] conversation id: %s message: %s", conv.ID, text)
+	defer m.client.DeleteConversation(ctx, conv.ID)
 	defer func() {
 		time.Sleep(time.Second)
-		delete(m.archiving, m.convID)
+		delete(m.archiving, conv.ID)
 	}()
 
 	urls := helper.MatchURL(text)
 	pub := publish.NewMastodon(m.client, m.opts)
 	if len(urls) == 0 {
 		logger.Info("[mastodon] archives failure, URL no found.")
-		pub.ToMastodon(ctx, m.opts, "URL no found", string(m.status.ID))
+		pub.ToMastodon(ctx, m.opts, "URL no found", string(conv.LastStatus.ID))
 		return errors.New("Mastodon: URL no found")
 	}
 
@@ -136,7 +135,7 @@ func (m *Mastodon) process(ctx context.Context) error {
 
 	replyText := pub.Render(col)
 	logger.Debug("[mastodon] reply text, %s", replyText)
-	pub.ToMastodon(ctx, m.opts, replyText, string(m.status.ID))
+	pub.ToMastodon(ctx, m.opts, replyText, string(conv.LastStatus.ID))
 
 	if m.opts.PublishToChannel() {
 		logger.Debug("[mastodon] publishing to Telegram channel...")
