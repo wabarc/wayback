@@ -148,21 +148,7 @@ func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent)
 		t.client.DirectMessages.EventsDestroy(ev.ID)
 	}()
 
-	pub.ToTwitter(ctx, t.opts, replyText)
-
-	if t.opts.PublishToChannel() {
-		logger.Debug("[twitter] publishing to Telegram channel...")
-		publish.ToChannel(t.opts, nil, replyText)
-	}
-	if t.opts.PublishToIssues() {
-		logger.Debug("[twitter] publishing to GitHub issues...")
-		publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
-	}
-	if t.opts.PublishToMastodon() {
-		logger.Debug("[twitter] publishing to Mastodon...")
-		mstdn := publish.NewMastodon(nil, t.opts)
-		mstdn.ToMastodon(ctx, t.opts, mstdn.Render(col), "")
-	}
+	go publish.To(ctx, t.opts, col, "twitter")
 
 	return nil
 }

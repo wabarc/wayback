@@ -90,24 +90,7 @@ func (t *Telegram) process(ctx context.Context, update tgbotapi.Update) {
 
 	bot.Send(msg)
 
-	if t.opts.PublishToChannel() {
-		logger.Debug("[telegram] publishing to channel...")
-		publish.ToChannel(t.opts, bot, replyText)
-	}
-	if t.opts.PublishToIssues() {
-		logger.Debug("[telegram] publishing to GitHub issues...")
-		publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
-	}
-	if t.opts.PublishToMastodon() {
-		logger.Debug("[telegram] publishing to Mastodon...")
-		mstdn := publish.NewMastodon(nil, t.opts)
-		mstdn.ToMastodon(ctx, t.opts, mstdn.Render(col), "")
-	}
-	if t.opts.PublishToTwitter() {
-		logger.Debug("[telegram] publishing to Twitter...")
-		twitter := publish.NewTwitter(nil, t.opts)
-		twitter.ToTwitter(ctx, t.opts, twitter.Render(col))
-	}
+	go publish.To(ctx, t.opts, col, "telegram")
 }
 
 func (t *Telegram) archive(urls []string) (col []*wayback.Collect, err error) {

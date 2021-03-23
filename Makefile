@@ -203,6 +203,10 @@ fmt:
 	@echo "-> Running go fmt"
 	@go fmt $(PACKAGES)
 
+vet:
+	@echo "-> Running go vet"
+	@go vet $(PACKAGES)
+
 test:
 	@echo "-> Running go test"
 	go test -v ./...

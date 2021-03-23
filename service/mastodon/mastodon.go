@@ -133,23 +133,8 @@ func (m *Mastodon) process(ctx context.Context, conv *mastodon.Conversation) err
 		return err
 	}
 
-	replyText := pub.Render(col)
-	logger.Debug("[mastodon] reply text, %s", replyText)
-	pub.ToMastodon(ctx, m.opts, replyText, string(conv.LastStatus.ID))
-
-	if m.opts.PublishToChannel() {
-		logger.Debug("[mastodon] publishing to Telegram channel...")
-		publish.ToChannel(m.opts, nil, replyText)
-	}
-	if m.opts.PublishToIssues() {
-		logger.Debug("[mastodon] publishing to GitHub issues...")
-		publish.ToIssues(ctx, m.opts, publish.NewGitHub().Render(col))
-	}
-	if m.opts.PublishToTwitter() {
-		logger.Debug("[mastodon] publishing to Twitter...")
-		twitter := publish.NewTwitter(nil, m.opts)
-		twitter.ToTwitter(ctx, m.opts, twitter.Render(col))
-	}
+	// Reply and publish toot as public
+	go publish.To(ctx, m.opts, col, "mastodon", string(conv.LastStatus.ID))
 
 	return nil
 }

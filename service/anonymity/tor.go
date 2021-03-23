@@ -127,27 +127,6 @@ func (t *Tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 
 	logger.Debug("[web] text: %s", text)
 
-	pub := func(col []*wayback.Collect) {
-		if t.opts.PublishToChannel() {
-			logger.Debug("[web] publishing to channel...")
-			publish.ToChannel(t.opts, nil, publish.Render(col))
-		}
-		if t.opts.PublishToIssues() {
-			logger.Debug("[web] publishing to GitHub issues...")
-			publish.ToIssues(ctx, t.opts, publish.NewGitHub().Render(col))
-		}
-		if t.opts.PublishToMastodon() {
-			logger.Debug("[web] publishing to Mastodon...")
-			mstdn := publish.NewMastodon(nil, t.opts)
-			mstdn.ToMastodon(ctx, t.opts, mstdn.Render(col), "")
-		}
-		if t.opts.PublishToTwitter() {
-			logger.Debug("[web] publishing to Twitter...")
-			twitter := publish.NewTwitter(nil, t.opts)
-			twitter.ToTwitter(ctx, t.opts, twitter.Render(col))
-		}
-	}
-
 	collector, col := t.archive(ctx, text)
 	switch r.PostFormValue("data-type") {
 	case "json":
@@ -156,7 +135,7 @@ func (t *Tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		if data, err := json.Marshal(collector); err != nil {
 			logger.Error("[web] encode for response failed, %v", err)
 		} else {
-			go pub(col)
+			go publish.To(ctx, t.opts, col, "web")
 			w.Write(data)
 		}
 
@@ -165,7 +144,7 @@ func (t *Tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		if html, ok := collector.Render(); ok {
-			go pub(col)
+			go publish.To(ctx, t.opts, col, "web")
 			w.Write(html)
 		} else {
 			logger.Error("[web] render template for response failed")
