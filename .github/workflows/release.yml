@@ -67,9 +67,8 @@ jobs:
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-
-    - name: List checked-out code
-      run: ls -al
+      with:
+        fetch-depth: 0
 
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
@@ -102,17 +101,41 @@ jobs:
         path: build/package/wayback*
 
   debpkg:
-    name: Packaging Debian package
+    name: Build deb
+    strategy:
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+          - os: linux
+            arch: arm32
+            arm: 7
+          - os: linux
+            arch: arm64
+            arm: 8
     runs-on: ubuntu-latest
+    env:
+      GOARCH: ${{ matrix.arch }}
+      GOARM: ${{ matrix.arm }}
     steps:
-    - name: Check out code codebase
+    - name: Check out codebase
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
-    - name: List checked-out code
-      run: ls -al
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
 
     - name: Build Debian package
-      run: make debian-packages
+      id: builder
+      run: |
+        TARGET="${GOARCH}"
+        if [[ -n "${GOARM}" ]]; then
+          TARGET="${GOARCH}v${GOARM}"
+        fi
+        PKG_ARCH="${TARGET//v8}"
+        PKG_ARCH="${PKG_ARCH//32}"
+        make debian DEB_IMG_ARCH=${TARGET} PKG_ARCH=${PKG_ARCH}
 
     - name: Upload archived binary
       uses: actions/upload-artifact@v2
@@ -124,11 +147,10 @@ jobs:
     name: Packaging RPM package
     runs-on: ubuntu-latest
     steps:
-    - name: Check out code codebase
+    - name: Check out codebase
       uses: actions/checkout@v2
-
-    - name: List checked-out code
-      run: ls -al
+      with:
+        fetch-depth: 0
 
     - name: Build RPM package
       run: make rpm

@@ -7,6 +7,8 @@ on:
       - "**/*.go"
       - "go.mod"
       - "go.sum"
+      - "Makefile"
+      - ".github/workflows/builder.yml"
   pull_request:
     branches: "*"
     paths:
@@ -66,6 +68,7 @@ jobs:
             arch: 386
       fail-fast: false
     runs-on: ubuntu-latest
+    continue-on-error: true
     env:
       GOOS: ${{ matrix.os }}
       GOARCH: ${{ matrix.arch }}
@@ -81,6 +84,8 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Cache go module
       uses: actions/cache@v2
@@ -114,3 +119,50 @@ jobs:
       with:
         name: ${{ steps.builder.outputs.filename }}
         path: ./build/binary/wayback*
+        if-no-files-found: error
+
+  debpkg:
+    name: Build deb
+    strategy:
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+          - os: linux
+            arch: arm32
+            arm: 7
+          - os: linux
+            arch: arm64
+            arm: 8
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      GOARCH: ${{ matrix.arch }}
+      GOARM: ${{ matrix.arm }}
+    steps:
+    - name: Check out codebase
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+
+    - name: Build Debian package
+      id: builder
+      run: |
+        TARGET="${GOARCH}"
+        if [[ -n "${GOARM}" ]]; then
+          TARGET="${GOARCH}v${GOARM}"
+        fi
+        PKG_ARCH="${TARGET//v8}"
+        PKG_ARCH="${PKG_ARCH//32}"
+        make debian DEB_IMG_ARCH=${TARGET} PKG_ARCH=${PKG_ARCH}
+        echo "::set-output name=filename::wayback-deb-${PKG_ARCH}"
+
+    - name: Upload archived binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ steps.builder.outputs.filename }}
+        path: build/package/wayback*.deb
+        if-no-files-found: error

@@ -225,6 +225,7 @@ debian:
 	@$(DOCKER) build \
 		--build-arg IMAGE_ARCH=$(DEB_IMG_ARCH) \
 		--build-arg PKG_VERSION=$(VERSION) \
+		--build-arg PKG_ARCH=$(PKG_ARCH) \
 		-t $(DEB_IMG_ARCH)/wayback-deb-builder \
 		-f build/debian/Dockerfile .
 	@$(DOCKER) run --rm \
@@ -235,5 +236,5 @@ debian:
 
 debian-packages:
 	$(MAKE) debian DEB_IMG_ARCH=amd64
-	#$(MAKE) debian DEB_IMG_ARCH=arm32v7
-	#$(MAKE) debian DEB_IMG_ARCH=arm64v8
+	$(MAKE) debian DEB_IMG_ARCH=arm32v7 PKG_ARCH=armv7
+	$(MAKE) debian DEB_IMG_ARCH=arm64v8 PKG_ARCH=arm64

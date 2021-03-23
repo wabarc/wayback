@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # Perform package builder
+#
 set -eux
 
 GOOS=linux
@@ -11,7 +12,7 @@ case $arg in
     *arm/v6|*arm32v6)
         GOARCH=armv6
         ;;
-    *arm/v7|*arm32v7)
+    *armv7|*arm/v7|*arm32v7)
         GOARCH=armv7
         ;;
     *arm64|*arm64v8)
