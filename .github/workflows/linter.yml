@@ -19,6 +19,11 @@ jobs:
         env:
           DEFAULT_BRANCH: 'main'
           VALIDATE_ALL_CODEBASE: false
-          VALIDATE_JSON: false
-          VALIDATE_ANSIBLE: false
+          VALIDATE_GO: true
+          VALIDATE_MARKDOWN: true
+          VALIDATE_SHELL_SHFMT: true
+          VALIDATE_DOCKERFILE: true
+          VALIDATE_DOCKERFILE_HADOLINT: true
+          VALIDATE_BASH: true
+          VALIDATE_BASH_EXEC: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
