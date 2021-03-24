@@ -1,0 +1,30 @@
+name: ReviewDog
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  alex:
+    name: runner / alex
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 0
+    - uses: reviewdog/action-alex@v1
+      with:
+        github_token: ${{ secrets.GItHUB_TOKEN }}
+  misspell:
+    name: runner / misspell
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 0
+    - uses: reviewdog/action-misspell@v1
+      with:
+        github_token: ${{ secrets.GItHUB_TOKEN }}
