@@ -3,18 +3,18 @@
 [![LICENSE](https://img.shields.io/github/license/wabarc/wayback.svg?color=green)](https://github.com/wabarc/wayback/blob/main/LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/wabarc/wayback)](https://goreportcard.com/report/github.com/wabarc/wayback)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/wabarc/wayback/Go?color=brightgreen)](https://github.com/wabarc/wayback/actions)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/wabarc/wayback)
+[![Go Reference](https://img.shields.io/badge/godoc-reference-blue.svg)](https://pkg.go.dev/github.com/wabarc/wayback)
 [![Releases](https://img.shields.io/github/v/release/wabarc/wayback.svg?include_prereleases&color=blue)](https://github.com/wabarc/wayback/releases)
-[![Docker Automated build](https://github.com/wabarc/wayback/workflows/Docker/badge.svg)](https://hub.docker.com/r/wabarc/wayback)
-[![Snapcraft](https://github.com/wabarc/wayback/workflows/Snapcraft/badge.svg)](https://snapcraft.io/wayback)
 
 Wayback is a tool that supports running as a command-line tool and docker container, purpose to snapshot webpage to time capsules.
 
-## Feature
+## Features
 
-- CLI tool
+- Cross platform
+- Batch wayback URLs
+- Builtin CLI (`wayback`)
 - Serve as Tor Hidden Service or local web entry
-- Wayback to Internet Archive, archive.today, IPFS and Telegraph
+- Wayback to Internet Archive, archive.today, IPFS and Telegraph easier
 - Interactive with IRC, Telegram bot, Mastodon and Twitter as daemon service
 - Support publish wayback resutls to Telegram channel, Mastodon and GitHub Issues
 
