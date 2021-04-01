@@ -469,3 +469,94 @@ func TestMastodonAccessToken(t *testing.T) {
 		t.Fatalf(`Unexpected Mastodon access token, got %v instead of %s`, got, expected)
 	}
 }
+
+func TestIRCNick(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_IRC_NICK", "foo")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "foo"
+	got := opts.IRCNick()
+
+	if got != expected {
+		t.Fatalf(`Unexpected IRC nick got %v instead of %s`, got, expected)
+	}
+}
+
+func TestIRCPassword(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_IRC_PASSWORD", "foo")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "foo"
+	got := opts.IRCPassword()
+
+	if got != expected {
+		t.Fatalf(`Unexpected IRC password got %v instead of %s`, got, expected)
+	}
+}
+
+func TestIRCChannel(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_IRC_CHANNEL", "foo")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "foo"
+	got := opts.IRCChannel()
+
+	if got != expected {
+		t.Fatalf(`Unexpected IRC channel got %v instead of %s`, got, expected)
+	}
+}
+
+func TestIRCServer(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_IRC_SERVER", "example.net:7000")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "example.net:7000"
+	got := opts.IRCServer()
+
+	if got != expected {
+		t.Fatalf(`Unexpected IRC server got %v instead of %s`, got, expected)
+	}
+}
+
+func TestPublishToIRCChannel(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_IRC_NICK", "foo")
+	os.Setenv("WAYBACK_IRC_CHANNEL", "bar")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := true
+	got := opts.PublishToIRCChannel()
+
+	if got != expected {
+		t.Fatalf(`Unexpected publish to IRC channel got %v instead of %v`, got, expected)
+	}
+}

@@ -145,39 +145,43 @@ $ wayback -d telegram -t YOUT-BOT-TOKEN -d web
 
 You can specify configuration options either via command flags or via environment variables, an overview of all options below.
 
-| Flags               | Environment Variable              | Default          | Description                                                  |
-| ------------------- | --------------------------------- | ---------------- | ------------------------------------------------------------ |
-| `--debug`           | `DEBUG`                           | `false`          | Enable debug mode                                            |
-| -                   | `LOG_TIME`                        | `true`           | Display the date and time in log messages                    |
-| `-d`, `--daemon`    | -                                 | -                | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter`    |
-| `--ia`              | `WAYBACK_ENABLE_IA`               | `true`           | Wayback webpages to **Internet Archive**                     |
-| `--is`              | `WAYBACK_ENABLE_IS`               | `true`           | Wayback webpages to **Archive Today**                        |
-| `--ip`              | `WAYBACK_ENABLE_IP`               | `false`          | Wayback webpages to **IPFS**                                 |
-| `--ph`              | `WAYBACK_ENABLE_PH`               | `false`          | Wayback webpages to **[Telegra.ph](https://telegra.ph)**, required Chrome/Chromium |
-| `--ipfs-host`       | `WAYBACK_IPFS_HOST`               | `127.0.0.1`      | IPFS daemon service host                                     |
-| `-p`, `--ipfs-port` | `WAYBACK_IPFS_PORT`               | `5001`           | IPFS daemon service port                                     |
-| `-m`, `--ipfs-mode` | `WAYBACK_IPFS_MODE`               | `pinner`         | IPFS mode for preserve webpage, e.g. `daemon`, `pinner`      |
-| -                   | `WAYBACK_GITHUB_TOKEN`            | -                | GitHub Personal Access Token, required the `repo` scope      |
-| -                   | `WAYBACK_GITHUB_OWNER`            | -                | GitHub account name                                          |
-| -                   | `WAYBACK_GITHUB_REPO`             | -                | GitHub repository to publish results                         |
-| `-t`, `--token`     | `WAYBACK_TELEGRAM_TOKEN`          | -                | Telegram Bot API Token                                       |
-| `-c`, `--chatid`    | `WAYBACK_TELEGRAM_CHANNEL`        | -                | The **Telegram Channel** name for publish archived result    |
-| -                   | `WAYBACK_MASTODON_SERVER`         | -                | Domain of Mastodon instance                                  |
-| -                   | `WAYBACK_MASTODON_KEY`            | -                | The client key of your Mastodon application                  |
-| -                   | `WAYBACK_MASTODON_SECRET`         | -                | The client secret of your Mastodon application               |
-| -                   | `WAYBACK_MASTODON_TOKEN`          | -                | The access token of your Mastodon application                |
-| -                   | `WAYBACK_TWITTER_CONSUMER_KEY`    | -                | The customer key of your Twitter application                 |
-| -                   | `WAYBACK_TWITTER_CONSUMER_SECRET` | -                | The customer secret of your Twitter application              |
-| -                   | `WAYBACK_TWITTER_ACCESS_TOKEN`    | -                | The access token of your Twitter application                 |
-| -                   | `WAYBACK_TWITTER_ACCESS_SECRET`   | -                | The access secret of your Twitter application                |
-| `--tor`             | `WAYBACK_USE_TOR`                 | `false`          | Snapshot webpage via Tor anonymity network                   |
-| `--tor-key`         | `WAYBACK_TOR_PRIVKEY`             | -                | The private key for Tor Hidden Service                       |
-| -                   | `WAYBACK_TOR_LOCAL_PORT`          | -                | Local port for Tor Hidden Service, also support for a **reverse proxy** |
-| -                   | `WAYBACK_TOR_REMOTE_PORTS`        | `80`             | Remote ports for Tor Hidden Service, e.g. `WAYBACK_TOR_REMOTE_PORTS=80,81` |
-| -                   | `WAYBACK_TORRC`                   | `/etc/tor/torrc` | Using `torrc` for Tor Hidden Service                         |
-| -                   | `WAYBACK_SLOT`                    | -                | Pinning service for IPFS mode of pinner, see [ipfs-pinner](https://github.com/wabarc/ipfs-pinner#supported-pinning-services) |
-| -                   | `WAYBACK_APIKEY`                  | -                | API key for pinning service                                  |
-| -                   | `WAYBACK_SECRET`                  | -                | API secret for pinning service                               |
+| Flags               | Environment Variable              | Default                 | Description                                                  |
+| ------------------- | --------------------------------- | ----------------------- | ------------------------------------------------------------ |
+| `--debug`           | `DEBUG`                           | `false`                 | Enable debug mode                                            |
+| -                   | `LOG_TIME`                        | `true`                  | Display the date and time in log messages                    |
+| `-d`, `--daemon`    | -                                 | -                       | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter` |
+| `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                  | Wayback webpages to **Internet Archive**                     |
+| `--is`              | `WAYBACK_ENABLE_IS`               | `true`                  | Wayback webpages to **Archive Today**                        |
+| `--ip`              | `WAYBACK_ENABLE_IP`               | `false`                 | Wayback webpages to **IPFS**                                 |
+| `--ph`              | `WAYBACK_ENABLE_PH`               | `false`                 | Wayback webpages to **[Telegra.ph](https://telegra.ph)**, required Chrome/Chromium |
+| `--ipfs-host`       | `WAYBACK_IPFS_HOST`               | `127.0.0.1`             | IPFS daemon service host                                     |
+| `-p`, `--ipfs-port` | `WAYBACK_IPFS_PORT`               | `5001`                  | IPFS daemon service port                                     |
+| `-m`, `--ipfs-mode` | `WAYBACK_IPFS_MODE`               | `pinner`                | IPFS mode for preserve webpage, e.g. `daemon`, `pinner`      |
+| -                   | `WAYBACK_GITHUB_TOKEN`            | -                       | GitHub Personal Access Token, required the `repo` scope      |
+| -                   | `WAYBACK_GITHUB_OWNER`            | -                       | GitHub account name                                          |
+| -                   | `WAYBACK_GITHUB_REPO`             | -                       | GitHub repository to publish results                         |
+| `-t`, `--token`     | `WAYBACK_TELEGRAM_TOKEN`          | -                       | Telegram Bot API Token                                       |
+| `-c`, `--chatid`    | `WAYBACK_TELEGRAM_CHANNEL`        | -                       | The **Telegram Channel** name for publish archived result    |
+| -                   | `WAYBACK_MASTODON_SERVER`         | -                       | Domain of Mastodon instance                                  |
+| -                   | `WAYBACK_MASTODON_KEY`            | -                       | The client key of your Mastodon application                  |
+| -                   | `WAYBACK_MASTODON_SECRET`         | -                       | The client secret of your Mastodon application               |
+| -                   | `WAYBACK_MASTODON_TOKEN`          | -                       | The access token of your Mastodon application                |
+| -                   | `WAYBACK_TWITTER_CONSUMER_KEY`    | -                       | The customer key of your Twitter application                 |
+| -                   | `WAYBACK_TWITTER_CONSUMER_SECRET` | -                       | The customer secret of your Twitter application              |
+| -                   | `WAYBACK_TWITTER_ACCESS_TOKEN`    | -                       | The access token of your Twitter application                 |
+| -                   | `WAYBACK_TWITTER_ACCESS_SECRET`   | -                       | The access secret of your Twitter application                |
+| -                   | `WAYBACK_IRC_NICK`                | -                       | IRC nick                                                     |
+| -                   | `WAYBACK_IRC_PASSWORD`            | -                       | IRC password                                                 |
+| -                   | `WAYBACK_IRC_CHANNEL`             | -                       | IRC channel                                                  |
+| -                   | `WAYBACK_IRC_SERVER`              | `irc.freenode.net:7000` | IRC server, required TLS                                     |
+| `--tor`             | `WAYBACK_USE_TOR`                 | `false`                 | Snapshot webpage via Tor anonymity network                   |
+| `--tor-key`         | `WAYBACK_TOR_PRIVKEY`             | -                       | The private key for Tor Hidden Service                       |
+| -                   | `WAYBACK_TOR_LOCAL_PORT`          | -                       | Local port for Tor Hidden Service, also support for a **reverse proxy** |
+| -                   | `WAYBACK_TOR_REMOTE_PORTS`        | `80`                    | Remote ports for Tor Hidden Service, e.g. `WAYBACK_TOR_REMOTE_PORTS=80,81` |
+| -                   | `WAYBACK_TORRC`                   | `/etc/tor/torrc`        | Using `torrc` for Tor Hidden Service                         |
+| -                   | `WAYBACK_SLOT`                    | -                       | Pinning service for IPFS mode of pinner, see [ipfs-pinner](https://github.com/wabarc/ipfs-pinner#supported-pinning-services) |
+| -                   | `WAYBACK_APIKEY`                  | -                       | API key for pinning service                                  |
+| -                   | `WAYBACK_SECRET`                  | -                       | API secret for pinning service                               |
 
 ### Docker/Podman
 
@@ -199,12 +203,20 @@ $ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHA
 - [x] [IPFS](https://ipfs.io/)
 - [ ] ~~[ZeroNet](https://zeronet.io/)~~
 
-## Telegram bot
+## Services
+
+### Telegram bot
 
 - [Bots: An introduction for developers](https://core.telegram.org/bots)
 - [How do I create a bot?](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
 - [An example bot](http://t.me/wabarc_bot)
 - [An example channel](http://t.me/wabarc)
+
+### Mastodon bot
+
+Bot friendly instance:
+
+- [botsin.space](https://botsin.space/about/more)
 
 ## F.A.Q
 

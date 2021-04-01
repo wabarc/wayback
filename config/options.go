@@ -38,6 +38,11 @@ const (
 	defTwitterAccessToken    = ""
 	defTwitterAccessSecret   = ""
 
+	defIRCNick     = ""
+	defIRCPassword = ""
+	defIRCChannel  = ""
+	defIRCServer   = "irc.freenode.net:7000"
+
 	defTorPrivateKey = ""
 	defTorLocalPort  = 0
 	defTorrcFile     = "/etc/tor/torrc"
@@ -58,6 +63,7 @@ type Options struct {
 	mastodon *mastodon
 	twitter  *twitter
 	github   *github
+	irc      *irc
 	tor      *tor
 }
 
@@ -97,6 +103,13 @@ type github struct {
 	token string
 	owner string
 	repo  string
+}
+
+type irc struct {
+	nick     string
+	password string
+	channel  string
+	server   string
 }
 
 type tor struct {
@@ -144,6 +157,12 @@ func NewOptions() *Options {
 			token: defGitHubToken,
 			owner: defGitHubOwner,
 			repo:  defGitHubRepo,
+		},
+		irc: &irc{
+			nick:     defIRCNick,
+			password: defIRCPassword,
+			channel:  defIRCChannel,
+			server:   defIRCServer,
 		},
 		tor: &tor{
 			pvk:         defTorPrivateKey,
@@ -289,6 +308,31 @@ func (o *Options) GitHubRepo() string {
 // PublishToIssues returns whether to publish results to GitHub issues.
 func (o *Options) PublishToIssues() bool {
 	return o.github.token != "" && o.github.owner != "" && o.github.repo != ""
+}
+
+// IRCNick returns nick of IRC
+func (o *Options) IRCNick() string {
+	return o.irc.nick
+}
+
+// IRCPassword returns password of IRC
+func (o *Options) IRCPassword() string {
+	return o.irc.password
+}
+
+// IRCChannel returns channel of IRC
+func (o *Options) IRCChannel() string {
+	return o.irc.channel
+}
+
+// IRCServer returns server of IRC
+func (o *Options) IRCServer() string {
+	return o.irc.server
+}
+
+// PublishToIRCChannel returns whether to publish results to IRC channel.
+func (o *Options) PublishToIRCChannel() bool {
+	return o.irc.nick != "" && o.irc.channel != ""
 }
 
 // TorPrivKey returns the private key of Tor service.
