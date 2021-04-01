@@ -84,6 +84,14 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.github.owner = parseString(val, defGitHubOwner)
 		case "WAYBACK_GITHUB_REPO":
 			p.opts.github.repo = parseString(val, defGitHubRepo)
+		case "WAYBACK_IRC_NICK":
+			p.opts.irc.nick = parseString(val, defIRCNick)
+		case "WAYBACK_IRC_PASSWORD":
+			p.opts.irc.password = parseString(val, defIRCPassword)
+		case "WAYBACK_IRC_CHANNEL":
+			p.opts.irc.channel = parseString(val, defIRCChannel)
+		case "WAYBACK_IRC_SERVER":
+			p.opts.irc.server = parseString(val, defIRCServer)
 		case "WAYBACK_TOR_PRIVKEY":
 			p.opts.tor.pvk = parseString(val, defTorPrivateKey)
 		case "WAYBACK_TOR_LOCAL_PORT":

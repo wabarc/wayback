@@ -40,4 +40,9 @@ func To(ctx context.Context, opts *config.Options, col []*wayback.Collect, args 
 		twitter := NewTwitter(nil, opts)
 		twitter.ToTwitter(ctx, opts, twitter.Render(col))
 	}
+	if opts.PublishToIRCChannel() {
+		logger.Debug("[%s] publishing to IRC channel...", from)
+		irc := NewIRC(nil, opts)
+		irc.ToChannel(ctx, opts, irc.Render(col))
+	}
 }

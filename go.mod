@@ -23,7 +23,8 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/tdewolff/parse/v2 v2.5.12 // indirect
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
-	github.com/wabarc/archive.is v1.1.3
+	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
+	github.com/wabarc/archive.is v1.1.4
 	github.com/wabarc/archive.org v1.0.4
 	github.com/wabarc/helper v0.0.0-20210304114921-68a65db707a6
 	github.com/wabarc/screenshot v1.0.0 // indirect
