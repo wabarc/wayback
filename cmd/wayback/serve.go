@@ -12,6 +12,7 @@ import (
 	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wayback/service/anonymity"
 	"github.com/wabarc/wayback/service/mastodon"
+	"github.com/wabarc/wayback/service/relaychat"
 	"github.com/wabarc/wayback/service/telegram"
 	"github.com/wabarc/wayback/service/twitter"
 )
@@ -40,6 +41,11 @@ func (srv *service) run(ctx context.Context, opts *config.Options) *service {
 	srv.errCh = make(chan error, len(daemon))
 	for _, s := range daemon {
 		switch s {
+		case "irc":
+			irc := relaychat.New(opts)
+			go func(errCh chan error) {
+				errCh <- irc.Serve(ctx)
+			}(srv.errCh)
 		case "mastodon", "mstdn":
 			mastodon := mastodon.New(opts)
 			go func(errCh chan error) {
