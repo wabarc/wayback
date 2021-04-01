@@ -6,6 +6,8 @@ on:
   push:
     tags:
       - v*
+    branches:
+      - main
 
 jobs:
   publish:
@@ -15,6 +17,8 @@ jobs:
     steps:
       - name: Checkout default branch
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Prepare
         id: prep
