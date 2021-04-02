@@ -25,7 +25,7 @@ require (
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
 	github.com/wabarc/archive.is v1.1.5
 	github.com/wabarc/archive.org v1.0.5
-	github.com/wabarc/helper v0.0.0-20210404101141-d4d5bd4d676f
+	github.com/wabarc/helper v0.0.0-20210406025114-49052beb93c4
 	github.com/wabarc/imgbb v1.0.0 // indirect
 	github.com/wabarc/screenshot v1.0.0 // indirect
 	github.com/wabarc/telegra.ph v0.0.0-20210404082130-1e2ddead2915
@@ -33,9 +33,10 @@ require (
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 // indirect
-	golang.org/x/net v0.0.0-20210331212208-0fccb6fa2b5c
+	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210403161142-5e06dd20ab57 // indirect
+	maunium.net/go/mautrix v0.9.3
 )
 
 replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20201203134337-61a4e7973e4c

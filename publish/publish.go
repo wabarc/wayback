@@ -45,4 +45,9 @@ func To(ctx context.Context, opts *config.Options, col []*wayback.Collect, args 
 		irc := NewIRC(nil, opts)
 		irc.ToChannel(ctx, opts, irc.Render(col))
 	}
+	if opts.PublishToMatrixRoom() {
+		logger.Debug("[%s] publishing to Matrix room...", from)
+		matrix := NewMatrix(nil, opts)
+		matrix.ToRoom(ctx, opts, matrix.Render(col))
+	}
 }

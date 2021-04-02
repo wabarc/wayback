@@ -43,6 +43,11 @@ const (
 	defIRCChannel  = ""
 	defIRCServer   = "irc.freenode.net:7000"
 
+	defMatrixHomeserver = "https://matrix.org"
+	defMatrixUserID     = ""
+	defMatrixRoomID     = ""
+	defMatrixPassword   = ""
+
 	defTorPrivateKey = ""
 	defTorLocalPort  = 0
 	defTorrcFile     = "/etc/tor/torrc"
@@ -63,6 +68,7 @@ type Options struct {
 	mastodon *mastodon
 	twitter  *twitter
 	github   *github
+	matrix   *matrix
 	irc      *irc
 	tor      *tor
 }
@@ -103,6 +109,13 @@ type github struct {
 	token string
 	owner string
 	repo  string
+}
+
+type matrix struct {
+	homeserver string
+	userID     string
+	roomID     string
+	password   string
 }
 
 type irc struct {
@@ -152,6 +165,12 @@ func NewOptions() *Options {
 			consumerSecret: defTwitterConsumerSecret,
 			accessToken:    defTwitterAccessToken,
 			accessSecret:   defTwitterAccessSecret,
+		},
+		matrix: &matrix{
+			homeserver: defMatrixHomeserver,
+			userID:     defMatrixUserID,
+			roomID:     defMatrixRoomID,
+			password:   defMatrixPassword,
 		},
 		github: &github{
 			token: defGitHubToken,
@@ -330,9 +349,47 @@ func (o *Options) IRCServer() string {
 	return o.irc.server
 }
 
-// PublishToIRCChannel returns whether to publish results to IRC channel.
+// PublishToIRCChannel returns whether publish results to IRC channel.
 func (o *Options) PublishToIRCChannel() bool {
 	return o.irc.nick != "" && o.irc.channel != ""
+}
+
+// MatrixHomeserver returns the homeserver of Matrix.
+func (o *Options) MatrixHomeserver() string {
+	u, err := url.Parse(o.matrix.homeserver)
+	if err != nil {
+		return ""
+	}
+	return u.String()
+}
+
+// MatrixUserID returns the user ID of Matrix account.
+func (o *Options) MatrixUserID() string {
+	if !strings.HasPrefix(o.matrix.userID, "@") || !strings.Contains(o.matrix.userID, ":") {
+		return ""
+	}
+	return o.matrix.userID
+}
+
+// MatrixRoomID returns the room ID of Matrix account.
+func (o *Options) MatrixRoomID() string {
+	if !strings.HasPrefix(o.matrix.roomID, "#") || !strings.Contains(o.matrix.roomID, ":") {
+		return ""
+	}
+	return o.matrix.roomID
+}
+
+// MatrixPassword returns the password of Matrix account.
+func (o *Options) MatrixPassword() string {
+	return o.matrix.password
+}
+
+// PublishToMatrixRoom returns whether publish results to Matrix room.
+func (o *Options) PublishToMatrixRoom() bool {
+	return o.MatrixHomeserver() != "" &&
+		o.MatrixUserID() != "" &&
+		o.MatrixRoomID() != "" &&
+		o.MatrixPassword() != ""
 }
 
 // TorPrivKey returns the private key of Tor service.

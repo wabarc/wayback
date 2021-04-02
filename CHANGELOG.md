@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add IRC support.
+- Add Matrix support.
+- Add linter rules for workflow.
+- Add reviewdog workflow.
+
+### Changed
+- Refine Dockerfile.
+- Refine test workflow.
+
 ## [0.8.3] - 2021-03-24
 
 ### Added

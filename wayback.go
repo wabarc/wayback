@@ -5,6 +5,8 @@
 package wayback // import "github.com/wabarc/wayback"
 
 import (
+	"sync"
+
 	"github.com/wabarc/archive.is/pkg"
 	"github.com/wabarc/archive.org/pkg"
 	"github.com/wabarc/telegra.ph/pkg"
@@ -37,6 +39,8 @@ type Handle struct {
 // Dst mapping the original URL and archived destination URL,
 // Ext is extra descriptions.
 type Collect struct {
+	sync.RWMutex
+
 	Arc string
 	Dst map[string]string
 	Ext string

@@ -92,6 +92,14 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.irc.channel = parseString(val, defIRCChannel)
 		case "WAYBACK_IRC_SERVER":
 			p.opts.irc.server = parseString(val, defIRCServer)
+		case "WAYBACK_MATRIX_HOMESERVER":
+			p.opts.matrix.homeserver = parseString(val, defMatrixHomeserver)
+		case "WAYBACK_MATRIX_USERID":
+			p.opts.matrix.userID = parseString(val, defMatrixUserID)
+		case "WAYBACK_MATRIX_ROOMID":
+			p.opts.matrix.roomID = parseString(val, defMatrixRoomID)
+		case "WAYBACK_MATRIX_PASSWORD":
+			p.opts.matrix.password = parseString(val, defMatrixPassword)
 		case "WAYBACK_TOR_PRIVKEY":
 			p.opts.tor.pvk = parseString(val, defTorPrivateKey)
 		case "WAYBACK_TOR_LOCAL_PORT":
