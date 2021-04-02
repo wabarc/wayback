@@ -29,11 +29,22 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
         go: [ "1.13", "1.14", "1.15", "1.16" ]
+    env:
+      SENDER_UID: ${{ secrets.MATRIX_SENDER_UID }}
+      SENDER_PWD: ${{ secrets.MATRIX_SENDER_PWD }}
+      RECVER_UID: ${{ secrets.MATRIX_RECVER_UID }}
+      RECVER_PWD: ${{ secrets.MATRIX_RECVER_PWD }}
+      MATRIX_ROOMID: ${{ secrets.MATRIX_ROOMID }}
     steps:
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
         go-version: ${{ matrix.go }}
+
+    - name: Set up IPFS
+      uses: ibnesayeed/setup-ipfs@master
+      with:
+        run_daemon: true
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2

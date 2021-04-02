@@ -557,6 +557,99 @@ func TestPublishToIRCChannel(t *testing.T) {
 	got := opts.PublishToIRCChannel()
 
 	if got != expected {
-		t.Fatalf(`Unexpected publish to IRC channel got %v instead of %v`, got, expected)
+		t.Fatalf(`Unexpected publish to IRC channel got %t instead of %v`, got, expected)
+	}
+}
+
+func TestMatrixHomeServer(t *testing.T) {
+	expected := "https://matrix-client.matrix.org"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_MATRIX_HOMESERVER", expected)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.MatrixHomeserver()
+	if got != expected {
+		t.Fatalf(`Unexpected Matrix homeserver got %v instead of %v`, got, expected)
+	}
+}
+
+func TestMatrixUserID(t *testing.T) {
+	expected := "@foo:matrix.org"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_MATRIX_USERID", expected)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.MatrixUserID()
+	if got != expected {
+		t.Fatalf(`Unexpected Matrix user ID got %v instead of %v`, got, expected)
+	}
+}
+
+func TestMatrixRoomID(t *testing.T) {
+	expected := "#foo:matrix.org"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_MATRIX_ROOMID", expected)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.MatrixRoomID()
+	if got != expected {
+		t.Fatalf(`Unexpected Matrix room ID got %v instead of %v`, got, expected)
+	}
+}
+
+func TestMatrixPassword(t *testing.T) {
+	expected := "foo-bar"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_MATRIX_PASSWORD", expected)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.MatrixPassword()
+	if got != expected {
+		t.Fatalf(`Unexpected Matrix password got %v instead of %v`, got, expected)
+	}
+}
+
+func TestPublishToMatrixRoom(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_MATRIX_HOMESERVER", "https://matrix-client.matrix.org")
+	os.Setenv("WAYBACK_MATRIX_USERID", "@foo:matrix.org")
+	os.Setenv("WAYBACK_MATRIX_ROOMID", "#bar:matrix.org")
+	os.Setenv("WAYBACK_MATRIX_PASSWORD", "zoo")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := true
+	got := opts.PublishToMatrixRoom()
+
+	if got != expected {
+		t.Fatalf(`Unexpected publish to Matrix room got %t instead of %v`, got, expected)
 	}
 }

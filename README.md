@@ -15,7 +15,7 @@ Wayback is a tool that supports running as a command-line tool and docker contai
 - Builtin CLI (`wayback`)
 - Serve as Tor Hidden Service or local web entry
 - Wayback to Internet Archive, archive.today, IPFS and Telegraph easier
-- Interactive with IRC, Telegram bot, Mastodon and Twitter as daemon service
+- Interactive with IRC, Martix, Telegram bot, Mastodon and Twitter as daemon service
 - Support publish wayback resutls to Telegram channel, Mastodon and GitHub Issues
 
 ## Installation
@@ -174,6 +174,10 @@ You can specify configuration options either via command flags or via environmen
 | -                   | `WAYBACK_IRC_PASSWORD`            | -                       | IRC password                                                 |
 | -                   | `WAYBACK_IRC_CHANNEL`             | -                       | IRC channel                                                  |
 | -                   | `WAYBACK_IRC_SERVER`              | `irc.freenode.net:7000` | IRC server, required TLS                                     |
+| -                   | `WAYBACK_MATRIX_HOMESERVER`       | `https://matrix.org`    | Matrix homeserver                                            |
+| -                   | `WAYBACK_MATRIX_USERID`           | -                       | Matrix unique user ID, format: `@foo:example.com`            |
+| -                   | `WAYBACK_MATRIX_ROOMID`           | -                       | Matrix unique room ID, format: `#bar:example.com`            |
+| -                   | `WAYBACK_MATRIX_PASSWORD`         | -                       | Matrix password                                              |
 | `--tor`             | `WAYBACK_USE_TOR`                 | `false`                 | Snapshot webpage via Tor anonymity network                   |
 | `--tor-key`         | `WAYBACK_TOR_PRIVKEY`             | -                       | The private key for Tor Hidden Service                       |
 | -                   | `WAYBACK_TOR_LOCAL_PORT`          | -                       | Local port for Tor Hidden Service, also support for a **reverse proxy** |

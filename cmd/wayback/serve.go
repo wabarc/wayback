@@ -12,6 +12,7 @@ import (
 	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wayback/service/anonymity"
 	"github.com/wabarc/wayback/service/mastodon"
+	"github.com/wabarc/wayback/service/matrix"
 	"github.com/wabarc/wayback/service/relaychat"
 	"github.com/wabarc/wayback/service/telegram"
 	"github.com/wabarc/wayback/service/twitter"
@@ -60,6 +61,11 @@ func (srv *service) run(ctx context.Context, opts *config.Options) *service {
 			twitter := twitter.New(opts)
 			go func(errCh chan error) {
 				errCh <- twitter.Serve(ctx)
+			}(srv.errCh)
+		case "matrix":
+			matrix := matrix.New(opts)
+			go func(errCh chan error) {
+				errCh <- matrix.Serve(ctx)
 			}(srv.errCh)
 		case "web":
 			tor := anonymity.New(opts)
