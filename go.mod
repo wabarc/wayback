@@ -25,7 +25,7 @@ require (
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
 	github.com/wabarc/archive.is v1.1.4
-	github.com/wabarc/archive.org v1.0.4
+	github.com/wabarc/archive.org v1.0.5
 	github.com/wabarc/helper v0.0.0-20210304114921-68a65db707a6
 	github.com/wabarc/screenshot v1.0.0 // indirect
 	github.com/wabarc/telegra.ph v0.0.0-20210221072121-954117897e8e

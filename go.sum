@@ -365,8 +365,8 @@ github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80/go.mod h1:iFy
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/wabarc/archive.is v1.1.4 h1:as0ctR2hiHJvRw3l1YZCIo1Yqo8Lbos5VdVIbpreYxc=
 github.com/wabarc/archive.is v1.1.4/go.mod h1:XIPjk4PXXiJSV4smyvrzWeBsQkG/MZ6JQNukWSaFqAY=
-github.com/wabarc/archive.org v1.0.4 h1:R8ZK9B6VoaSrlvRmBFcOTSEg40KdnDvi6ik4c8aArPY=
-github.com/wabarc/archive.org v1.0.4/go.mod h1:qP3/2Y83WH/PDvYnWpNqz1Xb3HMJxkTq4WJmioLAOug=
+github.com/wabarc/archive.org v1.0.5 h1:ohYqmVXj8M37YiRQ/ElsyuwS7cVssJ5c+BVbvjO3dKs=
+github.com/wabarc/archive.org v1.0.5/go.mod h1:qP3/2Y83WH/PDvYnWpNqz1Xb3HMJxkTq4WJmioLAOug=
 github.com/wabarc/go-mastodon v0.0.5-0.20210225142645-546cc5f43352 h1:oS/hEjtDeCYf7SCXk97tTjJFDMl20vVPg2UKLFwiFKs=
 github.com/wabarc/go-mastodon v0.0.5-0.20210225142645-546cc5f43352/go.mod h1:CZ3bPYRNGgvMZr4d/SNMvCObyCQvTgCXdIOrW040z5U=
 github.com/wabarc/helper v0.0.0-20210127120855-10af37cc2616/go.mod h1:N9P4r7Rn46p4nkWtXV6ztN3p5ACVnp++bgfwjTqSxQ8=
