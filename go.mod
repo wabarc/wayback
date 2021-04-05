@@ -29,7 +29,7 @@ require (
 	github.com/wabarc/helper v0.0.0-20210304114921-68a65db707a6
 	github.com/wabarc/screenshot v1.0.0 // indirect
 	github.com/wabarc/telegra.ph v0.0.0-20210221072121-954117897e8e
-	github.com/wabarc/wbipfs v0.1.2
+	github.com/wabarc/wbipfs v0.1.3
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83 // indirect

@@ -383,8 +383,8 @@ github.com/wabarc/screenshot v1.0.0 h1:eiwBE7oIh3GZ2PpmvVo1mi/wKVXr4t0tEXGR6o+2G
 github.com/wabarc/screenshot v1.0.0/go.mod h1:3s2a8mpwTpE1H8FSV7ExnKZvQUo/LYXRsw95W41Fuls=
 github.com/wabarc/telegra.ph v0.0.0-20210221072121-954117897e8e h1:QYnIBcb5J7oIBWNZxcqxsW9UUPzo0LkFy4MgTBr1UO8=
 github.com/wabarc/telegra.ph v0.0.0-20210221072121-954117897e8e/go.mod h1:yfb5rU8mtGeBuBk14N8UgsmSFbwCXFfTXdtOb4ZDY4g=
-github.com/wabarc/wbipfs v0.1.2 h1:Q012Xfk3FjNAInSkNWiV3qqtNMQ3UDdZBSojfD+BeMc=
-github.com/wabarc/wbipfs v0.1.2/go.mod h1:zjeZWvCyZ2MNPx0PbgwgqgbugrWz7C/Abib2fmy54qg=
+github.com/wabarc/wbipfs v0.1.3 h1:p1kMKPY7QCBq+BDPHOXkg7xizwFrWlHHNklfgdnHR58=
+github.com/wabarc/wbipfs v0.1.3/go.mod h1:zjeZWvCyZ2MNPx0PbgwgqgbugrWz7C/Abib2fmy54qg=
 github.com/whyrusleeping/tar-utils v0.0.0-20180509141711-8c6c8ba81d5c/go.mod h1:xxcJeBb7SIUl/Wzkz1eVKJE/CB34YNrqX2TQI6jY9zs=
 github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b h1:wA3QeTsaAXybLL2kb2cKhCAQTHgYTMwuI8lBlJSv5V8=
 github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b/go.mod h1:xT1Y5p2JR2PfSZihE0s4mjdJaRGp1waCTf5JzhQLBck=
