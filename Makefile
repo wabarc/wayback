@@ -19,7 +19,7 @@ DEB_IMG_ARCH := amd64
 
 PLATFORM_LIST = \
 	darwin-amd64 \
-	#darwin-arm64 \
+	darwin-arm64 \
 	linux-386 \
 	linux-amd64 \
 	linux-armv5 \
@@ -50,6 +50,7 @@ WINDOWS_ARCH_LIST = \
 .PHONY: \
 	darwin-386 \
 	darwin-amd64 \
+	darwin-arm64 \
 	linux-386 \
 	linux-amd64 \
 	linux-armv5 \
@@ -93,7 +94,6 @@ darwin-amd64:
 	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 darwin-arm64:
-	env CGO_ENABLED=1 \
 	GOOS=darwin GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-386:

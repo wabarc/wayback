@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add Matrix support.
 - Add linter rules for workflow.
 - Add reviewdog workflow.
+- Build binary for Apple Silicon.
 
 ### Changed
 - Refine Dockerfile.
