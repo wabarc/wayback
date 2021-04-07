@@ -18,13 +18,13 @@ import (
 	"github.com/cretz/bine/tor"
 	"github.com/cretz/bine/torutil/ed25519"
 	// "github.com/ipsn/go-libtor"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/template"
-	"github.com/wabarc/wayback/utils"
 )
 
 type Tor struct {
@@ -158,7 +158,7 @@ func (t *Tor) archive(ctx context.Context, text string) (tc *template.Collector,
 	logger.Debug("[web] archives start...")
 	tc = &template.Collector{}
 
-	urls := utils.MatchURL(text)
+	urls := helper.MatchURL(text)
 	if len(urls) == 0 {
 		transform(tc, "", map[string]string{text: "URL no found"})
 		logger.Info("[web] archives failure, URL no found.")
