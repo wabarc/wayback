@@ -6,9 +6,12 @@ package telegram // import "github.com/wabarc/wayback/service/telegram"
 
 import (
 	"context"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -19,38 +22,50 @@ import (
 
 type Telegram struct {
 	opts *config.Options
-
-	bot *tgbotapi.BotAPI
+	bot  *telegram.BotAPI
 }
 
 // New Telegram struct.
 func New(opts *config.Options) *Telegram {
+	if opts.TelegramToken() == "" {
+		logger.Fatal("[telegram] missing required environment variable")
+	}
+	bot, err := telegram.NewBotAPI(opts.TelegramToken())
+	if err != nil {
+		logger.Fatal("[telegram] create telegram bot instance failed: %v", err)
+	}
+
 	return &Telegram{
 		opts: opts,
+		bot:  bot,
 	}
 }
 
 // Serve loop request message from the Telegram api server.
 // Serve always returns an error.
 func (t *Telegram) Serve(ctx context.Context) (err error) {
-	if t.bot, err = tgbotapi.NewBotAPI(t.opts.TelegramToken()); err != nil {
+	if t.bot == nil {
 		return errors.New("Initialize telegram failed, error: %v", err)
 	}
-
 	logger.Info("[telegram] authorized on account %s", t.bot.Self.UserName)
 
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
+	cfg := telegram.NewUpdate(0)
+	cfg.Timeout = 60
+	updates := t.bot.GetUpdatesChan(cfg)
 
-	updates, err := t.bot.GetUpdatesChan(u)
-	if err != nil {
-		return errors.New("Get telegram message channel failed, error: %v", err)
-	}
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		logger.Info("[telegram] stopping receive updates...")
+		t.bot.StopReceivingUpdates()
+	}()
 
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
 		}
+		logger.Debug("[telegram] message: %v", update.Message)
 
 		go t.process(ctx, update)
 	}
@@ -58,7 +73,7 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 	return errors.New("done")
 }
 
-func (t *Telegram) process(ctx context.Context, update tgbotapi.Update) {
+func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 	bot := t.bot
 	message := update.Message
 	text := message.Text
@@ -67,24 +82,24 @@ func (t *Telegram) process(ctx context.Context, update tgbotapi.Update) {
 	urls := helper.MatchURL(text)
 	switch {
 	case message.IsCommand():
-		return
+		return nil
 	case len(urls) == 0:
 		logger.Info("[telegram] archives failure, URL no found.")
-		msg := tgbotapi.NewMessage(message.Chat.ID, "URL no found.")
+		msg := telegram.NewMessage(message.Chat.ID, "URL no found.")
 		msg.ReplyToMessageID = message.MessageID
 		bot.Send(msg)
-		return
+		return nil
 	}
 
 	col, err := t.archive(urls)
 	if err != nil {
 		logger.Error("[telegram] archives failure, ", err)
-		return
+		return err
 	}
 
 	replyText := publish.Render(col)
 	logger.Debug("[telegram] reply text, %s", replyText)
-	msg := tgbotapi.NewMessage(message.Chat.ID, replyText)
+	msg := telegram.NewMessage(message.Chat.ID, replyText)
 	msg.ReplyToMessageID = message.MessageID
 	msg.ParseMode = "html"
 
@@ -92,6 +107,8 @@ func (t *Telegram) process(ctx context.Context, update tgbotapi.Update) {
 
 	ctx = context.WithValue(ctx, "telegram", t.bot)
 	go publish.To(ctx, t.opts, col, "telegram")
+
+	return nil
 }
 
 func (t *Telegram) archive(urls []string) (col []*wayback.Collect, err error) {

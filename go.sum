@@ -100,8 +100,8 @@ github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V
 github.com/go-shiori/dom v0.0.0-20201011032054-d6b74a54fe52 h1:wEe9mu6BOmGYT5yQ9ag5E38LHUMUv7/AFx0J8YNR8HI=
 github.com/go-shiori/dom v0.0.0-20201011032054-d6b74a54fe52/go.mod h1:aLEd5DGjh1qYKnJJ/tC5OL0f3CV4CMcreDOn4RpCmUc=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
-github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible h1:2cauKuaELYAEARXRkq2LrJ0yDDv1rW7+wrTEdVL3uaU=
-github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible/go.mod h1:qf9acutJ8cwBUhm1bqgz6Bei9/C/c93FPDljKWwsOgM=
+github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.0.0-rc1.0.20210311030851-d0e1dfd8c604 h1:e60FUuyuEsg5bxiC3mBAbTt/IEQ0/W57XdhZXaqU3oY=
+github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.0.0-rc1.0.20210311030851-d0e1dfd8c604/go.mod h1:5+h9c5l1Z/+Pi+5boa1Fmr4Q+FImsXYnifor92ljaVs=
 github.com/gobwas/httphead v0.1.0 h1:exrUm0f4YX0L7EBwZHuCF4GDp8aJfVeBrlLQrs6NqWU=
 github.com/gobwas/httphead v0.1.0/go.mod h1:O/RXo79gxV8G+RqlR/otEwx4Q36zl9rqC5u12GKvMCM=
 github.com/gobwas/pool v0.2.1 h1:xfeeEhW7pwmX8nuLVlqbzVc7udMDrwetjEv+TZIz1og=
@@ -357,8 +357,6 @@ github.com/tdewolff/parse/v2 v2.5.14 h1:ftdD54vkOeLZ7VkEZxp+wZrYZyyPi43GGon5GwBT
 github.com/tdewolff/parse/v2 v2.5.14/go.mod h1:WzaJpRSbwq++EIQHYIRTpbYKNA3gn9it1Ik++q4zyho=
 github.com/tdewolff/test v1.0.6 h1:76mzYJQ83Op284kMT+63iCNCI7NEERsIN8dLM+RiKr4=
 github.com/tdewolff/test v1.0.6/go.mod h1:6DAvZliBAAnD7rhVgwaM7DE5/d9NMOAJ09SqYqeK4QE=
-github.com/technoweenie/multipartstreamer v1.0.1 h1:XRztA5MXiR1TIRHxH2uNxXxaIkKQDeX7m2XsSOlQEnM=
-github.com/technoweenie/multipartstreamer v1.0.1/go.mod h1:jNVxdtShOxzAsukZwTSw6MDx5eUJoiEBsSvzDU9uzog=
 github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb h1:EavwSqheIJl3nb91HhkL73DwnT2Fk8W3yM7T7TuLZvA=
 github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb/go.mod h1:I0ZT9x8wStY6VOxtNOrLpnDURFs7HS0z1e1vhuKUEVc=
 github.com/tidwall/gjson v1.6.8/go.mod h1:zeFuBCIqD4sN/gmqBzZ4j7Jd6UcA2Fc56x7QFsv+8fI=
@@ -376,8 +374,8 @@ github.com/wabarc/archive.org v1.0.5/go.mod h1:qP3/2Y83WH/PDvYnWpNqz1Xb3HMJxkTq4
 github.com/wabarc/go-mastodon v0.0.5-0.20210225142645-546cc5f43352 h1:oS/hEjtDeCYf7SCXk97tTjJFDMl20vVPg2UKLFwiFKs=
 github.com/wabarc/go-mastodon v0.0.5-0.20210225142645-546cc5f43352/go.mod h1:CZ3bPYRNGgvMZr4d/SNMvCObyCQvTgCXdIOrW040z5U=
 github.com/wabarc/helper v0.0.0-20210127120855-10af37cc2616/go.mod h1:N9P4r7Rn46p4nkWtXV6ztN3p5ACVnp++bgfwjTqSxQ8=
-github.com/wabarc/helper v0.0.0-20210406025114-49052beb93c4 h1:b0VQMZavf3LyRd0enqtVOsZOe30sX0GZIUDE5rchwG0=
-github.com/wabarc/helper v0.0.0-20210406025114-49052beb93c4/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
+github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe h1:V9yz2vQlSVLs51nlo0DAeETFOE57OvlYm98X1LKJA6U=
+github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/imgbb v0.0.0-20210221070034-ab3c2c2ad324/go.mod h1:piz6QXkVfFpQbaQHx70/rPDwaICkW5Ew3lShTzbnVt0=
 github.com/wabarc/imgbb v1.0.0 h1:vNud9qY4dRGp1nikb+GHIrc/sE3WOdNq5gfT/vhWEUQ=
 github.com/wabarc/imgbb v1.0.0/go.mod h1:piz6QXkVfFpQbaQHx70/rPDwaICkW5Ew3lShTzbnVt0=

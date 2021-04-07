@@ -8,29 +8,32 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"os"
 	"testing"
 
+	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 )
 
 func TestProcess(t *testing.T) {
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	_, mux, server := helper.MockServer()
+	defer server.Close()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Header.Get("Authorization") != "Bearer zoo" {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
 		}
-		if r.URL.Path == "/api/v1/conversations" {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/api/v1/conversations":
 			fmt.Fprintln(w, `[{"id": "1", "unread":true, "last_status" : {"content": "foo https://example.com/ bar"}}]`)
-		} else {
+		case "/api/v1/statuses":
 			fmt.Fprintln(w, `{"access_token": "zoo"}`)
 		}
-		return
-	}))
-	defer ts.Close()
+	})
 
-	os.Setenv("WAYBACK_MASTODON_SERVER", ts.URL)
+	os.Setenv("WAYBACK_MASTODON_SERVER", server.URL)
 	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
 	os.Setenv("WAYBACK_MASTODON_SECRET", "bar")
 	os.Setenv("WAYBACK_MASTODON_TOKEN", "zoo")
@@ -44,7 +47,6 @@ func TestProcess(t *testing.T) {
 	m := New(config.Opts)
 	ctx := context.Background()
 	convs, err := m.client.GetConversations(ctx, nil)
-	t.Logf("Conversations: %v", convs)
 	if err != nil {
 		t.Fatalf("Mastodon: Get conversations failure, err: %v", err)
 	}

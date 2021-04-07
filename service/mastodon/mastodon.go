@@ -33,7 +33,7 @@ type Mastodon struct {
 // New mastodon struct.
 func New(opts *config.Options) *Mastodon {
 	if !opts.PublishToMastodon() {
-		logger.Fatal("Missing required environment variable")
+		logger.Fatal("[mastodon] missing required environment variable")
 	}
 
 	client := mastodon.NewClient(&mastodon.Config{
