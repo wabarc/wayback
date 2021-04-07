@@ -37,6 +37,7 @@ PLATFORM_LIST = \
 	linux-s390x \
 	freebsd-386 \
 	freebsd-amd64 \
+	freebsd-arm64 \
 	openbsd-386 \
 	openbsd-amd64 \
 	dragonfly-amd64 \
@@ -68,6 +69,7 @@ WINDOWS_ARCH_LIST = \
 	linux-s390x \
 	freebsd-386 \
 	freebsd-amd64 \
+	freebsd-arm64 \
 	openbsd-386 \
 	openbsd-amd64 \
 	windows-386 \
@@ -147,6 +149,9 @@ freebsd-386:
 
 freebsd-amd64:
 	GOOS=freebsd GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+
+freebsd-arm64:
+	GOOS=freebsd GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 openbsd-386:
 	GOOS=openbsd GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)

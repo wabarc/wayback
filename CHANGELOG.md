@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add linter rules for workflow.
 - Add reviewdog workflow.
 - Build binary for Apple Silicon.
+- Build binary for FreeBSD/arm64.
 
 ### Changed
 - Refine Dockerfile.
