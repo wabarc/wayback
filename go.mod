@@ -36,7 +36,7 @@ require (
 	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20210403161142-5e06dd20ab57 // indirect
-	maunium.net/go/mautrix v0.9.3
+	maunium.net/go/mautrix v0.9.5
 )
 
 replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20201203134337-61a4e7973e4c
