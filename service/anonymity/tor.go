@@ -12,8 +12,10 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
 	"sync"
+	"syscall"
 
 	"github.com/cretz/bine/tor"
 	"github.com/cretz/bine/torutil/ed25519"
@@ -42,7 +44,7 @@ func New(opts *config.Options) *Tor {
 // a local port for proxy server by "WAYBACK_TOR_LOCAL_PORT" env.
 // Use "WAYBACK_TOR_PRIVKEY" to keep the Tor hidden service hostname.
 //
-// Serve always returns a nil error.
+// Serve always returns an error.
 func (t *Tor) Serve(ctx context.Context) error {
 	// Start tor with some defaults + elevated verbosity
 	logger.Info("[web] starting and registering onion service, please wait a bit...")
@@ -89,9 +91,15 @@ func (t *Tor) Serve(ctx context.Context) error {
 	logger.Info(`[web] listening on %q without TLS`, onion.LocalListener.Addr())
 	logger.Info("[web] please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
 
-	http.HandleFunc("/", home)
-	http.HandleFunc("/w", func(w http.ResponseWriter, r *http.Request) { t.process(w, r, ctx) })
-	http.Serve(onion, nil)
+	go func() {
+		http.HandleFunc("/", home)
+		http.HandleFunc("/w", func(w http.ResponseWriter, r *http.Request) { t.process(w, r, ctx) })
+		http.Serve(onion, nil)
+	}()
+
+	stop := make(chan os.Signal)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	<-stop
 
 	return errors.New("done")
 }

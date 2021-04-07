@@ -91,6 +91,7 @@ func (srv *service) stop(cancel context.CancelFunc) {
 		syscall.SIGQUIT,
 		syscall.SIGTERM,
 		syscall.SIGKILL,
+		os.Interrupt,
 	)
 
 	for {

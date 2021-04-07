@@ -69,10 +69,10 @@ func (i *IRC) Serve(ctx context.Context) error {
 		return err
 	}
 
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	stop := make(chan os.Signal)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		<-c
+		<-stop
 		i.conn.Quit()
 	}()
 
