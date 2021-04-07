@@ -234,7 +234,7 @@ profile:
 
 docker-image:
 	@echo "-> Building docker image..."
-	@$(DOCKER) build -t $(DOCKER_IMAGE):$(VERSION) -f build/docker/Dockerfile .
+	@$(DOCKER) build -t $(DOCKER_IMAGE):$(VERSION) -f ./Dockerfile .
 
 rpm:
 	@echo "-> Building rpm package..."

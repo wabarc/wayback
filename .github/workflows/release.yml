@@ -108,13 +108,13 @@ jobs:
           - os: linux
             arch: amd64
           - os: linux
-            arch: arm32
+            arch: arm
             arm: 7
           - os: linux
             arch: arm64
-            arm: 8
     runs-on: ubuntu-latest
     env:
+      GOOS: ${{ matrix.os }}
       GOARCH: ${{ matrix.arch }}
       GOARM: ${{ matrix.arm }}
     steps:
@@ -127,15 +127,17 @@ jobs:
       uses: docker/setup-qemu-action@v1
 
     - name: Build Debian package
-      id: builder
       run: |
-        TARGET="${GOARCH}"
+        OS_ARCH="${GOARCH}"
+        PKG_ARCH="${GOARCH}"
         if [[ -n "${GOARM}" ]]; then
-          TARGET="${GOARCH}v${GOARM}"
+          PKG_ARCH="${PKG_ARCH}v${GOARM}"
+          OS_ARCH="arm32v${GOARM}"
         fi
-        PKG_ARCH="${TARGET//v8}"
-        PKG_ARCH="${PKG_ARCH//32}"
-        make debian DEB_IMG_ARCH=${TARGET} PKG_ARCH=${PKG_ARCH}
+        if [[ "${OS_ARCH}" == "arm64" ]]; then
+          OS_ARCH=arm64v8
+        fi
+        make debian DEB_IMG_ARCH=${OS_ARCH} PKG_ARCH=${PKG_ARCH}
 
     - name: Upload archived binary
       uses: actions/upload-artifact@v2
@@ -194,12 +196,11 @@ jobs:
         path: wayback # Put files to wayback directory
 
     - name: Create Release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
         body: |
           See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/CHANGELOG.md).
 
@@ -208,12 +209,7 @@ jobs:
           ```
           ${{ needs.checksum.outputs.digest }}
           ```
-        draft: false
-        prerelease: true
-
-    - name: Upload release assets
-      uses: fnkr/github-action-ghr@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      env:
-        GHR_PATH: wayback/
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        draft: true
+        files: |
+          wayback/*.tar.gz
+          wayback/*.zip
