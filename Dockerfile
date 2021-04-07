@@ -50,6 +50,8 @@ RUN set -o pipefail; \
     #echo 'User tor' >> /etc/tor/torrc; \
     chmod a+w /var/log/tor
 
+EXPOSE 8964
+
 # Trigger on downstream build, only support for docker,
 # add flag `--format=docker` if using podman.
 # Ref: https://wiki.alpinelinux.org/wiki/Fonts

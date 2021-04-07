@@ -301,7 +301,7 @@ func TestDefaultTorLocalPortValue(t *testing.T) {
 		t.Fatalf(`Parsing environment variables failed: %v`, err)
 	}
 
-	expected := 0
+	expected := defTorLocalPort
 	got := opts.TorLocalPort()
 
 	if got != expected {

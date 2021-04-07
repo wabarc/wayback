@@ -49,7 +49,7 @@ const (
 	defMatrixPassword   = ""
 
 	defTorPrivateKey = ""
-	defTorLocalPort  = 0
+	defTorLocalPort  = 8964
 	defTorrcFile     = "/etc/tor/torrc"
 )
 

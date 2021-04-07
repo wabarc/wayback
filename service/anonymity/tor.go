@@ -78,13 +78,15 @@ func (t *Tor) Serve(ctx context.Context) error {
 	}
 	defer e.Close()
 
-	// Create an onion service to listen on any port but show as 80
+	// Create an onion service to listen on any port but show as local port,
+	// specify the local port using the `WAYBACK_TOR_LOCAL_PORT` environment variable.
 	onion, err := e.Listen(ctx, &tor.ListenConf{LocalPort: t.opts.TorLocalPort(), RemotePorts: t.opts.TorRemotePorts(), Version3: true, Key: pvk})
 	if err != nil {
 		logger.Fatal("[web] failed to create onion service: %v", err)
 	}
 	defer onion.Close()
 
+	logger.Info(`[web] listening on %q without TLS`, onion.LocalListener.Addr())
 	logger.Info("[web] please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
 
 	http.HandleFunc("/", home)

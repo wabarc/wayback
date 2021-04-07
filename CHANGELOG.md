@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refine test workflow.
 - Improve Docker image release workflow.
 - Upgrade dependencies.
+- Listen on local port `8964` for web service.
 
 ## [0.8.3] - 2021-03-24
 
