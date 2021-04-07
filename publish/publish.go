@@ -7,9 +7,14 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"context"
 
+	"github.com/dghubble/go-twitter/twitter"
+	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	mstdn "github.com/mattn/go-mastodon"
+	irc "github.com/thoj/go-ircevent"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/logger"
+	matrix "maunium.net/go/mautrix"
 )
 
 func To(ctx context.Context, opts *config.Options, col []*wayback.Collect, args ...string) {
@@ -20,7 +25,8 @@ func To(ctx context.Context, opts *config.Options, col []*wayback.Collect, args 
 
 	if opts.PublishToChannel() {
 		logger.Debug("[%s] publishing to channel...", from)
-		ToChannel(opts, nil, Render(col))
+		bot := ctx.Value("telegram").(*telegram.BotAPI)
+		ToChannel(opts, bot, Render(col))
 	}
 	if opts.PublishToIssues() {
 		logger.Debug("[%s] publishing to GitHub issues...", from)
@@ -32,22 +38,26 @@ func To(ctx context.Context, opts *config.Options, col []*wayback.Collect, args 
 			id = args[1]
 		}
 		logger.Debug("[%s] publishing to Mastodon...", from)
-		mstdn := NewMastodon(nil, opts)
+		client := ctx.Value("mastodon").(*mstdn.Client)
+		mstdn := NewMastodon(client, opts)
 		mstdn.ToMastodon(ctx, opts, mstdn.Render(col), id)
 	}
 	if opts.PublishToTwitter() {
 		logger.Debug("[%s] publishing to Twitter...", from)
-		twitter := NewTwitter(nil, opts)
+		client := ctx.Value("twitter").(*twitter.Client)
+		twitter := NewTwitter(client, opts)
 		twitter.ToTwitter(ctx, opts, twitter.Render(col))
 	}
 	if opts.PublishToIRCChannel() {
 		logger.Debug("[%s] publishing to IRC channel...", from)
-		irc := NewIRC(nil, opts)
+		conn := ctx.Value("irc").(*irc.Connection)
+		irc := NewIRC(conn, opts)
 		irc.ToChannel(ctx, opts, irc.Render(col))
 	}
 	if opts.PublishToMatrixRoom() {
 		logger.Debug("[%s] publishing to Matrix room...", from)
-		matrix := NewMatrix(nil, opts)
+		client := ctx.Value("matrix").(*matrix.Client)
+		matrix := NewMatrix(client, opts)
 		matrix.ToRoom(ctx, opts, matrix.Render(col))
 	}
 }

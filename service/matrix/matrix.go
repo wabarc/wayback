@@ -166,6 +166,7 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 		logger.Error("[matrix] mark message as receipt failure: %v", err)
 	}
 
+	ctx = context.WithValue(ctx, "matrix", m.client)
 	publish.To(ctx, m.opts, col, "matrix")
 
 	return nil

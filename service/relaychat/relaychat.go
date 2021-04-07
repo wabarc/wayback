@@ -108,6 +108,7 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 	i.conn.Privmsg(ev.Nick, replyText)
 
 	// Reply and publish toot as public
+	ctx = context.WithValue(ctx, "irc", i.conn)
 	publish.To(ctx, i.opts, col, "irc")
 
 	return nil

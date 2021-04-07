@@ -90,6 +90,7 @@ func (t *Telegram) process(ctx context.Context, update tgbotapi.Update) {
 
 	bot.Send(msg)
 
+	ctx = context.WithValue(ctx, "telegram", t.bot)
 	go publish.To(ctx, t.opts, col, "telegram")
 }
 

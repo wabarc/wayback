@@ -134,6 +134,7 @@ func (m *Mastodon) process(ctx context.Context, conv *mastodon.Conversation) err
 	}
 
 	// Reply and publish toot as public
+	ctx = context.WithValue(ctx, "mastodon", m.client)
 	go publish.To(ctx, m.opts, col, "mastodon", string(conv.LastStatus.ID))
 
 	return nil

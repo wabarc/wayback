@@ -148,6 +148,7 @@ func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent)
 		t.client.DirectMessages.EventsDestroy(ev.ID)
 	}()
 
+	ctx = context.WithValue(ctx, "twitter", t.client)
 	go publish.To(ctx, t.opts, col, "twitter")
 
 	return nil
