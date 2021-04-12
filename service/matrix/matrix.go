@@ -132,12 +132,10 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 	urls := helper.MatchURL(text)
 	if len(urls) == 0 {
 		logger.Info("[matrix] archives failure, URL no found.")
+		// Redact message
+		m.redact(ev, "URL no found. Original message: "+text)
 		return errors.New("Matrix: URL no found")
 	}
-	// Redact message
-	defer func(ev *event.Event) {
-		m.redact(ev.RoomID, ev.ID)
-	}(ev)
 
 	col, err := m.archive(urls)
 	if err != nil {
@@ -158,6 +156,8 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 		logger.Error("[matrix] send to Matrix room failure: %v", err)
 		return err
 	}
+	// Redact message
+	m.redact(ev, "Wayback completed. Original message: "+text)
 
 	// Mark message as receipt
 	if err := m.client.MarkRead(ev.RoomID, ev.ID); err != nil {
@@ -216,12 +216,12 @@ func (m *Matrix) archive(urls []string) (col []*wayback.Collect, err error) {
 	return col, nil
 }
 
-func (m *Matrix) redact(roomID id.RoomID, eventID id.EventID) bool {
-	if roomID == "" || m.client == nil {
+func (m *Matrix) redact(ev *event.Event, reason string) bool {
+	if ev.ID == "" || ev.RoomID == "" || m.client == nil {
 		return false
 	}
-	extra := matrix.ReqRedact{Reason: "wayback completed."}
-	if _, err := m.client.RedactEvent(roomID, eventID, extra); err != nil {
+	extra := matrix.ReqRedact{Reason: reason}
+	if _, err := m.client.RedactEvent(ev.RoomID, ev.ID, extra); err != nil {
 		logger.Error("[matrix] react message failure, error: %v", err)
 		return false
 	}
