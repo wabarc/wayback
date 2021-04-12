@@ -215,5 +215,4 @@ jobs:
           ```
         draft: true
         files: |
-          wayback/*.tar.gz
-          wayback/*.zip
+          wayback/wayback*
