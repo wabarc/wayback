@@ -61,17 +61,20 @@ Examples:
     WAYBACK_SECRET=YOUR-PINATA-SECRET wayback --ip https://www.fsf.org
 
 Flags:
-  -c, --chatid string      Telegram channel id.
-  -d, --daemon strings     Run as daemon service, e.g. telegram, web
+      --chatid string      Telegram channel id.
+  -c, --config string      Configuration file path, defaults: ./wayback.conf, ~/wayback.conf, /etc/wayback.conf
+  -d, --daemon strings     Run as daemon service, supported services are telegram, web, mastodon, twitter, irc
       --debug              Enable debug mode. (default false)
   -h, --help               help for wayback
       --ia                 Wayback webpages to Internet Archive.
+      --info               Show application information.
       --ip                 Wayback webpages to IPFS. (default false)
       --ipfs-host string   IPFS daemon host, do not require, unless enable ipfs. (default "127.0.0.1")
   -m, --ipfs-mode string   IPFS mode. (default "pinner")
   -p, --ipfs-port uint     IPFS daemon port. (default 5001)
       --is                 Wayback webpages to Archive Today.
       --ph                 Wayback webpages to Telegraph. (default false)
+      --print              Show application configurations.
   -t, --token string       Telegram Bot API Token.
       --tor                Snapshot webpage via Tor anonymity network.
       --tor-key string     The private key for Tor Hidden Service.
@@ -143,11 +146,20 @@ $ wayback -d telegram -t YOUT-BOT-TOKEN -d web
 
 #### Configuration Parameters
 
-You can specify configuration options either via command flags or via environment variables, an overview of all options below.
+By default, `wayback` looks for configuration options from this files, the following are parsed:
+
+- `./wayback.conf`
+- `~/wayback.conf`
+- `/etc/wayback.conf`
+
+Use the `-c` / `--config` option to specify the build definition file to use.
+
+You can also specify configuration options either via command flags or via environment variables, an overview of all options below.
 
 | Flags               | Environment Variable              | Default                 | Description                                                  |
 | ------------------- | --------------------------------- | ----------------------- | ------------------------------------------------------------ |
 | `--debug`           | `DEBUG`                           | `false`                 | Enable debug mode                                            |
+| `-c`, `--config`    | -                                 | -                       | Configuration file path, defaults: `./wayback.conf`, `~/wayback.conf`, `/etc/wayback.conf` |
 | -                   | `LOG_TIME`                        | `true`                  | Display the date and time in log messages                    |
 | `-d`, `--daemon`    | -                                 | -                       | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter` |
 | `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                  | Wayback webpages to **Internet Archive**                     |
@@ -161,7 +173,7 @@ You can specify configuration options either via command flags or via environmen
 | -                   | `WAYBACK_GITHUB_OWNER`            | -                       | GitHub account name                                          |
 | -                   | `WAYBACK_GITHUB_REPO`             | -                       | GitHub repository to publish results                         |
 | `-t`, `--token`     | `WAYBACK_TELEGRAM_TOKEN`          | -                       | Telegram Bot API Token                                       |
-| `-c`, `--chatid`    | `WAYBACK_TELEGRAM_CHANNEL`        | -                       | The **Telegram Channel** name for publish archived result    |
+| `--chatid`          | `WAYBACK_TELEGRAM_CHANNEL`        | -                       | The **Telegram Channel** name for publish archived result    |
 | -                   | `WAYBACK_MASTODON_SERVER`         | -                       | Domain of Mastodon instance                                  |
 | -                   | `WAYBACK_MASTODON_KEY`            | -                       | The client key of your Mastodon application                  |
 | -                   | `WAYBACK_MASTODON_SECRET`         | -                       | The client secret of your Mastodon application               |
@@ -180,12 +192,17 @@ You can specify configuration options either via command flags or via environmen
 | -                   | `WAYBACK_MATRIX_PASSWORD`         | -                       | Matrix password                                              |
 | `--tor`             | `WAYBACK_USE_TOR`                 | `false`                 | Snapshot webpage via Tor anonymity network                   |
 | `--tor-key`         | `WAYBACK_TOR_PRIVKEY`             | -                       | The private key for Tor Hidden Service                       |
-| -                   | `WAYBACK_TOR_LOCAL_PORT`          | 8964                    | Local port for Tor Hidden Service, also support for a **reverse proxy** |
+| -                   | `WAYBACK_TOR_LOCAL_PORT`          | `8964`                  | Local port for Tor Hidden Service, also support for a **reverse proxy** |
 | -                   | `WAYBACK_TOR_REMOTE_PORTS`        | `80`                    | Remote ports for Tor Hidden Service, e.g. `WAYBACK_TOR_REMOTE_PORTS=80,81` |
 | -                   | `WAYBACK_TORRC`                   | `/etc/tor/torrc`        | Using `torrc` for Tor Hidden Service                         |
 | -                   | `WAYBACK_SLOT`                    | -                       | Pinning service for IPFS mode of pinner, see [ipfs-pinner](https://github.com/wabarc/ipfs-pinner#supported-pinning-services) |
 | -                   | `WAYBACK_APIKEY`                  | -                       | API key for pinning service                                  |
 | -                   | `WAYBACK_SECRET`                  | -                       | API secret for pinning service                               |
+
+If both of the definition file and environment variables are specified, they are all will be read and apply,
+and preferred from the environment variable for the same item.
+
+Prints the resulting options of the targets with `--print`, in a Go struct with type, without running the `wayback`.
 
 ### Docker/Podman
 

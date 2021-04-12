@@ -5,7 +5,10 @@
 package config // import "github.com/wabarc/wayback/config"
 
 import (
+	"bufio"
+	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -31,13 +34,51 @@ func (p *Parser) ParseEnvironmentVariables() (*Options, error) {
 	}
 }
 
+// ParseFile loads configuration values from a local file.
+func (p *Parser) ParseFile(filename string) (*Options, error) {
+	if filename == "" {
+		for _, path := range defaultFilenames() {
+			_, err := os.Open(path)
+			if err != nil {
+				continue
+			}
+			filename = path
+			break
+		}
+	}
+
+	fp, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer fp.Close()
+
+	err = p.parseLines(p.parseFileContent(fp))
+	if err != nil {
+		return nil, err
+	}
+
+	return p.opts, nil
+}
+
+func (p *Parser) parseFileContent(r io.Reader) (lines []string) {
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if len(line) > 0 && !strings.HasPrefix(line, "#") && !strings.HasPrefix(line, "[") && strings.Index(line, "=") > 0 {
+			lines = append(lines, line)
+		}
+	}
+	return lines
+}
+
 func (p *Parser) parseLines(lines []string) (err error) {
 	for _, line := range lines {
 		fields := strings.SplitN(line, "=", 2)
 		key := strings.TrimSpace(fields[0])
 		val := strings.TrimSpace(fields[1])
 
-		switch key {
+		switch strings.ToUpper(key) {
 		case "DEBUG":
 			p.opts.debug = parseBool(val, defDebug)
 		case "LOG_TIME":
@@ -160,4 +201,14 @@ func parseIntList(val string, fallback []int) []int {
 	}
 
 	return intList
+}
+
+func defaultFilenames() []string {
+	name := "wayback.conf"
+	home, _ := os.UserHomeDir()
+	return []string{
+		name,
+		filepath.Join(home, name),
+		filepath.Join("/etc", name),
+	}
 }

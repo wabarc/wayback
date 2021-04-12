@@ -20,7 +20,7 @@ wayback \- easy and fast to wayback webpage.
 
 .SH OPTIONS
 .PP
-.B \-c, \-\-chatid
+.B \-\-chatid
 .RS 4
 The chatid which publish message, e.g. Temegram Channel id\&.
 .RE
@@ -30,9 +30,24 @@ The chatid which publish message, e.g. Temegram Channel id\&.
 Run as daemon service, e.g. telegram, web\&.
 .RE
 .PP
+.B \-c, \-\-config
+.RS 4
+Configuration file path, defaults: ./wayback.conf, ~/wayback.conf, /etc/wayback.conf\&.
+.RE
+.PP
 .B \-\-debug
 .RS 4
 Enable debug mode. default: false\&.
+.RE
+.PP
+.B \-\-print
+.RS 4
+Show application configurations. default: false\&.
+.RE
+.PP
+.B \-\-info
+.RS 4
+Show application information. default: false\&.
 .RE
 .PP
 .B \-h, \-\-help

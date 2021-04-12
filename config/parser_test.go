@@ -9,6 +9,10 @@ Package config handles configuration management for the application.
 package config // import "github.com/wabarc/wayback/config"
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -69,5 +73,22 @@ func TestParseStringValueWithUnsetVariable(t *testing.T) {
 func TestParseIntListValue(t *testing.T) {
 	if len(parseIntList("2020,1128", []int{80})) != 2 {
 		t.Errorf(`Defined variables should returns the specified value`)
+	}
+}
+
+func TestGetDefaultFilenames(t *testing.T) {
+	files := defaultFilenames()
+	got := len(files)
+	expected := 3
+	if got != expected {
+		t.Errorf(`Unexpected file path got %d instead of %d`, got, expected)
+	}
+
+	home, _ := os.UserHomeDir()
+	paths := fmt.Sprintf("%s %s %s", "wayback.conf", filepath.Join(home, "wayback.conf"), "/etc/wayback.conf")
+	for _, path := range files {
+		if strings.Index(paths, path) < 0 {
+			t.Errorf(`Unexpected file path got %s instead within '%s'`, path, paths)
+		}
 	}
 }

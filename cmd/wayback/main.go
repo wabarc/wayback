@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -13,6 +15,8 @@ import (
 )
 
 var (
+	err error
+
 	ia bool
 	is bool
 	ip bool
@@ -27,8 +31,13 @@ var (
 
 	token  string
 	chatid string
-	debug  bool
 	torKey string
+
+	debug bool
+	info  bool
+	print bool
+
+	configFile string
 
 	rootCmd = &cobra.Command{
 		Use:   "wayback",
@@ -65,9 +74,12 @@ func init() {
 	rootCmd.Flags().BoolVarP(&tor, "tor", "", false, "Snapshot webpage via Tor anonymity network.")
 
 	rootCmd.Flags().StringVarP(&token, "token", "t", "", "Telegram Bot API Token.")
-	rootCmd.Flags().StringVarP(&chatid, "chatid", "c", "", "Telegram channel id.")
-	rootCmd.Flags().BoolVarP(&debug, "debug", "", false, "Enable debug mode. (default false)")
+	rootCmd.Flags().StringVarP(&chatid, "chatid", "", "", "Telegram channel id.")
 	rootCmd.Flags().StringVarP(&torKey, "tor-key", "", "", "The private key for Tor Hidden Service.")
+	rootCmd.Flags().StringVarP(&configFile, "config", "c", "", "Configuration file path, defaults: ./wayback.conf, ~/wayback.conf, /etc/wayback.conf")
+	rootCmd.Flags().BoolVarP(&debug, "debug", "", false, "Enable debug mode. (default false)")
+	rootCmd.Flags().BoolVarP(&info, "info", "", false, "Show application information.")
+	rootCmd.Flags().BoolVarP(&print, "print", "", false, "Show application configurations.")
 }
 
 func checkRequiredFlags(cmd *cobra.Command, args []string) error {
@@ -143,7 +155,12 @@ func handle(cmd *cobra.Command, args []string) {
 	setToEnv(cmd)
 	parser := config.NewParser()
 
-	var err error
+	if configFile != "" {
+		if config.Opts, err = parser.ParseFile(configFile); err != nil {
+			logger.Fatal("Parse configuration file failed, error: %v", err)
+		}
+	}
+
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		logger.Fatal("Parse enviroment variables or flags failed, error: %v", err)
 	}
@@ -154,6 +171,22 @@ func handle(cmd *cobra.Command, args []string) {
 
 	if debug || config.Opts.HasDebugMode() {
 		logger.EnableDebug()
+	}
+
+	if info {
+		showInfo(cmd)
+		return
+	}
+
+	if print {
+		cmd.Printf("%#v", config.Opts)
+		// Convert structs to JSON.
+		data, err := json.Marshal(config.Opts)
+		if err != nil {
+			logger.Fatal("Print configuration file failed, error: %v", err)
+		}
+		fmt.Printf("%s\n", string(data))
+		return
 	}
 
 	hasDaemon := len(daemon) > 0
@@ -167,4 +200,14 @@ func handle(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	}
 	os.Exit(0)
+}
+
+func showInfo(cmd *cobra.Command) {
+	cmd.Println("Version:", version.Version)
+	cmd.Println("Commit:", version.Commit)
+	cmd.Println("Build Date:", version.BuildDate)
+	cmd.Println("Go Version:", runtime.Version())
+	cmd.Println("Compiler:", runtime.Compiler)
+	cmd.Println("Arch:", runtime.GOARCH)
+	cmd.Println("OS:", runtime.GOOS)
 }
