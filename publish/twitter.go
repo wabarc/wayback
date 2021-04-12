@@ -7,6 +7,7 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"bytes"
 	"context"
+	"strings"
 	"text/template"
 
 	"github.com/dghubble/go-twitter/twitter"
@@ -44,6 +45,10 @@ func (t *Twitter) ToTwitter(_ context.Context, text string) bool {
 
 	// TODO: character limit
 	tweet, resp, err := t.client.Statuses.Update(text, nil)
+	if err != nil {
+		logger.Error("[publish] create tweet failed: %v", err)
+		return false
+	}
 	logger.Debug("[publish] created tweet: %v, resp: %v, err: %v", tweet, resp, err)
 
 	return true
@@ -70,5 +75,5 @@ func (m *Twitter) Render(vars []*wayback.Collect) string {
 		return ""
 	}
 
-	return tmplBytes.String()
+	return strings.TrimSuffix(tmplBytes.String(), "\n")
 }

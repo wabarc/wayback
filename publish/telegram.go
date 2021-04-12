@@ -6,6 +6,8 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"bytes"
+	"context"
+	"strings"
 	"text/template"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -14,20 +16,45 @@ import (
 	"github.com/wabarc/wayback/logger"
 )
 
-// ToChannel for publish to message to Telegram channel,
-// returns boolean as result.
-func ToChannel(bot *telegram.BotAPI, text string) bool {
+type Telegram struct {
+	bot *telegram.BotAPI
+}
+
+// NewTelegram returns Telegram bot client
+func NewTelegram(bot *telegram.BotAPI) *Telegram {
+	if !config.Opts.PublishToChannel() {
+		logger.Error("Missing required environment variable, abort.")
+		return new(Telegram)
+	}
+
 	if bot == nil {
 		var err error
 		if bot, err = telegram.NewBotAPI(config.Opts.TelegramToken()); err != nil {
-			logger.Error("[publish] post to Telegram Channel failed, %v", err)
+			logger.Error("[telegram] create telegram bot instance failed: %v", err)
+		}
+	}
+
+	return &Telegram{bot: bot}
+}
+
+// ToChannel for publish to message to Telegram channel,
+// returns boolean as result.
+func (t *Telegram) ToChannel(_ context.Context, text string) bool {
+	if text == "" {
+		logger.Error("[publish] post to message to channel failed, text empty")
+		return false
+	}
+	if t.bot == nil {
+		var err error
+		if t.bot, err = telegram.NewBotAPI(config.Opts.TelegramToken()); err != nil {
+			logger.Error("[publish] post to channel failed, %v", err)
 			return false
 		}
 	}
 
 	msg := telegram.NewMessageToChannel("@"+config.Opts.TelegramChannel(), text)
 	msg.ParseMode = "html"
-	if _, err := bot.Send(msg); err != nil {
+	if _, err := t.bot.Send(msg); err != nil {
 		logger.Error("[publish] post message to channel failed, %v", err)
 		return false
 	}
@@ -35,7 +62,7 @@ func ToChannel(bot *telegram.BotAPI, text string) bool {
 	return true
 }
 
-func Render(vars []*wayback.Collect) string {
+func (t *Telegram) Render(vars []*wayback.Collect) string {
 	var tmplBytes bytes.Buffer
 
 	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext }}'>{{ $.Arc }}</a></b>:
@@ -56,5 +83,5 @@ func Render(vars []*wayback.Collect) string {
 		return ""
 	}
 
-	return tmplBytes.String()
+	return strings.TrimSuffix(tmplBytes.String(), "\n")
 }

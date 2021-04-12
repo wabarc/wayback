@@ -7,6 +7,7 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"bytes"
 	"context"
+	"strings"
 	"text/template"
 
 	mstdn "github.com/mattn/go-mastodon"
@@ -80,5 +81,5 @@ func (m *Mastodon) Render(vars []*wayback.Collect) string {
 		return ""
 	}
 
-	return tmplBytes.String()
+	return strings.TrimSuffix(tmplBytes.String(), "\n")
 }

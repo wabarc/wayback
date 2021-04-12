@@ -8,6 +8,8 @@ import (
 	"bytes"
 	"context"
 	"net/http"
+	"net/url"
+	"strings"
 	"text/template"
 	"time"
 
@@ -18,36 +20,45 @@ import (
 )
 
 type GitHub struct {
-	client *http.Client
+	client *github.Client
 }
 
-func NewGitHub() *GitHub {
-	return &GitHub{}
+func NewGitHub(httpClient *http.Client) *GitHub {
+	if config.Opts.GitHubToken() == "" || config.Opts.GitHubOwner() == "" {
+		logger.Fatal("[publish] GitHub personal access token is required")
+	}
+
+	if httpClient == nil {
+		// Authenticated user must grant repo:public_repo scope,
+		// private repository need whole repo scope.
+		auth := github.BasicAuthTransport{
+			Username: config.Opts.GitHubOwner(),
+			Password: config.Opts.GitHubToken(),
+		}
+		httpClient = auth.Client()
+	}
+	client := github.NewClient(httpClient)
+
+	return &GitHub{
+		client: client,
+	}
 }
 
-func ToIssues(ctx context.Context, text string) bool {
-	if config.Opts.GitHubToken() == "" {
-		logger.Error("[publish] GitHub personal access token is required")
+func (gh *GitHub) ToIssues(ctx context.Context, text string) bool {
+	if gh.client == nil {
+		logger.Error("[publish] create GitHub Issues abort")
 		return false
 	}
 
-	// Authenticated user must grant repo:public_repo scope,
-	// private repository need whole repo scope.
-	auth := github.BasicAuthTransport{
-		Username: config.Opts.GitHubOwner(),
-		Password: config.Opts.GitHubToken(),
-	}
-	client := github.NewClient(auth.Client())
-
 	if config.Opts.HasDebugMode() {
-		user, _, _ := client.Users.Get(ctx, "")
+		user, _, _ := gh.client.Users.Get(ctx, "")
 		logger.Debug("[publish] authorized GitHub user: %v", user)
 	}
 
 	// Create an issue to GitHub
 	t := "Published at " + time.Now().Format("2006-01-02T15:04:05")
 	ir := &github.IssueRequest{Title: github.String(t), Body: github.String(text)}
-	issue, _, err := client.Issues.Create(ctx, config.Opts.GitHubOwner(), config.Opts.GitHubRepo(), ir)
+	issue, _, err := gh.client.Issues.Create(ctx, config.Opts.GitHubOwner(), config.Opts.GitHubRepo(), ir)
 	if err != nil {
 		logger.Debug("[publish] create issue failed: %v", err)
 		return false
@@ -62,13 +73,22 @@ func (gh *GitHub) Render(vars []*wayback.Collect) string {
 
 	const tmpl = `{{range $ := .}}**[{{ $.Arc }}]({{ $.Ext }})**:
 {{ range $src, $dst := $.Dst -}}
-> origin: {{ $src }}
-> archived: {{ $dst }}
-
+> origin: [{{ $src | unescape}}]({{ $src }})
+> archived: [{{ $dst | unescape}}]({{ $dst }})
 {{end}}
 {{end}}`
 
-	tpl, err := template.New("message").Parse(tmpl)
+	funcMap := template.FuncMap{
+		"unescape": func(link string) string {
+			unescaped, err := url.QueryUnescape(link)
+			if err != nil {
+				return link
+			}
+			return unescaped
+		},
+	}
+
+	tpl, err := template.New("message").Funcs(funcMap).Parse(tmpl)
 	if err != nil {
 		logger.Debug("[publish] parse template failed, %v", err)
 		return ""
@@ -80,5 +100,5 @@ func (gh *GitHub) Render(vars []*wayback.Collect) string {
 		return ""
 	}
 
-	return tmplBytes.String()
+	return strings.TrimSuffix(tmplBytes.String(), "\n")
 }

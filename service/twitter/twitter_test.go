@@ -67,6 +67,8 @@ func TestProcess(t *testing.T) {
 			fmt.Fprintf(w, testDMEventShowJSON)
 		case "/1.1/direct_messages/events/destroy.json":
 			w.WriteHeader(204)
+		case "/1.1/statuses/update.json":
+			fmt.Fprintln(w, `{"id": 1}`)
 		default:
 			w.WriteHeader(404)
 		}

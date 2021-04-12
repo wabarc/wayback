@@ -73,6 +73,7 @@ func bot(t *testing.T, done chan<- bool) (*telegram.BotAPI, *httptest.Server) {
 				t.Errorf("Unexpected result: %s", text)
 				return
 			}
+			fmt.Fprintln(w, `{"ok":true, "result":null}`)
 			done <- true
 		}
 	})
@@ -87,7 +88,12 @@ func bot(t *testing.T, done chan<- bool) (*telegram.BotAPI, *httptest.Server) {
 }
 
 func TestServe(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skip test in short mode.")
+	}
+
 	os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
+	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
 	var err error

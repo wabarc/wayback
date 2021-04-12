@@ -72,7 +72,6 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 }
 
 func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
-	bot := t.bot
 	message := update.Message
 	text := message.Text
 	logger.Debug("[telegram] message: %s", text)
@@ -85,7 +84,7 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		logger.Info("[telegram] archives failure, URL no found.")
 		msg := telegram.NewMessage(message.Chat.ID, "URL no found.")
 		msg.ReplyToMessageID = message.MessageID
-		bot.Send(msg)
+		t.bot.Send(msg)
 		return nil
 	}
 
@@ -95,13 +94,14 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		return err
 	}
 
-	replyText := publish.Render(col)
+	tel := publish.NewTelegram(t.bot)
+	replyText := tel.Render(col)
 	logger.Debug("[telegram] reply text, %s", replyText)
 	msg := telegram.NewMessage(message.Chat.ID, replyText)
 	msg.ReplyToMessageID = message.MessageID
 	msg.ParseMode = "html"
 
-	bot.Send(msg)
+	t.bot.Send(msg)
 
 	ctx = context.WithValue(ctx, "telegram", t.bot)
 	go publish.To(ctx, col, "telegram")

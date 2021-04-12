@@ -67,8 +67,6 @@ func (i *IRC) Render(vars []*wayback.Collect) string {
 		logger.Error("[publish] execute IRC template failed, %v", err)
 		return ""
 	}
-	html := tmplBytes.String()
-	html = strings.TrimSuffix(html, ", ")
 
-	return html
+	return strings.TrimSuffix(tmplBytes.String(), ", ")
 }
