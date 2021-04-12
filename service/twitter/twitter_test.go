@@ -85,7 +85,7 @@ func TestProcess(t *testing.T) {
 
 	ctx := context.Background()
 	client := twitter.NewClient(httpClient)
-	tw := &Twitter{client: client, opts: config.Opts}
+	tw := &Twitter{client: client}
 	if err := tw.process(ctx, testDMEvent); err != nil {
 		t.Fatalf("should not be fail: %v", err)
 	}

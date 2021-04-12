@@ -160,9 +160,9 @@ func handle(cmd *cobra.Command, args []string) {
 	hasArgs := len(args) > 0
 	switch {
 	case hasDaemon:
-		serve(cmd, config.Opts, args)
+		serve(cmd, args)
 	case hasArgs:
-		archive(cmd, config.Opts, args)
+		archive(cmd, args)
 	default:
 		cmd.Help()
 	}

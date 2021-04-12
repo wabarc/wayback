@@ -24,26 +24,24 @@ import (
 type Mastodon struct {
 	sync.RWMutex
 
-	opts   *config.Options
 	client *mastodon.Client
 
 	archiving map[mastodon.ID]bool
 }
 
 // New mastodon struct.
-func New(opts *config.Options) *Mastodon {
-	if !opts.PublishToMastodon() {
+func New() *Mastodon {
+	if !config.Opts.PublishToMastodon() {
 		logger.Fatal("[mastodon] missing required environment variable")
 	}
 
 	client := mastodon.NewClient(&mastodon.Config{
-		Server:       opts.MastodonServer(),
-		ClientID:     opts.MastodonClientKey(),
-		ClientSecret: opts.MastodonClientSecret(),
-		AccessToken:  opts.MastodonAccessToken(),
+		Server:       config.Opts.MastodonServer(),
+		ClientID:     config.Opts.MastodonClientKey(),
+		ClientSecret: config.Opts.MastodonClientSecret(),
+		AccessToken:  config.Opts.MastodonAccessToken(),
 	})
 	return &Mastodon{
-		opts:   opts,
 		client: client,
 	}
 }
@@ -55,7 +53,7 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 		return errors.New("Must initialize Mastodon client.")
 	}
 
-	logger.Debug("[mastodon] Serving Mastodon instance: %s", m.opts.MastodonServer())
+	logger.Debug("[mastodon] Serving Mastodon instance: %s", config.Opts.MastodonServer())
 
 	// rcv, err := m.client.StreamingUser(ctx)
 	// if err != nil {
@@ -120,10 +118,10 @@ func (m *Mastodon) process(ctx context.Context, conv *mastodon.Conversation) err
 	}()
 
 	urls := helper.MatchURL(text)
-	pub := publish.NewMastodon(m.client, m.opts)
+	pub := publish.NewMastodon(m.client)
 	if len(urls) == 0 {
 		logger.Info("[mastodon] archives failure, URL no found.")
-		pub.ToMastodon(ctx, m.opts, "URL no found", string(conv.LastStatus.ID))
+		pub.ToMastodon(ctx, "URL no found", string(conv.LastStatus.ID))
 		return errors.New("Mastodon: URL no found")
 	}
 
@@ -135,7 +133,7 @@ func (m *Mastodon) process(ctx context.Context, conv *mastodon.Conversation) err
 
 	// Reply and publish toot as public
 	ctx = context.WithValue(ctx, "mastodon", m.client)
-	go publish.To(ctx, m.opts, col, "mastodon", string(conv.LastStatus.ID))
+	go publish.To(ctx, col, "mastodon", string(conv.LastStatus.ID))
 
 	return nil
 }
@@ -144,8 +142,8 @@ func (m *Mastodon) archive(urls []string) (col []*wayback.Collect, err error) {
 	logger.Debug("[mastodon] archives start...")
 
 	wg := sync.WaitGroup{}
-	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: m.opts}
-	for slot, arc := range m.opts.Slots() {
+	var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
+	for slot, arc := range config.Opts.Slots() {
 		if !arc {
 			continue
 		}

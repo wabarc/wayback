@@ -8,7 +8,6 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
-	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wayback/service/anonymity"
 	"github.com/wabarc/wayback/service/mastodon"
@@ -22,10 +21,10 @@ type service struct {
 	errCh chan error
 }
 
-func serve(_ *cobra.Command, opts *config.Options, args []string) {
+func serve(_ *cobra.Command, args []string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	srv := &service{}
-	ran := srv.run(ctx, opts)
+	ran := srv.run(ctx)
 
 	go srv.stop(cancel)
 	defer close(srv.errCh)
@@ -38,37 +37,37 @@ func serve(_ *cobra.Command, opts *config.Options, args []string) {
 	}
 }
 
-func (srv *service) run(ctx context.Context, opts *config.Options) *service {
+func (srv *service) run(ctx context.Context) *service {
 	srv.errCh = make(chan error, len(daemon))
 	for _, s := range daemon {
 		switch s {
 		case "irc":
-			irc := relaychat.New(opts)
+			irc := relaychat.New()
 			go func(errCh chan error) {
 				errCh <- irc.Serve(ctx)
 			}(srv.errCh)
 		case "mastodon", "mstdn":
-			mastodon := mastodon.New(opts)
+			mastodon := mastodon.New()
 			go func(errCh chan error) {
 				errCh <- mastodon.Serve(ctx)
 			}(srv.errCh)
 		case "telegram":
-			telegram := telegram.New(opts)
+			telegram := telegram.New()
 			go func(errCh chan error) {
 				errCh <- telegram.Serve(ctx)
 			}(srv.errCh)
 		case "twitter":
-			twitter := twitter.New(opts)
+			twitter := twitter.New()
 			go func(errCh chan error) {
 				errCh <- twitter.Serve(ctx)
 			}(srv.errCh)
 		case "matrix":
-			matrix := matrix.New(opts)
+			matrix := matrix.New()
 			go func(errCh chan error) {
 				errCh <- matrix.Serve(ctx)
 			}(srv.errCh)
 		case "web":
-			tor := anonymity.New(opts)
+			tor := anonymity.New()
 			go func(errCh chan error) {
 				errCh <- tor.Serve(ctx)
 			}(srv.errCh)

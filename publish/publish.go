@@ -17,26 +17,26 @@ import (
 	matrix "maunium.net/go/mautrix"
 )
 
-func To(ctx context.Context, opts *config.Options, col []*wayback.Collect, args ...string) {
+func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 	var from string
 	if len(args) > 0 {
 		from = args[0]
 	}
 
-	if opts.PublishToChannel() {
+	if config.Opts.PublishToChannel() {
 		logger.Debug("[%s] publishing to channel...", from)
 
 		var bot *telegram.BotAPI
 		if rev, ok := ctx.Value("telegram").(*telegram.BotAPI); ok {
 			bot = rev
 		}
-		ToChannel(opts, bot, Render(col))
+		ToChannel(bot, Render(col))
 	}
-	if opts.PublishToIssues() {
+	if config.Opts.PublishToIssues() {
 		logger.Debug("[%s] publishing to GitHub issues...", from)
-		ToIssues(ctx, opts, NewGitHub().Render(col))
+		ToIssues(ctx, NewGitHub().Render(col))
 	}
-	if opts.PublishToMastodon() {
+	if config.Opts.PublishToMastodon() {
 		var id string
 		if len(args) > 1 {
 			id = args[1]
@@ -47,37 +47,37 @@ func To(ctx context.Context, opts *config.Options, col []*wayback.Collect, args 
 		if rev, ok := ctx.Value("mastodon").(*mstdn.Client); ok {
 			client = rev
 		}
-		mstdn := NewMastodon(client, opts)
-		mstdn.ToMastodon(ctx, opts, mstdn.Render(col), id)
+		mstdn := NewMastodon(client)
+		mstdn.ToMastodon(ctx, mstdn.Render(col), id)
 	}
-	if opts.PublishToTwitter() {
+	if config.Opts.PublishToTwitter() {
 		logger.Debug("[%s] publishing to Twitter...", from)
 
 		var client *twitter.Client
 		if rev, ok := ctx.Value("twitter").(*twitter.Client); ok {
 			client = rev
 		}
-		twitter := NewTwitter(client, opts)
-		twitter.ToTwitter(ctx, opts, twitter.Render(col))
+		twitter := NewTwitter(client)
+		twitter.ToTwitter(ctx, twitter.Render(col))
 	}
-	if opts.PublishToIRCChannel() {
+	if config.Opts.PublishToIRCChannel() {
 		logger.Debug("[%s] publishing to IRC channel...", from)
 
 		var conn *irc.Connection
 		if rev, ok := ctx.Value("irc").(*irc.Connection); ok {
 			conn = rev
 		}
-		irc := NewIRC(conn, opts)
-		irc.ToChannel(ctx, opts, irc.Render(col))
+		irc := NewIRC(conn)
+		irc.ToChannel(ctx, irc.Render(col))
 	}
-	if opts.PublishToMatrixRoom() {
+	if config.Opts.PublishToMatrixRoom() {
 		logger.Debug("[%s] publishing to Matrix room...", from)
 
 		var client *matrix.Client
 		if rev, ok := ctx.Value("matrix").(*matrix.Client); ok {
 			client = rev
 		}
-		matrix := NewMatrix(client, opts)
-		matrix.ToRoom(ctx, opts, matrix.Render(col))
+		mat := NewMatrix(client)
+		mat.ToRoom(ctx, mat.Render(col))
 	}
 }

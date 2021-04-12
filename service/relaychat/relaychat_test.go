@@ -50,9 +50,8 @@ func TestProcess(t *testing.T) {
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
 	var err error
-	var opts *config.Options
 	parser := config.NewParser()
-	if opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
 
@@ -87,7 +86,7 @@ func TestProcess(t *testing.T) {
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
 			done <- true
-			i := New(opts)
+			i := New()
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
 			if err = i.process(context.Background(), ev); err != nil {
@@ -140,9 +139,8 @@ func TestToIRCChannel(t *testing.T) {
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
 	var err error
-	var opts *config.Options
 	parser := config.NewParser()
-	if opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
 
@@ -180,7 +178,7 @@ func TestToIRCChannel(t *testing.T) {
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
 			done <- true
-			i := New(opts)
+			i := New()
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
 			if err = i.process(context.Background(), ev); err != nil {

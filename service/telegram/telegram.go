@@ -21,23 +21,21 @@ import (
 )
 
 type Telegram struct {
-	opts *config.Options
-	bot  *telegram.BotAPI
+	bot *telegram.BotAPI
 }
 
 // New Telegram struct.
-func New(opts *config.Options) *Telegram {
-	if opts.TelegramToken() == "" {
+func New() *Telegram {
+	if config.Opts.TelegramToken() == "" {
 		logger.Fatal("[telegram] missing required environment variable")
 	}
-	bot, err := telegram.NewBotAPI(opts.TelegramToken())
+	bot, err := telegram.NewBotAPI(config.Opts.TelegramToken())
 	if err != nil {
 		logger.Fatal("[telegram] create telegram bot instance failed: %v", err)
 	}
 
 	return &Telegram{
-		opts: opts,
-		bot:  bot,
+		bot: bot,
 	}
 }
 
@@ -106,7 +104,7 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 	bot.Send(msg)
 
 	ctx = context.WithValue(ctx, "telegram", t.bot)
-	go publish.To(ctx, t.opts, col, "telegram")
+	go publish.To(ctx, col, "telegram")
 
 	return nil
 }
@@ -115,8 +113,8 @@ func (t *Telegram) archive(urls []string) (col []*wayback.Collect, err error) {
 	logger.Debug("[telegram] archives start...")
 
 	wg := sync.WaitGroup{}
-	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: t.opts}
-	for slot, arc := range t.opts.Slots() {
+	var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
+	for slot, arc := range config.Opts.Slots() {
 		if !arc {
 			continue
 		}

@@ -44,7 +44,7 @@ func TestProcess(t *testing.T) {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
 
-	m := New(config.Opts)
+	m := New()
 	ctx := context.Background()
 	convs, err := m.client.GetConversations(ctx, nil)
 	if err != nil {

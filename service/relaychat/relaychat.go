@@ -24,26 +24,24 @@ import (
 type IRC struct {
 	sync.RWMutex
 
-	opts *config.Options
 	conn *irc.Connection
 }
 
 // New IRC struct.
-func New(opts *config.Options) *IRC {
-	if opts.IRCNick() == "" {
+func New() *IRC {
+	if config.Opts.IRCNick() == "" {
 		logger.Fatal("Missing required environment variable")
 	}
 
 	// TODO: support SASL authenticate
-	conn := irc.IRC(opts.IRCNick(), opts.IRCNick())
-	conn.Password = opts.IRCPassword()
-	conn.VerboseCallbackHandler = opts.HasDebugMode()
-	conn.Debug = opts.HasDebugMode()
+	conn := irc.IRC(config.Opts.IRCNick(), config.Opts.IRCNick())
+	conn.Password = config.Opts.IRCPassword()
+	conn.VerboseCallbackHandler = config.Opts.HasDebugMode()
+	conn.Debug = config.Opts.HasDebugMode()
 	conn.UseTLS = true
 	conn.TLSConfig = &tls.Config{InsecureSkipVerify: false}
 
 	return &IRC{
-		opts: opts,
 		conn: conn,
 	}
 }
@@ -54,7 +52,7 @@ func (i *IRC) Serve(ctx context.Context) error {
 	if i.conn == nil {
 		return errors.New("Must initialize IRC connection.")
 	}
-	logger.Debug("[irc] Serving IRC instance: %s", i.opts.IRCServer())
+	logger.Debug("[irc] Serving IRC instance: %s", config.Opts.IRCServer())
 
 	i.conn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		go func(ev *irc.Event) {
@@ -63,7 +61,7 @@ func (i *IRC) Serve(ctx context.Context) error {
 			}
 		}(ev)
 	})
-	err := i.conn.Connect(i.opts.IRCServer())
+	err := i.conn.Connect(config.Opts.IRCServer())
 	if err != nil {
 		logger.Error("[irc] Get conversations failure, error: %v", err)
 		return err
@@ -101,7 +99,7 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 		return err
 	}
 
-	pub := publish.NewIRC(i.conn, i.opts)
+	pub := publish.NewIRC(i.conn)
 	replyText := pub.Render(col)
 
 	// Reply result to sender
@@ -109,7 +107,7 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 
 	// Reply and publish toot as public
 	ctx = context.WithValue(ctx, "irc", i.conn)
-	publish.To(ctx, i.opts, col, "irc")
+	publish.To(ctx, col, "irc")
 
 	return nil
 }
@@ -118,8 +116,8 @@ func (i *IRC) archive(urls []string) (col []*wayback.Collect, err error) {
 	logger.Debug("[irc] archives start...")
 
 	wg := sync.WaitGroup{}
-	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: i.opts}
-	for slot, arc := range i.opts.Slots() {
+	var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
+	for slot, arc := range config.Opts.Slots() {
 		if !arc {
 			continue
 		}

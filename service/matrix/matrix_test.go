@@ -89,7 +89,7 @@ func senderClient(t *testing.T) *Matrix {
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
-	return New(config.Opts)
+	return New()
 }
 
 func recverClient(t *testing.T) *Matrix {
@@ -99,7 +99,7 @@ func recverClient(t *testing.T) *Matrix {
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
-	return New(config.Opts)
+	return New()
 }
 
 func TestProcess(t *testing.T) {
@@ -137,7 +137,7 @@ func TestProcess(t *testing.T) {
 
 	// Create a room and invite recver
 	resp, err := sender.client.CreateRoom(&matrix.ReqCreateRoom{
-		Invite:     []id.UserID{id.UserID(recver.opts.MatrixUserID())},
+		Invite:     []id.UserID{id.UserID(config.Opts.MatrixUserID())},
 		Preset:     "trusted_private_chat",
 		Visibility: "private",
 		IsDirect:   true,

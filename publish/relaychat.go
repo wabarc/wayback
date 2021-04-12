@@ -18,36 +18,35 @@ import (
 )
 
 type IRC struct {
-	opts *config.Options
 	conn *irc.Connection
 }
 
-func NewIRC(conn *irc.Connection, opts *config.Options) *IRC {
-	if !opts.PublishToIRCChannel() {
+func NewIRC(conn *irc.Connection) *IRC {
+	if !config.Opts.PublishToIRCChannel() {
 		logger.Error("Missing required environment variable, abort.")
 		return new(IRC)
 	}
 
-	if conn == nil && opts != nil {
-		conn = irc.IRC(opts.IRCNick(), opts.IRCNick())
-		conn.Password = opts.IRCPassword()
-		conn.VerboseCallbackHandler = opts.HasDebugMode()
-		conn.Debug = opts.HasDebugMode()
+	if conn == nil {
+		conn = irc.IRC(config.Opts.IRCNick(), config.Opts.IRCNick())
+		conn.Password = config.Opts.IRCPassword()
+		conn.VerboseCallbackHandler = config.Opts.HasDebugMode()
+		conn.Debug = config.Opts.HasDebugMode()
 		conn.UseTLS = true
 		conn.TLSConfig = &tls.Config{InsecureSkipVerify: false}
 	}
 
-	return &IRC{opts: opts, conn: conn}
+	return &IRC{conn: conn}
 }
 
-func (i *IRC) ToChannel(ctx context.Context, opts *config.Options, text string) bool {
-	if !opts.PublishToIRCChannel() || i.conn == nil {
+func (i *IRC) ToChannel(ctx context.Context, text string) bool {
+	if !config.Opts.PublishToIRCChannel() || i.conn == nil {
 		logger.Debug("[publish] Do not publish to IRC channel.")
 		return false
 	}
 
-	i.conn.Join(i.opts.IRCChannel())
-	i.conn.Privmsg(i.opts.IRCChannel(), text)
+	i.conn.Join(config.Opts.IRCChannel())
+	i.conn.Privmsg(config.Opts.IRCChannel(), text)
 
 	return true
 }

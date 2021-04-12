@@ -113,7 +113,7 @@ func TestServe(t *testing.T) {
 		}
 	}()
 
-	tg := &Telegram{opts: config.Opts, bot: bot}
+	tg := &Telegram{bot: bot}
 	tg.Serve(context.Background())
 }
 
@@ -146,7 +146,7 @@ func TestProcess(t *testing.T) {
 		}
 	}()
 
-	tg := &Telegram{opts: config.Opts, bot: bot}
+	tg := &Telegram{bot: bot}
 
 	cfg := telegram.NewUpdate(0)
 	cfg.Timeout = 60

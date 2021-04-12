@@ -19,12 +19,12 @@ func output(tit string, args map[string]string) {
 	}
 }
 
-func archive(cmd *cobra.Command, opts *config.Options, args []string) {
+func archive(cmd *cobra.Command, args []string) {
 	archiving := func(ctx context.Context, urls []string) error {
 		g, ctx := errgroup.WithContext(ctx)
-		var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: opts}
+		var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
 
-		for slot, do := range opts.Slots() {
+		for slot, do := range config.Opts.Slots() {
 			slot, do := slot, do
 			g.Go(func() error {
 				switch {

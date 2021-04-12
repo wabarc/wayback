@@ -16,16 +16,16 @@ import (
 
 // ToChannel for publish to message to Telegram channel,
 // returns boolean as result.
-func ToChannel(opts *config.Options, bot *telegram.BotAPI, text string) bool {
+func ToChannel(bot *telegram.BotAPI, text string) bool {
 	if bot == nil {
 		var err error
-		if bot, err = telegram.NewBotAPI(opts.TelegramToken()); err != nil {
+		if bot, err = telegram.NewBotAPI(config.Opts.TelegramToken()); err != nil {
 			logger.Error("[publish] post to Telegram Channel failed, %v", err)
 			return false
 		}
 	}
 
-	msg := telegram.NewMessageToChannel("@"+opts.TelegramChannel(), text)
+	msg := telegram.NewMessageToChannel("@"+config.Opts.TelegramChannel(), text)
 	msg.ParseMode = "html"
 	if _, err := bot.Send(msg); err != nil {
 		logger.Error("[publish] post message to channel failed, %v", err)

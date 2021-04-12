@@ -22,22 +22,23 @@ type Matrix struct {
 	client *matrix.Client
 }
 
-func NewMatrix(client *matrix.Client, opts *config.Options) *Matrix {
-	if !opts.PublishToMatrixRoom() {
+func NewMatrix(client *matrix.Client) *Matrix {
+	if !config.Opts.PublishToMatrixRoom() {
 		logger.Error("Missing required environment variable, abort.")
 		return new(Matrix)
 	}
 
-	if client == nil && opts != nil {
-		client, err := matrix.NewClient(opts.MatrixHomeserver(), "", "")
+	if client == nil {
+		var err error
+		client, err = matrix.NewClient(config.Opts.MatrixHomeserver(), "", "")
 		if err != nil {
 			logger.Error("Dial Matrix client got unpredictable error: %v", err)
 			return new(Matrix)
 		}
 		_, err = client.Login(&matrix.ReqLogin{
 			Type:             matrix.AuthTypePassword,
-			Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: opts.MatrixUserID()},
-			Password:         opts.MatrixPassword(),
+			Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: config.Opts.MatrixUserID()},
+			Password:         config.Opts.MatrixPassword(),
 			StoreCredentials: false,
 		})
 		if err != nil {
@@ -48,8 +49,8 @@ func NewMatrix(client *matrix.Client, opts *config.Options) *Matrix {
 	return &Matrix{client: client}
 }
 
-func (m *Matrix) ToRoom(ctx context.Context, opts *config.Options, text string) bool {
-	if !opts.PublishToMatrixRoom() || m.client == nil {
+func (m *Matrix) ToRoom(ctx context.Context, text string) bool {
+	if !config.Opts.PublishToMatrixRoom() || m.client == nil {
 		logger.Debug("[publish] publish to Matrix room abort.")
 		return false
 	}
@@ -64,7 +65,7 @@ func (m *Matrix) ToRoom(ctx context.Context, opts *config.Options, text string) 
 		MsgType:       event.MsgText,
 	}
 	logger.Debug("[publish] send to Matrix room, text:\n%s", text)
-	if _, err := m.client.SendMessageEvent(id.RoomID(opts.MatrixRoomID()), event.EventMessage, content); err != nil {
+	if _, err := m.client.SendMessageEvent(id.RoomID(config.Opts.MatrixRoomID()), event.EventMessage, content); err != nil {
 		logger.Error("[publish] send to Matrix room failure: %v", err)
 		return false
 	}

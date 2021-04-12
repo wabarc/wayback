@@ -22,25 +22,23 @@ import (
 type Twitter struct {
 	sync.RWMutex
 
-	opts   *config.Options
 	client *twitter.Client
 
 	archiving map[string]bool
 }
 
 // New returns Twitter struct.
-func New(opts *config.Options) *Twitter {
-	if !opts.PublishToTwitter() {
+func New() *Twitter {
+	if !config.Opts.PublishToTwitter() {
 		logger.Fatal("Missing required environment variable")
 	}
 
-	config := oauth1.NewConfig(opts.TwitterConsumerKey(), opts.TwitterConsumerSecret())
-	token := oauth1.NewToken(opts.TwitterAccessToken(), opts.TwitterAccessSecret())
-	httpClient := config.Client(oauth1.NoContext, token)
+	oauth := oauth1.NewConfig(config.Opts.TwitterConsumerKey(), config.Opts.TwitterConsumerSecret())
+	token := oauth1.NewToken(config.Opts.TwitterAccessToken(), config.Opts.TwitterAccessSecret())
+	httpClient := oauth.Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
 
 	return &Twitter{
-		opts:   opts,
 		client: client,
 	}
 }
@@ -102,7 +100,7 @@ func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent)
 	}()
 
 	urls := helper.MatchURL(text)
-	pub := publish.NewTwitter(t.client, t.opts)
+	pub := publish.NewTwitter(t.client)
 	var realURLs []string
 	for _, url := range urls {
 		realURLs = append(realURLs, helper.RealURI(url))
@@ -149,7 +147,7 @@ func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent)
 	}()
 
 	ctx = context.WithValue(ctx, "twitter", t.client)
-	go publish.To(ctx, t.opts, col, "twitter")
+	go publish.To(ctx, col, "twitter")
 
 	return nil
 }
@@ -158,8 +156,8 @@ func (t *Twitter) archive(urls []string) (col []*wayback.Collect, err error) {
 	logger.Debug("[twitter] archives start...")
 
 	wg := sync.WaitGroup{}
-	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: t.opts}
-	for slot, arc := range t.opts.Slots() {
+	var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
+	for slot, arc := range config.Opts.Slots() {
 		if !arc {
 			continue
 		}

@@ -30,14 +30,11 @@ import (
 )
 
 type Tor struct {
-	opts *config.Options
 }
 
 // New tor struct.
-func New(opts *config.Options) *Tor {
-	return &Tor{
-		opts: opts,
-	}
+func New() *Tor {
+	return &Tor{}
 }
 
 // Serve accepts incoming HTTP requests over Tor network, or open
@@ -54,19 +51,19 @@ func (t *Tor) Serve(ctx context.Context) error {
 	}
 
 	var pvk ed25519.PrivateKey
-	if t.opts.TorPrivKey() == "" {
+	if config.Opts.TorPrivKey() == "" {
 		keypair, _ := ed25519.GenerateKey(rand.Reader)
 		pvk = keypair.PrivateKey()
 		logger.Info("[web] important to keep the private key: %s", hex.EncodeToString(pvk))
 	} else {
-		privb, err := hex.DecodeString(t.opts.TorPrivKey())
+		privb, err := hex.DecodeString(config.Opts.TorPrivKey())
 		if err != nil {
 			logger.Fatal("[web] the key %s is not specific", err)
 		}
 		pvk = ed25519.PrivateKey(privb)
 	}
 
-	verbose := t.opts.HasDebugMode()
+	verbose := config.Opts.HasDebugMode()
 	// startConf := &tor.StartConf{ProcessCreator: libtor.Creator, DataDir: "tor-data"}
 	startConf := &tor.StartConf{TorrcFile: t.torrc(), TempDataDirBase: os.TempDir()}
 	if verbose {
@@ -82,7 +79,7 @@ func (t *Tor) Serve(ctx context.Context) error {
 
 	// Create an onion service to listen on any port but show as local port,
 	// specify the local port using the `WAYBACK_TOR_LOCAL_PORT` environment variable.
-	onion, err := e.Listen(ctx, &tor.ListenConf{LocalPort: t.opts.TorLocalPort(), RemotePorts: t.opts.TorRemotePorts(), Version3: true, Key: pvk})
+	onion, err := e.Listen(ctx, &tor.ListenConf{LocalPort: config.Opts.TorLocalPort(), RemotePorts: config.Opts.TorRemotePorts(), Version3: true, Key: pvk})
 	if err != nil {
 		logger.Fatal("[web] failed to create onion service: %v", err)
 	}
@@ -145,7 +142,7 @@ func (t *Tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		if data, err := json.Marshal(collector); err != nil {
 			logger.Error("[web] encode for response failed, %v", err)
 		} else {
-			go publish.To(ctx, t.opts, col, "web")
+			go publish.To(ctx, col, "web")
 			w.Write(data)
 		}
 
@@ -154,7 +151,7 @@ func (t *Tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		if html, ok := collector.Render(); ok {
-			go publish.To(ctx, t.opts, col, "web")
+			go publish.To(ctx, col, "web")
 			w.Write(html)
 		} else {
 			logger.Error("[web] render template for response failed")
@@ -176,8 +173,8 @@ func (t *Tor) archive(ctx context.Context, text string) (tc *template.Collector,
 	}
 
 	wg := sync.WaitGroup{}
-	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: t.opts}
-	for slot, arc := range t.opts.Slots() {
+	var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
+	for slot, arc := range config.Opts.Slots() {
 		if !arc {
 			continue
 		}
@@ -233,11 +230,11 @@ func transform(c *template.Collector, slot string, arc map[string]string) {
 }
 
 func (t *Tor) torrc() string {
-	if t.opts.TorrcFile() == "" {
+	if config.Opts.TorrcFile() == "" {
 		return ""
 	}
-	if _, err := os.Open(t.opts.TorrcFile()); err != nil {
+	if _, err := os.Open(config.Opts.TorrcFile()); err != nil {
 		return ""
 	}
-	return t.opts.TorrcFile()
+	return config.Opts.TorrcFile()
 }

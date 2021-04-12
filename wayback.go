@@ -27,12 +27,9 @@ type Broker interface {
 	PH() Archived
 }
 
-// Handle URLs need to wayback and configs,
-// Opts on `github.com/wabarc/wayback/config`.
+// Handle URLs need to wayback and configs.
 type Handle struct {
 	URLs []string
-
-	Opts *config.Options
 }
 
 // Collect result that archived, Arc is name of the archive service,
@@ -68,10 +65,10 @@ func (h *Handle) IS() Archived {
 
 func (h *Handle) IP() Archived {
 	wbrc := &wbipfs.Archiver{
-		IPFSHost: h.Opts.IPFSHost(),
-		IPFSPort: h.Opts.IPFSPort(),
-		IPFSMode: h.Opts.IPFSMode(),
-		UseTor:   h.Opts.UseTor(),
+		IPFSHost: config.Opts.IPFSHost(),
+		IPFSPort: config.Opts.IPFSPort(),
+		IPFSMode: config.Opts.IPFSMode(),
+		UseTor:   config.Opts.UseTor(),
 	}
 	uris, err := wbrc.Wayback(h.URLs)
 	if err != nil {

@@ -19,26 +19,26 @@ type Mastodon struct {
 	client *mstdn.Client
 }
 
-func NewMastodon(client *mstdn.Client, opts *config.Options) *Mastodon {
-	if !opts.PublishToMastodon() {
+func NewMastodon(client *mstdn.Client) *Mastodon {
+	if !config.Opts.PublishToMastodon() {
 		logger.Error("Missing required environment variable")
 		return new(Mastodon)
 	}
 
-	if client == nil && opts != nil {
+	if client == nil {
 		client = mstdn.NewClient(&mstdn.Config{
-			Server:       opts.MastodonServer(),
-			ClientID:     opts.MastodonClientKey(),
-			ClientSecret: opts.MastodonClientSecret(),
-			AccessToken:  opts.MastodonAccessToken(),
+			Server:       config.Opts.MastodonServer(),
+			ClientID:     config.Opts.MastodonClientKey(),
+			ClientSecret: config.Opts.MastodonClientSecret(),
+			AccessToken:  config.Opts.MastodonAccessToken(),
 		})
 	}
 
 	return &Mastodon{client: client}
 }
 
-func (m *Mastodon) ToMastodon(ctx context.Context, opts *config.Options, text, id string) bool {
-	if !opts.PublishToMastodon() || m.client == nil {
+func (m *Mastodon) ToMastodon(ctx context.Context, text, id string) bool {
+	if !config.Opts.PublishToMastodon() || m.client == nil {
 		logger.Debug("[publish] Do not publish to Mastodon.")
 		return false
 	}

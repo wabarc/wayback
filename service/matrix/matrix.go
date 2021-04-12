@@ -25,24 +25,23 @@ import (
 type Matrix struct {
 	sync.RWMutex
 
-	opts   *config.Options
 	client *matrix.Client
 }
 
 // New Matrix struct.
-func New(opts *config.Options) *Matrix {
-	if opts.MatrixUserID() == "" || opts.MatrixPassword() == "" || opts.MatrixHomeserver() == "" {
+func New() *Matrix {
+	if config.Opts.MatrixUserID() == "" || config.Opts.MatrixPassword() == "" || config.Opts.MatrixHomeserver() == "" {
 		logger.Fatal("Missing required environment variable")
 	}
 
-	client, err := matrix.NewClient(opts.MatrixHomeserver(), "", "")
+	client, err := matrix.NewClient(config.Opts.MatrixHomeserver(), "", "")
 	if err != nil {
 		logger.Fatal("Dial Matrix client got unpredictable error: %v", err)
 	}
 	_, err = client.Login(&matrix.ReqLogin{
 		Type:             matrix.AuthTypePassword,
-		Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: opts.MatrixUserID()},
-		Password:         opts.MatrixPassword(),
+		Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: config.Opts.MatrixUserID()},
+		Password:         config.Opts.MatrixPassword(),
 		StoreCredentials: true,
 	})
 	if err != nil {
@@ -50,7 +49,6 @@ func New(opts *config.Options) *Matrix {
 	}
 
 	return &Matrix{
-		opts:   opts,
 		client: client,
 	}
 }
@@ -61,7 +59,7 @@ func (m *Matrix) Serve(ctx context.Context) error {
 	if m.client == nil {
 		return errors.New("Must initialize Matrix client.")
 	}
-	logger.Debug("[matrix] Serving Matrix account: %s", m.opts.MatrixUserID())
+	logger.Debug("[matrix] Serving Matrix account: %s", config.Opts.MatrixUserID())
 
 	syncer := m.client.Syncer.(*matrix.DefaultSyncer)
 	// Listen join room invite event from user
@@ -81,7 +79,7 @@ func (m *Matrix) Serve(ctx context.Context) error {
 			// Do not handle message event:
 			// 1. Sent by self
 			// 2. Message was deleted (when ev.Unsigned.RedactedBecause not nil)
-			if ev.Sender == id.UserID(m.opts.MatrixUserID()) || ev.Unsigned.RedactedBecause != nil {
+			if ev.Sender == id.UserID(config.Opts.MatrixUserID()) || ev.Unsigned.RedactedBecause != nil {
 				return
 			}
 			if err := m.process(ctx, ev); err != nil {
@@ -137,9 +135,9 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 		return errors.New("Matrix: URL no found")
 	}
 	// Redact message
-	defer func() {
+	defer func(ev *event.Event) {
 		m.redact(ev.RoomID, ev.ID)
-	}()
+	}(ev)
 
 	col, err := m.archive(urls)
 	if err != nil {
@@ -147,7 +145,7 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 		return err
 	}
 
-	body := publish.NewMatrix(m.client, m.opts).Render(col)
+	body := publish.NewMatrix(m.client).Render(col)
 	content := &event.MessageEventContent{
 		FormattedBody: body,
 		Format:        event.FormatHTML,
@@ -167,7 +165,7 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 	}
 
 	ctx = context.WithValue(ctx, "matrix", m.client)
-	publish.To(ctx, m.opts, col, "matrix")
+	publish.To(ctx, col, "matrix")
 
 	return nil
 }
@@ -177,8 +175,8 @@ func (m *Matrix) archive(urls []string) (col []*wayback.Collect, err error) {
 
 	var wg sync.WaitGroup
 	var mu sync.Mutex
-	var wbrc wayback.Broker = &wayback.Handle{URLs: urls, Opts: m.opts}
-	for slot, arc := range m.opts.Slots() {
+	var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
+	for slot, arc := range config.Opts.Slots() {
 		if !arc {
 			continue
 		}
@@ -247,7 +245,7 @@ func (m *Matrix) destroyRoom(roomID id.RoomID) {
 	if roomID == "" || m.client == nil {
 		return
 	}
-	if id.RoomID(m.opts.MatrixRoomID()) == roomID {
+	if id.RoomID(config.Opts.MatrixRoomID()) == roomID {
 		return
 	}
 

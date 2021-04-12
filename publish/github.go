@@ -25,8 +25,8 @@ func NewGitHub() *GitHub {
 	return &GitHub{}
 }
 
-func ToIssues(ctx context.Context, opts *config.Options, text string) bool {
-	if opts.GitHubToken() == "" {
+func ToIssues(ctx context.Context, text string) bool {
+	if config.Opts.GitHubToken() == "" {
 		logger.Error("[publish] GitHub personal access token is required")
 		return false
 	}
@@ -34,12 +34,12 @@ func ToIssues(ctx context.Context, opts *config.Options, text string) bool {
 	// Authenticated user must grant repo:public_repo scope,
 	// private repository need whole repo scope.
 	auth := github.BasicAuthTransport{
-		Username: opts.GitHubOwner(),
-		Password: opts.GitHubToken(),
+		Username: config.Opts.GitHubOwner(),
+		Password: config.Opts.GitHubToken(),
 	}
 	client := github.NewClient(auth.Client())
 
-	if opts.HasDebugMode() {
+	if config.Opts.HasDebugMode() {
 		user, _, _ := client.Users.Get(ctx, "")
 		logger.Debug("[publish] authorized GitHub user: %v", user)
 	}
@@ -47,7 +47,7 @@ func ToIssues(ctx context.Context, opts *config.Options, text string) bool {
 	// Create an issue to GitHub
 	t := "Published at " + time.Now().Format("2006-01-02T15:04:05")
 	ir := &github.IssueRequest{Title: github.String(t), Body: github.String(text)}
-	issue, _, err := client.Issues.Create(ctx, opts.GitHubOwner(), opts.GitHubRepo(), ir)
+	issue, _, err := client.Issues.Create(ctx, config.Opts.GitHubOwner(), config.Opts.GitHubRepo(), ir)
 	if err != nil {
 		logger.Debug("[publish] create issue failed: %v", err)
 		return false

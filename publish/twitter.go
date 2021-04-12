@@ -20,24 +20,24 @@ type Twitter struct {
 	client *twitter.Client
 }
 
-func NewTwitter(client *twitter.Client, opts *config.Options) *Twitter {
-	if !opts.PublishToTwitter() {
+func NewTwitter(client *twitter.Client) *Twitter {
+	if !config.Opts.PublishToTwitter() {
 		logger.Error("Missing required environment variable")
 		return new(Twitter)
 	}
 
-	if client == nil && opts != nil {
-		config := oauth1.NewConfig(opts.TwitterConsumerKey(), opts.TwitterConsumerSecret())
-		token := oauth1.NewToken(opts.TwitterAccessToken(), opts.TwitterAccessSecret())
-		httpClient := config.Client(oauth1.NoContext, token)
+	if client == nil {
+		oauth := oauth1.NewConfig(config.Opts.TwitterConsumerKey(), config.Opts.TwitterConsumerSecret())
+		token := oauth1.NewToken(config.Opts.TwitterAccessToken(), config.Opts.TwitterAccessSecret())
+		httpClient := oauth.Client(oauth1.NoContext, token)
 		client = twitter.NewClient(httpClient)
 	}
 
 	return &Twitter{client: client}
 }
 
-func (t *Twitter) ToTwitter(_ context.Context, opts *config.Options, text string) bool {
-	if !opts.PublishToTwitter() || t.client == nil {
+func (t *Twitter) ToTwitter(_ context.Context, text string) bool {
+	if !config.Opts.PublishToTwitter() || t.client == nil {
 		logger.Debug("[publish] Do not publish to Twitter.")
 		return false
 	}
