@@ -23,11 +23,12 @@ const (
 	defEnabledIP = false
 	defEnabledPH = false
 
-	defTelegramToken   = ""
-	defTelegramChannel = ""
-	defGitHubToken     = ""
-	defGitHubOwner     = ""
-	defGitHubRepo      = ""
+	defTelegramToken    = ""
+	defTelegramChannel  = ""
+	defTelegramHelptext = ""
+	defGitHubToken      = ""
+	defGitHubOwner      = ""
+	defGitHubRepo       = ""
 
 	defMastodonServer        = ""
 	defMastodonClientKey     = ""
@@ -87,8 +88,9 @@ type slots struct {
 }
 
 type telegram struct {
-	token   string
-	channel string
+	token    string
+	channel  string
+	helptext string
 }
 
 type mastodon struct {
@@ -151,8 +153,9 @@ func NewOptions() *Options {
 			SLOT_PH: defEnabledPH,
 		},
 		telegram: &telegram{
-			token:   defTelegramToken,
-			channel: defTelegramChannel,
+			token:    defTelegramToken,
+			channel:  defTelegramChannel,
+			helptext: defTelegramHelptext,
 		},
 		mastodon: &mastodon{
 			server:       defMastodonServer,
@@ -237,6 +240,16 @@ func (o *Options) TelegramToken() string {
 // TelegramChannel returns the Telegram Channel name.
 func (o *Options) TelegramChannel() string {
 	return o.telegram.channel
+}
+
+// TelegramHelptext returns the help text for Telegram bot.
+func (o *Options) TelegramHelptext() string {
+	o.telegram.helptext = strings.Replace(o.telegram.helptext, `\r`, "\n", -1)
+	o.telegram.helptext = strings.Replace(o.telegram.helptext, `\n`, "\n", -1)
+	o.telegram.helptext = strings.Replace(o.telegram.helptext, `\r\n`, "\n", -1)
+	o.telegram.helptext = strings.Replace(o.telegram.helptext, `<br>`, "\n", -1)
+	o.telegram.helptext = strings.Replace(o.telegram.helptext, `<br/>`, "\n", -1)
+	return o.telegram.helptext
 }
 
 // PublishToChannel returns whether to publish results to Telegram Channel.

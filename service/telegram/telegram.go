@@ -6,6 +6,7 @@ package telegram // import "github.com/wabarc/wayback/service/telegram"
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"sync"
@@ -76,9 +77,20 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 	text := message.Text
 	logger.Debug("[telegram] message: %s", text)
 
+	if message.Caption != "" {
+		text = fmt.Sprintf("Text: \n%s\nCaption: \n%s", text, message.Caption)
+	}
 	urls := helper.MatchURL(text)
 	switch {
+	case message.Command() == "help":
+		msg := telegram.NewMessage(message.Chat.ID, config.Opts.TelegramHelptext())
+		msg.ReplyToMessageID = message.MessageID
+		t.bot.Send(msg)
+		return nil
 	case message.IsCommand():
+		msg := telegram.NewMessage(message.Chat.ID, fmt.Sprintf("/%s no specified", message.Command()))
+		msg.ReplyToMessageID = message.MessageID
+		t.bot.Send(msg)
 		return nil
 	case len(urls) == 0:
 		logger.Info("[telegram] archives failure, URL no found.")

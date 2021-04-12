@@ -256,6 +256,24 @@ func TestTelegramChannel(t *testing.T) {
 	}
 }
 
+func TestTelegramHelptext(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_TELEGRAM_HELPTEXT", "some text")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "some text"
+	got := opts.TelegramHelptext()
+
+	if got != expected {
+		t.Fatalf(`Unexpected Telegram help text, got %v instead of %s`, got, expected)
+	}
+}
+
 func TestTorPrivateKey(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("WAYBACK_TOR_PRIVKEY", "tor:private:key")

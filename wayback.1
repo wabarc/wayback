@@ -5,9 +5,10 @@
 wayback \- easy and fast to wayback webpage.
 
 .SH SYNOPSIS
-\fBwayback\fR [-c|--chatid] [-d|--daemon] [--debug] [-h|--help] [--ia] [--ip] [--is]
+\fBwayback\fR [--chatid] [-d|--daemon] [--debug] [-h|--help] [--ia] [--ip] [--is]
         [--ipfs-host] [-m|--ipfs-mode] [-p|--ipfs-port]
         [-t|--token] [--tor] [--tor-key]
+        [-c|--config] [--info] [--print]
         [-v|--version]
 
 .SH EXAMPLES
@@ -142,6 +143,9 @@ Telegram Bot API Token. (same as flag --token)\&.
 .TP
 .B WAYBACK_TELEGRAM_CHANNEL
 The chatid which publish message. (same as flag --chatid)\&.
+.TP
+.B WAYBACK_TELEGRAM_HELPTEXT
+The help text for Telegram bot command\&.
 .TP
 .B WAYBACK_TOR_PRIVKEY
 The private key for Tor service. (same as flag --tor-key)\&.

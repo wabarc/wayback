@@ -103,6 +103,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.telegram.token = parseString(val, defTelegramToken)
 		case "WAYBACK_TELEGRAM_CHANNEL":
 			p.opts.telegram.channel = parseString(val, defTelegramChannel)
+		case "WAYBACK_TELEGRAM_HELPTEXT":
+			p.opts.telegram.helptext = parseString(val, defTelegramHelptext)
 		case "WAYBACK_MASTODON_SERVER":
 			p.opts.mastodon.server = parseString(val, defMastodonServer)
 		case "WAYBACK_MASTODON_KEY":
