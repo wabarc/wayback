@@ -39,7 +39,7 @@ func NewMatrix(client *matrix.Client) *Matrix {
 			Type:             matrix.AuthTypePassword,
 			Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: config.Opts.MatrixUserID()},
 			Password:         config.Opts.MatrixPassword(),
-			StoreCredentials: false,
+			StoreCredentials: true,
 		})
 		if err != nil {
 			logger.Error("Login to Matrix got unpredictable error: %v", err)
@@ -54,9 +54,6 @@ func (m *Matrix) ToRoom(ctx context.Context, text string) bool {
 		logger.Debug("[publish] publish to Matrix room abort.")
 		return false
 	}
-	defer func() {
-		m.client.Logout()
-	}()
 
 	content := &event.MessageEventContent{
 		FormattedBody: text,

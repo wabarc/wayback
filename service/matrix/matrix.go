@@ -74,7 +74,7 @@ func (m *Matrix) Serve(ctx context.Context) error {
 	})
 	// Listen message event from user
 	syncer.OnEventType(event.EventMessage, func(source matrix.EventSource, ev *event.Event) {
-		logger.Debug("[matrix] event: %v", ev)
+		logger.Debug("[matrix] event: %#v", ev)
 		go func(ev *event.Event) {
 			// Do not handle message event:
 			// 1. Sent by self

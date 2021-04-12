@@ -373,7 +373,7 @@ func (o *Options) MatrixUserID() string {
 
 // MatrixRoomID returns the room ID of Matrix account.
 func (o *Options) MatrixRoomID() string {
-	if !strings.HasPrefix(o.matrix.roomID, "#") || !strings.Contains(o.matrix.roomID, ":") {
+	if !strings.HasPrefix(o.matrix.roomID, "!") || !strings.Contains(o.matrix.roomID, ":") {
 		return ""
 	}
 	return o.matrix.roomID

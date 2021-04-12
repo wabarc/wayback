@@ -598,7 +598,7 @@ func TestMatrixUserID(t *testing.T) {
 }
 
 func TestMatrixRoomID(t *testing.T) {
-	expected := "#foo:matrix.org"
+	expected := "!foo:matrix.org"
 
 	os.Clearenv()
 	os.Setenv("WAYBACK_MATRIX_ROOMID", expected)
@@ -637,7 +637,7 @@ func TestPublishToMatrixRoom(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("WAYBACK_MATRIX_HOMESERVER", "https://matrix-client.matrix.org")
 	os.Setenv("WAYBACK_MATRIX_USERID", "@foo:matrix.org")
-	os.Setenv("WAYBACK_MATRIX_ROOMID", "#bar:matrix.org")
+	os.Setenv("WAYBACK_MATRIX_ROOMID", "!bar:matrix.org")
 	os.Setenv("WAYBACK_MATRIX_PASSWORD", "zoo")
 
 	parser := NewParser()

@@ -176,7 +176,7 @@ You can specify configuration options either via command flags or via environmen
 | -                   | `WAYBACK_IRC_SERVER`              | `irc.freenode.net:7000` | IRC server, required TLS                                     |
 | -                   | `WAYBACK_MATRIX_HOMESERVER`       | `https://matrix.org`    | Matrix homeserver                                            |
 | -                   | `WAYBACK_MATRIX_USERID`           | -                       | Matrix unique user ID, format: `@foo:example.com`            |
-| -                   | `WAYBACK_MATRIX_ROOMID`           | -                       | Matrix unique room ID, format: `#bar:example.com`            |
+| -                   | `WAYBACK_MATRIX_ROOMID`           | -                       | Matrix internal room ID, format: `!bar:example.com`          |
 | -                   | `WAYBACK_MATRIX_PASSWORD`         | -                       | Matrix password                                              |
 | `--tor`             | `WAYBACK_USE_TOR`                 | `false`                 | Snapshot webpage via Tor anonymity network                   |
 | `--tor-key`         | `WAYBACK_TOR_PRIVKEY`             | -                       | The private key for Tor Hidden Service                       |
