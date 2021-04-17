@@ -10,9 +10,9 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/logger"
 	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"

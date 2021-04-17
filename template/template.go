@@ -6,7 +6,7 @@ package template // import "github.com/wabarc/wayback/template"
 
 import (
 	"bytes"
-	"github.com/wabarc/wayback/logger"
+	"github.com/wabarc/logger"
 	"text/template"
 )
 

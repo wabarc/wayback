@@ -11,9 +11,9 @@ import (
 	"text/template"
 
 	mstdn "github.com/mattn/go-mastodon"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/logger"
 )
 
 type Mastodon struct {

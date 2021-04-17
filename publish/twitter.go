@@ -12,9 +12,9 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/logger"
 )
 
 type Twitter struct {

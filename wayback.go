@@ -9,9 +9,9 @@ import (
 
 	"github.com/wabarc/archive.is/pkg"
 	"github.com/wabarc/archive.org/pkg"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/telegra.ph/pkg"
 	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wbipfs"
 )
 
@@ -27,7 +27,7 @@ type Broker interface {
 	PH() Archived
 }
 
-// Handle URLs need to wayback and configs.
+// Handle represents a wayback handle.
 type Handle struct {
 	URLs []string
 }

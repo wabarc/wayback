@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
-	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wayback/version"
 )
 

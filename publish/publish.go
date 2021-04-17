@@ -11,9 +11,9 @@ import (
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	mstdn "github.com/mattn/go-mastodon"
 	irc "github.com/thoj/go-ircevent"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/logger"
 	matrix "maunium.net/go/mautrix"
 )
 

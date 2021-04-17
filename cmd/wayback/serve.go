@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/spf13/cobra"
-	"github.com/wabarc/wayback/logger"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/service/anonymity"
 	"github.com/wabarc/wayback/service/mastodon"
 	"github.com/wabarc/wayback/service/matrix"

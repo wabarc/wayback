@@ -12,9 +12,9 @@ import (
 	"text/template"
 
 	irc "github.com/thoj/go-ircevent"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/logger"
 )
 
 type IRC struct {

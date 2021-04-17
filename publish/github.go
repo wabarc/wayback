@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"github.com/google/go-github/v33/github"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/logger"
 )
 
 type GitHub struct {

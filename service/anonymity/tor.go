@@ -21,10 +21,10 @@ import (
 	"github.com/cretz/bine/torutil/ed25519"
 	// "github.com/ipsn/go-libtor"
 	"github.com/wabarc/helper"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
-	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/template"
 )

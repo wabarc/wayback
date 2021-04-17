@@ -13,10 +13,10 @@ import (
 
 	"github.com/mattn/go-mastodon"
 	"github.com/wabarc/helper"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
-	"github.com/wabarc/wayback/logger"
 	"github.com/wabarc/wayback/publish"
 	"golang.org/x/net/html"
 )

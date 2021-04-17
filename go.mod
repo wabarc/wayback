@@ -26,6 +26,7 @@ require (
 	github.com/wabarc/archive.org v1.0.5
 	github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe
 	github.com/wabarc/imgbb v1.0.0 // indirect
+	github.com/wabarc/logger v0.0.0-20210417045349-d0d82e8e99ee
 	github.com/wabarc/screenshot v1.0.0 // indirect
 	github.com/wabarc/telegra.ph v0.0.0-20210404082130-1e2ddead2915
 	github.com/wabarc/wbipfs v0.1.3

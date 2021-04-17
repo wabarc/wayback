@@ -11,9 +11,9 @@ import (
 	"text/template"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/logger"
 )
 
 type Telegram struct {
