@@ -6,6 +6,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2021-04-17
+
+### Added
+- Add flag `-c` and `--config` to specify configuration file path.
+- Add tests for publish.
+- Add playback for Telegram bot.
+- Supports to set help command for Telegram bot.
+
+### Changed
+- Refactor configuration handler.
+- Redact message without URL for Matrix.
+- Separate logger package.
+
+### Removed
+- Remove flag `-c` to define Telegram channel name.
+
+### Fixed
+- Fix Matrix RoomID format.
+
+## [0.9.1] - 2021-04-12
+
+### Fixed
+- Fix publish context panic.
+
 ## [0.9.0] - 2021-04-12
 
 ### Added

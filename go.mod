@@ -35,7 +35,7 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	maunium.net/go/mautrix v0.9.5
+	maunium.net/go/mautrix v0.9.6
 )
 
 replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20201203134337-61a4e7973e4c
