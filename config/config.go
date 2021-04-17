@@ -12,6 +12,7 @@ const (
 	SLOT_IS = "is"
 	SLOT_IP = "ip"
 	SLOT_PH = "ph"
+	SLOT_TT = "tt"
 )
 
 // SlotName returns the descriptions of the wayback service.
@@ -21,6 +22,7 @@ func SlotName(s string) string {
 		SLOT_IS: "archive.today",
 		SLOT_IP: "IPFS",
 		SLOT_PH: "Telegraph",
+		SLOT_TT: "Time Travel",
 	}
 
 	if _, exist := slots[s]; exist {
@@ -37,6 +39,7 @@ func SlotExtra(s string) string {
 		SLOT_IS: "https://archive.today/",
 		SLOT_IP: "https://ipfs.github.io/public-gateway-checker/",
 		SLOT_PH: "https://telegra.ph/",
+		SLOT_TT: "http://timetravel.mementoweb.org/",
 	}
 
 	if _, exist := extra[s]; exist {

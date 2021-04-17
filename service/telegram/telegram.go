@@ -81,10 +81,18 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		text = fmt.Sprintf("Text: \n%s\nCaption: \n%s", text, message.Caption)
 	}
 	urls := helper.MatchURL(text)
+	tel := publish.NewTelegram(t.bot)
 	switch {
 	case message.Command() == "help":
 		msg := telegram.NewMessage(message.Chat.ID, config.Opts.TelegramHelptext())
 		msg.ReplyToMessageID = message.MessageID
+		t.bot.Send(msg)
+		return nil
+	case message.Command() == "playback", message.Command() == "search":
+		col, _ := wayback.Playback(urls)
+		msg := telegram.NewMessage(message.Chat.ID, tel.Render(col))
+		msg.ReplyToMessageID = message.MessageID
+		msg.ParseMode = "html"
 		t.bot.Send(msg)
 		return nil
 	case message.IsCommand():
@@ -106,7 +114,6 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		return err
 	}
 
-	tel := publish.NewTelegram(t.bot)
 	replyText := tel.Render(col)
 	logger.Debug("[telegram] reply text, %s", replyText)
 	msg := telegram.NewMessage(message.Chat.ID, replyText)

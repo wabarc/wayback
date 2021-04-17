@@ -7,9 +7,10 @@ package wayback // import "github.com/wabarc/wayback"
 import (
 	"sync"
 
-	"github.com/wabarc/archive.is/pkg"
-	"github.com/wabarc/archive.org/pkg"
+	"github.com/wabarc/archive.is"
+	"github.com/wabarc/archive.org"
 	"github.com/wabarc/logger"
+	"github.com/wabarc/playback"
 	"github.com/wabarc/telegra.ph/pkg"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wbipfs"
@@ -86,4 +87,41 @@ func (h *Handle) PH() Archived {
 	}
 
 	return uris
+}
+
+// Playback returns URLs archived from the time capsules.
+func Playback(urls []string) (col []*Collect, err error) {
+	logger.Debug("[playback] start...")
+
+	var wg sync.WaitGroup
+	var pb playback.Playback = &playback.Handle{URLs: urls}
+	var slots = []string{config.SLOT_IA, config.SLOT_IS, config.SLOT_IP, config.SLOT_PH, config.SLOT_TT}
+	for _, slot := range slots {
+		wg.Add(1)
+		go func(slot string) {
+			defer wg.Done()
+			c := &Collect{}
+			logger.Debug("[playback] searching slot: %s", slot)
+			switch slot {
+			case config.SLOT_IA:
+				c.Dst = pb.IA()
+			case config.SLOT_IS:
+				c.Dst = pb.IS()
+			case config.SLOT_IP:
+				c.Dst = pb.IP()
+			case config.SLOT_PH:
+				c.Dst = pb.PH()
+			case config.SLOT_TT:
+				c.Dst = pb.TT()
+			}
+			c.Arc = config.SlotName(slot)
+			c.Ext = config.SlotExtra(slot)
+			c.Lock()
+			col = append(col, c)
+			c.Unlock()
+		}(slot)
+	}
+	wg.Wait()
+
+	return col, nil
 }

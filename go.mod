@@ -22,20 +22,19 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/tdewolff/parse/v2 v2.5.14 // indirect
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
-	github.com/wabarc/archive.is v1.1.5
-	github.com/wabarc/archive.org v1.0.5
+	github.com/wabarc/archive.is v1.2.0
+	github.com/wabarc/archive.org v1.1.0
 	github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe
 	github.com/wabarc/imgbb v1.0.0 // indirect
 	github.com/wabarc/logger v0.0.0-20210417045349-d0d82e8e99ee
+	github.com/wabarc/playback v0.0.0-20210417144321-505ad58bbf2a
 	github.com/wabarc/screenshot v1.0.0 // indirect
 	github.com/wabarc/telegra.ph v0.0.0-20210404082130-1e2ddead2915
 	github.com/wabarc/wbipfs v0.1.3
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 // indirect
-	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
+	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210403161142-5e06dd20ab57 // indirect
 	maunium.net/go/mautrix v0.9.5
 )
 
