@@ -20,7 +20,7 @@ RUN --mount=type=bind,target=/src,rw \
 FROM alpine:3.13
 
 LABEL org.wabarc.homepage="http://github.com/wabarc" \
-      org.wabarc.repository="http://github.com/wabarc/on-github"
+      org.wabarc.repository="http://github.com/wabarc/wayback"
 
 ARG TOR_EXCLUDE_NODE="{cn},{hk},{mo},{sg},{th},{pk},{by},{ru},{ir},{sy},{vn},{ph},{my},{cu}"
 ARG TOR_EXCLUDE_EXIT_NODE="{cn},{hk},{mo},{sg},{kp},{th},{pk},{by},{ru},{ir},{sy},{vn},{ph},{my},{cu},{au},{ca},{nz},{gb},{us},{fr},{dk},{nl},{no},{be},{de},{it},{es}"

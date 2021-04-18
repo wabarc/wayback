@@ -89,6 +89,11 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		t.bot.Send(msg)
 		return nil
 	case message.Command() == "playback", message.Command() == "search":
+		if len(urls) == 0 {
+			msg := telegram.NewMessage(message.Chat.ID, "Please send with URLs, e.g.\n\n/playback https://example.com")
+			t.bot.Send(msg)
+			return nil
+		}
 		col, _ := wayback.Playback(urls)
 		msg := telegram.NewMessage(message.Chat.ID, tel.Render(col))
 		msg.ReplyToMessageID = message.MessageID
@@ -108,6 +113,16 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		return nil
 	}
 
+	msg := telegram.NewMessage(message.Chat.ID, "Archiving...")
+	msg.ReplyToMessageID = message.MessageID
+	stage, err := t.bot.Send(msg)
+	if err != nil {
+		logger.Error("[telegram] send archiving message failed: %v", err)
+		return err
+	}
+	logger.Debug("[telegram] send archiving messagee result: %v", stage)
+	// t.bot.Send(telegram.NewChatAction(message.Chat.ID, telegram.ChatTyping))
+
 	col, err := t.archive(urls)
 	if err != nil {
 		logger.Error("[telegram] archives failure, ", err)
@@ -116,11 +131,12 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 
 	replyText := tel.Render(col)
 	logger.Debug("[telegram] reply text, %s", replyText)
-	msg := telegram.NewMessage(message.Chat.ID, replyText)
-	msg.ReplyToMessageID = message.MessageID
-	msg.ParseMode = "html"
-
-	t.bot.Send(msg)
+	updMsg := telegram.NewEditMessageText(stage.Chat.ID, stage.MessageID, replyText)
+	updMsg.ParseMode = "html"
+	if _, err := t.bot.Send(updMsg); err != nil {
+		logger.Error("[telegram] update message failed: %v", err)
+		return err
+	}
 
 	ctx = context.WithValue(ctx, "telegram", t.bot)
 	go publish.To(ctx, col, "telegram")

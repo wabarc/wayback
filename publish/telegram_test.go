@@ -18,16 +18,16 @@ import (
 )
 
 var message = `<b><a href='https://web.archive.org/'>Internet Archive</a></b>:
-• <a href="https://example.com/?q=%E4%B8%AD%E6%96%87">origin</a> - https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87
+• <a href="https://example.com/?q=%E4%B8%AD%E6%96%87">origin</a> - <a href="https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87">https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87</a>
 
 <b><a href='https://archive.today/'>archive.today</a></b>:
-• <a href="https://example.com/">origin</a> - http://archive.today/abcdE
+• <a href="https://example.com/">origin</a> - <a href="http://archive.today/abcdE">http://archive.today/abcdE</a>
 
 <b><a href='https://ipfs.github.io/public-gateway-checker/'>IPFS</a></b>:
-• <a href="https://example.com/">origin</a> - https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
+• <a href="https://example.com/">origin</a> - <a href="https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr">https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr</a>
 
 <b><a href='https://telegra.ph/'>Telegraph</a></b>:
-• <a href="https://example.com/">origin</a> - http://telegra.ph/title-01-01
+• <a href="https://example.com/">origin</a> - <a href="http://telegra.ph/title-01-01">http://telegra.ph/title-01-01</a>
 `
 
 var (

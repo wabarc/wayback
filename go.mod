@@ -23,11 +23,11 @@ require (
 	github.com/tdewolff/parse/v2 v2.5.14 // indirect
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
 	github.com/wabarc/archive.is v1.2.0
-	github.com/wabarc/archive.org v1.1.0
+	github.com/wabarc/archive.org v1.1.1
 	github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe
 	github.com/wabarc/imgbb v1.0.0 // indirect
 	github.com/wabarc/logger v0.0.0-20210417045349-d0d82e8e99ee
-	github.com/wabarc/playback v0.0.0-20210417144321-505ad58bbf2a
+	github.com/wabarc/playback v0.0.0-20210418074547-4bf9d94a794d
 	github.com/wabarc/screenshot v1.0.0 // indirect
 	github.com/wabarc/telegra.ph v0.0.0-20210404082130-1e2ddead2915
 	github.com/wabarc/wbipfs v0.1.3

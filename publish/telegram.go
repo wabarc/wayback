@@ -67,7 +67,7 @@ func (t *Telegram) Render(vars []*wayback.Collect) string {
 
 	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext }}'>{{ $.Arc }}</a></b>:
 {{ range $src, $dst := $.Dst -}}
-• <a href="{{ $src }}">origin</a> - {{ $dst }}
+• <a href="{{ $src }}">origin</a> - <a href="{{ $dst }}">{{ $dst }}</a>
 {{end}}
 {{end}}`
 

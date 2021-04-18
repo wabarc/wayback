@@ -48,14 +48,27 @@ var (
     }
   ]
 }`
+	replyJSON = `{
+  "ok": true,
+  "result": {
+    "message_id": 1002,
+    "text": "https://example.com",
+    "chat": {
+      "id": 1000001,
+      "type": "private"
+    }
+  }
+}`
 )
 
-func bot(t *testing.T, done chan<- bool) (*telegram.BotAPI, *httptest.Server) {
+func bot(done chan<- bool) (*telegram.BotAPI, *httptest.Server) {
 	httpClient, mux, server := helper.MockServer()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
 		w.Header().Set("Content-Type", "application/json")
+
+		r.ParseForm()
+		text := r.FormValue("text")
 		slug := strings.TrimPrefix(r.URL.Path, prefix)
 		switch slug {
 		case "getMe":
@@ -68,9 +81,13 @@ func bot(t *testing.T, done chan<- bool) (*telegram.BotAPI, *httptest.Server) {
 				fmt.Fprintln(w, `{"ok":true, "result":[]}`)
 			}
 		case "sendMessage":
-			text := r.FormValue("text")
+			if text == "Archiving..." {
+				fmt.Fprintln(w, replyJSON)
+				return
+			}
+		case "editMessageText":
 			if !strings.Contains(text, config.SlotName("ia")) {
-				t.Errorf("Unexpected result: %s", text)
+				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
 			fmt.Fprintln(w, `{"ok":true, "result":null}`)
@@ -79,10 +96,7 @@ func bot(t *testing.T, done chan<- bool) (*telegram.BotAPI, *httptest.Server) {
 	})
 
 	endpoint := server.URL + "/bot%s/%s"
-	b, err := telegram.NewBotAPIWithClient(token, endpoint, httpClient)
-	if err != nil {
-		t.Fatalf(`New Telegram bot API client failed: %v`, err)
-	}
+	b, _ := telegram.NewBotAPIWithClient(token, endpoint, httpClient)
 
 	return b, server
 }
@@ -103,7 +117,7 @@ func TestServe(t *testing.T) {
 	}
 
 	done := make(chan bool, 1)
-	bot, srv := bot(t, done)
+	bot, srv := bot(done)
 	defer srv.Close()
 
 	go func() {
@@ -136,7 +150,7 @@ func TestProcess(t *testing.T) {
 	}
 
 	done := make(chan bool, 1)
-	bot, srv := bot(t, done)
+	bot, srv := bot(done)
 	defer srv.Close()
 
 	go func() {

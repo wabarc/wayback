@@ -23,8 +23,7 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		from = args[0]
 	}
 
-	switch {
-	case config.Opts.PublishToChannel():
+	if config.Opts.PublishToChannel() {
 		logger.Debug("[%s] publishing to channel...", from)
 
 		var bot *telegram.BotAPI
@@ -33,11 +32,13 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		}
 		tel := NewTelegram(bot)
 		tel.ToChannel(ctx, tel.Render(col))
-	case config.Opts.PublishToIssues():
+	}
+	if config.Opts.PublishToIssues() {
 		logger.Debug("[%s] publishing to GitHub issues...", from)
 		gh := NewGitHub(nil)
 		gh.ToIssues(ctx, gh.Render(col))
-	case config.Opts.PublishToMastodon():
+	}
+	if config.Opts.PublishToMastodon() {
 		var id string
 		if len(args) > 1 {
 			id = args[1]
@@ -50,7 +51,8 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		}
 		mstdn := NewMastodon(client)
 		mstdn.ToMastodon(ctx, mstdn.Render(col), id)
-	case config.Opts.PublishToTwitter():
+	}
+	if config.Opts.PublishToTwitter() {
 		logger.Debug("[%s] publishing to Twitter...", from)
 
 		var client *twitter.Client
@@ -59,7 +61,8 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		}
 		twitter := NewTwitter(client)
 		twitter.ToTwitter(ctx, twitter.Render(col))
-	case config.Opts.PublishToIRCChannel():
+	}
+	if config.Opts.PublishToIRCChannel() {
 		logger.Debug("[%s] publishing to IRC channel...", from)
 
 		var conn *irc.Connection
@@ -68,7 +71,8 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		}
 		irc := NewIRC(conn)
 		irc.ToChannel(ctx, irc.Render(col))
-	case config.Opts.PublishToMatrixRoom():
+	}
+	if config.Opts.PublishToMatrixRoom() {
 		logger.Debug("[%s] publishing to Matrix room...", from)
 
 		var client *matrix.Client
