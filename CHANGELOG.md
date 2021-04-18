@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.1] - 2021-04-18
+
+### Changed
+- Update Dockerfile label
+- Update Telegram message template
+
+### Fixed
+- Fix publish in multiple mode
+
 ## [0.10.0] - 2021-04-17
 
 ### Added
