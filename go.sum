@@ -367,8 +367,9 @@ github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5/go.mod h1
 github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 h1:nrZ3ySNYwJbSpD6ce9duiP+QkD3JuLCcWkdaehUS/3Y=
 github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80/go.mod h1:iFyPdL66DjUD96XmzVL3ZntbzcflLnznH0fr99w5VqE=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
-github.com/wabarc/archive.is v1.2.0 h1:hjsW30eO5MGChlkxJitK8BZefB2vR4y/4CriIYEX0VA=
 github.com/wabarc/archive.is v1.2.0/go.mod h1:y30zW5b4wiHeZ6h4dQN/63+9Q0l0VVitmkDZxv1hTPg=
+github.com/wabarc/archive.is v1.2.1 h1:isyJ4ENJUbXPmqdqk4UMIr+73k9iF348ujcfDrPu8wM=
+github.com/wabarc/archive.is v1.2.1/go.mod h1:CjIdvS7MUO45lQLA5PcfWso1NPSQOl5f47iQ9RdB0Kk=
 github.com/wabarc/archive.org v1.1.0/go.mod h1:f+VqacB+XUJKQ7MmGgZ9CDB1x1ypwkMKtPjEfRD/qUs=
 github.com/wabarc/archive.org v1.1.1 h1:cPqimnYuWyobxzvuzos9DrEzuF/YuUTtrQZWNxQSnTg=
 github.com/wabarc/archive.org v1.1.1/go.mod h1:f+VqacB+XUJKQ7MmGgZ9CDB1x1ypwkMKtPjEfRD/qUs=
@@ -388,8 +389,6 @@ github.com/wabarc/memento v0.0.0-20210417125332-b8d39918d320 h1:kOKyvRW6p092aruS
 github.com/wabarc/memento v0.0.0-20210417125332-b8d39918d320/go.mod h1:qP6GisnqoSDc5Ivj34yV+Qar3B6tYyLDKx42oCDX1zY=
 github.com/wabarc/obelisk v0.0.0-20201203134337-61a4e7973e4c h1:wq9ZNfly9sj4E18zGRkLVysH5pxg4KIkBiMIQGBgPaw=
 github.com/wabarc/obelisk v0.0.0-20201203134337-61a4e7973e4c/go.mod h1:OlGUo0utWqPMcej0HirsoK2+65Je/ZPFNwasF/O3KYM=
-github.com/wabarc/playback v0.0.0-20210418071638-297b9e4f3252 h1:CdZYvD+YxOtyj/WKkJS5sU3UkkH0vd+xtsmGPN1Sfws=
-github.com/wabarc/playback v0.0.0-20210418071638-297b9e4f3252/go.mod h1:gQo3uKms0wQAOUwAqqlEQW1kV7IC6auoJMUZI61erVQ=
 github.com/wabarc/playback v0.0.0-20210418074547-4bf9d94a794d h1:bp/VItvjD2Sx77Gx113YaeaQHjxE/Bzmd+RVY3r7U8I=
 github.com/wabarc/playback v0.0.0-20210418074547-4bf9d94a794d/go.mod h1:gQo3uKms0wQAOUwAqqlEQW1kV7IC6auoJMUZI61erVQ=
 github.com/wabarc/screenshot v0.0.0-20210203092219-7a206c6a3d39/go.mod h1:4UF/mOVbZmULZ4qeigCWEXlSp0wS5jtq11EdsbyyN5w=

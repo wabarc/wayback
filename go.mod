@@ -22,7 +22,7 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/tdewolff/parse/v2 v2.5.14 // indirect
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
-	github.com/wabarc/archive.is v1.2.0
+	github.com/wabarc/archive.is v1.2.1
 	github.com/wabarc/archive.org v1.1.1
 	github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe
 	github.com/wabarc/imgbb v1.0.0 // indirect
