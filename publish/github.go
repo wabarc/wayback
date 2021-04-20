@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"context"
 	"net/http"
-	"net/url"
 	"strings"
 	"text/template"
 	"time"
@@ -74,21 +73,11 @@ func (gh *GitHub) Render(vars []*wayback.Collect) string {
 	const tmpl = `{{range $ := .}}**[{{ $.Arc }}]({{ $.Ext }})**:
 {{ range $src, $dst := $.Dst -}}
 > origin: [{{ $src | unescape}}]({{ $src }})
-> archived: [{{ $dst | unescape}}]({{ $dst }})
+> archived: {{ if $dst | isURL }}[{{ $dst | unescape}}]({{ $dst }}){{ else }}{{ $dst }}{{ end }}
 {{end}}
 {{end}}`
 
-	funcMap := template.FuncMap{
-		"unescape": func(link string) string {
-			unescaped, err := url.QueryUnescape(link)
-			if err != nil {
-				return link
-			}
-			return unescaped
-		},
-	}
-
-	tpl, err := template.New("message").Funcs(funcMap).Parse(tmpl)
+	tpl, err := template.New("message").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
 		logger.Debug("[publish] parse template failed, %v", err)
 		return ""

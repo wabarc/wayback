@@ -6,11 +6,14 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"context"
+	"net/url"
+	"text/template"
 
 	"github.com/dghubble/go-twitter/twitter"
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	mstdn "github.com/mattn/go-mastodon"
 	irc "github.com/thoj/go-ircevent"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -81,5 +84,18 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		}
 		mat := NewMatrix(client)
 		mat.ToRoom(ctx, mat.Render(col))
+	}
+}
+
+func funcMap() template.FuncMap {
+	return template.FuncMap{
+		"unescape": func(link string) string {
+			unescaped, err := url.QueryUnescape(link)
+			if err != nil {
+				return link
+			}
+			return unescaped
+		},
+		"isURL": helper.IsURL,
 	}
 }

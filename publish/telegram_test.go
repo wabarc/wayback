@@ -61,6 +61,28 @@ func TestRenderForTelegram(t *testing.T) {
 	}
 }
 
+func TestRenderForTelegramFlawed(t *testing.T) {
+	setTelegramEnv()
+
+	message := `<b><a href='https://web.archive.org/'>Internet Archive</a></b>:
+• <a href="https://example.com/?q=%E4%B8%AD%E6%96%87">origin</a> - Get "https://web.archive.org/save/https://example.com": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+
+<b><a href='https://archive.today/'>archive.today</a></b>:
+• <a href="https://example.com/">origin</a> - <a href="http://archive.today/abcdE">http://archive.today/abcdE</a>
+
+<b><a href='https://ipfs.github.io/public-gateway-checker/'>IPFS</a></b>:
+• <a href="https://example.com/">origin</a> - Archive failed.
+
+<b><a href='https://telegra.ph/'>Telegraph</a></b>:
+• <a href="https://example.com/">origin</a> - Screenshots failed.
+`
+	tel := &Telegram{}
+	got := tel.Render(flawed)
+	if got != message {
+		t.Errorf("Unexpected render template for Telegram got \n%s\ninstead of \n%s", got, message)
+	}
+}
+
 func TestToChannel(t *testing.T) {
 	setTelegramEnv()
 

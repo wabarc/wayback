@@ -67,11 +67,11 @@ func (t *Telegram) Render(vars []*wayback.Collect) string {
 
 	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext }}'>{{ $.Arc }}</a></b>:
 {{ range $src, $dst := $.Dst -}}
-• <a href="{{ $src }}">origin</a> - <a href="{{ $dst }}">{{ $dst }}</a>
+• <a href="{{ $src }}">origin</a> - {{ if $dst | isURL }}<a href="{{ $dst }}">{{ $dst }}</a>{{ else }}{{ $dst }}{{ end }}
 {{end}}
 {{end}}`
 
-	tpl, err := template.New("message").Parse(tmpl)
+	tpl, err := template.New("message").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
 		logger.Debug("[publish] parse Telegram template failed, %v", err)
 		return ""

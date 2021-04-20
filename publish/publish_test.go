@@ -51,6 +51,37 @@ var collects = []*wayback.Collect{
 	},
 }
 
+var flawed = []*wayback.Collect{
+	{
+		Arc: config.SlotName(config.SLOT_IA),
+		Dst: map[string]string{
+			"https://example.com/?q=%E4%B8%AD%E6%96%87": `Get "https://web.archive.org/save/https://example.com": context deadline exceeded (Client.Timeout exceeded while awaiting headers)`,
+		},
+		Ext: config.SlotExtra(config.SLOT_IA),
+	},
+	{
+		Arc: config.SlotName(config.SLOT_IS),
+		Dst: map[string]string{
+			"https://example.com/": "http://archive.today/abcdE",
+		},
+		Ext: config.SlotExtra(config.SLOT_IS),
+	},
+	{
+		Arc: config.SlotName(config.SLOT_IP),
+		Dst: map[string]string{
+			"https://example.com/": "Archive failed.",
+		},
+		Ext: config.SlotExtra(config.SLOT_IP),
+	},
+	{
+		Arc: config.SlotName(config.SLOT_PH),
+		Dst: map[string]string{
+			"https://example.com/": "Screenshots failed.",
+		},
+		Ext: config.SlotExtra(config.SLOT_PH),
+	},
+}
+
 func unsetAllEnv() {
 	lines := os.Environ()
 	for _, line := range lines {
