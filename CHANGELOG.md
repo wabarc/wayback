@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.2] - 2021-04-20
+
+### Added
+- Support screenshot using Chrome remote debugging address.
+
+### Changed
+- Improve telegram command message.
+- Append title content from `og:title` if empty.
+- Use socks proxy for `archive.is` as defaults.
+
 ## [0.10.1] - 2021-04-18
 
 ### Changed
