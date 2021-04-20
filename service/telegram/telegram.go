@@ -53,7 +53,7 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 	updates := t.bot.GetUpdatesChan(cfg)
 
 	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		<-c
 		logger.Info("[telegram] stopping receive updates...")
@@ -101,7 +101,11 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		t.bot.Send(msg)
 		return nil
 	case message.IsCommand():
-		msg := telegram.NewMessage(message.Chat.ID, fmt.Sprintf("/%s no specified", message.Command()))
+		commands := t.myCommands()
+		if commands != "" {
+			commands = fmt.Sprintf(", you can type:\n\n%s", commands)
+		}
+		msg := telegram.NewMessage(message.Chat.ID, fmt.Sprintf("/%s is no specified command%s", message.Command(), commands))
 		msg.ReplyToMessageID = message.MessageID
 		t.bot.Send(msg)
 		return nil
@@ -176,4 +180,18 @@ func (t *Telegram) archive(urls []string) (col []*wayback.Collect, err error) {
 	wg.Wait()
 
 	return col, nil
+}
+
+func (t *Telegram) myCommands() string {
+	commands, err := t.bot.GetMyCommands()
+	if err != nil {
+		return ""
+	}
+
+	var list string
+	for _, command := range commands {
+		list = fmt.Sprintf("/%s - %s\n", command.Command, command.Description)
+	}
+
+	return list
 }
