@@ -74,26 +74,40 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 
 func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 	message := update.Message
-	text := message.Text
-	logger.Debug("[telegram] message: %s", text)
+	command := message.Command()
+	content := message.Text
+	logger.Debug("[telegram] content: %s", content)
 
 	if message.Caption != "" {
-		text = fmt.Sprintf("Text: \n%s\nCaption: \n%s", text, message.Caption)
+		content = fmt.Sprintf("Text: \n%s\nCaption: \n%s", content, message.Caption)
 	}
-	urls := helper.MatchURL(text)
+	urls := helper.MatchURL(content)
 	tel := publish.NewTelegram(t.bot)
+
+	// Set command as playback if receive a playback command without URLs, and
+	// required user reply a message with URLs.
+	if message.ReplyToMessage != nil {
+		from := message.ReplyToMessage.From
+		if from.UserName == t.bot.Self.UserName {
+			command = "playback"
+		}
+	}
+
 	switch {
-	case message.Command() == "help":
+	case command == "help":
 		msg := telegram.NewMessage(message.Chat.ID, config.Opts.TelegramHelptext())
 		msg.ReplyToMessageID = message.MessageID
 		t.bot.Send(msg)
 		return nil
-	case message.Command() == "playback", message.Command() == "search":
+	case command == "playback", command == "search":
 		if len(urls) == 0 {
-			msg := telegram.NewMessage(message.Chat.ID, "Please send with URLs, e.g.\n\n/playback https://example.com")
+			msg := telegram.NewMessage(message.Chat.ID, "Please send me URLs to playback...")
+			msg.ReplyToMessageID = message.MessageID
+			msg.BaseChat.ReplyMarkup = telegram.ForceReply{ForceReply: true}
 			t.bot.Send(msg)
 			return nil
 		}
+		t.bot.Send(telegram.NewChatAction(message.Chat.ID, telegram.ChatTyping))
 		col, _ := wayback.Playback(urls)
 		msg := telegram.NewMessage(message.Chat.ID, tel.Render(col))
 		msg.ReplyToMessageID = message.MessageID
