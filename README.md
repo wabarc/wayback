@@ -129,7 +129,7 @@ $ wayback --ia --is --ip -d telegram -t your-telegram-bot-token
 Publish message to your Telegram channel at the same time:
 
 ```sh
-$ wayback --ia --is --ip -d telegram -t your-telegram-bot-token -c your-telegram-channel-name
+$ wayback --ia --is --ip -d telegram -t your-telegram-bot-token --chatid your-telegram-channel-name
 ```
 
 Also can run with debug mode:
@@ -161,6 +161,7 @@ You can also specify configuration options either via command flags or via envir
 | `--debug`           | `DEBUG`                           | `false`                 | Enable debug mode                                            |
 | `-c`, `--config`    | -                                 | -                       | Configuration file path, defaults: `./wayback.conf`, `~/wayback.conf`, `/etc/wayback.conf` |
 | -                   | `LOG_TIME`                        | `true`                  | Display the date and time in log messages                    |
+| -                   | `CHROME_REMOTE_ADDR`              | -                       | Chrome/Chromium remote debugging address, for screenshot     |
 | `-d`, `--daemon`    | -                                 | -                       | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter` |
 | `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                  | Wayback webpages to **Internet Archive**                     |
 | `--is`              | `WAYBACK_ENABLE_IS`               | `true`                  | Wayback webpages to **Archive Today**                        |

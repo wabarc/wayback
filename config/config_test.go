@@ -671,3 +671,55 @@ func TestPublishToMatrixRoom(t *testing.T) {
 		t.Fatalf(`Unexpected publish to Matrix room got %t instead of %v`, got, expected)
 	}
 }
+
+func TestEnabledChromeRemote(t *testing.T) {
+	addr := "127.0.0.1:1234"
+
+	os.Clearenv()
+	os.Setenv("CHROME_REMOTE_ADDR", addr)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	yes := opts.EnabledChromeRemote()
+	if !yes {
+		t.Fatalf(`Unexpected enable Chrome remote debugging got %t instead of 'true'`, yes)
+	}
+}
+
+func TestDisabledChromeRemote(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("CHROME_REMOTE_ADDR", "")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	yes := opts.EnabledChromeRemote()
+	if yes {
+		t.Fatalf(`Unexpected enable Chrome remote debugging got %t instead of 'true'`, yes)
+	}
+}
+
+func TestChromeRemoteAddr(t *testing.T) {
+	addr := "127.0.0.1:1234"
+
+	os.Clearenv()
+	os.Setenv("CHROME_REMOTE_ADDR", addr)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.ChromeRemoteAddr()
+	if got != addr {
+		t.Fatalf(`Unexpected Chrome remote debugging address got %s instead of %s`, got, addr)
+	}
+}

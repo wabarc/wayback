@@ -11,7 +11,7 @@ import (
 	"github.com/wabarc/archive.org"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/playback"
-	"github.com/wabarc/telegra.ph/pkg"
+	"github.com/wabarc/telegra.ph"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wbipfs"
 )
@@ -81,6 +81,9 @@ func (h *Handle) IP() Archived {
 
 func (h *Handle) PH() Archived {
 	wbrc := &ph.Archiver{}
+	if config.Opts.EnabledChromeRemote() {
+		wbrc.ByRemote(config.Opts.ChromeRemoteAddr())
+	}
 	uris, err := wbrc.Wayback(h.URLs)
 	if err != nil {
 		logger.Error("Wayback %v to Telegra.ph failed, %v", h.URLs, err)

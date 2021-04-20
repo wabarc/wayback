@@ -52,6 +52,9 @@ const (
 	defTorPrivateKey = ""
 	defTorLocalPort  = 8964
 	defTorrcFile     = "/etc/tor/torrc"
+
+	defChromeRemoteAddr    = ""
+	defEnabledChromeRemote = false
 )
 
 var (
@@ -72,6 +75,9 @@ type Options struct {
 	matrix   *matrix
 	irc      *irc
 	tor      *tor
+
+	chromeRemoteAddr    string
+	enabledChromeRemote bool
 }
 
 type ipfs struct {
@@ -138,9 +144,11 @@ type tor struct {
 // NewOptions returns Options with default values.
 func NewOptions() *Options {
 	opts := &Options{
-		debug:   defDebug,
-		logTime: defLogTime,
-		overTor: defOverTor,
+		debug:               defDebug,
+		logTime:             defLogTime,
+		overTor:             defOverTor,
+		chromeRemoteAddr:    defChromeRemoteAddr,
+		enabledChromeRemote: defEnabledChromeRemote,
 		ipfs: &ipfs{
 			host: defIPFSHost,
 			port: defIPFSPort,
@@ -423,4 +431,15 @@ func (o *Options) TorRemotePorts() []int {
 // TorrcFile returns path of the torrc file to set on start Tor Hidden Service.
 func (o *Options) TorrcFile() string {
 	return o.tor.torrcFile
+}
+
+// EnabledChromeRemote returns whether enable Chrome/Chromium remote debugging
+// for screenshot
+func (o *Options) EnabledChromeRemote() bool {
+	return o.enabledChromeRemote
+}
+
+// ChromeRemoteAddr returns the remote debugging address for Chrome/Chromium
+func (o *Options) ChromeRemoteAddr() string {
+	return o.chromeRemoteAddr
 }

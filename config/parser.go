@@ -83,6 +83,9 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.debug = parseBool(val, defDebug)
 		case "LOG_TIME":
 			p.opts.logTime = parseBool(val, defLogTime)
+		case "CHROME_REMOTE_ADDR":
+			p.opts.enabledChromeRemote = hasValue(val, defEnabledChromeRemote)
+			p.opts.chromeRemoteAddr = parseString(val, defChromeRemoteAddr)
 		case "WAYBACK_IPFS_HOST":
 			p.opts.ipfs.host = parseString(val, defIPFSHost)
 		case "WAYBACK_IPFS_PORT":
@@ -188,6 +191,13 @@ func parseString(val string, fallback string) string {
 		return fallback
 	}
 	return val
+}
+
+func hasValue(val string, fallback bool) bool {
+	if val == "" {
+		return fallback
+	}
+	return true
 }
 
 func parseIntList(val string, fallback []int) []int {
