@@ -8,13 +8,13 @@ require (
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
 	github.com/dghubble/oauth1 v0.7.0
 	github.com/go-shiori/obelisk v0.0.0-20201115143556-8de0d40b0a9b // indirect
-	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.0.0-rc1
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.0.0-rc1.0.20210311030851-d0e1dfd8c604
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/go-github/v33 v33.0.0
 	github.com/klauspost/cpuid/v2 v2.0.6 // indirect
 	// github.com/ipsn/go-libtor v1.0.329
 	github.com/libp2p/go-libp2p-core v0.8.5 // indirect
-	github.com/mattn/go-mastodon v0.0.4
+	github.com/mattn/go-mastodon v0.0.5-0.20210417123210-6abe72ddb09b
 	github.com/multiformats/go-multiaddr v0.3.1 // indirect
 	github.com/multiformats/go-multihash v0.0.15 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
@@ -39,7 +39,3 @@ require (
 )
 
 replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78
-
-replace github.com/mattn/go-mastodon => github.com/wabarc/go-mastodon v0.0.5-0.20210225142645-546cc5f43352
-
-replace github.com/go-telegram-bot-api/telegram-bot-api/v5 => github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.0.0-rc1.0.20210311030851-d0e1dfd8c604
