@@ -1,6 +1,6 @@
 module github.com/wabarc/wayback
 
-go 1.13
+go 1.16
 
 require (
 	github.com/btcsuite/btcd v0.21.0-beta // indirect
@@ -11,6 +11,7 @@ require (
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.0.0-rc1.0.20210311030851-d0e1dfd8c604
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/go-github/v33 v33.0.0
+	github.com/gorilla/mux v1.8.0
 	github.com/klauspost/cpuid/v2 v2.0.6 // indirect
 	// github.com/ipsn/go-libtor v1.0.329
 	github.com/libp2p/go-libp2p-core v0.8.5 // indirect
