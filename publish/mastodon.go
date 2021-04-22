@@ -43,6 +43,10 @@ func (m *Mastodon) ToMastodon(ctx context.Context, text, id string) bool {
 		logger.Debug("[publish] Do not publish to Mastodon.")
 		return false
 	}
+	if text == "" {
+		logger.Info("[publish] mastodon validation failed: Text can't be blank")
+		return false
+	}
 
 	// TODO: character limit
 	toot := &mstdn.Toot{

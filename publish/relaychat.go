@@ -44,6 +44,10 @@ func (i *IRC) ToChannel(ctx context.Context, text string) bool {
 		logger.Debug("[publish] Do not publish to IRC channel.")
 		return false
 	}
+	if text == "" {
+		logger.Info("[publish] IRC validation failed: Text can't be blank")
+		return false
+	}
 
 	i.conn.Join(config.Opts.IRCChannel())
 	i.conn.Privmsg(config.Opts.IRCChannel(), text)

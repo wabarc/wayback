@@ -54,6 +54,10 @@ func (m *Matrix) ToRoom(ctx context.Context, text string) bool {
 		logger.Debug("[publish] publish to Matrix room abort.")
 		return false
 	}
+	if text == "" {
+		logger.Info("[publish] matrix validation failed: Text can't be blank")
+		return false
+	}
 
 	content := &event.MessageEventContent{
 		FormattedBody: text,
