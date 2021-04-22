@@ -98,7 +98,7 @@ func (m *Matrix) Serve(ctx context.Context) error {
 	})
 
 	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		<-c
 		logger.Info("[matrix] stopping sync and logout all sessions")
@@ -137,7 +137,7 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 		return errors.New("Matrix: URL no found")
 	}
 
-	col, err := m.archive(urls)
+	col, err := wayback.Wayback(urls)
 	if err != nil {
 		logger.Error("[matrix] archives failure, %v", err)
 		return err
@@ -168,52 +168,6 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 	publish.To(ctx, col, "matrix")
 
 	return nil
-}
-
-func (m *Matrix) archive(urls []string) (col []*wayback.Collect, err error) {
-	logger.Debug("[matrix] archives start...")
-
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-	var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
-	for slot, arc := range config.Opts.Slots() {
-		if !arc {
-			continue
-		}
-		wg.Add(1)
-		go func(slot string) {
-			defer wg.Done()
-			c := &wayback.Collect{}
-			logger.Debug("[matrix] archiving slot: %s", slot)
-			switch slot {
-			case config.SLOT_IA:
-				c.Dst = wbrc.IA()
-			case config.SLOT_IS:
-				c.Dst = wbrc.IS()
-			case config.SLOT_IP:
-				c.Dst = wbrc.IP()
-			case config.SLOT_PH:
-				c.Dst = wbrc.PH()
-			}
-			c.Arc = config.SlotName(slot)
-			c.Ext = config.SlotExtra(slot)
-			mu.Lock()
-			col = append(col, c)
-			mu.Unlock()
-		}(slot)
-	}
-	wg.Wait()
-
-	if len(col) == 0 {
-		logger.Error("[matrix] archives failure")
-		return col, errors.New("archives failure")
-	}
-	if len(col[0].Dst) == 0 {
-		logger.Error("[matrix] without results")
-		return col, errors.New("without results")
-	}
-
-	return col, nil
 }
 
 func (m *Matrix) redact(ev *event.Event, reason string) bool {

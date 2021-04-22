@@ -68,7 +68,7 @@ func (i *IRC) Serve(ctx context.Context) error {
 	}
 
 	stop := make(chan os.Signal)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		<-stop
 		i.conn.Quit()
@@ -93,7 +93,7 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 		return errors.New("IRC: URL no found")
 	}
 
-	col, err := i.archive(urls)
+	col, err := wayback.Wayback(urls)
 	if err != nil {
 		logger.Error("[irc] archives failure, %v", err)
 		return err
@@ -110,49 +110,4 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 	publish.To(ctx, col, "irc")
 
 	return nil
-}
-
-func (i *IRC) archive(urls []string) (col []*wayback.Collect, err error) {
-	logger.Debug("[irc] archives start...")
-
-	wg := sync.WaitGroup{}
-	var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
-	for slot, arc := range config.Opts.Slots() {
-		if !arc {
-			continue
-		}
-		wg.Add(1)
-		go func(slot string) {
-			defer wg.Done()
-			c := &wayback.Collect{}
-			logger.Debug("[irc] archiving slot: %s", slot)
-			switch slot {
-			case config.SLOT_IA:
-				c.Arc = config.SlotName(slot)
-				c.Dst = wbrc.IA()
-			case config.SLOT_IS:
-				c.Arc = config.SlotName(slot)
-				c.Dst = wbrc.IS()
-			case config.SLOT_IP:
-				c.Arc = config.SlotName(slot)
-				c.Dst = wbrc.IP()
-			case config.SLOT_PH:
-				c.Arc = config.SlotName(slot)
-				c.Dst = wbrc.PH()
-			}
-			col = append(col, c)
-		}(slot)
-	}
-	wg.Wait()
-
-	if len(col) == 0 {
-		logger.Error("archives failure")
-		return col, errors.New("archives failure")
-	}
-	if len(col[0].Dst) == 0 {
-		logger.Error("without results")
-		return col, errors.New("without results")
-	}
-
-	return col, nil
 }

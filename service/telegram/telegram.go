@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -141,7 +140,7 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 	logger.Debug("[telegram] send archiving messagee result: %v", stage)
 	// t.bot.Send(telegram.NewChatAction(message.Chat.ID, telegram.ChatTyping))
 
-	col, err := t.archive(urls)
+	col, err := wayback.Wayback(urls)
 	if err != nil {
 		logger.Error("[telegram] archives failure, ", err)
 		return err
@@ -160,40 +159,6 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 	go publish.To(ctx, col, "telegram")
 
 	return nil
-}
-
-func (t *Telegram) archive(urls []string) (col []*wayback.Collect, err error) {
-	logger.Debug("[telegram] archives start...")
-
-	wg := sync.WaitGroup{}
-	var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
-	for slot, arc := range config.Opts.Slots() {
-		if !arc {
-			continue
-		}
-		wg.Add(1)
-		go func(slot string) {
-			defer wg.Done()
-			c := &wayback.Collect{}
-			logger.Debug("[telegram] archiving slot: %s", slot)
-			switch slot {
-			case config.SLOT_IA:
-				c.Dst = wbrc.IA()
-			case config.SLOT_IS:
-				c.Dst = wbrc.IS()
-			case config.SLOT_IP:
-				c.Dst = wbrc.IP()
-			case config.SLOT_PH:
-				c.Dst = wbrc.PH()
-			}
-			c.Arc = config.SlotName(slot)
-			c.Ext = config.SlotExtra(slot)
-			col = append(col, c)
-		}(slot)
-	}
-	wg.Wait()
-
-	return col, nil
 }
 
 func (t *Telegram) myCommands() string {

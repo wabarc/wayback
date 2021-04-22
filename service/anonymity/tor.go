@@ -14,7 +14,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"strings"
-	"sync"
 	"syscall"
 
 	"github.com/cretz/bine/tor"
@@ -131,10 +130,11 @@ func (t *Tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 		http.Redirect(w, r, "/", 411)
 		return
 	}
-
 	logger.Debug("[web] text: %s", text)
 
-	collector, col := t.archive(ctx, text)
+	urls := helper.MatchURL(text)
+	col, _ := wayback.Wayback(urls)
+	collector := transform(col)
 	switch r.PostFormValue("data-type") {
 	case "json":
 		w.Header().Set("Content-Type", "application/json")
@@ -161,72 +161,18 @@ func (t *Tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 	}
 }
 
-func (t *Tor) archive(ctx context.Context, text string) (tc *template.Collector, col []*wayback.Collect) {
-	logger.Debug("[web] archives start...")
-	tc = &template.Collector{}
-
-	urls := helper.MatchURL(text)
-	if len(urls) == 0 {
-		transform(tc, "", map[string]string{text: "URL no found"})
-		logger.Info("[web] archives failure, URL no found.")
-		return tc, []*wayback.Collect{}
-	}
-
-	wg := sync.WaitGroup{}
-	var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
-	for slot, arc := range config.Opts.Slots() {
-		if !arc {
-			continue
+func transform(col []*wayback.Collect) template.Collector {
+	collects := []template.Collect{}
+	for _, c := range col {
+		for src, dst := range c.Dst {
+			collects = append(collects, template.Collect{
+				Slot: c.Arc,
+				Src:  src,
+				Dst:  dst,
+			})
 		}
-		wg.Add(1)
-		logger.Debug("[web] archiving slot: %s", slot)
-		go func(slot string, tc *template.Collector) {
-			defer wg.Done()
-			slotName := config.SlotName(slot)
-			c := &wayback.Collect{
-				Arc: slotName,
-				Ext: config.SlotExtra(slot),
-			}
-			switch slot {
-			case config.SLOT_IA:
-				ia := wbrc.IA()
-				// Data for response
-				transform(tc, slotName, ia)
-				// Data for publish
-				c.Dst = ia
-			case config.SLOT_IS:
-				is := wbrc.IS()
-				// Data for response
-				transform(tc, slotName, is)
-				// Data for publish
-				c.Dst = is
-			case config.SLOT_IP:
-				ip := wbrc.IP()
-				// Data for response
-				transform(tc, slotName, ip)
-				// Data for publish
-				c.Dst = ip
-			case config.SLOT_PH:
-				ph := wbrc.PH()
-				// Data for response
-				transform(tc, slotName, ph)
-				// Data for publish
-				c.Dst = ph
-			}
-			col = append(col, c)
-		}(slot, tc)
 	}
-	wg.Wait()
-
-	return tc, col
-}
-
-func transform(c *template.Collector, slot string, arc map[string]string) {
-	p := *c
-	for src, dst := range arc {
-		p = append(p, template.Collect{Slot: slot, Src: src, Dst: dst})
-	}
-	*c = p
+	return collects
 }
 
 func (t *Tor) torrc() string {

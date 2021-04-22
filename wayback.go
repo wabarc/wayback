@@ -13,6 +13,7 @@ import (
 	"github.com/wabarc/playback"
 	"github.com/wabarc/telegra.ph"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wbipfs"
 )
 
@@ -92,10 +93,54 @@ func (h *Handle) PH() Archived {
 	return uris
 }
 
+// Wayback returns URLs archived to the time capsules.
+func Wayback(urls []string) (col []*Collect, err error) {
+	logger.Debug("[wayback] start...")
+
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	var wb Broker = &Handle{URLs: urls}
+	for slot, arc := range config.Opts.Slots() {
+		if !arc {
+			continue
+		}
+		wg.Add(1)
+		go func(slot string) {
+			defer wg.Done()
+			c := &Collect{}
+			logger.Debug("[wayback] archiving slot: %s", slot)
+			switch slot {
+			case config.SLOT_IA:
+				c.Dst = wb.IA()
+			case config.SLOT_IS:
+				c.Dst = wb.IS()
+			case config.SLOT_IP:
+				c.Dst = wb.IP()
+			case config.SLOT_PH:
+				c.Dst = wb.PH()
+			}
+			c.Arc = config.SlotName(slot)
+			c.Ext = config.SlotExtra(slot)
+			mu.Lock()
+			col = append(col, c)
+			mu.Unlock()
+		}(slot)
+	}
+	wg.Wait()
+
+	if len(col) == 0 {
+		logger.Error("[wayback] archives failure")
+		return col, errors.New("archives failure")
+	}
+
+	return col, nil
+}
+
 // Playback returns URLs archived from the time capsules.
 func Playback(urls []string) (col []*Collect, err error) {
 	logger.Debug("[playback] start...")
 
+	var mu sync.Mutex
 	var wg sync.WaitGroup
 	var pb playback.Playback = &playback.Handle{URLs: urls}
 	var slots = []string{config.SLOT_IA, config.SLOT_IS, config.SLOT_IP, config.SLOT_PH, config.SLOT_TT}
@@ -119,9 +164,9 @@ func Playback(urls []string) (col []*Collect, err error) {
 			}
 			c.Arc = config.SlotName(slot)
 			c.Ext = config.SlotExtra(slot)
-			c.Lock()
+			mu.Lock()
 			col = append(col, c)
-			c.Unlock()
+			mu.Unlock()
 		}(slot)
 	}
 	wg.Wait()
