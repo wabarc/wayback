@@ -43,7 +43,7 @@ var (
 		},
 		"sender_id": "623265148",
 		"message_data": {
-			"text": "example",
+			"text": "foo https://example.com/ bar",
 			"entities": {
 				"hashtags": [],
 				"symbols": [],
@@ -78,6 +78,7 @@ func TestProcess(t *testing.T) {
 	os.Setenv("WAYBACK_TWITTER_CONSUMER_SECRET", "foo")
 	os.Setenv("WAYBACK_TWITTER_ACCESS_TOKEN", "foo")
 	os.Setenv("WAYBACK_TWITTER_ACCESS_SECRET", "foo")
+	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
 	var err error
 	parser := config.NewParser()

@@ -37,6 +37,7 @@ func TestProcess(t *testing.T) {
 	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
 	os.Setenv("WAYBACK_MASTODON_SECRET", "bar")
 	os.Setenv("WAYBACK_MASTODON_TOKEN", "zoo")
+	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
 	var err error
 	parser := config.NewParser()

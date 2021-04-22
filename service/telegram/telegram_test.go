@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -20,7 +19,6 @@ import (
 )
 
 var (
-	times     = 0
 	token     = "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
 	prefix    = fmt.Sprintf("/bot%s/", token)
 	getMeJSON = `{
@@ -61,9 +59,8 @@ var (
 }`
 )
 
-func bot(done chan<- bool) (*telegram.BotAPI, *httptest.Server) {
-	httpClient, mux, server := helper.MockServer()
-
+func handle(mux *http.ServeMux, updatesJSON string) {
+	times := 0
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -75,7 +72,7 @@ func bot(done chan<- bool) (*telegram.BotAPI, *httptest.Server) {
 			fmt.Fprintln(w, getMeJSON)
 		case "getUpdates":
 			if times == 0 {
-				fmt.Fprintln(w, getUpdatesJSON)
+				fmt.Fprintln(w, updatesJSON)
 				times++
 			} else {
 				fmt.Fprintln(w, `{"ok":true, "result":[]}`)
@@ -85,23 +82,66 @@ func bot(done chan<- bool) (*telegram.BotAPI, *httptest.Server) {
 				fmt.Fprintln(w, replyJSON)
 				return
 			}
+			fmt.Fprintln(w, `{"ok":true, "result":null}`)
 		case "editMessageText":
 			if !strings.Contains(text, config.SlotName("ia")) {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
 			fmt.Fprintln(w, `{"ok":true, "result":null}`)
-			done <- true
+		case "sendChatAction":
+			fmt.Fprintln(w, `{"ok":true, "result":null}`)
+		default:
+			fmt.Println(slug)
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		}
 	})
-
-	endpoint := server.URL + "/bot%s/%s"
-	b, _ := telegram.NewBotAPIWithClient(token, endpoint, httpClient)
-
-	return b, server
 }
 
 func TestServe(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skip test in short mode.")
+	}
+
+	os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
+	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
+
+	var err error
+	parser := config.NewParser()
+	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+	}
+
+	done := make(chan bool, 1)
+
+	httpClient, mux, server := helper.MockServer()
+	defer server.Close()
+	handle(mux, `{"ok":true, "result":[]}`)
+
+	endpoint := server.URL + "/bot%s/%s"
+	bot, _ := telegram.NewBotAPIWithClient(token, endpoint, httpClient)
+
+	go func() {
+		for {
+			select {
+			case <-done:
+				bot.StopReceivingUpdates()
+				return
+			case <-time.After(3 * time.Second):
+				done <- true
+			}
+		}
+	}()
+
+	tg := &Telegram{bot: bot}
+	got := tg.Serve(context.Background())
+	expected := "done"
+	if got.Error() != expected {
+		t.Errorf("Unexpected serve telegram got %v instead of %v", got, expected)
+	}
+}
+
+func TestProcess(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skip test in short mode.")
 	}
@@ -117,8 +157,13 @@ func TestServe(t *testing.T) {
 	}
 
 	done := make(chan bool, 1)
-	bot, srv := bot(done)
-	defer srv.Close()
+
+	httpClient, mux, server := helper.MockServer()
+	defer server.Close()
+	handle(mux, getUpdatesJSON)
+
+	endpoint := server.URL + "/bot%s/%s"
+	bot, _ := telegram.NewBotAPIWithClient(token, endpoint, httpClient)
 
 	go func() {
 		for {
@@ -127,47 +172,12 @@ func TestServe(t *testing.T) {
 				bot.StopReceivingUpdates()
 				return
 			case <-time.After(120 * time.Second):
-				t.Error("timeout")
 				done <- true
 			}
 		}
 	}()
 
 	tg := &Telegram{bot: bot}
-	tg.Serve(context.Background())
-}
-
-func TestProcess(t *testing.T) {
-	t.Skip("Skip")
-
-	os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
-	os.Setenv("WAYBACK_ENABLE_IA", "true")
-
-	var err error
-	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
-	}
-
-	done := make(chan bool, 1)
-	bot, srv := bot(done)
-	defer srv.Close()
-
-	go func() {
-		for {
-			select {
-			case <-done:
-				bot.StopReceivingUpdates()
-				return
-			case <-time.After(120 * time.Second):
-				t.Error("timeout")
-				done <- true
-			}
-		}
-	}()
-
-	tg := &Telegram{bot: bot}
-
 	cfg := telegram.NewUpdate(0)
 	cfg.Timeout = 60
 	updates := tg.bot.GetUpdatesChan(cfg)
@@ -177,9 +187,91 @@ func TestProcess(t *testing.T) {
 			continue
 		}
 
-		t.Log(update.Message.Text)
 		if err := tg.process(context.Background(), update); err != nil {
 			t.Fatalf("process telegram message failed: %v", err)
+		} else {
+			time.Sleep(time.Second)
+			break
 		}
 	}
+	done <- true
+}
+
+func TestProcessPlayback(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skip test in short mode.")
+	}
+
+	os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
+	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
+	os.Setenv("WAYBACK_ENABLE_IA", "true")
+
+	var err error
+	parser := config.NewParser()
+	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+	}
+
+	done := make(chan bool, 1)
+
+	getUpdatesJSON = `{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 1,
+      "message": {
+        "message_id": 1001,
+        "text": "/playback https://example.com",
+        "entities": [
+          {
+            "type": "bot_command",
+            "offset": 0,
+            "length": 9
+          }
+        ],
+        "chat": {
+          "id": 1000001,
+          "type": "private"
+        }
+      }
+    }
+  ]
+}`
+	httpClient, mux, server := helper.MockServer()
+	defer server.Close()
+	handle(mux, getUpdatesJSON)
+
+	endpoint := server.URL + "/bot%s/%s"
+	bot, _ := telegram.NewBotAPIWithClient(token, endpoint, httpClient)
+
+	go func() {
+		for {
+			select {
+			case <-done:
+				bot.StopReceivingUpdates()
+				return
+			case <-time.After(120 * time.Second):
+				done <- true
+			}
+		}
+	}()
+
+	tg := &Telegram{bot: bot}
+	cfg := telegram.NewUpdate(0)
+	cfg.Timeout = 60
+	updates := tg.bot.GetUpdatesChan(cfg)
+
+	for update := range updates {
+		if update.Message == nil { // ignore any non-Message Updates
+			continue
+		}
+
+		if err := tg.process(context.Background(), update); err != nil {
+			t.Fatalf("process telegram message failed: %v", err)
+		} else {
+			time.Sleep(time.Second)
+			break
+		}
+	}
+	done <- true
 }

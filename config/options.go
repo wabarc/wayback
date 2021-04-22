@@ -30,7 +30,7 @@ const (
 	defGitHubOwner      = ""
 	defGitHubRepo       = ""
 
-	defMastodonServer        = ""
+	defMastodonServer        = "https://mastodon.social"
 	defMastodonClientKey     = ""
 	defMastodonClientSecret  = ""
 	defMastodonAccessToken   = ""
