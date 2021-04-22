@@ -190,7 +190,7 @@ func TestProcess(t *testing.T) {
 		if err := tg.process(context.Background(), update); err != nil {
 			t.Fatalf("process telegram message failed: %v", err)
 		} else {
-			time.Sleep(time.Second)
+			time.Sleep(3 * time.Second)
 			break
 		}
 	}
