@@ -48,6 +48,10 @@ func (gh *GitHub) ToIssues(ctx context.Context, text string) bool {
 		logger.Error("[publish] create GitHub Issues abort")
 		return false
 	}
+	if text == "" {
+		logger.Info("[publish] github validation failed: Text can't be blank")
+		return false
+	}
 
 	if config.Opts.HasDebugMode() {
 		user, _, _ := gh.client.Users.Get(ctx, "")

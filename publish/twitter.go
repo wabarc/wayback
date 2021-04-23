@@ -42,6 +42,10 @@ func (t *Twitter) ToTwitter(_ context.Context, text string) bool {
 		logger.Debug("[publish] Do not publish to Twitter.")
 		return false
 	}
+	if text == "" {
+		logger.Info("[publish] twitter validation failed: Text can't be blank")
+		return false
+	}
 
 	// TODO: character limit
 	tweet, resp, err := t.client.Statuses.Update(text, nil)
