@@ -5,7 +5,6 @@
 package anonymity // import "github.com/wabarc/wayback/service/anonymity"
 
 import (
-	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -43,11 +42,10 @@ func TestTransform(t *testing.T) {
 }
 
 func TestProcessRespStatus(t *testing.T) {
-	tor := New()
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tor.process(w, r, context.Background())
+		newWeb().process(w, r)
 	})
 
 	var tests = []struct {
@@ -57,12 +55,12 @@ func TestProcessRespStatus(t *testing.T) {
 	}{
 		{
 			method: http.MethodGet,
-			status: http.StatusMethodNotAllowed,
+			status: http.StatusNotModified,
 			data:   `{"text":"", "data-type":"json"}`,
 		},
 		{
 			method: http.MethodPost,
-			status: http.StatusLengthRequired,
+			status: http.StatusNotModified,
 			data:   `{"text":"foo bar", "data-type":"json"}`,
 		},
 	}
@@ -94,11 +92,12 @@ func TestProcessContentType(t *testing.T) {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
 
-	tor := New()
+	web := newWeb()
+	web.handle()
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tor.process(w, r, context.Background())
+		web.process(w, r)
 	})
 
 	var tests = []struct {

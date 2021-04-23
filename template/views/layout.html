@@ -1,16 +1,31 @@
-package template
-
-const html = `
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="user-scalable=no">
   <meta name="theme-color" content="#f3f3f3">
   <meta name="msapplication-navbutton-color" content="#f3f3f3">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Wayback">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="#f3f3f3">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="google" content="notranslate">
+  <meta name="X-Content-Type-Options" content="nosniff">
   <title>Wayback Archiver</title>
-  <link rel="icon" href="data:,">
+  <link rel="manifest" href="{{ route "manifest" "filename" "manifest.json" }}" crossorigin="use-credentials" />
+  <link rel="icon" href="{{ route "favicon" "filename" "favicon.ico" }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ route "icon" "filename" "favicon-16.png" }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ route "icon" "filename" "favicon-32.png" }}">
+  <link rel="icon" type="image/png" sizes="128x128" href="{{ route "icon" "filename" "icon-128.png" }}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{{ route "icon" "filename" "icon-192.png" }}">
+  <link rel="apple-touch-icon" sizes="120x120" href="{{ route "icon" "filename" "icon-120.png" }}">
+  <link rel="apple-touch-icon" sizes="152x152" href="{{ route "icon" "filename" "icon-152.png" }}">
+  <link rel="apple-touch-icon" sizes="167x167" href="{{ route "icon" "filename" "icon-167.png" }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ route "icon" "filename" "icon-180.png" }}">
   <style>
     :root {
       --c-light-text: #333;
@@ -24,11 +39,13 @@ const html = `
       --c-dark-form-background: #3e3e3e;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       height: 100%;
       min-height: 100%;
+      overflow: hidden;
     }
 
     html {
@@ -36,6 +53,13 @@ const html = `
       -webkit-transition: color 300ms, background-color 300ms;
       -o-transition: color 300ms, background-color 300ms;
       transition: color 300ms, background-color 300ms;
+      overflow: -moz-scrollbars-none;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    html::-webkit-scrollbar {
+      width: 0 !important
     }
 
     @media (prefers-color-scheme: light) {
@@ -108,18 +132,18 @@ const html = `
     .wrapper {
       position: absolute;
       margin: auto;
-      width: 100%;
+      width: 99%;
       max-width: 630px;
       bottom: 0;
       padding: 2rem 0;
       left: 0;
       right: 0;
       z-index: 12;
+      overflow: hidden;
     }
 
     @media only screen and (max-width: 1024px) {
       .wrapper {
-        padding: 1.5%;
         max-width: 100%;
       }
     }
@@ -363,17 +387,23 @@ const html = `
       text-overflow: ellipsis;
       display: inline-block;
     }
+
+    .add-button {
+      display: none;
+      position: fixed;
+      top: 5px;
+      left: 5px;
+      height: 35px;
+      text-align: center;
+    }
   </style>
+  <script src="{{ route "javascript" "name" "index" }}" defer></script>
 </head>
+
 <body>
   <div class="wrapper">
+    <button class="add-button">Add to home screen</button>
     <div class="archived" id="archived">
-      {{- range $i, $collect := . -}}
-      <ul class="row">
-        <li class="src">{{ $collect.Src }}</li>
-        <li class="dst"><a href="{{ $collect.Dst }}" target="blank">{{ $collect.Dst }}</a></li>
-      </ul>
-      {{end}}
     </div>
     <div class="form">
       <form action="/w" method="post" onsubmit="post(); return false;">
@@ -383,65 +413,6 @@ const html = `
       </form>
     </div>
   </div>
-
-  <script>
-    var render = function (collects) {
-      "use strict";
-      if (typeof collects !== "object") {
-        return;
-      }
-      var archived = document.getElementById('archived');
-      var html = '';
-      collects.forEach(function (collect, i) {
-        html += '<ul class="row">';
-        html += '<li class="src">' + collect.src + '</li>';
-        html += ' <li class="dst">';
-        try {
-          new URL(collect.dst);
-          html += '<a href="' + collect.dst + '" target="blank">' + collect.dst + '</a>';
-        } catch (_) {
-          html += '<a href="javascript:;">' + collect.dst + '</a>';
-        }
-        html += '</li>';
-        html += '</ul>';
-      })
-      archived.innerHTML = html + archived.innerHTML;
-
-      document.querySelector('div.form').style.backgroundColor = '';
-      document.querySelector('input[type=submit]').disabled = '';
-      document.getElementById('text').disabled = '';
-      document.getElementById('text').value = '';
-    };
-
-    var post = function () {
-      "use strict";
-      var http = new XMLHttpRequest(),
-        params = new URLSearchParams(),
-        text = document.getElementById('text').value,
-        url = "/w";
-      if (!text || text.length === 0) {
-        return;
-      }
-
-      document.getElementById('text').disabled = 'true';
-      document.querySelector('input[type=submit]').disabled = 'true';
-      document.querySelector('div.form').style.backgroundColor = '#5454541f';
-
-      http.open("POST", url, true);
-      http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-      http.onreadystatechange = function () {
-        if (http.readyState === 4 && http.status === 200) {
-          if (http.response !== undefined && http.response) {
-            var collects = JSON.parse(http.response)
-            render(collects);
-          }
-        }
-      };
-      params.append("text", text);
-      params.append("data-type", "json");
-      http.send(params);
-    };
-  </script>
 </body>
+
 </html>
-`

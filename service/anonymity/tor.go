@@ -88,53 +88,47 @@ func (t *Tor) Serve(ctx context.Context) error {
 	logger.Info("[web] please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
 
 	go func() {
-		http.HandleFunc("/", home)
-		http.HandleFunc("/w", func(w http.ResponseWriter, r *http.Request) { t.process(w, r, ctx) })
-		http.Serve(onion, nil)
+		http.Serve(onion, newWeb().handle())
 	}()
 
 	stop := make(chan os.Signal)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	<-stop
 
 	return errors.New("done")
 }
 
-func home(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Collector{}
-	if html, ok := tmpl.Render(); ok {
-		w.Write(html)
-	} else {
-		logger.Error("[web] render template for home request failed")
-		http.Error(w, "Internal Server Error", 500)
-	}
-}
-
-func (t *Tor) process(w http.ResponseWriter, r *http.Request, ctx context.Context) {
+func (web *web) process(w http.ResponseWriter, r *http.Request) {
 	logger.Debug("[web] process request start...")
 	if r.Method != http.MethodPost {
 		logger.Info("[web] request method no specific.")
-		http.Redirect(w, r, "/", 405)
+		http.Redirect(w, r, "/", http.StatusNotModified)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
 		logger.Error("[web] parse form error, %v", err)
-		http.Redirect(w, r, "/", 400)
+		http.Redirect(w, r, "/", http.StatusNotModified)
 		return
 	}
 
 	text := r.PostFormValue("text")
 	if len(strings.TrimSpace(text)) == 0 {
 		logger.Info("[web] post form value empty.")
-		http.Redirect(w, r, "/", 411)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 	logger.Debug("[web] text: %s", text)
 
 	urls := helper.MatchURL(text)
+	if len(urls) == 0 {
+		logger.Info("[web] url no found.")
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
 	col, _ := wayback.Wayback(urls)
 	collector := transform(col)
+	ctx := context.Background()
 	switch r.PostFormValue("data-type") {
 	case "json":
 		w.Header().Set("Content-Type", "application/json")
@@ -145,19 +139,15 @@ func (t *Tor) process(w http.ResponseWriter, r *http.Request, ctx context.Contex
 			go publish.To(ctx, col, "web")
 			w.Write(data)
 		}
-
-		return
 	default:
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		if html, ok := collector.Render(); ok {
+		if html, ok := web.template.Render("layout", collector); ok {
 			go publish.To(ctx, col, "web")
 			w.Write(html)
 		} else {
 			logger.Error("[web] render template for response failed")
 		}
-
-		return
 	}
 }
 

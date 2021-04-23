@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="user-scalable=no">
+  <meta name="theme-color" content="#f3f3f3">
+  <title>Wayback Archiver</title>
+  <style>
+    :root {
+      --c-light-text: #333;
+      --c-light-textarea: #222;
+      --c-light-background: #f7f7f7;
+      --c-light-form-background: #fff;
+
+      --c-dark-text: #fcfcfc;
+      --c-dark-textarea: #b4c9d4;
+      --c-dark-background: #222222ed;
+      --c-dark-form-background: #3e3e3e;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      min-height: 100%;
+      overflow: hidden;
+    }
+
+    html {
+      background-color: var(--c-light-background);
+      -webkit-transition: color 300ms, background-color 300ms;
+      -o-transition: color 300ms, background-color 300ms;
+      transition: color 300ms, background-color 300ms;
+      overflow: -moz-scrollbars-none;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    html::-webkit-scrollbar {
+      width: 0 !important
+    }
+
+    @media (prefers-color-scheme: light) {
+      html {
+        background-color: var(--c-light-background);
+        color: var(--c-light-text);
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      html {
+        background-color: var(--c-dark-background);
+        color: var(--c-dark-text);
+      }
+    }
+
+    body {
+      font: 100% / 1.5 "Open Sans", Helvetica, Arial, sans-serif;
+      font-size: 1rem;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>You are offline. Quit and reopen try again.</h2>
+</body>
+
+</html>
