@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -22,6 +23,7 @@ import (
 
 type Telegram struct {
 	bot *telegram.BotAPI
+	pub *publish.Telegram
 }
 
 // New Telegram struct.
@@ -36,6 +38,7 @@ func New() *Telegram {
 
 	return &Telegram{
 		bot: bot,
+		pub: publish.NewTelegram(bot),
 	}
 }
 
@@ -60,12 +63,20 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 	}()
 
 	for update := range updates {
-		if update.Message == nil { // ignore any non-Message Updates
+		if update.Message != nil {
+			logger.Debug("[telegram] message: %v", update.Message)
+			go t.process(ctx, update)
 			continue
 		}
-		logger.Debug("[telegram] message: %v", update.Message)
-
-		go t.process(ctx, update)
+		if update.CallbackQuery != nil {
+			logger.Debug("[telegram] callback query: %#v", update.CallbackQuery)
+			callback := update.CallbackQuery
+			if strings.HasPrefix(callback.Data, callbackPrefix()) {
+				go t.archive(ctx, callback.Message, helper.MatchURL(callback.Data))
+			}
+			continue
+		}
+		logger.Debug("[telegram] message empty, update: %#v", update)
 	}
 
 	return errors.New("done")
@@ -81,7 +92,6 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		content = fmt.Sprintf("Text: \n%s\nCaption: \n%s", content, message.Caption)
 	}
 	urls := helper.MatchURL(content)
-	tel := publish.NewTelegram(t.bot)
 
 	// Set command as playback if receive a playback command without URLs, and
 	// required user reply a message with URLs.
@@ -99,20 +109,7 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		t.bot.Send(msg)
 		return nil
 	case command == "playback", command == "search":
-		if len(urls) == 0 {
-			msg := telegram.NewMessage(message.Chat.ID, "Please send me URLs to playback...")
-			msg.ReplyToMessageID = message.MessageID
-			msg.BaseChat.ReplyMarkup = telegram.ForceReply{ForceReply: true}
-			t.bot.Send(msg)
-			return nil
-		}
-		t.bot.Send(telegram.NewChatAction(message.Chat.ID, telegram.ChatTyping))
-		col, _ := wayback.Playback(urls)
-		msg := telegram.NewMessage(message.Chat.ID, tel.Render(col))
-		msg.ReplyToMessageID = message.MessageID
-		msg.ParseMode = "html"
-		t.bot.Send(msg)
-		return nil
+		return t.playback(message, urls)
 	case message.IsCommand():
 		commands := t.myCommands()
 		if commands != "" {
@@ -130,6 +127,10 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		return nil
 	}
 
+	return t.archive(ctx, message, urls)
+}
+
+func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls []string) error {
 	msg := telegram.NewMessage(message.Chat.ID, "Archiving...")
 	msg.ReplyToMessageID = message.MessageID
 	stage, err := t.bot.Send(msg)
@@ -146,9 +147,10 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		return err
 	}
 
-	replyText := tel.Render(col)
+	replyText := t.pub.Render(col)
 	logger.Debug("[telegram] reply text, %s", replyText)
 	updMsg := telegram.NewEditMessageText(stage.Chat.ID, stage.MessageID, replyText)
+	updMsg.DisableWebPagePreview = true
 	updMsg.ParseMode = "html"
 	if _, err := t.bot.Send(updMsg); err != nil {
 		logger.Error("[telegram] update message failed: %v", err)
@@ -158,6 +160,34 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 	ctx = context.WithValue(ctx, "telegram", t.bot)
 	go publish.To(ctx, col, "telegram")
 
+	return nil
+}
+
+func (t *Telegram) playback(message *telegram.Message, urls []string) error {
+	if len(urls) == 0 {
+		msg := telegram.NewMessage(message.Chat.ID, "Please send me URLs to playback...")
+		msg.ReplyToMessageID = message.MessageID
+		msg.BaseChat.ReplyMarkup = telegram.ForceReply{ForceReply: true}
+		if _, err := t.bot.Send(msg); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	t.bot.Send(telegram.NewChatAction(message.Chat.ID, telegram.ChatTyping))
+	col, _ := wayback.Playback(urls)
+
+	msg := telegram.NewMessage(message.Chat.ID, t.pub.Render(col))
+	msg.ReplyToMessageID = message.MessageID
+	// Attach a button below the message to send a wayback request quickly
+	msg.BaseChat.ReplyMarkup = telegram.NewInlineKeyboardMarkup(telegram.NewInlineKeyboardRow(
+		telegram.NewInlineKeyboardButtonData("wayback", callbackPrefix()+message.Text),
+	))
+	msg.DisableWebPagePreview = true
+	msg.ParseMode = "html"
+	if _, err := t.bot.Send(msg); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -173,4 +203,8 @@ func (t *Telegram) myCommands() string {
 	}
 
 	return list
+}
+
+func callbackPrefix() string {
+	return ":wayback "
 }
