@@ -362,7 +362,10 @@ func (o *Options) IRCPassword() string {
 
 // IRCChannel returns channel of IRC
 func (o *Options) IRCChannel() string {
-	return o.irc.channel
+	if strings.HasPrefix(o.irc.channel, "#") {
+		return o.irc.channel
+	}
+	return "#" + o.irc.channel
 }
 
 // IRCServer returns server of IRC
