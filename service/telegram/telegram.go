@@ -91,6 +91,12 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 	if message.Caption != "" {
 		content = fmt.Sprintf("Text: \n%s\nCaption: \n%s", content, message.Caption)
 	}
+	// If the message is forwarded and contains multiple entities,
+	// the update will be split into multiple parts.
+	// Don't process parts of the forwarded message without text.
+	if message.ForwardFromMessageID != 0 && message.Caption == "" {
+		return nil
+	}
 	urls := helper.MatchURL(content)
 
 	// Set command as playback if receive a playback command without URLs, and
