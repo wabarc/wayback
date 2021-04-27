@@ -54,6 +54,9 @@ func (i *IRC) Serve(ctx context.Context) error {
 	}
 	logger.Debug("[irc] Serving IRC instance: %s", config.Opts.IRCServer())
 
+	if config.Opts.IRCChannel() != "" {
+		i.conn.AddCallback("001", func(ev *irc.Event) { i.conn.Join(config.Opts.IRCChannel()) })
+	}
 	i.conn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		go func(ev *irc.Event) {
 			if err := i.process(context.Background(), ev); err != nil {

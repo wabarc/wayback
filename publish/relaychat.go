@@ -49,7 +49,7 @@ func (i *IRC) ToChannel(ctx context.Context, text string) bool {
 		return false
 	}
 
-	i.conn.Join(config.Opts.IRCChannel())
+	// i.conn.Join(config.Opts.IRCChannel())
 	i.conn.Privmsg(config.Opts.IRCChannel(), text)
 
 	return true

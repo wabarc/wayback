@@ -534,7 +534,7 @@ func TestIRCChannel(t *testing.T) {
 		t.Fatalf(`Parsing environment variables failed: %v`, err)
 	}
 
-	expected := "foo"
+	expected := "#foo"
 	got := opts.IRCChannel()
 
 	if got != expected {
