@@ -47,6 +47,11 @@ jobs:
       with:
         run_daemon: true
 
+    - name: Set up Tor
+      uses: tor-actions/setup-tor@main
+      with:
+        daemon: true
+
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
       with:
