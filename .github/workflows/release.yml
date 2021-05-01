@@ -98,14 +98,14 @@ jobs:
     - name: Archive binary
       run: make TARGET=${{ steps.builder.outputs.args }} releases
 
-    - name: Upload archived binary
+    - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
         name: wayback
         path: build/package/wayback*
 
   debpkg:
-    name: Build deb
+    name: Build DEB
     strategy:
       matrix:
         include:
@@ -143,14 +143,14 @@ jobs:
         fi
         make debian DEB_IMG_ARCH=${OS_ARCH} PKG_ARCH=${PKG_ARCH}
 
-    - name: Upload archived binary
+    - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
         name: wayback
         path: build/package/wayback*.deb
 
   rpmpkg:
-    name: Packaging RPM package
+    name: Build RPM
     runs-on: ubuntu-latest
     steps:
     - name: Check out codebase
@@ -161,16 +161,42 @@ jobs:
     - name: Build RPM package
       run: make rpm
 
-    - name: Upload archived binary
+    - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
         name: wayback
         path: build/package/wayback*.rpm
 
+  aurpkg:
+    name: Build AUR
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code base
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        submodules: true
+
+    - name: Build AUR package
+      run: |
+        make submodule
+        cd build/aur
+        make volume
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: wayback
+        path: |
+          build/aur/.SRCINFO
+          build/aur/PKGBUILD
+          build/aur/wayback*.pkg.tar.zst
+        if-no-files-found: error
+
   checksum:
     name: Get archived packages checksum
     runs-on: ubuntu-latest
-    needs: [ build, debpkg, rpmpkg ]
+    needs: [ build, debpkg, rpmpkg, aurpkg ]
     outputs:
       digest: ${{ steps.digest.outputs.result }}
     steps:
@@ -232,3 +258,17 @@ jobs:
         body_path: gittaglogs.txt
         files: wayback/wayback*
         draft: true
+
+  dispatch:
+    if: github.repository == 'wabarc/wayback'
+    name: Repository Dispatch
+    runs-on: ubuntu-latest
+    needs: [release]
+    steps:
+    - name: Dispatch repository in wabarc/aur
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        repository: wabarc/aur
+        event-type: publish
+        token: ${{ secrets.PAT_WORKFLOW }}
+        client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
