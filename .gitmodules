@@ -1,0 +1,3 @@
+[submodule "build/aur"]
+	path = build/aur
+	url = https://github.com/wabarc/aur.git

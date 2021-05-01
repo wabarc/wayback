@@ -269,3 +269,7 @@ debian-packages:
 	$(MAKE) debian DEB_IMG_ARCH=amd64
 	$(MAKE) debian DEB_IMG_ARCH=arm32v7 PKG_ARCH=armv7
 	$(MAKE) debian DEB_IMG_ARCH=arm64v8 PKG_ARCH=arm64
+
+submodule:
+	@echo "-> Updating Git submodule..."
+	@git submodule update --init --recursive --remote
