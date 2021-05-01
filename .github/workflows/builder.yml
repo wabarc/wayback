@@ -144,7 +144,7 @@ jobs:
       GOARCH: ${{ matrix.arch }}
       GOARM: ${{ matrix.arm }}
     steps:
-    - name: Check out codebase
+    - name: Check out code base
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
@@ -170,3 +170,49 @@ jobs:
         name: ${{ steps.builder.outputs.filename }}
         path: build/package/wayback*.deb
         if-no-files-found: error
+
+  rpmpkg:
+    name: Build RPM
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code base
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Build RPM package
+      run: make rpm
+
+    - name: Upload archived binary
+      uses: actions/upload-artifact@v2
+      with:
+        name: wayback-rpm
+        path: build/package/wayback*.rpm
+        if-no-files-found: error
+
+  aurpkg:
+    name: Build AUR
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code base
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        submodules: true
+
+    - name: Build AUR package
+      run: |
+        make submodule
+        cd build/aur
+        make volume
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: wayback-aur
+        path: |
+          build/aur/.SRCINFO
+          build/aur/PKGBUILD
+          build/aur/wayback*.pkg.tar.zst
+        if-no-files-found: error
+
