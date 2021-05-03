@@ -1,0 +1,46 @@
+{
+  "name": "wayback",
+  "description": "A toolkit for snapshot webpage to Internet Archive, archive.today, IPFS and beyond.",
+  "keywords": [
+    "wayback"
+  ],
+  "website": "https://wabarc.eu.org/",
+  "repository": "https://github.com/wabarc/wayback",
+  "logo": "https://avatars.githubusercontent.com/u/66000339",
+  "success_url": "/welcome",
+  "scripts": {
+    "target": "echo 'target'"
+  },
+  "env": {
+    "SECRET_TOKEN": {
+      "description": "A secret key for verifying the integrity of signed cookies.",
+      "generator": "secret"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    },
+    "worker": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "addons": [],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-google-chrome.git"
+    },
+    {
+      "url": "https://github.com/tor-actions/heroku-buildpack-tor.git"
+    }
+  ],
+  "environments": {
+    "test": {
+      "scripts": {
+        "test": "wayback -d web"
+      }
+    }
+  }
+}
