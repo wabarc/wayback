@@ -365,8 +365,8 @@ github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 h1:nrZ3ySNYwJ
 github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80/go.mod h1:iFyPdL66DjUD96XmzVL3ZntbzcflLnznH0fr99w5VqE=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/wabarc/archive.is v1.2.0/go.mod h1:y30zW5b4wiHeZ6h4dQN/63+9Q0l0VVitmkDZxv1hTPg=
-github.com/wabarc/archive.is v1.2.1 h1:isyJ4ENJUbXPmqdqk4UMIr+73k9iF348ujcfDrPu8wM=
-github.com/wabarc/archive.is v1.2.1/go.mod h1:CjIdvS7MUO45lQLA5PcfWso1NPSQOl5f47iQ9RdB0Kk=
+github.com/wabarc/archive.is v1.2.3 h1:7oB3Eh9DvLKCPEWHi4mkFZQ2/HXrsOcQ0KHoSik2evg=
+github.com/wabarc/archive.is v1.2.3/go.mod h1:CjIdvS7MUO45lQLA5PcfWso1NPSQOl5f47iQ9RdB0Kk=
 github.com/wabarc/archive.org v1.1.0/go.mod h1:f+VqacB+XUJKQ7MmGgZ9CDB1x1ypwkMKtPjEfRD/qUs=
 github.com/wabarc/archive.org v1.1.1 h1:cPqimnYuWyobxzvuzos9DrEzuF/YuUTtrQZWNxQSnTg=
 github.com/wabarc/archive.org v1.1.1/go.mod h1:f+VqacB+XUJKQ7MmGgZ9CDB1x1ypwkMKtPjEfRD/qUs=
