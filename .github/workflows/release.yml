@@ -272,3 +272,11 @@ jobs:
         event-type: publish
         token: ${{ secrets.PAT_WORKFLOW }}
         client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
+
+    - name: Dispatch repository in wabarc/on-heroku
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        repository: wabarc/on-heroku
+        event-type: deploy
+        token: ${{ secrets.PAT_WORKFLOW }}
+        client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
