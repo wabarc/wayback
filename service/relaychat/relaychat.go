@@ -7,10 +7,7 @@ package relaychat // import "github.com/wabarc/wayback/service/relaychat"
 import (
 	"context"
 	"crypto/tls"
-	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 
 	irc "github.com/thoj/go-ircevent"
 	"github.com/wabarc/helper"
@@ -70,11 +67,11 @@ func (i *IRC) Serve(ctx context.Context) error {
 		return err
 	}
 
-	stop := make(chan os.Signal)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
-		<-stop
-		i.conn.Quit()
+		select {
+		case <-ctx.Done():
+			i.conn.Quit()
+		}
 	}()
 
 	i.conn.Loop()

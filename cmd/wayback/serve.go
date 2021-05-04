@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/wabarc/logger"
@@ -35,6 +36,8 @@ func serve(_ *cobra.Command, args []string) {
 	case <-ctx.Done():
 		logger.Info("Wayback service stopped.")
 	}
+
+	time.Sleep(100 * time.Millisecond)
 }
 
 func (srv *service) run(ctx context.Context) *service {

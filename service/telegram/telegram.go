@@ -7,10 +7,7 @@ package telegram // import "github.com/wabarc/wayback/service/telegram"
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 
 	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wabarc/helper"
@@ -54,12 +51,12 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 	cfg.Timeout = 60
 	updates := t.bot.GetUpdatesChan(cfg)
 
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
-		<-c
-		logger.Info("[telegram] stopping receive updates...")
-		t.bot.StopReceivingUpdates()
+		select {
+		case <-ctx.Done():
+			logger.Info("[telegram] stopping receive updates...")
+			t.bot.StopReceivingUpdates()
+		}
 	}()
 
 	for update := range updates {

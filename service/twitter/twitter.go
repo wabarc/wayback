@@ -56,29 +56,49 @@ func (t *Twitter) Serve(ctx context.Context) error {
 	}
 	logger.Info("[twitter] authorized on account %s", user.ScreenName)
 
-	mutex := sync.RWMutex{}
-	t.archiving = make(map[string]bool)
-	for {
-		messages, _, err := t.client.DirectMessages.EventsList(
-			&twitter.DirectMessageEventsListParams{Count: 3},
-		)
-		logger.Debug("[twitter] messages: %v", messages)
-		if err != nil {
-			logger.Error("[twitter] get direct messages failed, %v", err)
-		}
+	go func() {
+		fetchTick := time.NewTicker(time.Minute) // Fetch Direct Message event
 
-		for _, event := range messages.Events {
-			if _, exist := t.archiving[event.ID]; exist {
-				continue
+		t.archiving = make(map[string]bool)
+		var mute sync.RWMutex
+		var once sync.Once
+		for {
+			select {
+			case <-fetchTick.C:
+				messages, _, err := t.client.DirectMessages.EventsList(
+					&twitter.DirectMessageEventsListParams{Count: 3},
+				)
+				logger.Debug("[twitter] messages: %v", messages)
+				if err != nil {
+					logger.Error("[twitter] get direct messages failed, %v", err)
+				}
+
+				for _, event := range messages.Events {
+					if _, exist := t.archiving[event.ID]; exist {
+						continue
+					}
+					go t.process(ctx, event)
+
+					mute.Lock()
+					t.archiving[event.ID] = true
+					mute.Unlock()
+				}
+			case <-ctx.Done():
+				once.Do(func() {
+					logger.Debug("[twitter] stopping ticker...")
+					fetchTick.Stop()
+				})
+			default:
 			}
-			go t.process(ctx, event)
-
-			mutex.Lock()
-			t.archiving[event.ID] = true
-			mutex.Unlock()
 		}
-		time.Sleep(time.Minute)
+	}()
+
+	select {
+	case <-ctx.Done():
+		logger.Info("[twitter] stopping service...")
 	}
+
+	return errors.New("done")
 }
 
 func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent) error {
