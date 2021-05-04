@@ -107,30 +107,22 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 
 	switch {
 	case command == "help":
-		msg := telegram.NewMessage(message.Chat.ID, config.Opts.TelegramHelptext())
-		msg.ReplyToMessageID = message.MessageID
-		t.bot.Send(msg)
-		return nil
+		t.reply(message, config.Opts.TelegramHelptext())
 	case command == "playback", command == "search":
 		return t.playback(message, urls)
 	case message.IsCommand():
 		commands := t.myCommands()
 		if commands != "" {
-			commands = fmt.Sprintf(", you can type:\n\n%s", commands)
+			commands = fmt.Sprintf("\n\nAvailable commands:\n%s", commands)
 		}
-		msg := telegram.NewMessage(message.Chat.ID, fmt.Sprintf("/%s is no specified command%s", message.Command(), commands))
-		msg.ReplyToMessageID = message.MessageID
-		t.bot.Send(msg)
-		return nil
+		t.reply(message, fmt.Sprintf("/%s is no specified command%s", message.Command(), commands))
 	case len(urls) == 0:
 		logger.Info("[telegram] archives failure, URL no found.")
-		msg := telegram.NewMessage(message.Chat.ID, "URL no found.")
-		msg.ReplyToMessageID = message.MessageID
-		t.bot.Send(msg)
-		return nil
+		t.reply(message, "URL no found.")
+	default:
+		return t.archive(ctx, message, urls)
 	}
-
-	return t.archive(ctx, message, urls)
+	return nil
 }
 
 func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls []string) error {
@@ -189,6 +181,16 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 	msg.DisableWebPagePreview = true
 	msg.ParseMode = "html"
 	if _, err := t.bot.Send(msg); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *Telegram) reply(message *telegram.Message, text string) error {
+	msg := telegram.NewMessage(message.Chat.ID, text)
+	msg.ReplyToMessageID = message.MessageID
+	if _, err := t.bot.Send(msg); err != nil {
+		logger.Error("[telegram] reply failed: %v", err)
 		return err
 	}
 	return nil

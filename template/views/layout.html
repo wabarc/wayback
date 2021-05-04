@@ -404,6 +404,12 @@
   <div class="wrapper">
     <button class="add-button">Add to home screen</button>
     <div class="archived" id="archived">
+      {{- range $i, $collect := . -}}
+      <ul class="row">
+        <li class="src">{{ $collect.Src }}</li>
+        <li class="dst"><a href="{{ $collect.Dst }}" target="blank">{{ $collect.Dst }}</a></li>
+      </ul>
+      {{end}}
     </div>
     <div class="form">
       <form action="/w" method="post" onsubmit="post(); return false;">
