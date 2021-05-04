@@ -187,7 +187,7 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 }
 
 func (t *Telegram) reply(message *telegram.Message, text string) error {
-	msg := telegram.NewMessage(message.Chat.ID, config.Opts.TelegramHelptext())
+	msg := telegram.NewMessage(message.Chat.ID, text)
 	msg.ReplyToMessageID = message.MessageID
 	if _, err := t.bot.Send(msg); err != nil {
 		logger.Error("[telegram] reply failed: %v", err)

@@ -5,11 +5,16 @@
 package anonymity // import "github.com/wabarc/wayback/service/anonymity"
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
+	"github.com/wabarc/wayback"
+	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/template"
 )
 
@@ -152,6 +157,73 @@ func (web *web) showJavascript(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "max-age=2592000")
 	w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
 	w.Write(contents)
+}
+
+func (web *web) process(w http.ResponseWriter, r *http.Request) {
+	logger.Debug("[web] process request start...")
+	if r.Method != http.MethodPost {
+		logger.Info("[web] request method no specific.")
+		http.Redirect(w, r, "/", http.StatusNotModified)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		logger.Error("[web] parse form error, %v", err)
+		http.Redirect(w, r, "/", http.StatusNotModified)
+		return
+	}
+
+	text := r.PostFormValue("text")
+	if len(strings.TrimSpace(text)) == 0 {
+		logger.Info("[web] post form value empty.")
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	logger.Debug("[web] text: %s", text)
+
+	urls := helper.MatchURL(text)
+	if len(urls) == 0 {
+		logger.Info("[web] url no found.")
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	col, _ := wayback.Wayback(urls)
+	collector := transform(col)
+	ctx := context.Background()
+	switch r.PostFormValue("data-type") {
+	case "json":
+		w.Header().Set("Content-Type", "application/json")
+
+		if data, err := json.Marshal(collector); err != nil {
+			logger.Error("[web] encode for response failed, %v", err)
+		} else {
+			go publish.To(ctx, col, "web")
+			w.Write(data)
+		}
+	default:
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+		if html, ok := web.template.Render("layout", collector); ok {
+			go publish.To(ctx, col, "web")
+			w.Write(html)
+		} else {
+			logger.Error("[web] render template for response failed")
+		}
+	}
+}
+
+func transform(col []*wayback.Collect) template.Collector {
+	collects := []template.Collect{}
+	for _, c := range col {
+		for src, dst := range c.Dst {
+			collects = append(collects, template.Collect{
+				Slot: c.Arc,
+				Src:  src,
+				Dst:  dst,
+			})
+		}
+	}
+	return collects
 }
 
 func routeParam(r *http.Request, param string) string {
