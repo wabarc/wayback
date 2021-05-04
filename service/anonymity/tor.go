@@ -12,9 +12,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"os/signal"
 	"strings"
-	"syscall"
 
 	"github.com/cretz/bine/tor"
 	"github.com/cretz/bine/torutil/ed25519"
@@ -75,6 +73,8 @@ func (t *Tor) Serve(ctx context.Context) error {
 		logger.Fatal("[web] failed to start tor: %v", err)
 	}
 	defer e.Close()
+	e.DeleteDataDirOnClose = true
+	e.StopProcessOnClose = false
 
 	// Create an onion service to listen on any port but show as local port,
 	// specify the local port using the `WAYBACK_TOR_LOCAL_PORT` environment variable.
@@ -83,17 +83,21 @@ func (t *Tor) Serve(ctx context.Context) error {
 		logger.Fatal("[web] failed to create onion service: %v", err)
 	}
 	defer onion.Close()
+	onion.CloseLocalListenerOnClose = false
 
 	logger.Info(`[web] listening on %q without TLS`, onion.LocalListener.Addr())
 	logger.Info("[web] please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
 
+	server := http.Server{Handler: newWeb().handle()}
 	go func() {
-		http.Serve(onion, newWeb().handle())
+		server.Serve(onion)
 	}()
 
-	stop := make(chan os.Signal)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-	<-stop
+	select {
+	case <-ctx.Done():
+		logger.Info("[web] stopping tor hidden service...")
+		server.Shutdown(ctx)
+	}
 
 	return errors.New("done")
 }

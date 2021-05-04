@@ -52,7 +52,6 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 	if m.client == nil {
 		return errors.New("Must initialize Mastodon client.")
 	}
-
 	logger.Debug("[mastodon] Serving Mastodon instance: %s", config.Opts.MastodonServer())
 
 	// rcv, err := m.client.StreamingUser(ctx)
@@ -72,35 +71,52 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 	// 	}
 	// }
 
-	// Clear notifications every 10 minutes
 	go func() {
+		clearTick := time.NewTicker(10 * time.Minute) // Clear notifications
+		fetchTick := time.NewTicker(5 * time.Second)  // Fetch conversations
+
+		m.archiving = make(map[mastodon.ID]bool)
+		var mute sync.RWMutex
+		var once sync.Once
 		for {
-			time.Sleep(10 * time.Minute)
-			m.client.ClearNotifications(ctx)
+			select {
+			case <-clearTick.C:
+				logger.Debug("[mastodon] clear notifications...")
+				m.client.ClearNotifications(ctx)
+			case <-fetchTick.C:
+				convs, err := m.client.GetConversations(ctx, nil)
+				if err != nil {
+					logger.Error("[mastodon] Get conversations failure, error: %v", err)
+				}
+				logger.Debug("[mastodon] conversations: %v", convs)
+
+				for _, conv := range convs {
+					if _, exist := m.archiving[conv.ID]; exist {
+						continue
+					}
+					go m.process(ctx, conv)
+
+					mute.Lock()
+					m.archiving[conv.ID] = true
+					mute.Unlock()
+				}
+			case <-ctx.Done():
+				once.Do(func() {
+					logger.Debug("[mastodon] stopping ticker...")
+					clearTick.Stop()
+					fetchTick.Stop()
+				})
+			default:
+			}
 		}
 	}()
 
-	mutex := sync.RWMutex{}
-	m.archiving = make(map[mastodon.ID]bool)
-	for {
-		convs, err := m.client.GetConversations(ctx, nil)
-		if err != nil {
-			logger.Error("[mastodon] Get conversations failure, error: %v", err)
-		}
-		logger.Debug("[mastodon] conversations: %v", convs)
-
-		for _, conv := range convs {
-			if _, exist := m.archiving[conv.ID]; exist {
-				continue
-			}
-			go m.process(ctx, conv)
-
-			mutex.Lock()
-			m.archiving[conv.ID] = true
-			mutex.Unlock()
-		}
-		time.Sleep(5 * time.Second)
+	select {
+	case <-ctx.Done():
+		logger.Info("[mastodon] stopping service...")
 	}
+
+	return errors.New("done")
 }
 
 func (m *Mastodon) process(ctx context.Context, conv *mastodon.Conversation) error {

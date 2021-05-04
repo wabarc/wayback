@@ -6,10 +6,7 @@ package matrix // import "github.com/wabarc/wayback/service/matrix"
 
 import (
 	"context"
-	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
@@ -97,18 +94,17 @@ func (m *Matrix) Serve(ctx context.Context) error {
 		// m.destroyRoom(ev.RoomID)
 	})
 
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
-		<-c
+		if err := m.client.Sync(); err != nil {
+			logger.Debug("[matrix] sync failed: %v", err)
+		}
+	}()
+
+	select {
+	case <-ctx.Done():
 		logger.Info("[matrix] stopping sync and logout all sessions")
 		m.client.StopSync()
 		m.client.LogoutAll()
-	}()
-
-	// Block sync
-	if err := m.client.SyncWithContext(ctx); err != nil {
-		return err
 	}
 
 	return errors.New("done")
