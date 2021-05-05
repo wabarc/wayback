@@ -15,6 +15,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
 )
 
@@ -56,8 +57,12 @@ func (i *IRC) Serve(ctx context.Context) error {
 	}
 	i.conn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		go func(ev *irc.Event) {
+			metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusRequest)
 			if err := i.process(context.Background(), ev); err != nil {
-				logger.Error("[irc] Process failure, message: %s, error: %v", ev.Message(), err)
+				logger.Error("[irc] process failure, message: %s, error: %v", ev.Message(), err)
+				metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusFailure)
+			} else {
+				metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusSuccess)
 			}
 		}(ev)
 	})

@@ -15,6 +15,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
 )
 
@@ -60,20 +61,22 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 	}()
 
 	for update := range updates {
-		if update.Message != nil {
-			logger.Debug("[telegram] message: %v", update.Message)
-			go t.process(ctx, update)
-			continue
-		}
-		if update.CallbackQuery != nil {
+		switch {
+		case update.CallbackQuery != nil:
 			logger.Debug("[telegram] callback query: %#v", update.CallbackQuery)
+
 			callback := update.CallbackQuery
 			if strings.HasPrefix(callback.Data, callbackPrefix()) {
+				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
 				go t.archive(ctx, callback.Message, helper.MatchURL(callback.Data))
 			}
-			continue
+		case update.Message != nil:
+			logger.Debug("[telegram] message: %v", update.Message)
+
+			go t.process(ctx, update)
+		default:
+			logger.Debug("[telegram] update: %#v", update)
 		}
-		logger.Debug("[telegram] message empty, update: %#v", update)
 	}
 
 	return errors.New("done")
@@ -110,6 +113,12 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		t.reply(message, config.Opts.TelegramHelptext())
 	case command == "playback", command == "search":
 		return t.playback(message, urls)
+	case command == "status", strings.HasPrefix(command, "metric"):
+		stats := metrics.Gather.Export("wayback", "go_info")
+		if config.Opts.EnabledMetrics() && stats != "" {
+			return t.reply(message, stats)
+		}
+		return nil
 	case message.IsCommand():
 		commands := t.myCommands()
 		if commands != "" {
@@ -118,9 +127,16 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 		t.reply(message, fmt.Sprintf("/%s is no specified command%s", message.Command(), commands))
 	case len(urls) == 0:
 		logger.Info("[telegram] archives failure, URL no found.")
+		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
 		t.reply(message, "URL no found.")
 	default:
-		return t.archive(ctx, message, urls)
+		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
+		err := t.archive(ctx, message, urls)
+		if err != nil {
+			metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
+			return err
+		}
+		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusSuccess)
 	}
 	return nil
 }
@@ -159,6 +175,7 @@ func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls 
 }
 
 func (t *Telegram) playback(message *telegram.Message, urls []string) error {
+	metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusRequest)
 	if len(urls) == 0 {
 		msg := telegram.NewMessage(message.Chat.ID, "Please send me URLs to playback...")
 		msg.ReplyToMessageID = message.MessageID
@@ -181,8 +198,10 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 	msg.DisableWebPagePreview = true
 	msg.ParseMode = "html"
 	if _, err := t.bot.Send(msg); err != nil {
+		metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusFailure)
 		return err
 	}
+	metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusSuccess)
 	return nil
 }
 

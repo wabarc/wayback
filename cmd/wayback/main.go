@@ -11,6 +11,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/version"
 )
 
@@ -174,6 +175,10 @@ func handle(cmd *cobra.Command, args []string) {
 
 	if debug || config.Opts.HasDebugMode() {
 		logger.EnableDebug()
+	}
+
+	if config.Opts.EnabledMetrics() {
+		metrics.Gather = metrics.NewCollector()
 	}
 
 	if info {

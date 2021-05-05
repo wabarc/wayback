@@ -12,11 +12,11 @@ import (
 const (
 	defDebug    = false
 	defLogTime  = true
+	defMetrics  = false
+	defOverTor  = false
 	defIPFSHost = "127.0.0.1"
 	defIPFSPort = 4001
 	defIPFSMode = "pinner"
-
-	defOverTor = false
 
 	defEnabledIA = false
 	defEnabledIS = false
@@ -65,6 +65,7 @@ type Options struct {
 	debug   bool
 	logTime bool
 	overTor bool
+	metrics bool
 
 	ipfs     *ipfs
 	slots    map[string]bool
@@ -147,6 +148,7 @@ func NewOptions() *Options {
 		debug:               defDebug,
 		logTime:             defLogTime,
 		overTor:             defOverTor,
+		metrics:             defMetrics,
 		chromeRemoteAddr:    defChromeRemoteAddr,
 		enabledChromeRemote: defEnabledChromeRemote,
 		ipfs: &ipfs{
@@ -213,6 +215,11 @@ func (o *Options) HasDebugMode() bool {
 // LogTime returns if the time should be displayed in log messages.
 func (o *Options) LogTime() bool {
 	return o.logTime
+}
+
+// EnabledMetrics returns true if metrics collector is enabled.
+func (o *Options) EnabledMetrics() bool {
+	return o.metrics
 }
 
 // IPFSHost returns the host of IPFS daemon service.
