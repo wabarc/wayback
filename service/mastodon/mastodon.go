@@ -17,6 +17,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
 	"golang.org/x/net/html"
 )
@@ -86,7 +87,7 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 			case <-fetchTick.C:
 				convs, err := m.client.GetConversations(ctx, nil)
 				if err != nil {
-					logger.Error("[mastodon] Get conversations failure, error: %v", err)
+					logger.Error("[mastodon] get conversations failure, error: %v", err)
 				}
 				logger.Debug("[mastodon] conversations: %v", convs)
 
@@ -94,7 +95,15 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 					if _, exist := m.archiving[conv.ID]; exist {
 						continue
 					}
-					go m.process(ctx, conv)
+					go func(conv *mastodon.Conversation) {
+						metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusRequest)
+						if err := m.process(ctx, conv); err != nil {
+							logger.Error("[mastodon] process failure, conversation: %#v, error: %v", conv, err)
+							metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusFailure)
+						} else {
+							metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusSuccess)
+						}
+					}(conv)
 
 					mute.Lock()
 					m.archiving[conv.ID] = true

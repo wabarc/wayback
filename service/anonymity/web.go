@@ -11,11 +11,15 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
+	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/template"
+	"github.com/wabarc/wayback/version"
 )
 
 type web struct {
@@ -47,6 +51,16 @@ func (web *web) handle() http.Handler {
 	web.router.HandleFunc("/offline.html", web.showOfflinePage).Methods(http.MethodGet)
 
 	web.router.HandleFunc("/w", func(w http.ResponseWriter, r *http.Request) { web.process(w, r) }).Methods(http.MethodPost)
+
+	web.router.HandleFunc("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("ok"))
+	}).Name("healthcheck")
+	web.router.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(version.Version))
+	}).Name("version")
+	if config.Opts.EnabledMetrics() {
+		web.router.Handle("/metrics", promhttp.Handler()).Methods(http.MethodGet)
+	}
 
 	web.router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
@@ -161,6 +175,8 @@ func (web *web) showJavascript(w http.ResponseWriter, r *http.Request) {
 
 func (web *web) process(w http.ResponseWriter, r *http.Request) {
 	logger.Debug("[web] process request start...")
+	metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusRequest)
+
 	if r.Method != http.MethodPost {
 		logger.Info("[web] request method no specific.")
 		http.Redirect(w, r, "/", http.StatusNotModified)
@@ -196,7 +212,9 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 
 		if data, err := json.Marshal(collector); err != nil {
 			logger.Error("[web] encode for response failed, %v", err)
+			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
 		} else {
+			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
 			go publish.To(ctx, col, "web")
 			w.Write(data)
 		}
@@ -204,9 +222,11 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		if html, ok := web.template.Render("layout", collector); ok {
+			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
 			go publish.To(ctx, col, "web")
 			w.Write(html)
 		} else {
+			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
 			logger.Error("[web] render template for response failed")
 		}
 	}

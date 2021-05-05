@@ -17,6 +17,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/metrics"
 	matrix "maunium.net/go/mautrix"
 )
 
@@ -27,19 +28,31 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 	}
 
 	if config.Opts.PublishToChannel() {
-		logger.Debug("[%s] publishing to channel...", from)
+		logger.Debug("[%s] publishing to telegram channel...", from)
+		metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusRequest)
 
 		var bot *telegram.BotAPI
 		if rev, ok := ctx.Value("telegram").(*telegram.BotAPI); ok {
 			bot = rev
 		}
+
 		tel := NewTelegram(bot)
-		tel.ToChannel(ctx, tel.Render(col))
+		if tel.ToChannel(ctx, tel.Render(col)) {
+			metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusSuccess)
+		} else {
+			metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusFailure)
+		}
 	}
 	if config.Opts.PublishToIssues() {
 		logger.Debug("[%s] publishing to GitHub issues...", from)
+		metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusRequest)
+
 		gh := NewGitHub(nil)
-		gh.ToIssues(ctx, gh.Render(col))
+		if gh.ToIssues(ctx, gh.Render(col)) {
+			metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusSuccess)
+		} else {
+			metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusFailure)
+		}
 	}
 	if config.Opts.PublishToMastodon() {
 		var id string
@@ -47,43 +60,63 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 			id = args[1]
 		}
 		logger.Debug("[%s] publishing to Mastodon...", from)
+		metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusRequest)
 
 		var client *mstdn.Client
 		if rev, ok := ctx.Value("mastodon").(*mstdn.Client); ok {
 			client = rev
 		}
 		mstdn := NewMastodon(client)
-		mstdn.ToMastodon(ctx, mstdn.Render(col), id)
+		if mstdn.ToMastodon(ctx, mstdn.Render(col), id) {
+			metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusSuccess)
+		} else {
+			metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusFailure)
+		}
 	}
 	if config.Opts.PublishToTwitter() {
 		logger.Debug("[%s] publishing to Twitter...", from)
+		metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusRequest)
 
 		var client *twitter.Client
 		if rev, ok := ctx.Value("twitter").(*twitter.Client); ok {
 			client = rev
 		}
 		twitter := NewTwitter(client)
-		twitter.ToTwitter(ctx, twitter.Render(col))
+		if twitter.ToTwitter(ctx, twitter.Render(col)) {
+			metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusSuccess)
+		} else {
+			metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusFailure)
+		}
 	}
 	if config.Opts.PublishToIRCChannel() {
 		logger.Debug("[%s] publishing to IRC channel...", from)
+		metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusRequest)
 
 		var conn *irc.Connection
 		if rev, ok := ctx.Value("irc").(*irc.Connection); ok {
 			conn = rev
 		}
 		irc := NewIRC(conn)
-		irc.ToChannel(ctx, irc.Render(col))
+		if irc.ToChannel(ctx, irc.Render(col)) {
+			metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusSuccess)
+		} else {
+			metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusFailure)
+		}
 	}
 	if config.Opts.PublishToMatrixRoom() {
 		logger.Debug("[%s] publishing to Matrix room...", from)
+		metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusRequest)
 
 		var client *matrix.Client
 		if rev, ok := ctx.Value("matrix").(*matrix.Client); ok {
 			client = rev
 		}
 		mat := NewMatrix(client)
-		mat.ToRoom(ctx, mat.Render(col))
+		if mat.ToRoom(ctx, mat.Render(col)) {
+			metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusSuccess)
+		} else {
+			metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusFailure)
+		}
 	}
 }
 

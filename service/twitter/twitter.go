@@ -16,6 +16,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
 )
 
@@ -77,7 +78,15 @@ func (t *Twitter) Serve(ctx context.Context) error {
 					if _, exist := t.archiving[event.ID]; exist {
 						continue
 					}
-					go t.process(ctx, event)
+					go func(event twitter.DirectMessageEvent) {
+						metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusRequest)
+						if err := t.process(ctx, event); err != nil {
+							logger.Error("[twitter] process failure, message: %#v, error: %v", event.Message, err)
+							metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusFailure)
+						} else {
+							metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusSuccess)
+						}
+					}(event)
 
 					mute.Lock()
 					t.archiving[event.ID] = true

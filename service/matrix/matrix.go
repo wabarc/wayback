@@ -13,6 +13,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
 	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
@@ -79,8 +80,12 @@ func (m *Matrix) Serve(ctx context.Context) error {
 			if ev.Sender == id.UserID(config.Opts.MatrixUserID()) || ev.Unsigned.RedactedBecause != nil {
 				return
 			}
+			metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusRequest)
 			if err := m.process(ctx, ev); err != nil {
 				logger.Error("[matrix] process request failure, error: %v", err)
+				metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusFailure)
+			} else {
+				metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusSuccess)
 			}
 			// m.destroyRoom(ev.RoomID)
 		}(ev)

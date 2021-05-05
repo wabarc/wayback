@@ -161,6 +161,7 @@ You can also specify configuration options either via command flags or via envir
 | `--debug`           | `DEBUG`                           | `false`                 | Enable debug mode                                            |
 | `-c`, `--config`    | -                                 | -                       | Configuration file path, defaults: `./wayback.conf`, `~/wayback.conf`, `/etc/wayback.conf` |
 | -                   | `LOG_TIME`                        | `true`                  | Display the date and time in log messages                    |
+| -                   | `ENABLE_METRICS`                  | `false`                 | Enable metrics collector                                     |
 | -                   | `CHROME_REMOTE_ADDR`              | -                       | Chrome/Chromium remote debugging address, for screenshot     |
 | `-d`, `--daemon`    | -                                 | -                       | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter` |
 | `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                  | Wayback webpages to **Internet Archive**                     |

@@ -101,6 +101,41 @@ func TestDisableLogTime(t *testing.T) {
 	}
 }
 
+func TestMetricsEnabled(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("ENABLE_METRICS", "on")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := true
+	got := opts.EnabledMetrics()
+
+	if got != expected {
+		t.Fatalf(`Unexpected metrics mode value, got %v instead of %v`, got, expected)
+	}
+}
+
+func TestMetricsDisabled(t *testing.T) {
+	os.Clearenv()
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := false
+	got := opts.EnabledMetrics()
+
+	if got != expected {
+		t.Fatalf(`Unexpected metrics mode value, got %v instead of %v`, got, expected)
+	}
+}
+
 func TestIPFSHost(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("WAYBACK_IPFS_HOST", "127.0.0.1")
