@@ -8,6 +8,7 @@ on:
       - "go.mod"
       - "go.sum"
       - "Makefile"
+      - "build/**"
       - ".github/workflows/builder.yml"
   pull_request:
     branches: "*"
@@ -15,6 +16,7 @@ on:
       - "**/*.go"
       - "go.mod"
       - "go.sum"
+  workflow_dispatch:
 
 jobs:
   build:

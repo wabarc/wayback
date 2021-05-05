@@ -17,6 +17,7 @@ on:
     paths-ignore:
       - '**.md'
       - 'snapcraft.yaml'
+  workflow_dispatch:
 
 jobs:
   publish:
