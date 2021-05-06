@@ -8,9 +8,11 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/cretz/bine/tor"
 	"github.com/cretz/bine/torutil/ed25519"
@@ -100,8 +102,27 @@ func (t *Tor) torrc() string {
 	if config.Opts.TorrcFile() == "" {
 		return ""
 	}
+	if torPortBusy() {
+		return ""
+	}
 	if _, err := os.Open(config.Opts.TorrcFile()); err != nil {
 		return ""
 	}
 	return config.Opts.TorrcFile()
+}
+
+func torPortBusy() bool {
+	addr := net.JoinHostPort("127.0.0.1", "9050")
+	conn, err := net.DialTimeout("tcp", addr, time.Second)
+	if err != nil {
+		logger.Debug("[web] defaults tor port is idle")
+		return false
+	}
+	if conn != nil {
+		conn.Close()
+		logger.Debug("[web] defaults tor port is busy")
+		return true
+	}
+
+	return false
 }
