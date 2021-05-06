@@ -111,20 +111,20 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 	switch {
 	case command == "help":
 		t.reply(message, config.Opts.TelegramHelptext())
-	case command == "playback", command == "search":
+	case command == "playback":
 		return t.playback(message, urls)
-	case command == "status", strings.HasPrefix(command, "metric"):
+	case command == "metrics":
 		stats := metrics.Gather.Export("wayback")
 		if config.Opts.EnabledMetrics() && stats != "" {
 			return t.reply(message, stats)
 		}
 		return nil
 	case message.IsCommand():
-		commands := t.myCommands()
-		if commands != "" {
-			commands = fmt.Sprintf("\n\nAvailable commands:\n%s", commands)
+		fallback := t.commandFallback()
+		if fallback != "" {
+			fallback = fmt.Sprintf("\n\nAvailable commands:\n%s", fallback)
 		}
-		t.reply(message, fmt.Sprintf("/%s is no specified command%s", message.Command(), commands))
+		t.reply(message, fmt.Sprintf("/%s is no specified command%s", message.Command(), fallback))
 	case len(urls) == 0:
 		logger.Info("[telegram] archives failure, URL no found.")
 		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
@@ -215,18 +215,67 @@ func (t *Telegram) reply(message *telegram.Message, text string) error {
 	return nil
 }
 
-func (t *Telegram) myCommands() string {
-	commands, err := t.bot.GetMyCommands()
-	if err != nil {
-		return ""
-	}
+func (t *Telegram) commandFallback() string {
+	commands := t.myCommands()
 
 	var list string
 	for _, command := range commands {
-		list = fmt.Sprintf("/%s - %s\n", command.Command, command.Description)
+		list += fmt.Sprintf("/%s - %s\n", command.Command, command.Description)
 	}
 
 	return list
+}
+
+func (t *Telegram) myCommands() []telegram.BotCommand {
+	commands, err := t.bot.GetMyCommands()
+	if err != nil {
+		logger.Error("[telegram] got my failed: %v", err)
+	}
+
+	var maps = make(map[string]bool, len(commands))
+	for _, command := range commands {
+		maps[command.Command] = true
+	}
+
+	for _, command := range defaultCommands() {
+		if maps[command.Command] {
+			continue
+		}
+		commands = append(commands, command)
+	}
+
+	return commands
+}
+
+func (t *Telegram) setCommands() (error, bool) {
+	commands, err := t.bot.GetMyCommands()
+	if err != nil {
+		logger.Error("[telegram] got my failed: %v", err)
+		return err, false
+	}
+	logger.Debug("[telegram] got my commands: %v", commands)
+
+	// TODO
+	telegram.NewSetMyCommands(defaultCommands()...)
+
+	return nil, true
+}
+
+func defaultCommands() []telegram.BotCommand {
+	return []telegram.BotCommand{
+		{
+			Command:     "help",
+			Description: "Show help information",
+		},
+		{
+			Command:     "playback",
+			Description: "Playback archived url",
+		},
+		{
+			Command:     "metrics",
+			Description: "Show service metrics",
+		},
+	}
 }
 
 func callbackPrefix() string {
