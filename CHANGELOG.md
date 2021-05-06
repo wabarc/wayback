@@ -6,6 +6,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2021-05-06
+
+### Added
+- Add PWA support
+- Add more tests
+- Build package for Archlinux
+- Setup tor for testing workflow
+- Generate Git log as release note
+- Dispatch repository in wabarc/on-heroku
+- Add Heroku process file
+- Add metrics collector
+
+### Changed
+- Join IRC channel before connect
+- Doesn't reply if a forwarded message from telegram without caption
+- Attach a button below the message for send a wayback request
+- Upgrade dependencies
+- Refactor archive func
+- Close services using context cancellation signals
+- Check defaults port idle status to use torrc
+- Append defaults telegram command to fallback text
+
+### Fixed
+- Validate text for publish
+- Fix template render without args
+
+### Removed
+- Remove defaults command `/search` and `/status` for telegram
+
 ## [0.10.3] - 2021-04-21
 
 ### Changed
