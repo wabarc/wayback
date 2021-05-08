@@ -7,6 +7,7 @@ self.addEventListener("install", (event) => {
   const urlsToCache = [
     '/',
     '/index.js',
+    '/service-worker.js',
     '/offline.html',
     '/icon/favicon-16.png',
     '/icon/favicon-32.png',
@@ -39,6 +40,14 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener("fetch", (event) => {
+  if (event.request.url !== '') {
+    try {
+      const url = new URL(event.request.url)
+      if (url.pathname.match('^.*(\/w|\/healthcheck|\/version|\/metrics)$')) {
+        return false
+      }
+    } catch (_) { }
+  }
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
@@ -57,6 +66,9 @@ function fetchAndCache(url) {
       }
       return caches.open(CACHE_NAME)
         .then(function (cache) {
+          if (!(url.indexOf('http') === 0)) {
+            return response;
+          }
           cache.put(url, response.clone());
           return response;
         });
