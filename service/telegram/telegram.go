@@ -188,17 +188,19 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 
 	t.bot.Send(telegram.NewChatAction(message.Chat.ID, telegram.ChatTyping))
 	col, _ := wayback.Playback(urls)
+	logger.Debug("[telegram] playback collections: %#v", col)
 
 	msg := telegram.NewMessage(message.Chat.ID, t.pub.Render(col))
 	msg.ReplyToMessageID = message.MessageID
 	// Attach a button below the message to send a wayback request quickly
 	msg.BaseChat.ReplyMarkup = telegram.NewInlineKeyboardMarkup(telegram.NewInlineKeyboardRow(
-		telegram.NewInlineKeyboardButtonData("wayback", callbackPrefix()+message.Text),
+		telegram.NewInlineKeyboardButtonData("wayback", strings.ReplaceAll(callbackPrefix()+message.Text, "/playback", "")),
 	))
 	msg.DisableWebPagePreview = true
 	msg.ParseMode = "html"
 	if _, err := t.bot.Send(msg); err != nil {
 		metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusFailure)
+		logger.Debug("[telegram] playback failed: %v", err)
 		return err
 	}
 	metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusSuccess)

@@ -142,6 +142,7 @@ func (web *web) showFavicon(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+	w.Header().Set("Cache-Control", "max-age=2592000")
 	w.Header().Set("Content-Type", "image/x-icon")
 	w.Write(blob)
 }
@@ -200,8 +201,6 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 	urls := helper.MatchURL(text)
 	if len(urls) == 0 {
 		logger.Info("[web] url no found.")
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
 	}
 	col, _ := wayback.Wayback(urls)
 	collector := transform(col)
@@ -215,7 +214,9 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
 		} else {
 			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-			go publish.To(ctx, col, "web")
+			if len(urls) > 0 {
+				go publish.To(ctx, col, "web")
+			}
 			w.Write(data)
 		}
 	default:
@@ -223,7 +224,9 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 
 		if html, ok := web.template.Render("layout", collector); ok {
 			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-			go publish.To(ctx, col, "web")
+			if len(urls) > 0 {
+				go publish.To(ctx, col, "web")
+			}
 			w.Write(html)
 		} else {
 			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
