@@ -8,8 +8,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
-	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
@@ -17,10 +17,11 @@ import (
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
+	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
 type Telegram struct {
-	bot *telegram.BotAPI
+	bot *telegram.Bot
 	pub *publish.Telegram
 }
 
@@ -29,7 +30,12 @@ func New() *Telegram {
 	if config.Opts.TelegramToken() == "" {
 		logger.Fatal("[telegram] missing required environment variable")
 	}
-	bot, err := telegram.NewBotAPI(config.Opts.TelegramToken())
+	bot, err := telegram.NewBot(telegram.Settings{
+		Token:     config.Opts.TelegramToken(),
+		Verbose:   config.Opts.HasDebugMode(),
+		ParseMode: telegram.ModeHTML,
+		Poller:    &telegram.LongPoller{Timeout: 3 * time.Second},
+	})
 	if err != nil {
 		logger.Fatal("[telegram] create telegram bot instance failed: %v", err)
 	}
@@ -46,45 +52,48 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 	if t.bot == nil {
 		return errors.New("Initialize telegram failed, error: %v", err)
 	}
-	logger.Info("[telegram] authorized on account %s", t.bot.Self.UserName)
-
-	cfg := telegram.NewUpdate(0)
-	cfg.Timeout = 60
-	updates := t.bot.GetUpdatesChan(cfg)
+	logger.Info("[telegram] authorized on account %s", t.bot.Me.Username)
 
 	go func() {
 		select {
 		case <-ctx.Done():
 			logger.Info("[telegram] stopping receive updates...")
-			t.bot.StopReceivingUpdates()
+			t.bot.Stop()
 		}
 	}()
 
-	for update := range updates {
-		switch {
-		case update.CallbackQuery != nil:
-			logger.Debug("[telegram] callback query: %#v", update.CallbackQuery)
+	// Set bot commands
+	t.setCommands()
 
-			callback := update.CallbackQuery
+	t.bot.Poller = telegram.NewMiddlewarePoller(t.bot.Poller, func(update *telegram.Update) bool {
+		switch {
+		case update.Callback != nil:
+			logger.Debug("[telegram] callback query: %#v", update.Callback)
+
+			callback := update.Callback
 			if strings.HasPrefix(callback.Data, callbackPrefix()) {
 				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
 				go t.archive(ctx, callback.Message, helper.MatchURL(callback.Data))
 			}
 		case update.Message != nil:
-			logger.Debug("[telegram] message: %v", update.Message)
+			logger.Debug("[telegram] message: %#v", update.Message)
 
 			go t.process(ctx, update)
 		default:
 			logger.Debug("[telegram] update: %#v", update)
 		}
-	}
+
+		return true
+	})
+
+	logger.Info("[telegram] starting receive updates...")
+	t.bot.Start()
 
 	return errors.New("done")
 }
 
-func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
+func (t *Telegram) process(ctx context.Context, update *telegram.Update) error {
 	message := update.Message
-	command := message.Command()
 	content := message.Text
 	logger.Debug("[telegram] content: %s", content)
 
@@ -94,20 +103,21 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 	// If the message is forwarded and contains multiple entities,
 	// the update will be split into multiple parts.
 	// Don't process parts of the forwarded message without text.
-	if message.ForwardFromMessageID != 0 && message.Caption == "" {
+	// if message.IsForwarded() && message.Caption == "" {
+	if message.IsForwarded() && content == "" {
 		return nil
 	}
 	urls := helper.MatchURL(content)
 
 	// Set command as playback if receive a playback command without URLs, and
 	// required user reply a message with URLs.
-	if message.ReplyToMessage != nil {
-		from := message.ReplyToMessage.From
-		if from.UserName == t.bot.Self.UserName {
-			command = "playback"
+	if message.IsReply() {
+		if message.ReplyTo.Sender.Username == t.bot.Me.Username {
+			content = "/playback" + content
 		}
 	}
 
+	command := command(content)
 	switch {
 	case command == "help":
 		t.reply(message, config.Opts.TelegramHelptext())
@@ -116,15 +126,17 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 	case command == "metrics":
 		stats := metrics.Gather.Export("wayback")
 		if config.Opts.EnabledMetrics() && stats != "" {
-			return t.reply(message, stats)
+			if _, err := t.reply(message, stats); err != nil {
+				return err
+			}
 		}
 		return nil
-	case message.IsCommand():
+	case command == "/":
 		fallback := t.commandFallback()
 		if fallback != "" {
 			fallback = fmt.Sprintf("\n\nAvailable commands:\n%s", fallback)
 		}
-		t.reply(message, fmt.Sprintf("/%s is no specified command%s", message.Command(), fallback))
+		t.reply(message, fmt.Sprintf("/%s is no specified command%s", message.Payload, fallback))
 	case len(urls) == 0:
 		logger.Info("[telegram] archives failure, URL no found.")
 		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
@@ -142,15 +154,12 @@ func (t *Telegram) process(ctx context.Context, update telegram.Update) error {
 }
 
 func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls []string) error {
-	msg := telegram.NewMessage(message.Chat.ID, "Archiving...")
-	msg.ReplyToMessageID = message.MessageID
-	stage, err := t.bot.Send(msg)
+	stage, err := t.reply(message, "Archiving...")
 	if err != nil {
 		logger.Error("[telegram] send archiving message failed: %v", err)
 		return err
 	}
 	logger.Debug("[telegram] send archiving messagee result: %v", stage)
-	// t.bot.Send(telegram.NewChatAction(message.Chat.ID, telegram.ChatTyping))
 
 	col, err := wayback.Wayback(urls)
 	if err != nil {
@@ -160,10 +169,9 @@ func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls 
 
 	replyText := t.pub.Render(col)
 	logger.Debug("[telegram] reply text, %s", replyText)
-	updMsg := telegram.NewEditMessageText(stage.Chat.ID, stage.MessageID, replyText)
-	updMsg.DisableWebPagePreview = true
-	updMsg.ParseMode = "html"
-	if _, err := t.bot.Send(updMsg); err != nil {
+
+	opts := &telegram.SendOptions{DisableWebPagePreview: true}
+	if _, err := t.bot.Edit(stage, replyText, opts); err != nil {
 		logger.Error("[telegram] update message failed: %v", err)
 		return err
 	}
@@ -177,28 +185,37 @@ func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls 
 func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 	metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusRequest)
 	if len(urls) == 0 {
-		msg := telegram.NewMessage(message.Chat.ID, "Please send me URLs to playback...")
-		msg.ReplyToMessageID = message.MessageID
-		msg.BaseChat.ReplyMarkup = telegram.ForceReply{ForceReply: true}
-		if _, err := t.bot.Send(msg); err != nil {
+		opts := &telegram.SendOptions{
+			ReplyTo:               message,
+			DisableWebPagePreview: true,
+			ReplyMarkup: &telegram.ReplyMarkup{
+				ForceReply: true,
+			},
+		}
+		_, err := t.bot.Send(message.Sender, "Please send me URLs to playback...", opts)
+		if err != nil {
 			return err
 		}
 		return nil
 	}
 
-	t.bot.Send(telegram.NewChatAction(message.Chat.ID, telegram.ChatTyping))
+	t.bot.Notify(message.Sender, telegram.ChatAction(telegram.Typing))
 	col, _ := wayback.Playback(urls)
 	logger.Debug("[telegram] playback collections: %#v", col)
 
-	msg := telegram.NewMessage(message.Chat.ID, t.pub.Render(col))
-	msg.ReplyToMessageID = message.MessageID
-	// Attach a button below the message to send a wayback request quickly
-	msg.BaseChat.ReplyMarkup = telegram.NewInlineKeyboardMarkup(telegram.NewInlineKeyboardRow(
-		telegram.NewInlineKeyboardButtonData("wayback", strings.ReplaceAll(callbackPrefix()+message.Text, "/playback", "")),
-	))
-	msg.DisableWebPagePreview = true
-	msg.ParseMode = "html"
-	if _, err := t.bot.Send(msg); err != nil {
+	opts := &telegram.SendOptions{
+		ReplyTo:               message,
+		DisableWebPagePreview: true,
+		ReplyMarkup: &telegram.ReplyMarkup{
+			InlineKeyboard: [][]telegram.InlineButton{
+				{{
+					Text: "wayback",
+					Data: strings.ReplaceAll(callbackPrefix()+message.Text, "/playback", ""),
+				}},
+			},
+		},
+	}
+	if _, err := t.bot.Send(message.Sender, t.pub.Render(col), opts); err != nil {
 		metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusFailure)
 		logger.Debug("[telegram] playback failed: %v", err)
 		return err
@@ -207,40 +224,40 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 	return nil
 }
 
-func (t *Telegram) reply(message *telegram.Message, text string) error {
-	msg := telegram.NewMessage(message.Chat.ID, text)
-	msg.ReplyToMessageID = message.MessageID
-	if _, err := t.bot.Send(msg); err != nil {
+func (t *Telegram) reply(message *telegram.Message, text string) (*telegram.Message, error) {
+	opts := &telegram.SendOptions{DisableWebPagePreview: true}
+	msg, err := t.bot.Reply(message, text, opts)
+	if err != nil {
 		logger.Error("[telegram] reply failed: %v", err)
-		return err
+		return nil, err
 	}
-	return nil
+	return msg, nil
 }
 
 func (t *Telegram) commandFallback() string {
-	commands := t.myCommands()
+	commands := t.getCommands()
 
 	var list string
 	for _, command := range commands {
-		list += fmt.Sprintf("/%s - %s\n", command.Command, command.Description)
+		list += fmt.Sprintf("/%s - %s\n", command.Text, command.Description)
 	}
 
 	return list
 }
 
-func (t *Telegram) myCommands() []telegram.BotCommand {
-	commands, err := t.bot.GetMyCommands()
+func (t *Telegram) getCommands() []telegram.Command {
+	commands, err := t.bot.GetCommands()
 	if err != nil {
 		logger.Error("[telegram] got my failed: %v", err)
 	}
 
 	var maps = make(map[string]bool, len(commands))
 	for _, command := range commands {
-		maps[command.Command] = true
+		maps[command.Text] = true
 	}
 
 	for _, command := range defaultCommands() {
-		if maps[command.Command] {
+		if maps[command.Text] {
 			continue
 		}
 		commands = append(commands, command)
@@ -250,36 +267,50 @@ func (t *Telegram) myCommands() []telegram.BotCommand {
 }
 
 func (t *Telegram) setCommands() (error, bool) {
-	commands, err := t.bot.GetMyCommands()
-	if err != nil {
-		logger.Error("[telegram] got my failed: %v", err)
+	commands := t.getCommands()
+	logger.Debug("[telegram] got commands: %v", commands)
+
+	if err := t.bot.SetCommands(commands); err != nil {
+		logger.Error("[telegram] set commands failed: %v", err)
 		return err, false
 	}
-	logger.Debug("[telegram] got my commands: %v", commands)
-
-	// TODO
-	telegram.NewSetMyCommands(defaultCommands()...)
+	logger.Debug("[telegram] set commands succeed")
 
 	return nil, true
 }
 
-func defaultCommands() []telegram.BotCommand {
-	return []telegram.BotCommand{
+func defaultCommands() []telegram.Command {
+	return []telegram.Command{
 		{
-			Command:     "help",
+			Text:        "help",
 			Description: "Show help information",
 		},
 		{
-			Command:     "playback",
-			Description: "Playback archived url",
+			Text:        "metrics",
+			Description: "Show service metrics",
 		},
 		{
-			Command:     "metrics",
-			Description: "Show service metrics",
+			Text:        "playback",
+			Description: "Playback archived url",
 		},
 	}
 }
 
 func callbackPrefix() string {
 	return ":wayback "
+}
+
+func command(message string) string {
+	switch {
+	case strings.HasPrefix(message, "/help"):
+		return "help"
+	case strings.HasPrefix(message, "/playback"):
+		return "playback"
+	case strings.HasPrefix(message, "/metrics"):
+		return "metrics"
+	case strings.HasPrefix(message, "/"):
+		return "/"
+	default:
+		return ""
+	}
 }

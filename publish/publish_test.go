@@ -7,6 +7,7 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -14,10 +15,10 @@ import (
 	"testing"
 
 	"github.com/dghubble/go-twitter/twitter"
-	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
 var collects = []*wayback.Collect{
@@ -108,9 +109,11 @@ func TestPublishToChannelFromTelegram(t *testing.T) {
 		switch slug {
 		case "getMe":
 			fmt.Fprintln(w, getMeJSON)
+		case "getChat":
+			fmt.Fprintln(w, getChatJSON)
 		case "sendMessage":
-			text := r.FormValue("text")
-			if strings.Index(text, config.SlotName(config.SLOT_IA)) == -1 {
+			text, _ := io.ReadAll(r.Body)
+			if strings.Index(string(text), config.SlotName(config.SLOT_IA)) == -1 {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
@@ -118,8 +121,11 @@ func TestPublishToChannelFromTelegram(t *testing.T) {
 		}
 	})
 
-	endpoint := server.URL + "/bot%s/%s"
-	bot, err := telegram.NewBotAPIWithClient(token, endpoint, httpClient)
+	bot, err := telegram.NewBot(telegram.Settings{
+		URL:    server.URL,
+		Token:  token,
+		Client: httpClient,
+	})
 	if err != nil {
 		t.Fatalf(`New Telegram bot API client failed: %v`, err)
 	}

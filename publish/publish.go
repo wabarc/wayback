@@ -10,7 +10,6 @@ import (
 	"text/template"
 
 	"github.com/dghubble/go-twitter/twitter"
-	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	mstdn "github.com/mattn/go-mastodon"
 	irc "github.com/thoj/go-ircevent"
 	"github.com/wabarc/helper"
@@ -18,6 +17,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/metrics"
+	telegram "gopkg.in/tucnak/telebot.v2"
 	matrix "maunium.net/go/mautrix"
 )
 
@@ -31,8 +31,8 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		logger.Debug("[%s] publishing to telegram channel...", from)
 		metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusRequest)
 
-		var bot *telegram.BotAPI
-		if rev, ok := ctx.Value("telegram").(*telegram.BotAPI); ok {
+		var bot *telegram.Bot
+		if rev, ok := ctx.Value("telegram").(*telegram.Bot); ok {
 			bot = rev
 		}
 

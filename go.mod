@@ -10,7 +10,6 @@ require (
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
 	github.com/dghubble/oauth1 v0.7.0
 	github.com/go-shiori/obelisk v0.0.0-20201115143556-8de0d40b0a9b // indirect
-	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.0.0-rc1.0.20210311030851-d0e1dfd8c604
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/go-github/v33 v33.0.0
 	github.com/gorilla/mux v1.8.0
@@ -39,6 +38,7 @@ require (
 	golang.org/x/crypto v0.0.0-20210505212654-3497b51f5e64 // indirect
 	golang.org/x/net v0.0.0-20210505214959-0714010a04ed
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	gopkg.in/tucnak/telebot.v2 v2.3.5
 	maunium.net/go/mautrix v0.9.10
 )
 

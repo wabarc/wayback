@@ -34,10 +34,9 @@ func serve(_ *cobra.Command, args []string) {
 	case err := <-ran.err():
 		logger.Error("%v", err.Error())
 	case <-ctx.Done():
-		logger.Info("Wayback service stopped.")
+		time.Sleep(100 * time.Millisecond)
+		logger.Info("wayback service stopped.")
 	}
-
-	time.Sleep(100 * time.Millisecond)
 }
 
 func (srv *service) run(ctx context.Context) *service {
@@ -100,7 +99,7 @@ func (srv *service) stop(cancel context.CancelFunc) {
 		sig := <-signalChan
 		switch sig {
 		case os.Interrupt:
-			logger.Info("Signal SIGINT is received, probably due to `Ctrl-C`, exiting ...")
+			logger.Info("Signal SIGINT is received, probably due to `Ctrl-C`, exiting...")
 			cancel()
 			return
 		}

@@ -6,15 +6,17 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 
-	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
 var message = `<b><a href='https://web.archive.org/'>Internet Archive</a></b>:
@@ -41,6 +43,15 @@ var (
     "first_name": "Bot",
     "username": "Fake Bot"
   }
+}`
+	getChatJSON = `{
+	"ok": true,
+	"result": {
+		"id": -100011121113,
+		"title": "Channel Name",
+		"username": "channel-id",
+		"type": "channel"
+	}
 }`
 )
 
@@ -90,14 +101,22 @@ func TestToChannel(t *testing.T) {
 	defer server.Close()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
+		b, _ := io.ReadAll(r.Body)
+		var dat map[string]interface{}
+		if err := json.Unmarshal(b, &dat); err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+		text, _ := dat["text"].(string)
+
 		w.Header().Set("Content-Type", "application/json")
 		slug := strings.TrimPrefix(r.URL.Path, prefix)
 		switch slug {
 		case "getMe":
 			fmt.Fprintln(w, getMeJSON)
+		case "getChat":
+			fmt.Fprintln(w, getChatJSON)
 		case "sendMessage":
-			text := r.FormValue("text")
 			if strings.Index(text, config.SlotName(config.SLOT_IA)) == -1 {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
@@ -106,8 +125,11 @@ func TestToChannel(t *testing.T) {
 		}
 	})
 
-	endpoint := server.URL + "/bot%s/%s"
-	bot, err := telegram.NewBotAPIWithClient(token, endpoint, httpClient)
+	bot, err := telegram.NewBot(telegram.Settings{
+		URL:    server.URL,
+		Token:  token,
+		Client: httpClient,
+	})
 	if err != nil {
 		t.Fatalf(`New Telegram bot API client failed: %v`, err)
 	}

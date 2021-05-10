@@ -6,16 +6,18 @@ package telegram // import "github.com/wabarc/wayback/service/telegram"
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
-	telegram "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
 var (
@@ -29,6 +31,32 @@ var (
     "first_name": "Bot",
     "username": "Fake Bot"
   }
+}`
+	getChatJSON = `{
+  "ok": true,
+  "result": {
+    "id": -100011121113,
+    "title": "Channel Name",
+    "username": "channel-id",
+    "type": "channel"
+  }
+}`
+	getMyCommandsJSON = `{
+  "ok": true,
+  "result": [
+    {
+      "command": "help",
+      "description": "Show help information"
+    },
+    {
+      "command": "metrics",
+      "description": "Show service metrics"
+    },
+    {
+      "command": "playback",
+      "description": "Playback archived url"
+    }
+  ]
 }`
 	getUpdatesJSON = `{
   "ok": true,
@@ -64,12 +92,24 @@ func handle(mux *http.ServeMux, updatesJSON string) {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		r.ParseForm()
-		text := r.FormValue("text")
+		b, _ := io.ReadAll(r.Body)
+		var dat map[string]interface{}
+		if err := json.Unmarshal(b, &dat); err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+		text, _ := dat["text"].(string)
+
 		slug := strings.TrimPrefix(r.URL.Path, prefix)
 		switch slug {
 		case "getMe":
 			fmt.Fprintln(w, getMeJSON)
+		case "getChat":
+			fmt.Fprintln(w, getChatJSON)
+		case "getMyCommands":
+			fmt.Fprintln(w, getMyCommandsJSON)
+		case "setMyCommands":
+			fmt.Fprintln(w, `{"ok":true, "result":true}`)
 		case "getUpdates":
 			if times == 0 {
 				fmt.Fprintln(w, updatesJSON)
@@ -112,29 +152,28 @@ func TestServe(t *testing.T) {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
 
-	done := make(chan bool, 1)
-
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	handle(mux, `{"ok":true, "result":[]}`)
 
-	endpoint := server.URL + "/bot%s/%s"
-	bot, _ := telegram.NewBotAPIWithClient(token, endpoint, httpClient)
+	bot, err := telegram.NewBot(telegram.Settings{
+		URL:    server.URL,
+		Token:  token,
+		Client: httpClient,
+		Poller: &telegram.LongPoller{Timeout: time.Second},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	go func() {
-		for {
-			select {
-			case <-done:
-				bot.StopReceivingUpdates()
-				return
-			case <-time.After(3 * time.Second):
-				done <- true
-			}
-		}
-	}()
+	ctx, cancel := context.WithCancel(context.Background())
+	time.AfterFunc(3*time.Second, func() {
+		bot.Stop()
+		cancel()
+	})
 
 	tg := &Telegram{bot: bot}
-	got := tg.Serve(context.Background())
+	got := tg.Serve(ctx)
 	expected := "done"
 	if got.Error() != expected {
 		t.Errorf("Unexpected serve telegram got %v instead of %v", got, expected)
@@ -162,14 +201,24 @@ func TestProcess(t *testing.T) {
 	defer server.Close()
 	handle(mux, getUpdatesJSON)
 
-	endpoint := server.URL + "/bot%s/%s"
-	bot, _ := telegram.NewBotAPIWithClient(token, endpoint, httpClient)
+	bot, err := telegram.NewBot(telegram.Settings{
+		URL:    server.URL,
+		Token:  token,
+		Client: httpClient,
+		Poller: &telegram.LongPoller{Timeout: time.Second},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
+	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		for {
 			select {
 			case <-done:
-				bot.StopReceivingUpdates()
+				time.Sleep(10 * time.Second)
+				bot.Stop()
+				cancel()
 				return
 			case <-time.After(120 * time.Second):
 				done <- true
@@ -178,23 +227,23 @@ func TestProcess(t *testing.T) {
 	}()
 
 	tg := &Telegram{bot: bot}
-	cfg := telegram.NewUpdate(0)
-	cfg.Timeout = 60
-	updates := tg.bot.GetUpdatesChan(cfg)
 
-	for update := range updates {
-		if update.Message == nil { // ignore any non-Message Updates
-			continue
+	bot.Poller = telegram.NewMiddlewarePoller(bot.Poller, func(update *telegram.Update) bool {
+		switch {
+		// case update.Callback != nil:
+		case update.Message != nil:
+			if err := tg.process(ctx, update); err != nil {
+				t.Fatalf("process telegram message failed: %v", err)
+			} else {
+				done <- true
+			}
+		default:
+			t.Log("Unhandle")
 		}
+		return true
+	})
 
-		if err := tg.process(context.Background(), update); err != nil {
-			t.Fatalf("process telegram message failed: %v", err)
-		} else {
-			time.Sleep(3 * time.Second)
-			break
-		}
-	}
-	done <- true
+	bot.Start()
 }
 
 func TestProcessPlayback(t *testing.T) {
@@ -229,6 +278,12 @@ func TestProcessPlayback(t *testing.T) {
             "length": 9
           }
         ],
+        "from": {
+          "id": -100000001,
+          "is_bot": false,
+          "first_name": "Somebody",
+          "language_code": "en"
+        },
         "chat": {
           "id": 1000001,
           "type": "private"
@@ -241,14 +296,24 @@ func TestProcessPlayback(t *testing.T) {
 	defer server.Close()
 	handle(mux, getUpdatesJSON)
 
-	endpoint := server.URL + "/bot%s/%s"
-	bot, _ := telegram.NewBotAPIWithClient(token, endpoint, httpClient)
+	bot, err := telegram.NewBot(telegram.Settings{
+		URL:    server.URL,
+		Token:  token,
+		Client: httpClient,
+		Poller: &telegram.LongPoller{Timeout: time.Second},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 
+	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		for {
 			select {
 			case <-done:
-				bot.StopReceivingUpdates()
+				time.Sleep(10 * time.Second)
+				bot.Stop()
+				cancel()
 				return
 			case <-time.After(120 * time.Second):
 				done <- true
@@ -257,21 +322,21 @@ func TestProcessPlayback(t *testing.T) {
 	}()
 
 	tg := &Telegram{bot: bot}
-	cfg := telegram.NewUpdate(0)
-	cfg.Timeout = 60
-	updates := tg.bot.GetUpdatesChan(cfg)
 
-	for update := range updates {
-		if update.Message == nil { // ignore any non-Message Updates
-			continue
+	bot.Poller = telegram.NewMiddlewarePoller(bot.Poller, func(update *telegram.Update) bool {
+		switch {
+		// case update.Callback != nil:
+		case update.Message != nil:
+			if err := tg.process(ctx, update); err != nil {
+				t.Fatalf("process telegram message failed: %v", err)
+			} else {
+				done <- true
+			}
+		default:
+			t.Log("Unhandle")
 		}
+		return true
+	})
 
-		if err := tg.process(context.Background(), update); err != nil {
-			t.Fatalf("process telegram message failed: %v", err)
-		} else {
-			time.Sleep(time.Second)
-			break
-		}
-	}
-	done <- true
+	bot.Start()
 }
