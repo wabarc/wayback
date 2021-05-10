@@ -16,6 +16,7 @@ import (
 	"github.com/wabarc/wayback/service/relaychat"
 	"github.com/wabarc/wayback/service/telegram"
 	"github.com/wabarc/wayback/service/twitter"
+	"github.com/wabarc/wayback/storage"
 )
 
 type service struct {
@@ -23,9 +24,15 @@ type service struct {
 }
 
 func serve(_ *cobra.Command, args []string) {
+	store, err := storage.Open("")
+	if err != nil {
+		logger.Fatal("open storage failed: %v", err)
+	}
+	defer store.Close()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	srv := &service{}
-	ran := srv.run(ctx)
+	ran := srv.run(ctx, store)
 
 	go srv.stop(cancel)
 	defer close(srv.errCh)
@@ -39,37 +46,37 @@ func serve(_ *cobra.Command, args []string) {
 	}
 }
 
-func (srv *service) run(ctx context.Context) *service {
+func (srv *service) run(ctx context.Context, store *storage.Storage) *service {
 	srv.errCh = make(chan error, len(daemon))
 	for _, s := range daemon {
 		switch s {
 		case "irc":
-			irc := relaychat.New()
+			irc := relaychat.New(store)
 			go func(errCh chan error) {
 				errCh <- irc.Serve(ctx)
 			}(srv.errCh)
 		case "mastodon", "mstdn":
-			mastodon := mastodon.New()
+			mastodon := mastodon.New(store)
 			go func(errCh chan error) {
 				errCh <- mastodon.Serve(ctx)
 			}(srv.errCh)
 		case "telegram":
-			telegram := telegram.New()
+			telegram := telegram.New(store)
 			go func(errCh chan error) {
 				errCh <- telegram.Serve(ctx)
 			}(srv.errCh)
 		case "twitter":
-			twitter := twitter.New()
+			twitter := twitter.New(store)
 			go func(errCh chan error) {
 				errCh <- twitter.Serve(ctx)
 			}(srv.errCh)
 		case "matrix":
-			matrix := matrix.New()
+			matrix := matrix.New(store)
 			go func(errCh chan error) {
 				errCh <- matrix.Serve(ctx)
 			}(srv.errCh)
 		case "web":
-			tor := anonymity.New()
+			tor := anonymity.New(store)
 			go func(errCh chan error) {
 				errCh <- tor.Serve(ctx)
 			}(srv.errCh)

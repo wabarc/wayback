@@ -17,18 +17,23 @@ import (
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/storage"
 )
 
 type IRC struct {
 	sync.RWMutex
 
-	conn *irc.Connection
+	conn  *irc.Connection
+	store *storage.Storage
 }
 
 // New IRC struct.
-func New() *IRC {
+func New(store *storage.Storage) *IRC {
 	if config.Opts.IRCNick() == "" {
-		logger.Fatal("Missing required environment variable")
+		logger.Fatal("[irc] missing required environment variable")
+	}
+	if store == nil {
+		logger.Fatal("[irc] must initialize storage")
 	}
 
 	// TODO: support SASL authenticate
@@ -40,7 +45,8 @@ func New() *IRC {
 	conn.TLSConfig = &tls.Config{InsecureSkipVerify: false}
 
 	return &IRC{
-		conn: conn,
+		conn:  conn,
+		store: store,
 	}
 }
 

@@ -20,14 +20,19 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/storage"
 )
 
 type Tor struct {
+	store *storage.Storage
 }
 
 // New tor struct.
-func New() *Tor {
-	return &Tor{}
+func New(store *storage.Storage) *Tor {
+	if store == nil {
+		logger.Fatal("[web] must initialize storage")
+	}
+	return &Tor{store: store}
 }
 
 // Serve accepts incoming HTTP requests over Tor network, or open

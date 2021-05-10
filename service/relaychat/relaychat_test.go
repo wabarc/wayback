@@ -17,6 +17,7 @@ import (
 	irc "github.com/thoj/go-ircevent"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/storage"
 )
 
 var (
@@ -86,7 +87,7 @@ func TestProcess(t *testing.T) {
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
 			done <- true
-			i := New()
+			i := New(&storage.Storage{})
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
 			if err = i.process(context.Background(), ev); err != nil {
@@ -178,7 +179,7 @@ func TestToIRCChannel(t *testing.T) {
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
 			done <- true
-			i := New()
+			i := New(&storage.Storage{})
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
 			if err = i.process(context.Background(), ev); err != nil {

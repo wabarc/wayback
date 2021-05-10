@@ -16,6 +16,7 @@ import (
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/storage"
 	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
@@ -89,7 +90,7 @@ func senderClient(t *testing.T) *Matrix {
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
-	return New()
+	return New(&storage.Storage{})
 }
 
 func recverClient(t *testing.T) *Matrix {
@@ -99,7 +100,7 @@ func recverClient(t *testing.T) *Matrix {
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
-	return New()
+	return New(&storage.Storage{})
 }
 
 func TestProcess(t *testing.T) {

@@ -18,20 +18,25 @@ import (
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/storage"
 )
 
 type Twitter struct {
 	sync.RWMutex
 
 	client *twitter.Client
+	store  *storage.Storage
 
 	archiving map[string]bool
 }
 
 // New returns Twitter struct.
-func New() *Twitter {
+func New(store *storage.Storage) *Twitter {
 	if !config.Opts.PublishToTwitter() {
-		logger.Fatal("Missing required environment variable")
+		logger.Fatal("[twitter] missing required environment variable")
+	}
+	if store == nil {
+		logger.Fatal("[twitter] must initialize storage")
 	}
 
 	oauth := oauth1.NewConfig(config.Opts.TwitterConsumerKey(), config.Opts.TwitterConsumerSecret())
@@ -41,6 +46,7 @@ func New() *Twitter {
 
 	return &Twitter{
 		client: client,
+		store:  store,
 	}
 }
 

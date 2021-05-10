@@ -13,6 +13,7 @@ import (
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/storage"
 )
 
 func TestProcess(t *testing.T) {
@@ -45,7 +46,7 @@ func TestProcess(t *testing.T) {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
 
-	m := New()
+	m := New(&storage.Storage{})
 	ctx := context.Background()
 	convs, err := m.client.GetConversations(ctx, nil)
 	if err != nil {

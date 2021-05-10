@@ -6,7 +6,9 @@ package telegram // import "github.com/wabarc/wayback/service/telegram"
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,25 +16,32 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/entity"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/storage"
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
+// Telegram handles a telegram service.
 type Telegram struct {
-	bot *telegram.Bot
-	pub *publish.Telegram
+	bot   *telegram.Bot
+	pub   *publish.Telegram
+	store *storage.Storage
 }
 
 // New Telegram struct.
-func New() *Telegram {
+func New(store *storage.Storage) *Telegram {
 	if config.Opts.TelegramToken() == "" {
 		logger.Fatal("[telegram] missing required environment variable")
 	}
+	if store == nil {
+		logger.Fatal("[telegram] must initialize storage")
+	}
 	bot, err := telegram.NewBot(telegram.Settings{
-		Token:     config.Opts.TelegramToken(),
-		Verbose:   config.Opts.HasDebugMode(),
+		Token: config.Opts.TelegramToken(),
+		// Verbose:   config.Opts.HasDebugMode(),
 		ParseMode: telegram.ModeHTML,
 		Poller:    &telegram.LongPoller{Timeout: 3 * time.Second},
 	})
@@ -41,8 +50,9 @@ func New() *Telegram {
 	}
 
 	return &Telegram{
-		bot: bot,
-		pub: publish.NewTelegram(bot),
+		bot:   bot,
+		pub:   publish.NewTelegram(bot),
+		store: store,
 	}
 }
 
@@ -69,12 +79,32 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 		switch {
 		case update.Callback != nil:
 			logger.Debug("[telegram] callback query: %#v", update.Callback)
+			metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
 
 			callback := update.Callback
-			if strings.HasPrefix(callback.Data, callbackPrefix()) {
-				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
-				go t.archive(ctx, callback.Message, helper.MatchURL(callback.Data))
+			id, err := strconv.Atoi(callback.Data)
+			if err != nil {
+				logger.Error("[telegram] invalid playback id: %s", callback.Data)
+				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
+				return false
 			}
+
+			// Query playback callback data from database
+			pb, err := t.store.Playback(id)
+			if err != nil {
+				logger.Error("[telegram] query playback data failed: %v", err)
+				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
+				return false
+			}
+
+			data, err := base64.StdEncoding.DecodeString(pb.Source)
+			if err != nil {
+				logger.Error("[telegram] decoding callback data failed: %v", err)
+				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
+				return false
+			}
+
+			go t.archive(ctx, callback.Message, helper.MatchURL(string(data)))
 		case update.Message != nil:
 			logger.Debug("[telegram] message: %#v", update.Message)
 
@@ -203,6 +233,13 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 	col, _ := wayback.Playback(urls)
 	logger.Debug("[telegram] playback collections: %#v", col)
 
+	// Due to Telegram restricted callback data to 1-64 bytes, it requires to store
+	// playback URLs to database.
+	data := []byte(strings.ReplaceAll(callbackPrefix()+message.Text, "/playback", ""))
+	// data := []byte(callbackPrefix()+message.Text)
+	pb := &entity.Playback{Source: base64.StdEncoding.EncodeToString(data)}
+	t.store.CreatePlayback(pb)
+
 	opts := &telegram.SendOptions{
 		ReplyTo:               message,
 		DisableWebPagePreview: true,
@@ -210,7 +247,7 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 			InlineKeyboard: [][]telegram.InlineButton{
 				{{
 					Text: "wayback",
-					Data: strings.ReplaceAll(callbackPrefix()+message.Text, "/playback", ""),
+					Data: strconv.Itoa(pb.ID),
 				}},
 			},
 		},

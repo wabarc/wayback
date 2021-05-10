@@ -19,6 +19,7 @@ import (
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/storage"
 	"golang.org/x/net/html"
 )
 
@@ -26,14 +27,18 @@ type Mastodon struct {
 	sync.RWMutex
 
 	client *mastodon.Client
+	store  *storage.Storage
 
 	archiving map[mastodon.ID]bool
 }
 
 // New mastodon struct.
-func New() *Mastodon {
+func New(store *storage.Storage) *Mastodon {
 	if !config.Opts.PublishToMastodon() {
 		logger.Fatal("[mastodon] missing required environment variable")
+	}
+	if store == nil {
+		logger.Fatal("[mastodon] must initialize storage")
 	}
 
 	client := mastodon.NewClient(&mastodon.Config{
@@ -44,6 +49,7 @@ func New() *Mastodon {
 	})
 	return &Mastodon{
 		client: client,
+		store:  store,
 	}
 }
 

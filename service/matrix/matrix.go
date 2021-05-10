@@ -15,6 +15,7 @@ import (
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/storage"
 	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
@@ -24,12 +25,16 @@ type Matrix struct {
 	sync.RWMutex
 
 	client *matrix.Client
+	store  *storage.Storage
 }
 
 // New Matrix struct.
-func New() *Matrix {
+func New(store *storage.Storage) *Matrix {
 	if config.Opts.MatrixUserID() == "" || config.Opts.MatrixPassword() == "" || config.Opts.MatrixHomeserver() == "" {
-		logger.Fatal("Missing required environment variable")
+		logger.Fatal("[matrix] missing required environment variable")
+	}
+	if store == nil {
+		logger.Fatal("[matrix] must initialize storage")
 	}
 
 	client, err := matrix.NewClient(config.Opts.MatrixHomeserver(), "", "")
@@ -48,6 +53,7 @@ func New() *Matrix {
 
 	return &Matrix{
 		client: client,
+		store:  store,
 	}
 }
 

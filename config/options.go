@@ -55,6 +55,7 @@ const (
 
 	defChromeRemoteAddr    = ""
 	defEnabledChromeRemote = false
+	defBoltFilename        = "wayback.db"
 )
 
 var (
@@ -452,4 +453,9 @@ func (o *Options) EnabledChromeRemote() bool {
 // ChromeRemoteAddr returns the remote debugging address for Chrome/Chromium
 func (o *Options) ChromeRemoteAddr() string {
 	return o.chromeRemoteAddr
+}
+
+// BoltFilename returns filename of bolt database
+func (o *Options) BoltFilename() string {
+	return defBoltFilename
 }

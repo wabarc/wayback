@@ -206,6 +206,7 @@ clean:
 	rm -rf data-dir*
 	rm -rf coverage*
 	rm -rf *.out
+	rm -rf wayback.db
 
 fmt:
 	@echo "-> Running go fmt"

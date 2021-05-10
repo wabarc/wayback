@@ -17,6 +17,7 @@ import (
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/storage"
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -321,7 +322,13 @@ func TestProcessPlayback(t *testing.T) {
 		}
 	}()
 
-	tg := &Telegram{bot: bot}
+	store, err := storage.Open("")
+	if err != nil {
+		t.Fatalf("Open storage failed: %v", err)
+	}
+	defer store.Close()
+
+	tg := &Telegram{bot: bot, store: store}
 
 	bot.Poller = telegram.NewMiddlewarePoller(bot.Poller, func(update *telegram.Update) bool {
 		switch {
