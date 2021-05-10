@@ -34,21 +34,22 @@ jobs:
         id: prep
         run: |
           GHCR_HOST=ghcr.io
+          DOCKER_HOST=docker.io
           DOCKER_IMAGE_SCOPE=${{ github.repository }} # foo/bar
           if [ "${{ github.event_name }}" = "schedule" ]; then
             DOCKER_IMAGE_VERSION=nightly
           elif [[ $GITHUB_REF == refs/tags/* ]]; then
             DOCKER_IMAGE_VERSION=${GITHUB_REF#refs/*/v}
-            TAGS="${DOCKER_IMAGE_SCOPE}:latest,${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}:latest"
+            TAGS="${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE}:latest,${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}:latest"
           else
             DOCKER_IMAGE_VERSION=edge
           fi
-          TAGS="${TAGS},${DOCKER_IMAGE_SCOPE}:${DOCKER_IMAGE_VERSION},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}:${DOCKER_IMAGE_VERSION}"
+          TAGS="${TAGS},${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE}:${DOCKER_IMAGE_VERSION},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}:${DOCKER_IMAGE_VERSION}"
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=version::${DOCKER_IMAGE_VERSION}
-          echo ::set-output name=docker::${DOCKER_IMAGE_SCOPE}
+          echo ::set-output name=docker::${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE}
           echo ::set-output name=ghcr::${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}
-          echo ::set-output name=images::${DOCKER_IMAGE_SCOPE},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}
+          echo ::set-output name=images::${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -73,7 +74,7 @@ jobs:
 
       - name: Generate meta
         id: meta
-        uses: crazy-max/ghaction-docker-meta@v2
+        uses: docker/metadata-action@v3
         with:
           images: ${{ steps.prep.outputs.images }}
           tags: |
@@ -85,6 +86,9 @@ jobs:
         with:
           files: ./docker-bake.hcl
           targets: artifact-all
+          set: |
+            *.cache-from=type=local,src=/tmp/.image-cache/artifacts
+            *.cache-to=type=local,dest=/tmp/.image-cache-new/artifacts
 
       - name: Build and push Docker image
         uses: docker/bake-action@v1
@@ -94,6 +98,9 @@ jobs:
             ${{ steps.meta.outputs.bake-file }}
           targets: release
           push: ${{ github.event_name != 'pull_request' }}
+          set: |
+            *.cache-from=type=local,src=/tmp/.image-cache/image
+            *.cache-to=type=local,dest=/tmp/.image-cache-new/image
 
       - name: Check manifest
         if: github.event_name != 'pull_request'

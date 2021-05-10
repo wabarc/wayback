@@ -24,8 +24,8 @@ group "default" {
   targets = ["image-local"]
 }
 
-// Special target: https://github.com/crazy-max/ghaction-docker-meta#bake-definition
-target "ghaction-docker-meta" {
+// Special target: https://github.com/docker/docker-metadata-action#bake-definition
+target "docker-metadata-action" {
   tags = ["wabarc/wayback:local"]
 }
 
@@ -47,7 +47,7 @@ target "artifact-all" {
 }
 
 target "image" {
-  inherits = ["ghaction-docker-meta"]
+  inherits = ["docker-metadata-action"]
 }
 
 target "image-local" {
@@ -56,7 +56,7 @@ target "image-local" {
 }
 
 target "release" {
-  inherits = ["ghaction-docker-meta"]
+  inherits = ["docker-metadata-action"]
   context = "./"
   platforms = [
     "linux/386",
