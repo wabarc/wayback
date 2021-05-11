@@ -21,7 +21,7 @@ require (
 	github.com/multiformats/go-multiaddr v0.3.1 // indirect
 	github.com/multiformats/go-multihash v0.0.15 // indirect
 	github.com/prometheus/client_golang v1.10.0
-	github.com/prometheus/common v0.23.0
+	github.com/prometheus/common v0.24.0
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/cobra v1.1.3
 	github.com/tdewolff/parse/v2 v2.5.15 // indirect
