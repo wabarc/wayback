@@ -198,7 +198,7 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Debug("[web] text: %s", text)
 
-	urls := helper.MatchURL(text)
+	urls := helper.MatchURLFallback(text)
 	if len(urls) == 0 {
 		logger.Info("[web] url no found.")
 	}

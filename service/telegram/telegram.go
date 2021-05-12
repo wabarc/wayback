@@ -104,7 +104,7 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 				return false
 			}
 
-			go t.archive(ctx, callback.Message, helper.MatchURL(string(data)))
+			go t.archive(ctx, callback.Message, helper.MatchURLFallback(string(data)))
 		case update.Message != nil:
 			logger.Debug("[telegram] message: %#v", update.Message)
 
@@ -137,7 +137,7 @@ func (t *Telegram) process(ctx context.Context, update *telegram.Update) error {
 	if message.IsForwarded() && content == "" {
 		return nil
 	}
-	urls := helper.MatchURL(content)
+	urls := helper.MatchURLFallback(content)
 
 	// Set command as playback if receive a playback command without URLs, and
 	// required user reply a message with URLs.

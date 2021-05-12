@@ -27,7 +27,7 @@ require (
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
 	github.com/wabarc/archive.is v1.2.4-0.20210505135936-034a6c963560
 	github.com/wabarc/archive.org v1.1.2
-	github.com/wabarc/helper v0.0.0-20210420080053-35532f1f6a79
+	github.com/wabarc/helper v0.0.0-20210511232523-02eb9f3480da
 	github.com/wabarc/logger v0.0.0-20210417045349-d0d82e8e99ee
 	github.com/wabarc/playback v0.0.0-20210418074547-4bf9d94a794d
 	github.com/wabarc/screenshot v1.1.1 // indirect

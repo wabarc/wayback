@@ -64,8 +64,8 @@ func TestRenderForGitHubFlawed(t *testing.T) {
 > archived: Archive failed.
 
 **[Telegraph](https://telegra.ph/)**:
-> origin: [https://example.com/](https://example.com/)
-> archived: Screenshots failed.
+> origin: [https://example.com/404](https://example.com/404)
+> archived: [https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404](https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404)
 `
 
 	gh := NewGitHub(&http.Client{})

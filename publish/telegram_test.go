@@ -85,7 +85,7 @@ func TestRenderForTelegramFlawed(t *testing.T) {
 • <a href="https://example.com/">origin</a> - Archive failed.
 
 <b><a href='https://telegra.ph/'>Telegraph</a></b>:
-• <a href="https://example.com/">origin</a> - Screenshots failed.
+• <a href="https://example.com/404">origin</a> - <a href="https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404">https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404</a>
 `
 	tel := &Telegram{}
 	got := tel.Render(flawed)

@@ -148,7 +148,7 @@ func (m *Mastodon) process(ctx context.Context, conv *mastodon.Conversation) err
 		delete(m.archiving, conv.ID)
 	}()
 
-	urls := helper.MatchURL(text)
+	urls := helper.MatchURLFallback(text)
 	pub := publish.NewMastodon(m.client)
 	if len(urls) == 0 {
 		logger.Info("[mastodon] archives failure, URL no found.")
