@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.1] - 2021-05-12
+
+### Added
+- Store playback data locally
+- Auto fallback to Google cache if URI is missing
+
+### Changed
+- Migrate telegram-bot-api to telebot, support auto append bot command
+- Update PAT to GITHUB_TOKEN
+- Exclude path from service worker
+- Upgrade dependencies
+- Minor improvements
+
 ## [0.11.0] - 2021-05-06
 
 ### Added
