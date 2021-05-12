@@ -134,7 +134,7 @@ func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent)
 		delete(t.archiving, event.ID)
 	}()
 
-	urls := helper.MatchURL(text)
+	urls := helper.MatchURLFallback(text)
 	pub := publish.NewTwitter(t.client)
 	var realURLs []string
 	for _, url := range urls {

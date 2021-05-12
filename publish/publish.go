@@ -7,6 +7,7 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"context"
 	"net/url"
+	"strings"
 	"text/template"
 
 	"github.com/dghubble/go-twitter/twitter"
@@ -121,6 +122,7 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 }
 
 func funcMap() template.FuncMap {
+	cache := "https://webcache.googleusercontent.com/search?q=cache:"
 	return template.FuncMap{
 		"unescape": func(link string) string {
 			unescaped, err := url.QueryUnescape(link)
@@ -130,5 +132,8 @@ func funcMap() template.FuncMap {
 			return unescaped
 		},
 		"isURL": helper.IsURL,
+		"revert": func(link string) string {
+			return strings.Replace(link, cache, "", 1)
+		},
 	}
 }

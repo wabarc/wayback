@@ -136,7 +136,7 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 	text := ev.Content.AsMessage().Body
 	logger.Debug("[matrix] from: %s message: %s", ev.Sender, text)
 
-	urls := helper.MatchURL(text)
+	urls := helper.MatchURLFallback(text)
 	if len(urls) == 0 {
 		logger.Info("[matrix] archives failure, URL no found.")
 		// Redact message

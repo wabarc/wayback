@@ -79,11 +79,11 @@ func (m *Matrix) Render(vars []*wayback.Collect) string {
 
 	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext }}'>{{ $.Arc }}</a></b>:<br>
 {{ range $src, $dst := $.Dst -}}
-• <a href="{{ $src }}">origin</a> - {{ $dst }}<br>
+• <a href="{{ $src | revert }}">origin</a> - {{ $dst }}<br>
 {{end}}<br>
 {{end}}`
 
-	tpl, err := template.New("message").Parse(tmpl)
+	tpl, err := template.New("message").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
 		logger.Debug("[publish] parse Mastodon template failed, %v", err)
 		return ""

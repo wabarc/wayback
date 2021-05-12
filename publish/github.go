@@ -76,8 +76,8 @@ func (gh *GitHub) Render(vars []*wayback.Collect) string {
 
 	const tmpl = `{{range $ := .}}**[{{ $.Arc }}]({{ $.Ext }})**:
 {{ range $src, $dst := $.Dst -}}
-> origin: [{{ $src | unescape}}]({{ $src }})
-> archived: {{ if $dst | isURL }}[{{ $dst | unescape}}]({{ $dst }}){{ else }}{{ $dst }}{{ end }}
+> origin: [{{ $src | unescape | revert }}]({{ $src | revert }})
+> archived: {{ if $dst | isURL }}[{{ $dst | unescape }}]({{ $dst }}){{ else }}{{ $dst }}{{ end }}
 {{end}}
 {{end}}`
 

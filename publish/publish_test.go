@@ -77,7 +77,7 @@ var flawed = []*wayback.Collect{
 	{
 		Arc: config.SlotName(config.SLOT_PH),
 		Dst: map[string]string{
-			"https://example.com/": "Screenshots failed.",
+			"https://example.com/404": "https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404",
 		},
 		Ext: config.SlotExtra(config.SLOT_PH),
 	},

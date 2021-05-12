@@ -98,7 +98,7 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 	text := ev.MessageWithoutFormat()
 	logger.Debug("[irc] from: %s message: %s", ev.Nick, text)
 
-	urls := helper.MatchURL(text)
+	urls := helper.MatchURLFallback(text)
 	if len(urls) == 0 {
 		logger.Info("[irc] archives failure, URL no found.")
 		return errors.New("IRC: URL no found")
