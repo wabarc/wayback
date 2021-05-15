@@ -17,6 +17,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/metrics"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/template"
 	"github.com/wabarc/wayback/version"
@@ -42,7 +43,7 @@ func newWeb() *web {
 	return web
 }
 
-func (web *web) handle() http.Handler {
+func (web *web) handle(pool pooling.Pool) http.Handler {
 	web.router.HandleFunc("/", web.home)
 	web.router.HandleFunc("/{name}.js", web.showJavascript).Name("javascript").Methods(http.MethodGet)
 	web.router.HandleFunc("/favicon.ico", web.showFavicon).Name("favicon").Methods(http.MethodGet)
@@ -50,7 +51,11 @@ func (web *web) handle() http.Handler {
 	web.router.HandleFunc("/manifest.json", web.showWebManifest).Name("manifest").Methods(http.MethodGet)
 	web.router.HandleFunc("/offline.html", web.showOfflinePage).Methods(http.MethodGet)
 
-	web.router.HandleFunc("/w", func(w http.ResponseWriter, r *http.Request) { web.process(w, r) }).Methods(http.MethodPost)
+	web.router.HandleFunc("/w", func(w http.ResponseWriter, r *http.Request) {
+		pool.Roll(func() {
+			web.process(w, r)
+		})
+	}).Methods(http.MethodPost)
 
 	web.router.HandleFunc("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))

@@ -307,8 +307,6 @@ github.com/mattn/go-isatty v0.0.4/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNx
 github.com/mattn/go-isatty v0.0.8/go.mod h1:Iq45c/XA43vh69/j3iqttzPXn0bhXyGjM0Hdxcsrc5s=
 github.com/mattn/go-isatty v0.0.10/go.mod h1:qgIWMr58cqv1PHHyhnkY9lrL7etaEgOFcMEpPG5Rm84=
 github.com/mattn/go-isatty v0.0.11/go.mod h1:PhnuNfih5lzO57/f3n+odYbM4JtupLOxQOAqxQCu2WE=
-github.com/mattn/go-mastodon v0.0.5-0.20210417123210-6abe72ddb09b h1:iVEMKyxzSj7AvE5s2cJmkfMdu6T67EllkG9WsGNY8J0=
-github.com/mattn/go-mastodon v0.0.5-0.20210417123210-6abe72ddb09b/go.mod h1:CZ3bPYRNGgvMZr4d/SNMvCObyCQvTgCXdIOrW040z5U=
 github.com/mattn/go-runewidth v0.0.2/go.mod h1:LwmH8dsx7+W8Uxz3IHJYH5QSwggIsqBzpuz5H//U1FU=
 github.com/mattn/go-runewidth v0.0.6/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
 github.com/mattn/go-sqlite3 v1.14.6/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
@@ -506,6 +504,8 @@ github.com/wabarc/archive.is v1.2.4-0.20210505135936-034a6c963560/go.mod h1:CjId
 github.com/wabarc/archive.org v1.1.0/go.mod h1:f+VqacB+XUJKQ7MmGgZ9CDB1x1ypwkMKtPjEfRD/qUs=
 github.com/wabarc/archive.org v1.1.2 h1:XCFprQh5rt8bLBOWLEBO108LqVBZ34Y9ItJR3JfWN0A=
 github.com/wabarc/archive.org v1.1.2/go.mod h1:f+VqacB+XUJKQ7MmGgZ9CDB1x1ypwkMKtPjEfRD/qUs=
+github.com/wabarc/go-mastodon v0.0.5-0.20210515142258-3b5e7391589b h1:oqRnK62G0s5ygFQJquelxLTK+GdiXKztG1TsZWstEoQ=
+github.com/wabarc/go-mastodon v0.0.5-0.20210515142258-3b5e7391589b/go.mod h1:CZ3bPYRNGgvMZr4d/SNMvCObyCQvTgCXdIOrW040z5U=
 github.com/wabarc/helper v0.0.0-20210127120855-10af37cc2616/go.mod h1:N9P4r7Rn46p4nkWtXV6ztN3p5ACVnp++bgfwjTqSxQ8=
 github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/helper v0.0.0-20210420080053-35532f1f6a79/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=

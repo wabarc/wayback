@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package storage implements a set of functions to interact with the database.
+Package pooling implements the wayback workers pool.
 */
 
-package storage // import "github.com/wabarc/wayback/storage"
+package pooling // import "github.com/wabarc/wayback/pooling"

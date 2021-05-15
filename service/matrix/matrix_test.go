@@ -16,6 +16,7 @@ import (
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/storage"
 	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
@@ -90,7 +91,8 @@ func senderClient(t *testing.T) *Matrix {
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
-	return New(&storage.Storage{})
+	pool := pooling.New(config.Opts.PoolingSize())
+	return New(context.Background(), &storage.Storage{}, pool)
 }
 
 func recverClient(t *testing.T) *Matrix {
@@ -100,7 +102,8 @@ func recverClient(t *testing.T) *Matrix {
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
-	return New(&storage.Storage{})
+	pool := pooling.New(config.Opts.PoolingSize())
+	return New(context.Background(), &storage.Storage{}, pool)
 }
 
 func TestProcess(t *testing.T) {
@@ -167,7 +170,7 @@ func TestProcess(t *testing.T) {
 		if ev.Sender == id.UserID(senderUID) {
 			t.Logf("Event id: %s, event type: %s, event content: %v", id.EventID(ev.ID), ev.Type.Type, ev.Content.AsMessage().Body)
 
-			if err := recver.process(context.Background(), ev); err != nil {
+			if err := recver.process(ev); err != nil {
 				t.Errorf("Process request failure, error: %v", err)
 			}
 			done <- true

@@ -17,6 +17,7 @@ import (
 	irc "github.com/thoj/go-ircevent"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/storage"
 )
 
@@ -83,14 +84,15 @@ func TestProcess(t *testing.T) {
 		}(ev)
 	})
 
+	pool := pooling.New(config.Opts.PoolingSize())
 	// Receive privmsg from sender
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
 			done <- true
-			i := New(&storage.Storage{})
+			i := New(context.Background(), &storage.Storage{}, pool)
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
-			if err = i.process(context.Background(), ev); err != nil {
+			if err = i.process(ev); err != nil {
 				t.Error(err)
 			}
 			recvConn.Quit()
@@ -175,14 +177,15 @@ func TestToIRCChannel(t *testing.T) {
 		}(ev)
 	})
 
+	pool := pooling.New(config.Opts.PoolingSize())
 	// Receive privmsg from sender
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
 			done <- true
-			i := New(&storage.Storage{})
+			i := New(context.Background(), &storage.Storage{}, pool)
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
-			if err = i.process(context.Background(), ev); err != nil {
+			if err = i.process(ev); err != nil {
 				t.Error(err)
 			}
 			recvConn.Quit()

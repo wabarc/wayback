@@ -14,6 +14,7 @@ import (
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/pooling"
 )
 
 // src: https://github.com/dghubble/go-twitter/blob/4b180d0cc78db653b2810d87f268590889f21a02/twitter/direct_messages_test.go#L12
@@ -87,9 +88,10 @@ func TestProcess(t *testing.T) {
 	}
 
 	ctx := context.Background()
+	pool := pooling.New(config.Opts.PoolingSize())
 	client := twitter.NewClient(httpClient)
-	tw := &Twitter{client: client}
-	if err := tw.process(ctx, testDMEvent); err != nil {
+	tw := &Twitter{ctx: ctx, pool: pool, client: client}
+	if err := tw.process(testDMEvent); err != nil {
 		t.Fatalf("should not be fail: %v", err)
 	}
 }

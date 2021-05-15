@@ -17,6 +17,7 @@ import (
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/storage"
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
@@ -139,6 +140,28 @@ func handle(mux *http.ServeMux, updatesJSON string) {
 	})
 }
 
+func newTelegram(client *http.Client, endpoint string) (tg *Telegram, cancel context.CancelFunc, err error) {
+	bot, err := telegram.NewBot(telegram.Settings{
+		URL:    endpoint,
+		Token:  token,
+		Client: client,
+		Poller: &telegram.LongPoller{Timeout: time.Second},
+	})
+	if err != nil {
+		return tg, nil, err
+	}
+
+	store, e := storage.Open("")
+	if e != nil {
+		return tg, nil, e
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	pool := pooling.New(config.Opts.PoolingSize())
+	tg = &Telegram{ctx: ctx, bot: bot, pool: pool, store: store}
+
+	return tg, cancel, nil
+}
+
 func TestServe(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skip test in short mode.")
@@ -173,8 +196,9 @@ func TestServe(t *testing.T) {
 		cancel()
 	})
 
-	tg := &Telegram{bot: bot}
-	got := tg.Serve(ctx)
+	pool := pooling.New(config.Opts.PoolingSize())
+	tg := &Telegram{ctx: ctx, bot: bot, pool: pool}
+	got := tg.Serve()
 	expected := "done"
 	if got.Error() != expected {
 		t.Errorf("Unexpected serve telegram got %v instead of %v", got, expected)
@@ -202,23 +226,21 @@ func TestProcess(t *testing.T) {
 	defer server.Close()
 	handle(mux, getUpdatesJSON)
 
-	bot, err := telegram.NewBot(telegram.Settings{
-		URL:    server.URL,
-		Token:  token,
-		Client: httpClient,
-		Poller: &telegram.LongPoller{Timeout: time.Second},
-	})
+	tg, cancel, err := newTelegram(httpClient, server.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
+	if tg.store == nil {
+		t.Fatalf("Open storage failed: %v", err)
+	}
+	defer tg.store.Close()
 
-	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		for {
 			select {
 			case <-done:
 				time.Sleep(10 * time.Second)
-				bot.Stop()
+				tg.bot.Stop()
 				cancel()
 				return
 			case <-time.After(120 * time.Second):
@@ -227,13 +249,11 @@ func TestProcess(t *testing.T) {
 		}
 	}()
 
-	tg := &Telegram{bot: bot}
-
-	bot.Poller = telegram.NewMiddlewarePoller(bot.Poller, func(update *telegram.Update) bool {
+	tg.bot.Poller = telegram.NewMiddlewarePoller(tg.bot.Poller, func(update *telegram.Update) bool {
 		switch {
 		// case update.Callback != nil:
 		case update.Message != nil:
-			if err := tg.process(ctx, update); err != nil {
+			if err := tg.process(update); err != nil {
 				t.Fatalf("process telegram message failed: %v", err)
 			} else {
 				done <- true
@@ -244,7 +264,7 @@ func TestProcess(t *testing.T) {
 		return true
 	})
 
-	bot.Start()
+	tg.bot.Start()
 }
 
 func TestProcessPlayback(t *testing.T) {
@@ -297,23 +317,21 @@ func TestProcessPlayback(t *testing.T) {
 	defer server.Close()
 	handle(mux, getUpdatesJSON)
 
-	bot, err := telegram.NewBot(telegram.Settings{
-		URL:    server.URL,
-		Token:  token,
-		Client: httpClient,
-		Poller: &telegram.LongPoller{Timeout: time.Second},
-	})
+	tg, cancel, err := newTelegram(httpClient, server.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
+	if tg.store == nil {
+		t.Fatalf("Open storage failed: %v", err)
+	}
+	defer tg.store.Close()
 
-	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
 		for {
 			select {
 			case <-done:
 				time.Sleep(10 * time.Second)
-				bot.Stop()
+				tg.bot.Stop()
 				cancel()
 				return
 			case <-time.After(120 * time.Second):
@@ -322,19 +340,11 @@ func TestProcessPlayback(t *testing.T) {
 		}
 	}()
 
-	store, err := storage.Open("")
-	if err != nil {
-		t.Fatalf("Open storage failed: %v", err)
-	}
-	defer store.Close()
-
-	tg := &Telegram{bot: bot, store: store}
-
-	bot.Poller = telegram.NewMiddlewarePoller(bot.Poller, func(update *telegram.Update) bool {
+	tg.bot.Poller = telegram.NewMiddlewarePoller(tg.bot.Poller, func(update *telegram.Update) bool {
 		switch {
 		// case update.Callback != nil:
 		case update.Message != nil:
-			if err := tg.process(ctx, update); err != nil {
+			if err := tg.process(update); err != nil {
 				t.Fatalf("process telegram message failed: %v", err)
 			} else {
 				done <- true
@@ -345,5 +355,5 @@ func TestProcessPlayback(t *testing.T) {
 		return true
 	})
 
-	bot.Start()
+	tg.bot.Start()
 }

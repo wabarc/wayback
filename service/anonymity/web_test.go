@@ -15,6 +15,7 @@ import (
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/pooling"
 )
 
 func TestTransform(t *testing.T) {
@@ -93,7 +94,7 @@ func TestProcessContentType(t *testing.T) {
 	}
 
 	web := newWeb()
-	web.handle()
+	web.handle(pooling.New(config.Opts.PoolingSize()))
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

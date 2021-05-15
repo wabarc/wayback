@@ -18,6 +18,7 @@ import (
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/storage"
 	"golang.org/x/net/html"
@@ -26,6 +27,8 @@ import (
 type Mastodon struct {
 	sync.RWMutex
 
+	ctx    context.Context
+	pool   pooling.Pool
 	client *mastodon.Client
 	store  *storage.Storage
 
@@ -33,12 +36,18 @@ type Mastodon struct {
 }
 
 // New mastodon struct.
-func New(store *storage.Storage) *Mastodon {
+func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Mastodon {
 	if !config.Opts.PublishToMastodon() {
 		logger.Fatal("[mastodon] missing required environment variable")
 	}
 	if store == nil {
 		logger.Fatal("[mastodon] must initialize storage")
+	}
+	if pool == nil {
+		logger.Fatal("[mastodon] must initialize pooling")
+	}
+	if ctx == nil {
+		ctx = context.Background()
 	}
 
 	client := mastodon.NewClient(&mastodon.Config{
@@ -48,6 +57,8 @@ func New(store *storage.Storage) *Mastodon {
 		AccessToken:  config.Opts.MastodonAccessToken(),
 	})
 	return &Mastodon{
+		ctx:    ctx,
+		pool:   pool,
 		client: client,
 		store:  store,
 	}
@@ -55,13 +66,13 @@ func New(store *storage.Storage) *Mastodon {
 
 // Serve loop request direct messages from the Mastodon instance.
 // Serve always returns a nil error.
-func (m *Mastodon) Serve(ctx context.Context) error {
+func (m *Mastodon) Serve() error {
 	if m.client == nil {
 		return errors.New("Must initialize Mastodon client.")
 	}
 	logger.Debug("[mastodon] Serving Mastodon instance: %s", config.Opts.MastodonServer())
 
-	// rcv, err := m.client.StreamingUser(ctx)
+	// rcv, err := m.client.StreamingUser(m.ctx)
 	// if err != nil {
 	// 	logger.Error("%v", err)
 	// 	return err
@@ -72,7 +83,7 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 	// 		logger.Debug("%v", t.Status)
 
 	// 		m.status = t.Status
-	// 		go m.process(ctx)
+	// 		go m.process(m.ctx)
 	// 	case *mastodon.ErrorEvent:
 	// 		logger.Error("%v", e)
 	// 	}
@@ -89,9 +100,9 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 			select {
 			case <-clearTick.C:
 				logger.Debug("[mastodon] clear notifications...")
-				m.client.ClearNotifications(ctx)
+				m.client.ClearNotifications(m.ctx)
 			case <-fetchTick.C:
-				convs, err := m.client.GetConversations(ctx, nil)
+				convs, err := m.client.GetConversations(m.ctx, nil)
 				if err != nil {
 					logger.Error("[mastodon] get conversations failure, error: %v", err)
 				}
@@ -101,21 +112,22 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 					if _, exist := m.archiving[conv.ID]; exist {
 						continue
 					}
-					go func(conv *mastodon.Conversation) {
+					conv := conv
+					go m.pool.Roll(func() {
 						metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusRequest)
-						if err := m.process(ctx, conv); err != nil {
+						if err := m.process(conv); err != nil {
 							logger.Error("[mastodon] process failure, conversation: %#v, error: %v", conv, err)
 							metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusFailure)
 						} else {
 							metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusSuccess)
 						}
-					}(conv)
+					})
 
 					mute.Lock()
 					m.archiving[conv.ID] = true
 					mute.Unlock()
 				}
-			case <-ctx.Done():
+			case <-m.ctx.Done():
 				once.Do(func() {
 					logger.Debug("[mastodon] stopping ticker...")
 					clearTick.Stop()
@@ -127,14 +139,14 @@ func (m *Mastodon) Serve(ctx context.Context) error {
 	}()
 
 	select {
-	case <-ctx.Done():
+	case <-m.ctx.Done():
 		logger.Info("[mastodon] stopping service...")
 	}
 
 	return errors.New("done")
 }
 
-func (m *Mastodon) process(ctx context.Context, conv *mastodon.Conversation) error {
+func (m *Mastodon) process(conv *mastodon.Conversation) error {
 	if conv.LastStatus == nil || conv.ID == "" {
 		logger.Debug("[mastodon] no status or conversation")
 		return errors.New("Mastodon: no status or conversation")
@@ -142,7 +154,7 @@ func (m *Mastodon) process(ctx context.Context, conv *mastodon.Conversation) err
 
 	text := textContent(conv.LastStatus.Content)
 	logger.Debug("[mastodon] conversation id: %s message: %s", conv.ID, text)
-	defer m.client.DeleteConversation(ctx, conv.ID)
+	defer m.client.DeleteConversation(m.ctx, conv.ID)
 	defer func() {
 		time.Sleep(time.Second)
 		delete(m.archiving, conv.ID)
@@ -152,7 +164,7 @@ func (m *Mastodon) process(ctx context.Context, conv *mastodon.Conversation) err
 	pub := publish.NewMastodon(m.client)
 	if len(urls) == 0 {
 		logger.Info("[mastodon] archives failure, URL no found.")
-		pub.ToMastodon(ctx, "URL no found", string(conv.LastStatus.ID))
+		pub.ToMastodon(m.ctx, "URL no found", string(conv.LastStatus.ID))
 		return errors.New("Mastodon: URL no found")
 	}
 
@@ -163,7 +175,7 @@ func (m *Mastodon) process(ctx context.Context, conv *mastodon.Conversation) err
 	}
 
 	// Reply and publish toot as public
-	ctx = context.WithValue(ctx, "mastodon", m.client)
+	ctx := context.WithValue(m.ctx, "mastodon", m.client)
 	go publish.To(ctx, col, "mastodon", string(conv.LastStatus.ID))
 
 	return nil

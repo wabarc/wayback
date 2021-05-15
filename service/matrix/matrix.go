@@ -14,6 +14,7 @@ import (
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/storage"
 	matrix "maunium.net/go/mautrix"
@@ -24,17 +25,25 @@ import (
 type Matrix struct {
 	sync.RWMutex
 
+	ctx    context.Context
+	pool   pooling.Pool
 	client *matrix.Client
 	store  *storage.Storage
 }
 
 // New Matrix struct.
-func New(store *storage.Storage) *Matrix {
+func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Matrix {
 	if config.Opts.MatrixUserID() == "" || config.Opts.MatrixPassword() == "" || config.Opts.MatrixHomeserver() == "" {
 		logger.Fatal("[matrix] missing required environment variable")
 	}
 	if store == nil {
 		logger.Fatal("[matrix] must initialize storage")
+	}
+	if pool == nil {
+		logger.Fatal("[matrix] must initialize pooling")
+	}
+	if ctx == nil {
+		ctx = context.Background()
 	}
 
 	client, err := matrix.NewClient(config.Opts.MatrixHomeserver(), "", "")
@@ -52,6 +61,8 @@ func New(store *storage.Storage) *Matrix {
 	}
 
 	return &Matrix{
+		ctx:    ctx,
+		pool:   pool,
 		client: client,
 		store:  store,
 	}
@@ -59,7 +70,7 @@ func New(store *storage.Storage) *Matrix {
 
 // Serve loop request direct messages from the Matrix server.
 // Serve returns an error.
-func (m *Matrix) Serve(ctx context.Context) error {
+func (m *Matrix) Serve() error {
 	if m.client == nil {
 		return errors.New("Must initialize Matrix client.")
 	}
@@ -87,13 +98,15 @@ func (m *Matrix) Serve(ctx context.Context) error {
 				return
 			}
 			metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusRequest)
-			if err := m.process(ctx, ev); err != nil {
-				logger.Error("[matrix] process request failure, error: %v", err)
-				metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusFailure)
-			} else {
-				metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusSuccess)
-			}
-			// m.destroyRoom(ev.RoomID)
+			m.pool.Roll(func() {
+				if err := m.process(ev); err != nil {
+					logger.Error("[matrix] process request failure, error: %v", err)
+					metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusFailure)
+				} else {
+					metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusSuccess)
+				}
+				// m.destroyRoom(ev.RoomID)
+			})
 		}(ev)
 	})
 	syncer.OnEventType(event.EventEncrypted, func(source matrix.EventSource, ev *event.Event) {
@@ -112,7 +125,7 @@ func (m *Matrix) Serve(ctx context.Context) error {
 	}()
 
 	select {
-	case <-ctx.Done():
+	case <-m.ctx.Done():
 		logger.Info("[matrix] stopping sync and logout all sessions")
 		m.client.StopSync()
 		m.client.LogoutAll()
@@ -121,7 +134,7 @@ func (m *Matrix) Serve(ctx context.Context) error {
 	return errors.New("done")
 }
 
-func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
+func (m *Matrix) process(ev *event.Event) error {
 	if ev.Sender == "" {
 		logger.Debug("[matrix] without sender")
 		return errors.New("Matrix: without sender")
@@ -171,7 +184,7 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 		logger.Error("[matrix] mark message as receipt failure: %v", err)
 	}
 
-	ctx = context.WithValue(ctx, "matrix", m.client)
+	ctx := context.WithValue(m.ctx, "matrix", m.client)
 	publish.To(ctx, col, "matrix")
 
 	return nil

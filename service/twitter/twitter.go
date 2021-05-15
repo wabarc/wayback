@@ -17,6 +17,7 @@ import (
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/storage"
 )
@@ -24,6 +25,8 @@ import (
 type Twitter struct {
 	sync.RWMutex
 
+	ctx    context.Context
+	pool   pooling.Pool
 	client *twitter.Client
 	store  *storage.Storage
 
@@ -31,12 +34,18 @@ type Twitter struct {
 }
 
 // New returns Twitter struct.
-func New(store *storage.Storage) *Twitter {
+func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Twitter {
 	if !config.Opts.PublishToTwitter() {
 		logger.Fatal("[twitter] missing required environment variable")
 	}
 	if store == nil {
 		logger.Fatal("[twitter] must initialize storage")
+	}
+	if pool == nil {
+		logger.Fatal("[twitter] must initialize pooling")
+	}
+	if ctx == nil {
+		ctx = context.Background()
 	}
 
 	oauth := oauth1.NewConfig(config.Opts.TwitterConsumerKey(), config.Opts.TwitterConsumerSecret())
@@ -45,6 +54,8 @@ func New(store *storage.Storage) *Twitter {
 	client := twitter.NewClient(httpClient)
 
 	return &Twitter{
+		ctx:    ctx,
+		pool:   pool,
 		client: client,
 		store:  store,
 	}
@@ -52,7 +63,7 @@ func New(store *storage.Storage) *Twitter {
 
 // Serve loop request direct messages from the Twitter API.
 // Serve always returns a nil error.
-func (t *Twitter) Serve(ctx context.Context) error {
+func (t *Twitter) Serve() error {
 	if t.client == nil {
 		return errors.New("[twitter] Initialize Twitter cilent failed.")
 	}
@@ -86,19 +97,21 @@ func (t *Twitter) Serve(ctx context.Context) error {
 					}
 					go func(event twitter.DirectMessageEvent) {
 						metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusRequest)
-						if err := t.process(ctx, event); err != nil {
-							logger.Error("[twitter] process failure, message: %#v, error: %v", event.Message, err)
-							metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusFailure)
-						} else {
-							metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusSuccess)
-						}
+						t.pool.Roll(func() {
+							if err := t.process(event); err != nil {
+								logger.Error("[twitter] process failure, message: %#v, error: %v", event.Message, err)
+								metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusFailure)
+							} else {
+								metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusSuccess)
+							}
+						})
 					}(event)
 
 					mute.Lock()
 					t.archiving[event.ID] = true
 					mute.Unlock()
 				}
-			case <-ctx.Done():
+			case <-t.ctx.Done():
 				once.Do(func() {
 					logger.Debug("[twitter] stopping ticker...")
 					fetchTick.Stop()
@@ -109,14 +122,14 @@ func (t *Twitter) Serve(ctx context.Context) error {
 	}()
 
 	select {
-	case <-ctx.Done():
+	case <-t.ctx.Done():
 		logger.Info("[twitter] stopping service...")
 	}
 
 	return errors.New("done")
 }
 
-func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent) error {
+func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	msg := event.Message
 	if msg == nil || event.ID == "" {
 		logger.Debug("[twitter] no direct message")
@@ -181,7 +194,7 @@ func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent)
 		t.client.DirectMessages.EventsDestroy(ev.ID)
 	}()
 
-	ctx = context.WithValue(ctx, "twitter", t.client)
+	ctx := context.WithValue(t.ctx, "twitter", t.client)
 	go publish.To(ctx, col, "twitter")
 
 	return nil

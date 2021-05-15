@@ -19,6 +19,7 @@ import (
 	"github.com/wabarc/wayback/entity"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/storage"
 	telegram "gopkg.in/tucnak/telebot.v2"
@@ -26,18 +27,24 @@ import (
 
 // Telegram handles a telegram service.
 type Telegram struct {
+	ctx context.Context
+
 	bot   *telegram.Bot
 	pub   *publish.Telegram
 	store *storage.Storage
+	pool  pooling.Pool
 }
 
 // New Telegram struct.
-func New(store *storage.Storage) *Telegram {
+func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Telegram {
 	if config.Opts.TelegramToken() == "" {
 		logger.Fatal("[telegram] missing required environment variable")
 	}
 	if store == nil {
 		logger.Fatal("[telegram] must initialize storage")
+	}
+	if pool == nil {
+		logger.Fatal("[telegram] must initialize pooling")
 	}
 	bot, err := telegram.NewBot(telegram.Settings{
 		Token: config.Opts.TelegramToken(),
@@ -49,16 +56,22 @@ func New(store *storage.Storage) *Telegram {
 		logger.Fatal("[telegram] create telegram bot instance failed: %v", err)
 	}
 
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	return &Telegram{
+		ctx:   ctx,
 		bot:   bot,
 		pub:   publish.NewTelegram(bot),
 		store: store,
+		pool:  pool,
 	}
 }
 
 // Serve loop request message from the Telegram api server.
 // Serve always returns an error.
-func (t *Telegram) Serve(ctx context.Context) (err error) {
+func (t *Telegram) Serve() (err error) {
 	if t.bot == nil {
 		return errors.New("Initialize telegram failed, error: %v", err)
 	}
@@ -66,7 +79,7 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 
 	go func() {
 		select {
-		case <-ctx.Done():
+		case <-t.ctx.Done():
 			logger.Info("[telegram] stopping receive updates...")
 			t.bot.Stop()
 		}
@@ -104,11 +117,12 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 				return false
 			}
 
-			go t.archive(ctx, callback.Message, helper.MatchURLFallback(string(data)))
+			// go t.archive(t.ctx, callback.Message, helper.MatchURLFallback(string(data)))
+			go t.pool.Roll(func() { t.archive(t.ctx, callback.Message, helper.MatchURLFallback(string(data))) })
 		case update.Message != nil:
 			logger.Debug("[telegram] message: %#v", update.Message)
 
-			go t.process(ctx, update)
+			go t.process(update)
 		default:
 			logger.Debug("[telegram] update: %#v", update)
 		}
@@ -122,7 +136,7 @@ func (t *Telegram) Serve(ctx context.Context) (err error) {
 	return errors.New("done")
 }
 
-func (t *Telegram) process(ctx context.Context, update *telegram.Update) error {
+func (t *Telegram) process(update *telegram.Update) error {
 	message := update.Message
 	content := message.Text
 	logger.Debug("[telegram] content: %s", content)
@@ -149,7 +163,7 @@ func (t *Telegram) process(ctx context.Context, update *telegram.Update) error {
 
 	command := command(content)
 	switch {
-	case command == "help":
+	case command == "help", command == "start":
 		t.reply(message, config.Opts.TelegramHelptext())
 	case command == "playback":
 		return t.playback(message, urls)
@@ -173,12 +187,14 @@ func (t *Telegram) process(ctx context.Context, update *telegram.Update) error {
 		t.reply(message, "URL no found.")
 	default:
 		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
-		err := t.archive(ctx, message, urls)
-		if err != nil {
-			metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
-			return err
-		}
-		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusSuccess)
+		t.pool.Roll(func() {
+			if err := t.archive(t.ctx, message, urls); err != nil {
+				logger.Error("[telegram] archives failed: %v", err)
+				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
+				return
+			}
+			metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusSuccess)
+		})
 	}
 	return nil
 }
@@ -339,7 +355,7 @@ func callbackPrefix() string {
 
 func command(message string) string {
 	switch {
-	case strings.HasPrefix(message, "/help"):
+	case strings.HasPrefix(message, "/help"), strings.HasPrefix(message, "/start"):
 		return "help"
 	case strings.HasPrefix(message, "/playback"):
 		return "playback"

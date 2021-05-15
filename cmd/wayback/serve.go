@@ -10,6 +10,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/wabarc/logger"
+	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/service/anonymity"
 	"github.com/wabarc/wayback/service/mastodon"
 	"github.com/wabarc/wayback/service/matrix"
@@ -30,9 +32,11 @@ func serve(_ *cobra.Command, args []string) {
 	}
 	defer store.Close()
 
+	pool := pooling.New(config.Opts.PoolingSize())
+
 	ctx, cancel := context.WithCancel(context.Background())
 	srv := &service{}
-	ran := srv.run(ctx, store)
+	ran := srv.run(ctx, store, pool)
 
 	go srv.stop(cancel)
 	defer close(srv.errCh)
@@ -46,39 +50,39 @@ func serve(_ *cobra.Command, args []string) {
 	}
 }
 
-func (srv *service) run(ctx context.Context, store *storage.Storage) *service {
+func (srv *service) run(ctx context.Context, store *storage.Storage, pool pooling.Pool) *service {
 	srv.errCh = make(chan error, len(daemon))
 	for _, s := range daemon {
 		switch s {
 		case "irc":
-			irc := relaychat.New(store)
+			irc := relaychat.New(ctx, store, pool)
 			go func(errCh chan error) {
-				errCh <- irc.Serve(ctx)
+				errCh <- irc.Serve()
 			}(srv.errCh)
 		case "mastodon", "mstdn":
-			mastodon := mastodon.New(store)
+			mastodon := mastodon.New(ctx, store, pool)
 			go func(errCh chan error) {
-				errCh <- mastodon.Serve(ctx)
+				errCh <- mastodon.Serve()
 			}(srv.errCh)
 		case "telegram":
-			telegram := telegram.New(store)
+			telegram := telegram.New(ctx, store, pool)
 			go func(errCh chan error) {
-				errCh <- telegram.Serve(ctx)
+				errCh <- telegram.Serve()
 			}(srv.errCh)
 		case "twitter":
-			twitter := twitter.New(store)
+			twitter := twitter.New(ctx, store, pool)
 			go func(errCh chan error) {
-				errCh <- twitter.Serve(ctx)
+				errCh <- twitter.Serve()
 			}(srv.errCh)
 		case "matrix":
-			matrix := matrix.New(store)
+			matrix := matrix.New(ctx, store, pool)
 			go func(errCh chan error) {
-				errCh <- matrix.Serve(ctx)
+				errCh <- matrix.Serve()
 			}(srv.errCh)
 		case "web":
-			tor := anonymity.New(store)
+			tor := anonymity.New(ctx, store, pool)
 			go func(errCh chan error) {
-				errCh <- tor.Serve(ctx)
+				errCh <- tor.Serve()
 			}(srv.errCh)
 		default:
 			fmt.Printf("Unrecognize %s in `--daemon`\n", s)

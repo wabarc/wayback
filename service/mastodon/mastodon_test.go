@@ -13,6 +13,7 @@ import (
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/storage"
 )
 
@@ -46,9 +47,8 @@ func TestProcess(t *testing.T) {
 		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
 	}
 
-	m := New(&storage.Storage{})
-	ctx := context.Background()
-	convs, err := m.client.GetConversations(ctx, nil)
+	m := New(context.Background(), &storage.Storage{}, pooling.New(config.Opts.PoolingSize()))
+	convs, err := m.client.GetConversations(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get conversations failure, err: %v", err)
 	}
@@ -57,7 +57,7 @@ func TestProcess(t *testing.T) {
 	}
 
 	for _, conv := range convs {
-		if err = m.process(ctx, conv); err != nil {
+		if err = m.process(conv); err != nil {
 			t.Fatalf("should not be fail: %v", err)
 		}
 	}

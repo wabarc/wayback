@@ -20,19 +20,33 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/storage"
 )
 
 type Tor struct {
+	ctx   context.Context
+	pool  pooling.Pool
 	store *storage.Storage
 }
 
 // New tor struct.
-func New(store *storage.Storage) *Tor {
+func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Tor {
 	if store == nil {
 		logger.Fatal("[web] must initialize storage")
 	}
-	return &Tor{store: store}
+	if pool == nil {
+		logger.Fatal("[web] must initialize pooling")
+	}
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	return &Tor{
+		ctx:   ctx,
+		pool:  pool,
+		store: store,
+	}
 }
 
 // Serve accepts incoming HTTP requests over Tor network, or open
@@ -40,7 +54,7 @@ func New(store *storage.Storage) *Tor {
 // Use "WAYBACK_TOR_PRIVKEY" to keep the Tor hidden service hostname.
 //
 // Serve always returns an error.
-func (t *Tor) Serve(ctx context.Context) error {
+func (t *Tor) Serve() error {
 	// Start tor with some defaults + elevated verbosity
 	logger.Info("[web] starting and registering onion service, please wait a bit...")
 
@@ -69,7 +83,7 @@ func (t *Tor) Serve(ctx context.Context) error {
 	} else {
 		startConf.ExtraArgs = []string{"--quiet"}
 	}
-	e, err := tor.Start(ctx, startConf)
+	e, err := tor.Start(t.ctx, startConf)
 	if err != nil {
 		logger.Fatal("[web] failed to start tor: %v", err)
 	}
@@ -79,7 +93,7 @@ func (t *Tor) Serve(ctx context.Context) error {
 
 	// Create an onion service to listen on any port but show as local port,
 	// specify the local port using the `WAYBACK_TOR_LOCAL_PORT` environment variable.
-	onion, err := e.Listen(ctx, &tor.ListenConf{LocalPort: config.Opts.TorLocalPort(), RemotePorts: config.Opts.TorRemotePorts(), Version3: true, Key: pvk})
+	onion, err := e.Listen(t.ctx, &tor.ListenConf{LocalPort: config.Opts.TorLocalPort(), RemotePorts: config.Opts.TorRemotePorts(), Version3: true, Key: pvk})
 	if err != nil {
 		logger.Fatal("[web] failed to create onion service: %v", err)
 	}
@@ -89,15 +103,15 @@ func (t *Tor) Serve(ctx context.Context) error {
 	logger.Info(`[web] listening on %q without TLS`, onion.LocalListener.Addr())
 	logger.Info("[web] please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
 
-	server := http.Server{Handler: newWeb().handle()}
+	server := http.Server{Handler: newWeb().handle(t.pool)}
 	go func() {
 		server.Serve(onion)
 	}()
 
 	select {
-	case <-ctx.Done():
+	case <-t.ctx.Done():
 		logger.Info("[web] stopping tor hidden service...")
-		server.Shutdown(ctx)
+		server.Shutdown(t.ctx)
 	}
 
 	return errors.New("done")

@@ -10,6 +10,7 @@ package config // import "github.com/wabarc/wayback/config"
 
 import (
 	"os"
+	"strconv"
 	"testing"
 )
 
@@ -756,5 +757,22 @@ func TestChromeRemoteAddr(t *testing.T) {
 	got := opts.ChromeRemoteAddr()
 	if got != addr {
 		t.Fatalf(`Unexpected Chrome remote debugging address got %s instead of %s`, got, addr)
+	}
+}
+
+func TestPoolingSize(t *testing.T) {
+	size := 10
+	os.Clearenv()
+	os.Setenv("WAYBACK_POOLING_SIZE", strconv.Itoa(size))
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.PoolingSize()
+	if got != size {
+		t.Fatalf(`Unexpected pooling size got %d instead of %d`, got, size)
 	}
 }
