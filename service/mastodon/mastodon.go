@@ -102,21 +102,27 @@ func (m *Mastodon) Serve() error {
 				logger.Debug("[mastodon] clear notifications...")
 				m.client.ClearNotifications(m.ctx)
 			case <-fetchTick.C:
-				convs, err := m.client.GetConversations(m.ctx, nil)
+				noti, err := m.client.GetNotifications(m.ctx, nil)
 				if err != nil {
-					logger.Error("[mastodon] get conversations failure, error: %v", err)
+					logger.Error("[mastodon] get notifications failed: %v", err)
 				}
-				logger.Debug("[mastodon] conversations: %v", convs)
+				logger.Debug("[mastodon] notifications: %v", noti)
 
-				for _, conv := range convs {
-					if _, exist := m.archiving[conv.ID]; exist {
+				for _, n := range noti {
+					if n.Type != "mention" {
 						continue
 					}
-					conv := conv
+					if n.Status == nil {
+						continue
+					}
+					if _, exist := m.archiving[n.Status.ID]; exist {
+						continue
+					}
+					n := n
 					go m.pool.Roll(func() {
 						metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusRequest)
-						if err := m.process(conv); err != nil {
-							logger.Error("[mastodon] process failure, conversation: %#v, error: %v", conv, err)
+						if err := m.process(n.ID, n.Status); err != nil {
+							logger.Error("[mastodon] process failure, notification: %#v, error: %v", n, err)
 							metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusFailure)
 						} else {
 							metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusSuccess)
@@ -124,7 +130,7 @@ func (m *Mastodon) Serve() error {
 					})
 
 					mute.Lock()
-					m.archiving[conv.ID] = true
+					m.archiving[n.Status.ID] = true
 					mute.Unlock()
 				}
 			case <-m.ctx.Done():
@@ -146,25 +152,25 @@ func (m *Mastodon) Serve() error {
 	return errors.New("done")
 }
 
-func (m *Mastodon) process(conv *mastodon.Conversation) error {
-	if conv.LastStatus == nil || conv.ID == "" {
+func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) error {
+	if status == nil || id == "" {
 		logger.Debug("[mastodon] no status or conversation")
 		return errors.New("Mastodon: no status or conversation")
 	}
 
-	text := textContent(conv.LastStatus.Content)
-	logger.Debug("[mastodon] conversation id: %s message: %s", conv.ID, text)
-	defer m.client.DeleteConversation(m.ctx, conv.ID)
+	text := textContent(status.Content)
+	logger.Debug("[mastodon] conversation id: %s message: %s", id, text)
+	defer m.client.DismissNotification(m.ctx, id)
 	defer func() {
 		time.Sleep(time.Second)
-		delete(m.archiving, conv.ID)
+		delete(m.archiving, id)
 	}()
 
 	urls := helper.MatchURLFallback(text)
 	pub := publish.NewMastodon(m.client)
 	if len(urls) == 0 {
 		logger.Info("[mastodon] archives failure, URL no found.")
-		pub.ToMastodon(m.ctx, "URL no found", string(conv.LastStatus.ID))
+		pub.ToMastodon(m.ctx, "URL no found", string(status.ID))
 		return errors.New("Mastodon: URL no found")
 	}
 
@@ -176,7 +182,7 @@ func (m *Mastodon) process(conv *mastodon.Conversation) error {
 
 	// Reply and publish toot as public
 	ctx := context.WithValue(m.ctx, "mastodon", m.client)
-	go publish.To(ctx, col, "mastodon", string(conv.LastStatus.ID))
+	go publish.To(ctx, col, "mastodon", string(status.ID))
 
 	return nil
 }

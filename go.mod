@@ -16,7 +16,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.0.6 // indirect
 	// github.com/ipsn/go-libtor v1.0.329
 	github.com/libp2p/go-libp2p-core v0.8.5 // indirect
-	github.com/mattn/go-mastodon v0.0.5-0.20210417123210-6abe72ddb09b
+	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
 	github.com/multiformats/go-multiaddr v0.3.1 // indirect
 	github.com/multiformats/go-multihash v0.0.15 // indirect
 	github.com/prometheus/client_golang v1.10.0

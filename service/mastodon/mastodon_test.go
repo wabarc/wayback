@@ -30,8 +30,12 @@ func TestProcess(t *testing.T) {
 		switch r.URL.Path {
 		case "/api/v1/conversations":
 			fmt.Fprintln(w, `[{"id": "1", "unread":true, "last_status" : {"content": "foo https://example.com/ bar"}}]`)
+		case "/api/v1/notifications":
+			fmt.Fprintln(w, `[{"id": "1", "type": "mention", "status" : {"content": "foo https://example.com/ bar"}}]`)
 		case "/api/v1/statuses":
 			fmt.Fprintln(w, `{"access_token": "zoo"}`)
+		case "/api/v1/notifications/dismiss":
+			fmt.Fprintln(w, `{}`)
 		}
 	})
 
@@ -48,16 +52,16 @@ func TestProcess(t *testing.T) {
 	}
 
 	m := New(context.Background(), &storage.Storage{}, pooling.New(config.Opts.PoolingSize()))
-	convs, err := m.client.GetConversations(m.ctx, nil)
+	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
-		t.Fatalf("Mastodon: Get conversations failure, err: %v", err)
+		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)
 	}
-	if len(convs) != 1 {
-		t.Fatalf("result should be 1: %d", len(convs))
+	if len(noti) != 1 {
+		t.Fatalf("result should be 1: %d", len(noti))
 	}
 
-	for _, conv := range convs {
-		if err = m.process(conv); err != nil {
+	for _, n := range noti {
+		if err = m.process(n.ID, n.Status); err != nil {
 			t.Fatalf("should not be fail: %v", err)
 		}
 	}
