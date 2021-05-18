@@ -92,7 +92,6 @@ func (t *Telegram) Serve() (err error) {
 		switch {
 		case update.Callback != nil:
 			logger.Debug("[telegram] callback query: %#v", update.Callback)
-			metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
 
 			callback := update.Callback
 			id, err := strconv.Atoi(callback.Data)
@@ -117,12 +116,12 @@ func (t *Telegram) Serve() (err error) {
 				return false
 			}
 
-			// go t.archive(t.ctx, callback.Message, helper.MatchURLFallback(string(data)))
-			go t.pool.Roll(func() { t.archive(t.ctx, callback.Message, helper.MatchURLFallback(string(data))) })
+			callback.Message.Text = string(data)
+			go t.process(callback.Message)
 		case update.Message != nil:
 			logger.Debug("[telegram] message: %#v", update.Message)
 
-			go t.process(update)
+			go t.process(update.Message)
 		default:
 			logger.Debug("[telegram] update: %#v", update)
 		}
@@ -136,8 +135,7 @@ func (t *Telegram) Serve() (err error) {
 	return errors.New("done")
 }
 
-func (t *Telegram) process(update *telegram.Update) error {
-	message := update.Message
+func (t *Telegram) process(message *telegram.Message) error {
 	content := message.Text
 	logger.Debug("[telegram] content: %s", content)
 
@@ -252,7 +250,6 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 	// Due to Telegram restricted callback data to 1-64 bytes, it requires to store
 	// playback URLs to database.
 	data := []byte(strings.ReplaceAll(callbackPrefix()+message.Text, "/playback", ""))
-	// data := []byte(callbackPrefix()+message.Text)
 	pb := &entity.Playback{Source: base64.StdEncoding.EncodeToString(data)}
 	t.store.CreatePlayback(pb)
 

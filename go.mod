@@ -27,7 +27,7 @@ require (
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
 	github.com/wabarc/archive.is v1.2.4-0.20210505135936-034a6c963560
 	github.com/wabarc/archive.org v1.1.2
-	github.com/wabarc/helper v0.0.0-20210511232523-02eb9f3480da
+	github.com/wabarc/helper v0.0.0-20210511232523-5ac25c99226f
 	github.com/wabarc/logger v0.0.0-20210417045349-d0d82e8e99ee
 	github.com/wabarc/playback v0.0.0-20210418074547-4bf9d94a794d
 	github.com/wabarc/screenshot v1.1.1 // indirect
@@ -36,11 +36,11 @@ require (
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.etcd.io/bbolt v1.3.5
 	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/crypto v0.0.0-20210505212654-3497b51f5e64 // indirect
-	golang.org/x/net v0.0.0-20210505214959-0714010a04ed
+	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
+	golang.org/x/net v0.0.0-20210510120150-4163338589ed
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/tucnak/telebot.v2 v2.3.5
-	maunium.net/go/mautrix v0.9.10
+	maunium.net/go/mautrix v0.9.12
 )
 
 replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78

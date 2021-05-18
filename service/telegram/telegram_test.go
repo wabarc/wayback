@@ -253,7 +253,7 @@ func TestProcess(t *testing.T) {
 		switch {
 		// case update.Callback != nil:
 		case update.Message != nil:
-			if err := tg.process(update); err != nil {
+			if err := tg.process(update.Message); err != nil {
 				t.Fatalf("process telegram message failed: %v", err)
 			} else {
 				done <- true
@@ -344,7 +344,7 @@ func TestProcessPlayback(t *testing.T) {
 		switch {
 		// case update.Callback != nil:
 		case update.Message != nil:
-			if err := tg.process(update); err != nil {
+			if err := tg.process(update.Message); err != nil {
 				t.Fatalf("process telegram message failed: %v", err)
 			} else {
 				done <- true

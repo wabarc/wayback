@@ -19,25 +19,29 @@ self.addEventListener("install", (event) => {
     '/icon/icon-167.png',
     '/icon/icon-180.png'
   ];
-  event.waitUntil(
-    (async () => {
-      caches.open(CACHE_NAME).then(function (cache) {
-        cache.addAll(urlsToCache);
-      });
-    })()
-  );
+  if (typeof window !== "undefined" && "caches" in window) {
+    event.waitUntil(
+      (async () => {
+        caches.open(CACHE_NAME).then(function (cache) {
+          cache.addAll(urlsToCache);
+        });
+      })()
+    );
+  }
 
   // Force the waiting service worker to become the active service worker.
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then((keyList) => {
-    Promise.all(keyList.map((key) => {
-      if (key === CACHE_NAME) { return; }
-      caches.delete(key);
-    }))
-  })());
+  if (typeof window !== "undefined" && "caches" in window) {
+    e.waitUntil(caches.keys().then((keyList) => {
+      Promise.all(keyList.map((key) => {
+        if (key === CACHE_NAME) { return; }
+        caches.delete(key);
+      }))
+    })());
+  }
 });
 
 self.addEventListener("fetch", (event) => {
@@ -49,13 +53,15 @@ self.addEventListener("fetch", (event) => {
       }
     } catch (_) { }
   }
-  event.respondWith(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cachedResponse = await cache.match(event.request);
-      return cachedResponse || fetchAndCache(event.request);
-    })()
-  );
+  if (typeof window !== "undefined" && "caches" in window) {
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const cachedResponse = await cache.match(event.request);
+        return cachedResponse || fetchAndCache(event.request);
+      })()
+    );
+  }
 });
 
 function fetchAndCache(url) {

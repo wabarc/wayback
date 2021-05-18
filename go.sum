@@ -509,8 +509,8 @@ github.com/wabarc/archive.org v1.1.2/go.mod h1:f+VqacB+XUJKQ7MmGgZ9CDB1x1ypwkMKt
 github.com/wabarc/helper v0.0.0-20210127120855-10af37cc2616/go.mod h1:N9P4r7Rn46p4nkWtXV6ztN3p5ACVnp++bgfwjTqSxQ8=
 github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/helper v0.0.0-20210420080053-35532f1f6a79/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
-github.com/wabarc/helper v0.0.0-20210511232523-02eb9f3480da h1:ieCdQ0CRkzRtCSoLarNIo35M48vNTtkTwVNPw+rM5Qk=
-github.com/wabarc/helper v0.0.0-20210511232523-02eb9f3480da/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
+github.com/wabarc/helper v0.0.0-20210511232523-5ac25c99226f h1:jXJc/PEFPYqLZDRaC4CAADgbuedfZ9o2+TyJyoqtGuA=
+github.com/wabarc/helper v0.0.0-20210511232523-5ac25c99226f/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/imgbb v1.0.0 h1:vNud9qY4dRGp1nikb+GHIrc/sE3WOdNq5gfT/vhWEUQ=
 github.com/wabarc/imgbb v1.0.0/go.mod h1:piz6QXkVfFpQbaQHx70/rPDwaICkW5Ew3lShTzbnVt0=
 github.com/wabarc/ipfs-pinner v1.0.1 h1:PaWBDn1X556IyiOVd143XO9PVRjbohppA+JMJQwNBHI=
@@ -571,8 +571,8 @@ golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37/go.mod h1:LzIPMQfyMNhhGPh
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83/go.mod h1:jdWPYTVW3xRLrWPugEBEK3UY2ZEsg3UU495nc5E+M+I=
 golang.org/x/crypto v0.0.0-20210415154028-4f45737414dc/go.mod h1:T9bdIzuCu7OtxOm1hfPfRQxPLYneinmdGuTeoZ9dtd4=
-golang.org/x/crypto v0.0.0-20210505212654-3497b51f5e64 h1:QuAh/1Gwc0d+u9walMU1NqzhRemNegsv5esp2ALQIY4=
-golang.org/x/crypto v0.0.0-20210505212654-3497b51f5e64/go.mod h1:P+XmwS30IXTQdn5tA2iutPOUgjI07+tq3H3K9MVA1s8=
+golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a h1:kr2P4QFmQr29mSLA43kwrOcgcReGTfbE9N577tCTuBc=
+golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a/go.mod h1:P+XmwS30IXTQdn5tA2iutPOUgjI07+tq3H3K9MVA1s8=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190510132918-efd6b22b2522/go.mod h1:ZjyILWgesfNpC6sMxTJOJm9Kp84zZh5NQWvqDGG3Qr8=
@@ -624,8 +624,8 @@ golang.org/x/net v0.0.0-20201110031124-69a78807bb2b/go.mod h1:sp8m0HH+o8qH0wwXwY
 golang.org/x/net v0.0.0-20210220033124-5f55cee0dc0d/go.mod h1:m0MpNAwzfU5UDzcl9v0D8zg8gWTRqZa9RBIspLL5mdg=
 golang.org/x/net v0.0.0-20210226172049-e18ecbb05110/go.mod h1:m0MpNAwzfU5UDzcl9v0D8zg8gWTRqZa9RBIspLL5mdg=
 golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d/go.mod h1:9tjilg8BloeKEkVJvy7fQ90B1CfIiPueXVOjqfkSzI8=
-golang.org/x/net v0.0.0-20210505214959-0714010a04ed h1:V9kAVxLvz1lkufatrpHuUVyJ/5tR3Ms7rk951P4mI98=
-golang.org/x/net v0.0.0-20210505214959-0714010a04ed/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
+golang.org/x/net v0.0.0-20210510120150-4163338589ed h1:p9UgmWI9wKpfYmgaV/IZKGdXc5qEK45tDwwwDyjS26I=
+golang.org/x/net v0.0.0-20210510120150-4163338589ed/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
@@ -799,8 +799,8 @@ honnef.co/go/tools v0.0.0-20190418001031-e561f6794a2a/go.mod h1:rf3lG4BRIbNafJWh
 honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=
 honnef.co/go/tools v0.0.1-2019.2.3/go.mod h1:a3bituU0lyd329TUQxRnasdCoJDkEUEAqEt0JzvZhAg=
 maunium.net/go/maulogger/v2 v2.2.4/go.mod h1:TYWy7wKwz/tIXTpsx8G3mZseIRiC5DoMxSZazOHy68A=
-maunium.net/go/mautrix v0.9.10 h1:VNwUI10xRF/du7YWhdF8PQI1huiLUZZs0kYtV9JEiCs=
-maunium.net/go/mautrix v0.9.10/go.mod h1:mckyHSKKyI0PQF2K9MgWMMDUWH1meCNggE28ILTLuMg=
+maunium.net/go/mautrix v0.9.12 h1:iNsKOCyK/BqN6Q/7A1aLj1B0/lMbr81LIg+Lry1Vjuo=
+maunium.net/go/mautrix v0.9.12/go.mod h1:7IzKfWvpQtN+W2Lzxc0rLvIxFM3ryKX6Ys3S/ZoWbg8=
 mvdan.cc/xurls/v2 v2.2.0 h1:NSZPykBXJFCetGZykLAxaL6SIpvbVy/UFEniIfHAa8A=
 mvdan.cc/xurls/v2 v2.2.0/go.mod h1:EV1RMtya9D6G5DMYPGD8zTQzaHet6Jh8gFlRgGRJeO8=
 rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=
