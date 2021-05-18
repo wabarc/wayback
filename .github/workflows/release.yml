@@ -232,16 +232,26 @@ jobs:
         GITVER=$(git describe --tags)
         PREVVER=$(git describe --tags --abbrev=0 ${GITVER}~1)
         git log --oneline ${PREVVER}..${GITVER} > gittaglogs.txt
+        head=$(echo -e "See full [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/CHANGELOG.md).")
+        echo -e "*Release ${GITVER}* #wayback\n" > release-note.md
+        cut -c9- gittaglogs.txt | sed -e 's/^/- /' >> release-note.md
+        echo -e "\n${head}" >> release-note.md
         # Append digests
-        echo '
-        See full [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/CHANGELOG.md).
+        echo -e "
+        ${head}
 
         **Digests in this release:**
 
         ```
         ${{ needs.checksum.outputs.digest }}
         ```
-        ' >> gittaglogs.txt
+        " >> gittaglogs.txt
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: release-note
+        path: release-note.md
 
     - name: Download math result from build and checksum jobs
       uses: actions/download-artifact@v2
@@ -333,6 +343,27 @@ jobs:
         git config --local user.name 'github-actions[bot]'
         git config --local user.email '41898282+github-actions[bot]@users.noreply.github.com'
         make publish
+
+  notification:
+    if: github.repository == 'wabarc/wayback'
+    name: Send Notification
+    runs-on: ubuntu-latest
+    needs: [release]
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: release-note
+        path: .
+
+    - name: Send release note to Telegram channel
+      continue-on-error: true
+      run: |
+        TEXT="$(cat release-note.md)"
+        curl --silent --output /dev/null --show-error --fail -X POST \
+             -H 'Content-Type: application/json' \
+             -d '{"chat_id": "${{ secrets.TELEGRAM_TO }}", "text": "'"$TEXT"'", "parse_mode": "markdown"}' \
+             "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage"
 
   dispatch:
     if: github.repository == 'wabarc/wayback'
