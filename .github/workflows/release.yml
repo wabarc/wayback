@@ -259,6 +259,81 @@ jobs:
         files: wayback/wayback*
         draft: true
 
+  release-apt:
+    if: github.repository == 'wabarc/wayback'
+    name: Release APT Repository
+    runs-on: ubuntu-latest
+    needs: [debpkg]
+    steps:
+    - name: Check out code base
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.GH_PAT }}
+        repository: 'wabarc/apt-repo'
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: wayback
+        path: wayback # Put files to wayback directory
+
+    - name: Import GPG key
+      id: gpg
+      uses: crazy-max/ghaction-import-gpg@v3
+      with:
+        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+
+    - name: GPG user IDs
+      run: |
+        echo "fingerprint: ${{ steps.gpg.outputs.fingerprint }}"
+        echo "keyid:       ${{ steps.gpg.outputs.keyid }}"
+        echo "name:        ${{ steps.gpg.outputs.name }}"
+        echo "email:       ${{ steps.gpg.outputs.email }}"
+        gpg --armor --export-secret-keys > priv.asc
+
+    - name: Build APT Repository
+      if: ${{ steps.gpg.outputs.keyid != '' }}
+      run: |
+        cp ./wayback/*.deb .
+        make build
+
+    - name: Publish APT Repository
+      if: ${{ steps.gpg.outputs.keyid != '' }}
+      run: |
+        git config --local user.name 'github-actions[bot]'
+        git config --local user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        make publish
+        rm -f priv.asc
+
+  release-rpm:
+    if: github.repository == 'wabarc/wayback'
+    name: Release RPM Repository
+    runs-on: ubuntu-latest
+    needs: [rpmpkg]
+    steps:
+    - name: Check out code base
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.GH_PAT }}
+        repository: 'wabarc/rpm-repo'
+
+    - name: Download artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: wayback
+        path: wayback # Put files to wayback directory
+
+    - name: Build RPM Repository
+      run: |
+        cp ./wayback/*.rpm ./x86_64
+        make build
+
+    - name: Publish RPM Repository
+      run: |
+        git config --local user.name 'github-actions[bot]'
+        git config --local user.email '41898282+github-actions[bot]@users.noreply.github.com'
+        make publish
+
   dispatch:
     if: github.repository == 'wabarc/wayback'
     name: Repository Dispatch
