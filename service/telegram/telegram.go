@@ -118,9 +118,14 @@ func (t *Telegram) Serve() (err error) {
 
 			callback.Message.Text = string(data)
 			go t.process(callback.Message)
+		case update.Message != nil && update.Message.FromGroup():
+			logger.Debug("[telegram] message: %#v", update.Message)
+			if strings.Index(update.Message.Text, "@"+t.bot.Me.Username) == -1 {
+				return false
+			}
+			go t.process(update.Message)
 		case update.Message != nil:
 			logger.Debug("[telegram] message: %#v", update.Message)
-
 			go t.process(update.Message)
 		default:
 			logger.Debug("[telegram] update: %#v", update)
@@ -228,6 +233,14 @@ func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls 
 
 func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 	metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusRequest)
+
+	recipient, err := t.bot.ChatByID(fmt.Sprint(message.Chat.ID))
+	if err != nil {
+		metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusFailure)
+		logger.Error("[telegram] playback failed: %v", err)
+		return err
+	}
+
 	if len(urls) == 0 {
 		opts := &telegram.SendOptions{
 			ReplyTo:               message,
@@ -236,7 +249,7 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 				ForceReply: true,
 			},
 		}
-		_, err := t.bot.Send(message.Sender, "Please send me URLs to playback...", opts)
+		_, err := t.bot.Send(recipient, "Please send me URLs to playback...", opts)
 		if err != nil {
 			return err
 		}
@@ -265,9 +278,9 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 			},
 		},
 	}
-	if _, err := t.bot.Send(message.Sender, t.pub.Render(col), opts); err != nil {
+	if _, err := t.bot.Send(recipient, t.pub.Render(col), opts); err != nil {
 		metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusFailure)
-		logger.Debug("[telegram] playback failed: %v", err)
+		logger.Error("[telegram] send playback results failed: %v", err)
 		return err
 	}
 	metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusSuccess)
