@@ -232,20 +232,18 @@ jobs:
         GITVER=$(git describe --tags)
         PREVVER=$(git describe --tags --abbrev=0 ${GITVER}~1)
         git log --oneline ${PREVVER}..${GITVER} > gittaglogs.txt
-        head=$(echo -e "See full [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/CHANGELOG.md).")
+        MORE=$(echo "See full [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/CHANGELOG.md)")
         echo -e "*Release ${GITVER}* #wayback\n" > release-note.md
         cut -c9- gittaglogs.txt | sed -e 's/^/- /' >> release-note.md
-        echo -e "\n${head}" >> release-note.md
+        echo -e "\n${MORE}" | tee -a release-note.md gittaglogs.txt > /dev/null
         # Append digests
-        echo -e "
-        ${head}
-
+        echo '
         **Digests in this release:**
 
         ```
         ${{ needs.checksum.outputs.digest }}
         ```
-        " >> gittaglogs.txt
+        ' >> gittaglogs.txt
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
@@ -360,9 +358,10 @@ jobs:
       continue-on-error: true
       run: |
         TEXT="$(cat release-note.md)"
+        echo -e "${TEXT}"
         curl --silent --output /dev/null --show-error --fail -X POST \
              -H 'Content-Type: application/json' \
-             -d '{"chat_id": "${{ secrets.TELEGRAM_TO }}", "text": "'"$TEXT"'", "parse_mode": "markdown"}' \
+             -d '{"chat_id": "${{ secrets.TELEGRAM_TO }}", "text": "'"${TEXT}"'", "parse_mode": "markdown"}' \
              "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage"
 
   dispatch:
@@ -376,13 +375,5 @@ jobs:
       with:
         repository: wabarc/aur
         event-type: publish
-        token: ${{ secrets.PAT_WORKFLOW }}
-        client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
-
-    - name: Dispatch repository in wabarc/on-heroku
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        repository: wabarc/on-heroku
-        event-type: deploy
         token: ${{ secrets.PAT_WORKFLOW }}
         client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
