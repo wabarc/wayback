@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2021-05-19
+
+### Added
+- Add worker pool
+- Handle message from Telegram group
+- Add APT, RPM and Homebrew repository
+- Publish release note to Telegram channel
+
+### Changed
+- Handle mastodon message using notification instead conversation
+- Packaging license, changelog and readme
+- Improve web layout
+
 ## [0.11.1] - 2021-05-12
 
 ### Added
