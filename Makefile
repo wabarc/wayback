@@ -191,10 +191,10 @@ endif
 
 $(tar_releases): %.gz : %
 	chmod +x $(BINDIR)/$(NAME)-$(basename $@)
-	tar -czf $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).tar.gz --transform "s/.*\///g" $(BINDIR)/$(NAME)-$(basename $@)
+	tar -czf $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).tar.gz --transform "s/.*\///g" $(BINDIR)/$(NAME)-$(basename $@) LICENSE CHANGELOG.md README.md
 
 $(zip_releases): %.zip : %
-	zip -m -j $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).zip $(BINDIR)/$(NAME)-$(basename $@).exe
+	zip -m -j $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).zip $(BINDIR)/$(NAME)-$(basename $@).exe LICENSE CHANGELOG.md README.md
 
 all-arch: $(PLATFORM_LIST) $(WINDOWS_ARCH_LIST)
 
