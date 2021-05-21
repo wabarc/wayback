@@ -42,7 +42,7 @@ const (
 	defIRCNick     = ""
 	defIRCPassword = ""
 	defIRCChannel  = ""
-	defIRCServer   = "irc.freenode.net:7000"
+	defIRCServer   = "irc.libera.chat:6697"
 
 	defMatrixHomeserver = "https://matrix.org"
 	defMatrixUserID     = ""

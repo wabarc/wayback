@@ -189,7 +189,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_IRC_NICK`                | -                       | IRC nick                                                     |
 | -                   | `WAYBACK_IRC_PASSWORD`            | -                       | IRC password                                                 |
 | -                   | `WAYBACK_IRC_CHANNEL`             | -                       | IRC channel                                                  |
-| -                   | `WAYBACK_IRC_SERVER`              | `irc.freenode.net:7000` | IRC server, required TLS                                     |
+| -                   | `WAYBACK_IRC_SERVER`              | `irc.libera.chat:6697`  | IRC server, required TLS                                     |
 | -                   | `WAYBACK_MATRIX_HOMESERVER`       | `https://matrix.org`    | Matrix homeserver                                            |
 | -                   | `WAYBACK_MATRIX_USERID`           | -                       | Matrix unique user ID, format: `@foo:example.com`            |
 | -                   | `WAYBACK_MATRIX_ROOMID`           | -                       | Matrix internal room ID, format: `!bar:example.com`          |
