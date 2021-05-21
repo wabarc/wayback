@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	server1  = "irc.freenode.net:7000"
+	server1  = "irc.libera.chat:6697"
 	server2  = "irc.darkscience.net:6697"
 	sender   = "wsend" + helper.RandString(4, "lower")
 	receiver = "wrecv" + helper.RandString(4, "lower")
