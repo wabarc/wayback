@@ -44,9 +44,12 @@ RUN set -o pipefail; \
     rm -rf /var/cache/apk/*; \
     \
     mv /etc/tor/torrc.sample /etc/tor/torrc; \
-    echo "ExcludeNodes ${TOR_EXCLUDE_NODE}" >> /etc/tor/torrc; \
-    echo "ExcludeExitNodes ${TOR_EXCLUDE_EXIT_NODE}" >> /etc/tor/torrc; \
-    echo 'StrictNodes 1' >> /etc/tor/torrc; \
+    #echo "ExcludeNodes ${TOR_EXCLUDE_NODE}" >> /etc/tor/torrc; \
+    #echo "ExcludeExitNodes ${TOR_EXCLUDE_EXIT_NODE}" >> /etc/tor/torrc; \
+    #echo 'StrictNodes 1' >> /etc/tor/torrc; \
+    echo 'SocksPort 0' >> /etc/tor/torrc; \
+    echo 'ExitRelay 0' >> /etc/tor/torrc; \
+    echo 'LongLivedPorts 8964' >> /etc/tor/torrc; \
     #echo 'User tor' >> /etc/tor/torrc; \
     chmod a+w /var/log/tor
 
