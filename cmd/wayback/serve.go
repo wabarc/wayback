@@ -25,7 +25,7 @@ type service struct {
 	errCh chan error
 }
 
-func serve(_ *cobra.Command, args []string) {
+func serve(_ *cobra.Command, _ []string) {
 	store, err := storage.Open("")
 	if err != nil {
 		logger.Fatal("open storage failed: %v", err)
@@ -102,14 +102,12 @@ func (srv *service) stop(cancel context.CancelFunc) {
 		syscall.SIGINT,
 		syscall.SIGQUIT,
 		syscall.SIGTERM,
-		syscall.SIGKILL,
 		os.Interrupt,
 	)
 
 	for {
 		sig := <-signalChan
-		switch sig {
-		case os.Interrupt:
+		if sig == os.Interrupt {
 			logger.Info("Signal SIGINT is received, probably due to `Ctrl-C`, exiting...")
 			cancel()
 			return
@@ -117,4 +115,4 @@ func (srv *service) stop(cancel context.CancelFunc) {
 	}
 }
 
-func (s *service) err() <-chan error { return s.errCh }
+func (srv *service) err() <-chan error { return srv.errCh }

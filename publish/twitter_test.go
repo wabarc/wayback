@@ -64,6 +64,8 @@ func TestToTwitter(t *testing.T) {
 				return
 			}
 			fmt.Fprintln(w, `{"id": 1}`)
+		default:
+			fmt.Fprintln(w, `{}`)
 		}
 	})
 

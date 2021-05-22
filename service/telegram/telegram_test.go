@@ -173,7 +173,7 @@ func TestServe(t *testing.T) {
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	httpClient, mux, server := helper.MockServer()
@@ -192,7 +192,6 @@ func TestServe(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	time.AfterFunc(3*time.Second, func() {
-		bot.Stop()
 		cancel()
 	})
 
@@ -203,6 +202,7 @@ func TestServe(t *testing.T) {
 	if got.Error() != expected {
 		t.Errorf("Unexpected serve telegram got %v instead of %v", got, expected)
 	}
+	time.Sleep(time.Second)
 }
 
 func TestProcess(t *testing.T) {
@@ -217,7 +217,7 @@ func TestProcess(t *testing.T) {
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	done := make(chan bool, 1)
@@ -265,6 +265,7 @@ func TestProcess(t *testing.T) {
 	})
 
 	tg.bot.Start()
+	time.Sleep(time.Second)
 }
 
 func TestProcessPlayback(t *testing.T) {
@@ -279,7 +280,7 @@ func TestProcessPlayback(t *testing.T) {
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	done := make(chan bool, 1)
@@ -356,4 +357,5 @@ func TestProcessPlayback(t *testing.T) {
 	})
 
 	tg.bot.Start()
+	time.Sleep(time.Second)
 }

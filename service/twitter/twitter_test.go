@@ -84,7 +84,7 @@ func TestProcess(t *testing.T) {
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	ctx := context.Background()

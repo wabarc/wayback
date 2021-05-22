@@ -162,6 +162,7 @@ func Path(router *mux.Router, name string, args ...interface{}) string {
 		switch param := arg.(type) {
 		case string:
 			pairs = append(pairs, param)
+		default:
 		}
 	}
 

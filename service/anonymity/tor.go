@@ -64,8 +64,11 @@ func (t *Tor) Serve() error {
 
 	var pvk ed25519.PrivateKey
 	if config.Opts.TorPrivKey() == "" {
-		keypair, _ := ed25519.GenerateKey(rand.Reader)
-		pvk = keypair.PrivateKey()
+		if keypair, err := ed25519.GenerateKey(rand.Reader); err != nil {
+			logger.Fatal("[web] generate key failed: %v", err)
+		} else {
+			pvk = keypair.PrivateKey()
+		}
 		logger.Info("[web] important to keep the private key: %s", hex.EncodeToString(pvk))
 	} else {
 		privb, err := hex.DecodeString(config.Opts.TorPrivKey())
@@ -105,13 +108,16 @@ func (t *Tor) Serve() error {
 
 	server := http.Server{Handler: newWeb().handle(t.pool)}
 	go func() {
-		server.Serve(onion)
+		if err := server.Serve(onion); err != nil {
+			logger.Error("[web] serve tor hidden service failed: %v", err)
+		}
 	}()
 
-	select {
-	case <-t.ctx.Done():
-		logger.Info("[web] stopping tor hidden service...")
-		server.Shutdown(t.ctx)
+	<-t.ctx.Done()
+	logger.Info("[web] stopping tor hidden service...")
+	if err := server.Shutdown(t.ctx); err != nil {
+		logger.Error("[web] shutdown tor hidden service failed: %v", err)
+		return err
 	}
 
 	return errors.New("done")

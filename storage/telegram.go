@@ -35,7 +35,7 @@ func (s *Storage) createPlaybackBucket() error {
 func (s *Storage) Playback(id int) (*entity.Playback, error) {
 	var pb entity.Playback
 
-	s.db.View(func(tx *bolt.Tx) error {
+	err := s.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(entity.EntityPlayback))
 		v := b.Get(itob(id))
 		pb.Source = string(v)
@@ -43,7 +43,7 @@ func (s *Storage) Playback(id int) (*entity.Playback, error) {
 		return nil
 	})
 
-	return &pb, nil
+	return &pb, err
 }
 
 // CreatePlayback creates a playback callback data.

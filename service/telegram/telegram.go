@@ -78,11 +78,9 @@ func (t *Telegram) Serve() (err error) {
 	logger.Info("[telegram] authorized on account %s", t.bot.Me.Username)
 
 	go func() {
-		select {
-		case <-t.ctx.Done():
-			logger.Info("[telegram] stopping receive updates...")
-			t.bot.Stop()
-		}
+		<-t.ctx.Done()
+		logger.Info("[telegram] stopping receive updates...")
+		t.bot.Stop()
 	}()
 
 	// Set bot commands
@@ -120,7 +118,7 @@ func (t *Telegram) Serve() (err error) {
 			go t.process(callback.Message)
 		case update.Message != nil && update.Message.FromGroup():
 			logger.Debug("[telegram] message: %#v", update.Message)
-			if strings.Index(update.Message.Text, "@"+t.bot.Me.Username) == -1 {
+			if !strings.Contains(update.Message.Text, "@"+t.bot.Me.Username) {
 				return false
 			}
 			go t.process(update.Message)
@@ -225,8 +223,8 @@ func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls 
 		return err
 	}
 
-	ctx = context.WithValue(ctx, "telegram", t.bot)
-	go publish.To(ctx, col, "telegram")
+	ctx = context.WithValue(ctx, publish.FlagTelegram, t.bot)
+	go publish.To(ctx, col, publish.FlagTelegram)
 
 	return nil
 }
@@ -249,14 +247,16 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 				ForceReply: true,
 			},
 		}
-		_, err := t.bot.Send(recipient, "Please send me URLs to playback...", opts)
+		_, err = t.bot.Send(recipient, "Please send me URLs to playback...", opts)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
 
-	t.bot.Notify(message.Sender, telegram.ChatAction(telegram.Typing))
+	if err = t.bot.Notify(message.Sender, telegram.ChatAction(telegram.Typing)); err != nil {
+		logger.Error("[telegram] send typing action failed: %v", err)
+	}
 	col, _ := wayback.Playback(urls)
 	logger.Debug("[telegram] playback collections: %#v", col)
 
@@ -264,7 +264,10 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 	// playback URLs to database.
 	data := []byte(strings.ReplaceAll(callbackPrefix()+message.Text, "/playback", ""))
 	pb := &entity.Playback{Source: base64.StdEncoding.EncodeToString(data)}
-	t.store.CreatePlayback(pb)
+	if err := t.store.CreatePlayback(pb); err != nil {
+		logger.Error("[telegram] store collections failed: %v", err)
+		return err
+	}
 
 	opts := &telegram.SendOptions{
 		ReplyTo:               message,

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -48,6 +47,6 @@ func archive(cmd *cobra.Command, args []string) {
 	defer cancel()
 
 	if err := archiving(ctx, args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		cmd.PrintErrln(err)
 	}
 }

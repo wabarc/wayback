@@ -22,8 +22,7 @@ import (
 )
 
 var (
-	server1  = "irc.libera.chat:6697"
-	server2  = "irc.darkscience.net:6697"
+	server   = "irc.libera.chat:6697"
 	sender   = "wsend" + helper.RandString(4, "lower")
 	receiver = "wrecv" + helper.RandString(4, "lower")
 	channel  = "#wabarc-testing"
@@ -47,14 +46,14 @@ func TestProcess(t *testing.T) {
 	}
 
 	os.Setenv("WAYBACK_IRC_NICK", "wabarc-process")
-	os.Setenv("WAYBACK_IRC_SERVER", server1)
+	os.Setenv("WAYBACK_IRC_SERVER", server)
 	os.Setenv("WAYBACK_IRC_CHANNEL", channel)
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	sendConn := conn(sender)
@@ -63,7 +62,7 @@ func TestProcess(t *testing.T) {
 
 	// Send privmsg if receiver connected
 	recvConn.AddCallback("001", func(ev *irc.Event) {
-		go func(ev *irc.Event) {
+		go func() {
 			tick := time.NewTicker(3 * time.Second)
 			i := 10
 			for {
@@ -81,7 +80,7 @@ func TestProcess(t *testing.T) {
 				}
 				i -= 1
 			}
-		}(ev)
+		}()
 	})
 
 	pool := pooling.New(config.Opts.PoolingSize())
@@ -109,11 +108,11 @@ func TestProcess(t *testing.T) {
 		}
 	})
 
-	err = recvConn.Connect(server1)
+	err = recvConn.Connect(server)
 	if err != nil {
 		t.Errorf("Can't connect to freenode, error: %v", err)
 	}
-	err = sendConn.Connect(server1)
+	err = sendConn.Connect(server)
 	if err != nil {
 		t.Errorf("Can't connect to freenode, error: %v", err)
 	}
@@ -137,14 +136,14 @@ func TestToIRCChannel(t *testing.T) {
 	}
 
 	os.Setenv("WAYBACK_IRC_NICK", "wabarc-process")
-	os.Setenv("WAYBACK_IRC_SERVER", server1)
+	os.Setenv("WAYBACK_IRC_SERVER", server)
 	os.Setenv("WAYBACK_IRC_CHANNEL", channel)
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	sendConn := conn(sender)
@@ -156,7 +155,7 @@ func TestToIRCChannel(t *testing.T) {
 
 	// Send privmsg if receiver connected
 	recvConn.AddCallback("001", func(ev *irc.Event) {
-		go func(ev *irc.Event) {
+		go func() {
 			tick := time.NewTicker(3 * time.Second)
 			i := 10
 			for {
@@ -174,7 +173,7 @@ func TestToIRCChannel(t *testing.T) {
 				}
 				i -= 1
 			}
-		}(ev)
+		}()
 	})
 
 	pool := pooling.New(config.Opts.PoolingSize())
@@ -205,11 +204,11 @@ func TestToIRCChannel(t *testing.T) {
 		}
 	})
 
-	err = recvConn.Connect(server1)
+	err = recvConn.Connect(server)
 	if err != nil {
 		t.Errorf("Can't connect to freenode, error: %v", err)
 	}
-	err = sendConn.Connect(server1)
+	err = sendConn.Connect(server)
 	if err != nil {
 		t.Errorf("Can't connect to freenode, error: %v", err)
 	}

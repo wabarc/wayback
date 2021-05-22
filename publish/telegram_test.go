@@ -117,7 +117,7 @@ func TestToChannel(t *testing.T) {
 		case "getChat":
 			fmt.Fprintln(w, getChatJSON)
 		case "sendMessage":
-			if strings.Index(text, config.SlotName(config.SLOT_IA)) == -1 {
+			if !strings.Contains(text, config.SlotName(config.SLOT_IA)) {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}

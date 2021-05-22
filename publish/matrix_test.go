@@ -57,9 +57,9 @@ func TestToMatrixRoom(t *testing.T) {
 		switch {
 		case r.URL.Path == "/_matrix/client/r0/login":
 			fmt.Fprintln(w, `{"access_token": "zoo"}`)
-		case strings.Index(r.URL.Path, "!bar:example.com/send/m.room.message") > -1:
+		case strings.Contains(r.URL.Path, "!bar:example.com/send/m.room.message"):
 			body, _ := ioutil.ReadAll(r.Body)
-			if strings.Index(string(body), config.SlotName(config.SLOT_IA)) == -1 {
+			if !strings.Contains(string(body), config.SlotName(config.SLOT_IA)) {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"runtime"
@@ -50,7 +49,7 @@ var (
   WAYBACK_SLOT=pinata WAYBACK_APIKEY=YOUR-PINATA-APIKEY \
     WAYBACK_SECRET=YOUR-PINATA-SECRET wayback --ip https://www.fsf.org`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return checkRequiredFlags(cmd, args)
+			return checkRequiredFlags(cmd)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			handle(cmd, args)
@@ -83,7 +82,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&print, "print", "", false, "Show application configurations.")
 }
 
-func checkRequiredFlags(cmd *cobra.Command, args []string) error {
+func checkRequiredFlags(cmd *cobra.Command) error {
 	flags := cmd.Flags()
 	for _, d := range daemon {
 		switch d {
@@ -166,7 +165,7 @@ func handle(cmd *cobra.Command, args []string) {
 	}
 
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		logger.Fatal("Parse enviroment variables or flags failed, error: %v", err)
+		logger.Fatal("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	if !config.Opts.LogTime() {
@@ -187,13 +186,7 @@ func handle(cmd *cobra.Command, args []string) {
 	}
 
 	if print {
-		cmd.Printf("%#v", config.Opts)
-		// Convert structs to JSON.
-		data, err := json.Marshal(config.Opts)
-		if err != nil {
-			logger.Fatal("Print configuration file failed, error: %v", err)
-		}
-		fmt.Printf("%s\n", string(data))
+		cmd.Printf("%#v\n", config.Opts)
 		return
 	}
 

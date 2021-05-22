@@ -92,10 +92,8 @@ func (i *IRC) Serve() error {
 	}
 
 	go func() {
-		select {
-		case <-i.ctx.Done():
-			i.conn.Quit()
-		}
+		<-i.ctx.Done()
+		i.conn.Quit()
 	}()
 
 	i.conn.Loop()
@@ -130,8 +128,8 @@ func (i *IRC) process(ev *irc.Event) error {
 	i.conn.Privmsg(ev.Nick, replyText)
 
 	// Reply and publish toot as public
-	ctx := context.WithValue(i.ctx, "irc", i.conn)
-	publish.To(ctx, col, "irc")
+	ctx := context.WithValue(i.ctx, publish.FlagIRC, i.conn)
+	publish.To(ctx, col, publish.FlagIRC)
 
 	return nil
 }

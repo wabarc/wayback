@@ -90,13 +90,6 @@ type ipfs struct {
 	mode string
 }
 
-type slots struct {
-	ia bool
-	is bool
-	ip bool
-	ph bool
-}
-
 type telegram struct {
 	token    string
 	channel  string
@@ -263,11 +256,11 @@ func (o *Options) TelegramChannel() string {
 
 // TelegramHelptext returns the help text for Telegram bot.
 func (o *Options) TelegramHelptext() string {
-	o.telegram.helptext = strings.Replace(o.telegram.helptext, `\r`, "\n", -1)
-	o.telegram.helptext = strings.Replace(o.telegram.helptext, `\n`, "\n", -1)
-	o.telegram.helptext = strings.Replace(o.telegram.helptext, `\r\n`, "\n", -1)
-	o.telegram.helptext = strings.Replace(o.telegram.helptext, `<br>`, "\n", -1)
-	o.telegram.helptext = strings.Replace(o.telegram.helptext, `<br/>`, "\n", -1)
+	o.telegram.helptext = strings.ReplaceAll(o.telegram.helptext, `\r`, "\n")
+	o.telegram.helptext = strings.ReplaceAll(o.telegram.helptext, `\n`, "\n")
+	o.telegram.helptext = strings.ReplaceAll(o.telegram.helptext, `\r\n`, "\n")
+	o.telegram.helptext = strings.ReplaceAll(o.telegram.helptext, `<br>`, "\n")
+	o.telegram.helptext = strings.ReplaceAll(o.telegram.helptext, `<br/>`, "\n")
 	return o.telegram.helptext
 }
 

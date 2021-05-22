@@ -139,15 +139,12 @@ func (m *Mastodon) Serve() error {
 					clearTick.Stop()
 					fetchTick.Stop()
 				})
-			default:
 			}
 		}
 	}()
 
-	select {
-	case <-m.ctx.Done():
-		logger.Info("[mastodon] stopping service...")
-	}
+	<-m.ctx.Done()
+	logger.Info("[mastodon] stopping service...")
 
 	return errors.New("done")
 }
@@ -160,9 +157,11 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) error {
 
 	text := textContent(status.Content)
 	logger.Debug("[mastodon] conversation id: %s message: %s", id, text)
-	defer m.client.DismissNotification(m.ctx, id)
 	defer func() {
 		time.Sleep(time.Second)
+		if err := m.client.DismissNotification(m.ctx, id); err != nil {
+			logger.Debug("[mastodon] dismiss notification failed: %v", err)
+		}
 		delete(m.archiving, id)
 	}()
 
@@ -181,8 +180,8 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) error {
 	}
 
 	// Reply and publish toot as public
-	ctx := context.WithValue(m.ctx, "mastodon", m.client)
-	go publish.To(ctx, col, "mastodon", string(status.ID))
+	ctx := context.WithValue(m.ctx, publish.FlagMastodon, m.client)
+	go publish.To(ctx, col, publish.FlagMastodon, string(status.ID))
 
 	return nil
 }

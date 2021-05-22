@@ -103,7 +103,10 @@ func TestPublishToChannelFromTelegram(t *testing.T) {
 	defer server.Close()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		slug := strings.TrimPrefix(r.URL.Path, prefix)
 		switch slug {
@@ -113,7 +116,7 @@ func TestPublishToChannelFromTelegram(t *testing.T) {
 			fmt.Fprintln(w, getChatJSON)
 		case "sendMessage":
 			text, _ := io.ReadAll(r.Body)
-			if strings.Index(string(text), config.SlotName(config.SLOT_IA)) == -1 {
+			if !strings.Contains(string(text), config.SlotName(config.SLOT_IA)) {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
@@ -130,8 +133,8 @@ func TestPublishToChannelFromTelegram(t *testing.T) {
 		t.Fatalf(`New Telegram bot API client failed: %v`, err)
 	}
 
-	ctx := context.WithValue(context.Background(), "telegram", bot)
-	To(ctx, collects, "telegram")
+	ctx := context.WithValue(context.Background(), FlagTelegram, bot)
+	To(ctx, collects, FlagTelegram)
 }
 
 func TestPublishTootFromMastodon(t *testing.T) {
@@ -146,7 +149,10 @@ func TestPublishTootFromMastodon(t *testing.T) {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
 		}
-		r.ParseForm()
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
 		switch r.URL.Path {
 		case "/api/v1/statuses":
 			status := r.FormValue("status")
@@ -155,6 +161,8 @@ func TestPublishTootFromMastodon(t *testing.T) {
 				return
 			}
 			fmt.Fprintln(w, `{"access_token": "zoo"}`)
+		default:
+			fmt.Fprintln(w, `{}`)
 		}
 	})
 
@@ -164,8 +172,8 @@ func TestPublishTootFromMastodon(t *testing.T) {
 
 	mstdn := NewMastodon(nil)
 
-	ctx := context.WithValue(context.Background(), "mastodon", mstdn.client)
-	To(ctx, collects, "mastodon")
+	ctx := context.WithValue(context.Background(), FlagMastodon, mstdn.client)
+	To(ctx, collects, FlagMastodon)
 }
 
 func TestPublishTweetFromTwitter(t *testing.T) {
@@ -186,12 +194,14 @@ func TestPublishTweetFromTwitter(t *testing.T) {
 				return
 			}
 			fmt.Fprintln(w, `{"id": 1}`)
+		default:
+			fmt.Fprintln(w, `{}`)
 		}
 	})
 
 	twi := NewTwitter(twitter.NewClient(httpClient))
-	ctx := context.WithValue(context.Background(), "twitter", twi.client)
-	To(ctx, collects, "twitter")
+	ctx := context.WithValue(context.Background(), FlagTwitter, twi.client)
+	To(ctx, collects, FlagTwitter)
 }
 
 func TestPublishToIRCChannelFromIRC(t *testing.T) {
@@ -210,9 +220,9 @@ func TestPublishToMatrixRoomFromMatrix(t *testing.T) {
 		switch {
 		case r.URL.Path == "/_matrix/client/r0/login":
 			fmt.Fprintln(w, `{"access_token": "zoo"}`)
-		case strings.Index(r.URL.Path, "!bar:example.com/send/m.room.message") > -1:
+		case strings.Contains(r.URL.Path, "!bar:example.com/send/m.room.message"):
 			body, _ := ioutil.ReadAll(r.Body)
-			if strings.Index(string(body), config.SlotName(config.SLOT_IA)) == -1 {
+			if !strings.Contains(string(body), config.SlotName(config.SLOT_IA)) {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}

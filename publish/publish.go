@@ -22,6 +22,15 @@ import (
 	matrix "maunium.net/go/mautrix"
 )
 
+const (
+	FlagWeb      = "web"
+	FlagTelegram = "telegram"
+	FlagTwitter  = "twitter"
+	FlagMastodon = "mastodon"
+	FlagMatrix   = "matrix"
+	FlagIRC      = "irc"
+)
+
 func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 	var from string
 	if len(args) > 0 {
@@ -33,7 +42,7 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusRequest)
 
 		var bot *telegram.Bot
-		if rev, ok := ctx.Value("telegram").(*telegram.Bot); ok {
+		if rev, ok := ctx.Value(FlagTelegram).(*telegram.Bot); ok {
 			bot = rev
 		}
 
@@ -64,7 +73,7 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusRequest)
 
 		var client *mstdn.Client
-		if rev, ok := ctx.Value("mastodon").(*mstdn.Client); ok {
+		if rev, ok := ctx.Value(FlagMastodon).(*mstdn.Client); ok {
 			client = rev
 		}
 		mstdn := NewMastodon(client)
@@ -79,7 +88,7 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusRequest)
 
 		var client *twitter.Client
-		if rev, ok := ctx.Value("twitter").(*twitter.Client); ok {
+		if rev, ok := ctx.Value(FlagTwitter).(*twitter.Client); ok {
 			client = rev
 		}
 		twitter := NewTwitter(client)
@@ -94,7 +103,7 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusRequest)
 
 		var conn *irc.Connection
-		if rev, ok := ctx.Value("irc").(*irc.Connection); ok {
+		if rev, ok := ctx.Value(FlagIRC).(*irc.Connection); ok {
 			conn = rev
 		}
 		irc := NewIRC(conn)
@@ -109,7 +118,7 @@ func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 		metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusRequest)
 
 		var client *matrix.Client
-		if rev, ok := ctx.Value("matrix").(*matrix.Client); ok {
+		if rev, ok := ctx.Value(FlagMatrix).(*matrix.Client); ok {
 			client = rev
 		}
 		mat := NewMatrix(client)

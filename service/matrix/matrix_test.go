@@ -89,7 +89,7 @@ func senderClient(t *testing.T) *Matrix {
 	os.Setenv("WAYBACK_MATRIX_PASSWORD", senderPwd)
 	parser = config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	pool := pooling.New(config.Opts.PoolingSize())
 	return New(context.Background(), &storage.Storage{}, pool)
@@ -100,7 +100,7 @@ func recverClient(t *testing.T) *Matrix {
 	os.Setenv("WAYBACK_MATRIX_PASSWORD", recverPwd)
 	parser = config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	pool := pooling.New(config.Opts.PoolingSize())
 	return New(context.Background(), &storage.Storage{}, pool)
@@ -160,7 +160,7 @@ func TestProcess(t *testing.T) {
 	recvSyncer.OnEventType(event.StateMember, func(source matrix.EventSource, ev *event.Event) {
 		ms := ev.Content.AsMember().Membership
 		if ev.Sender == id.UserID(senderUID) && ms == event.MembershipInvite {
-			t.Logf("Event id: %s, event type: %s, event content: %v", id.EventID(ev.ID), ev.Type.Type, ev.Content.Raw)
+			t.Logf("Event id: %s, event type: %s, event content: %v", ev.ID, ev.Type.Type, ev.Content.Raw)
 			if _, err := recver.client.JoinRoomByID(ev.RoomID); err != nil {
 				t.Fatalf("Accept invitation from sender failure, error: %v", err)
 			}
@@ -168,7 +168,7 @@ func TestProcess(t *testing.T) {
 	})
 	recvSyncer.OnEventType(event.EventMessage, func(source matrix.EventSource, ev *event.Event) {
 		if ev.Sender == id.UserID(senderUID) {
-			t.Logf("Event id: %s, event type: %s, event content: %v", id.EventID(ev.ID), ev.Type.Type, ev.Content.AsMessage().Body)
+			t.Logf("Event id: %s, event type: %s, event content: %v", ev.ID, ev.Type.Type, ev.Content.AsMessage().Body)
 
 			if err := recver.process(ev); err != nil {
 				t.Errorf("Process request failure, error: %v", err)

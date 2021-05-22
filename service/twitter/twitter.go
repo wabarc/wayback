@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dghubble/go-twitter/twitter"
+	twitter "github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
@@ -83,13 +83,14 @@ func (t *Twitter) Serve() error {
 		for {
 			select {
 			case <-fetchTick.C:
-				messages, _, err := t.client.DirectMessages.EventsList(
+				messages, resp, err := t.client.DirectMessages.EventsList(
 					&twitter.DirectMessageEventsListParams{Count: 3},
 				)
 				logger.Debug("[twitter] messages: %v", messages)
 				if err != nil {
 					logger.Error("[twitter] get direct messages failed, %v", err)
 				}
+				resp.Body.Close()
 
 				for _, event := range messages.Events {
 					if _, exist := t.archiving[event.ID]; exist {
@@ -116,15 +117,12 @@ func (t *Twitter) Serve() error {
 					logger.Debug("[twitter] stopping ticker...")
 					fetchTick.Stop()
 				})
-			default:
 			}
 		}
 	}()
 
-	select {
-	case <-t.ctx.Done():
-		logger.Info("[twitter] stopping service...")
-	}
+	<-t.ctx.Done()
+	logger.Info("[twitter] stopping service...")
 
 	return errors.New("done")
 }
@@ -142,7 +140,12 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	logger.Debug("[twitter] message event id: %s message: %s", event.ID, text)
 	defer func() {
 		// Destroy Direct Message
-		t.client.DirectMessages.EventsDestroy(event.ID)
+		resp, err := t.client.DirectMessages.EventsDestroy(event.ID)
+		if err != nil {
+			return
+		}
+		resp.Body.Close()
+
 		time.Sleep(time.Second)
 		delete(t.archiving, event.ID)
 	}()
@@ -191,24 +194,28 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	go func() {
 		// Destroy Direct Message
 		time.Sleep(time.Second)
-		t.client.DirectMessages.EventsDestroy(ev.ID)
+		resp, err := t.client.DirectMessages.EventsDestroy(ev.ID)
+		if err != nil {
+			return
+		}
+		resp.Body.Close()
 	}()
 
-	ctx := context.WithValue(t.ctx, "twitter", t.client)
-	go publish.To(ctx, col, "twitter")
+	ctx := context.WithValue(t.ctx, publish.FlagTwitter, t.client)
+	go publish.To(ctx, col, publish.FlagTwitter)
 
 	return nil
 }
 
 // doc: https://developer.twitter.com/en/docs/twitter-api/v1/rate-limits
 // rate limit of application/rate_limit_status: 180 requests / 15min
-func (t *Twitter) isRateLimit() bool {
-	rateLimits, _, err := t.client.RateLimits.Status(&twitter.RateLimitParams{Resources: []string{"statuses", "users"}})
-	if err != nil {
-		logger.Error("[twitter] request application/rate_limit_status failure, err: %v", err)
-		return false
-	}
-	logger.Debug("[twitter] rate limits: %v", rateLimits)
-
-	return true
-}
+// func (t *Twitter) isRateLimit() bool {
+// 	rateLimits, _, err := t.client.RateLimits.Status(&twitter.RateLimitParams{Resources: []string{"statuses", "users"}})
+// 	if err != nil {
+// 		logger.Error("[twitter] request application/rate_limit_status failure, err: %v", err)
+// 		return false
+// 	}
+// 	logger.Debug("[twitter] rate limits: %v", rateLimits)
+//
+// 	return true
+// }

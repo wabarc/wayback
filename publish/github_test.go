@@ -84,12 +84,14 @@ func TestToIssues(t *testing.T) {
 		switch r.URL.Path {
 		case "/repos/bar/zoo/issues":
 			body, _ := ioutil.ReadAll(r.Body)
-			if strings.Index(string(body), config.SlotName(config.SLOT_IA)) == -1 {
+			if !strings.Contains(string(body), config.SlotName(config.SLOT_IA)) {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
 			w.Header().Set("Status", "201 Created")
 			fmt.Fprintln(w, `{"id": 1}`)
+		default:
+			fmt.Fprintln(w, `{}`)
 		}
 	})
 

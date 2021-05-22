@@ -24,7 +24,7 @@ func TestTransform(t *testing.T) {
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	text := "some text https://example.com"
@@ -77,6 +77,7 @@ func TestProcessRespStatus(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Unexpected response: %v", err)
 		}
+		defer resp.Body.Close()
 
 		if resp.StatusCode != test.status {
 			t.Fatalf("Unexpected response code got %d instead of %d", resp.StatusCode, test.status)
@@ -90,7 +91,7 @@ func TestProcessContentType(t *testing.T) {
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse enviroment variables or flags failed, error: %v", err)
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	web := newWeb()

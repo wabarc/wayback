@@ -81,7 +81,7 @@ func (m *Matrix) Serve() error {
 	syncer.OnEventType(event.StateMember, func(source matrix.EventSource, ev *event.Event) {
 		ms := ev.Content.AsMember().Membership
 		if ms == event.MembershipInvite {
-			logger.Debug("[matrix] StateMember event id: %s, event type: %s, event content: %v", id.EventID(ev.ID), ev.Type.Type, ev.Content.Raw)
+			logger.Debug("[matrix] StateMember event id: %s, event type: %s, event content: %v", ev.ID, ev.Type.Type, ev.Content.Raw)
 			if _, err := m.client.JoinRoomByID(ev.RoomID); err != nil {
 				logger.Error("[matrix] accept invitation from sender failure, error: %v", err)
 			}
@@ -124,12 +124,10 @@ func (m *Matrix) Serve() error {
 		}
 	}()
 
-	select {
-	case <-m.ctx.Done():
-		logger.Info("[matrix] stopping sync and logout all sessions")
-		m.client.StopSync()
-		m.client.LogoutAll()
-	}
+	<-m.ctx.Done()
+	logger.Info("[matrix] stopping sync and logout all sessions")
+	m.client.StopSync()
+	m.client.LogoutAll()
 
 	return errors.New("done")
 }
@@ -139,7 +137,7 @@ func (m *Matrix) process(ev *event.Event) error {
 		logger.Debug("[matrix] without sender")
 		return errors.New("Matrix: without sender")
 	}
-	logger.Debug("[matrix] event id: %s, event type: %s, event content: %v", id.EventID(ev.ID), ev.Type.Type, ev.Content)
+	logger.Debug("[matrix] event id: %s, event type: %s, event content: %v", ev.ID, ev.Type.Type, ev.Content)
 
 	if content := ev.Content.Parsed.(*event.MessageEventContent); content.MsgType != event.MsgText {
 		logger.Debug("[matrix] only support text message, current msgtype: %v", content.MsgType)
@@ -184,8 +182,8 @@ func (m *Matrix) process(ev *event.Event) error {
 		logger.Error("[matrix] mark message as receipt failure: %v", err)
 	}
 
-	ctx := context.WithValue(m.ctx, "matrix", m.client)
-	publish.To(ctx, col, "matrix")
+	ctx := context.WithValue(m.ctx, publish.FlagMatrix, m.client)
+	publish.To(ctx, col, publish.FlagMatrix)
 
 	return nil
 }

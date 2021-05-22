@@ -133,7 +133,11 @@ func init() {
 func (c *Collector) collect(ch chan<- prometheus.Metric) error {
 	// Set uptime
 	duration := fmt.Sprint(time.Since(startTime).Truncate(time.Second))
-	ch <- prometheus.MustNewConstMetric(c.uptimeDesc, prometheus.GaugeValue, float64(1), duration)
+	m, err := prometheus.NewConstMetric(c.uptimeDesc, prometheus.GaugeValue, float64(1), duration)
+	if err != nil {
+		return err
+	}
+	ch <- m
 
 	return nil
 }

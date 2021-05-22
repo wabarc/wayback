@@ -55,7 +55,10 @@ func TestToMastodon(t *testing.T) {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
 		}
-		r.ParseForm()
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
 		switch r.URL.Path {
 		case "/api/v1/statuses":
 			status := r.FormValue("status")
@@ -64,6 +67,8 @@ func TestToMastodon(t *testing.T) {
 				return
 			}
 			fmt.Fprintln(w, `{"access_token": "zoo"}`)
+		default:
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		}
 	})
 
