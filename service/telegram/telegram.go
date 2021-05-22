@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -176,12 +177,12 @@ func (t *Telegram) process(message *telegram.Message) error {
 			}
 		}
 		return nil
-	case command == "/":
+	case command != "":
 		fallback := t.commandFallback()
 		if fallback != "" {
 			fallback = fmt.Sprintf("\n\nAvailable commands:\n%s", fallback)
 		}
-		t.reply(message, fmt.Sprintf("/%s is no specified command%s", message.Payload, fallback))
+		t.reply(message, fmt.Sprintf("/%s is an illegal command%s", command, fallback))
 	case len(urls) == 0:
 		logger.Info("[telegram] archives failure, URL no found.")
 		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
@@ -367,6 +368,14 @@ func callbackPrefix() string {
 }
 
 func command(message string) string {
+	matchCmd := func(str string) string {
+		re := regexp.MustCompile(`(?m)^\/\w+`)
+		for _, match := range re.FindAllString(str, -1) {
+			return strings.TrimLeft(match, "/")
+		}
+		return ""
+	}
+
 	switch {
 	case strings.HasPrefix(message, "/help"), strings.HasPrefix(message, "/start"):
 		return "help"
@@ -374,9 +383,7 @@ func command(message string) string {
 		return "playback"
 	case strings.HasPrefix(message, "/metrics"):
 		return "metrics"
-	case strings.HasPrefix(message, "/"):
-		return "/"
 	default:
-		return ""
+		return matchCmd(message)
 	}
 }
