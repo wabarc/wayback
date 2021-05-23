@@ -16,7 +16,7 @@ Wayback is a tool that supports running as a command-line tool and docker contai
 - Serve as Tor Hidden Service or local web entry
 - Wayback to Internet Archive, archive.today, IPFS and Telegraph easier
 - Interactive with IRC, Martix, Telegram bot, Mastodon and Twitter as daemon service
-- Support publish wayback resutls to Telegram channel, Mastodon and GitHub Issues
+- Support publish wayback results to Telegram channel, Mastodon and GitHub Issues
 
 ## Installation
 

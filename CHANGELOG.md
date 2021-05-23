@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.1] - 2021-05-23
+
+### Changed
+- Improvement for illegal command
+- Enhancement for Tor Hidden Service
+- Set defaults IRC server to Libera Chat
+- Styling code base
+
+### Fixed
+- Prevent dispatch multiple deployment
+- Fix release notes announcements
+
 ## [0.12.0] - 2021-05-19
 
 ### Added
