@@ -45,6 +45,36 @@ Using [Snapcraft](https://snapcraft.io/wayback) (on GNU/Linux)
 $ sudo snap install wayback
 ```
 
+Via [APT](https://github.com/wabarc/apt-repo):
+
+```bash
+$ curl -s https://apt.wabarc.eu.org/KEY.gpg | sudo apt-key add -
+$ sudo echo "deb https://apt.wabarc.eu.org/ /" > /etc/apt/sources.list.d/wayback.list
+$ sudo apt update
+$ sudo apt install wayback
+```
+
+Via [RPM](https://github.com/wabarc/rpm-repo):
+
+```
+$ sudo cat > /etc/yum.repos.d/wayback.repo<< EOF
+[wayback]
+name=Wayback Repository
+baseurl=https://rpm.wabarc.eu.org/x86_64/
+enabled=1
+gpgcheck=0
+EOF
+
+$ sudo yum install -y wayback
+```
+
+Via [Homebrew](https://github.com/wabarc/homebrew-wayback):
+
+```
+$ brew tap wabarc/wayback
+$ brew install wayback
+```
+
 See more on [releases](https://github.com/wabarc/wayback/releases).
 
 ## Usage
