@@ -80,10 +80,24 @@ var (
   "ok": true,
   "result": {
     "message_id": 1002,
-    "text": "https://example.com",
+    "text": "Queue... or Archiving...",
+    "from": {
+      "id": 120000000,
+      "is_bot": true,
+      "first_name": "Testing Bot",
+      "username": "username"
+    },
     "chat": {
       "id": 1000001,
       "type": "private"
+    },
+    "reply_to_message": {
+      "message_id": 1001,
+      "text": "https://example.com",
+      "chat": {
+        "id": 1000001,
+        "type": "private"
+      }
     }
   }
 }`
@@ -120,17 +134,17 @@ func handle(mux *http.ServeMux, updatesJSON string) {
 				fmt.Fprintln(w, `{"ok":true, "result":[]}`)
 			}
 		case "sendMessage":
-			if text == "Archiving..." {
+			if text == "Queue..." {
 				fmt.Fprintln(w, replyJSON)
 				return
 			}
 			fmt.Fprintln(w, `{"ok":true, "result":null}`)
 		case "editMessageText":
-			if !strings.Contains(text, config.SlotName("ia")) {
+			if !strings.Contains(text, config.SlotName("ia")) && !strings.Contains(text, "Archiving...") {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
-			fmt.Fprintln(w, `{"ok":true, "result":null}`)
+			fmt.Fprintln(w, replyJSON)
 		case "sendChatAction":
 			fmt.Fprintln(w, `{"ok":true, "result":null}`)
 		default:

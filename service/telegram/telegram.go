@@ -139,7 +139,7 @@ func (t *Telegram) Serve() (err error) {
 	return errors.New("done")
 }
 
-func (t *Telegram) process(message *telegram.Message) error {
+func (t *Telegram) process(message *telegram.Message) (err error) {
 	content := message.Text
 	logger.Debug("[telegram] content: %s", content)
 
@@ -172,7 +172,7 @@ func (t *Telegram) process(message *telegram.Message) error {
 	case command == "metrics":
 		stats := metrics.Gather.Export("wayback")
 		if config.Opts.EnabledMetrics() && stats != "" {
-			if _, err := t.reply(message, stats); err != nil {
+			if _, err = t.reply(message, stats); err != nil {
 				return err
 			}
 		}
@@ -189,6 +189,10 @@ func (t *Telegram) process(message *telegram.Message) error {
 		t.reply(message, "URL no found.")
 	default:
 		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
+		if message, err = t.reply(message, "Queue..."); err != nil {
+			logger.Error("[telegram] reply queue failed: %v", err)
+			return
+		}
 		t.pool.Roll(func() {
 			if err := t.archive(t.ctx, message, urls); err != nil {
 				logger.Error("[telegram] archives failed: %v", err)
@@ -202,7 +206,7 @@ func (t *Telegram) process(message *telegram.Message) error {
 }
 
 func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls []string) error {
-	stage, err := t.reply(message, "Archiving...")
+	stage, err := t.bot.Edit(message, "Archiving...")
 	if err != nil {
 		logger.Error("[telegram] send archiving message failed: %v", err)
 		return err
