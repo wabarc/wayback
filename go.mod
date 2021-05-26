@@ -30,8 +30,7 @@ require (
 	github.com/wabarc/helper v0.0.0-20210511232523-5ac25c99226f
 	github.com/wabarc/logger v0.0.0-20210417045349-d0d82e8e99ee
 	github.com/wabarc/playback v0.0.0-20210418074547-4bf9d94a794d
-	github.com/wabarc/screenshot v1.1.1 // indirect
-	github.com/wabarc/telegra.ph v0.0.0-20210505140622-220623b0de58
+	github.com/wabarc/telegra.ph v0.0.0-20210525222733-85ca843f6637
 	github.com/wabarc/wbipfs v0.1.3
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.etcd.io/bbolt v1.3.5
