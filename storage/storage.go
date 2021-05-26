@@ -23,7 +23,7 @@ type Storage struct {
 // It is the caller's responsibility to close it.
 func Open(path string) (*Storage, error) {
 	if path == "" {
-		path = config.Opts.BoltFilename()
+		path = config.Opts.BoltPathname()
 	}
 	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {

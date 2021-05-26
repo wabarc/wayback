@@ -776,3 +776,21 @@ func TestPoolingSize(t *testing.T) {
 		t.Fatalf(`Unexpected pooling size got %d instead of %d`, got, size)
 	}
 }
+
+func TestBoltPath(t *testing.T) {
+	path := "./wayback.db"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_BOLT_PATH", path)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.BoltPathname()
+	if got != path {
+		t.Fatalf(`Unexpected bolt db file path got %s instead of %s`, got, path)
+	}
+}

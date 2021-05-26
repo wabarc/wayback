@@ -55,7 +55,7 @@ const (
 
 	defChromeRemoteAddr    = ""
 	defEnabledChromeRemote = false
-	defBoltFilename        = "wayback.db"
+	defBoltPathname        = "wayback.db"
 	defPoolingSize         = 3
 )
 
@@ -81,6 +81,7 @@ type Options struct {
 
 	chromeRemoteAddr    string
 	enabledChromeRemote bool
+	boltPathname        string
 	poolingSize         int
 }
 
@@ -147,6 +148,7 @@ func NewOptions() *Options {
 		metrics:             defMetrics,
 		chromeRemoteAddr:    defChromeRemoteAddr,
 		enabledChromeRemote: defEnabledChromeRemote,
+		boltPathname:        defBoltPathname,
 		poolingSize:         defPoolingSize,
 		ipfs: &ipfs{
 			host: defIPFSHost,
@@ -451,9 +453,9 @@ func (o *Options) ChromeRemoteAddr() string {
 	return o.chromeRemoteAddr
 }
 
-// BoltFilename returns filename of bolt database
-func (o *Options) BoltFilename() string {
-	return defBoltFilename
+// BoltPathname returns filename of bolt database
+func (o *Options) BoltPathname() string {
+	return o.boltPathname
 }
 
 // PoolingSize returns the number of worker pool
