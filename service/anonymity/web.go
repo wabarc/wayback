@@ -218,8 +218,8 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 			logger.Error("[web] encode for response failed, %v", err)
 			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
 		} else {
-			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
 			if len(urls) > 0 {
+				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
 				go publish.To(ctx, col, "web")
 			}
 			w.Write(data)
@@ -228,8 +228,8 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		if html, ok := web.template.Render("layout", collector); ok {
-			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
 			if len(urls) > 0 {
+				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
 				go publish.To(ctx, col, "web")
 			}
 			w.Write(html)
