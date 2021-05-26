@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.2] - 2021-05-26
+
+### Changed
+- Stability improvements on [wabarc/telegra.ph](https://github.com/wabarc/telegra.ph/commit/85ca843f66376b2ebcd2235762dab75694b6a3e6)
+- Reply queue message from Telegram
+- Upgrade linter to v4
+- Update README
+
 ## [0.12.1] - 2021-05-23
 
 ### Changed
