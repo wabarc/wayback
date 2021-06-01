@@ -141,7 +141,7 @@ $ wayback --is https://www.fsf.org
 $ wayback --ip https://www.fsf.org
 ```
 
-For the IPFS, also can use a specific pinner service:
+For using IPFS, also can specify a pinning service:
 
 ```sh
 $ export WAYBACK_SLOT=pinata
@@ -155,7 +155,7 @@ $ WAYBACK_SLOT=pinata WAYBACK_APIKEY=YOUR-PINATA-APIKEY \
 $ WAYBACK_SECRET=YOUR-PINATA-SECRET wayback --ip https://www.fsf.org
 ```
 
-TIP: [more details](https://github.com/wabarc/ipfs-pinner) about pinner service.
+More details about [pinning service](https://github.com/wabarc/ipfs-pinner).
 
 With telegram bot:
 

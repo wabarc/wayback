@@ -75,8 +75,9 @@ github.com/cheekybits/is v0.0.0-20150225183255-68e9c0620927/go.mod h1:h/aW8ynjgk
 github.com/chromedp/cdproto v0.0.0-20210508221054-d7cfa85db7d1/go.mod h1:At5TxYYdxkbQL0TSefRjhLE3Q0lgvqKKMSFUglJ7i1U=
 github.com/chromedp/cdproto v0.0.0-20210526005521-9e51b9051fd0 h1:aIcgRshD5I1MfJfB92KBDKpaXrYqj3fkqI8bHdtP3zA=
 github.com/chromedp/cdproto v0.0.0-20210526005521-9e51b9051fd0/go.mod h1:At5TxYYdxkbQL0TSefRjhLE3Q0lgvqKKMSFUglJ7i1U=
-github.com/chromedp/chromedp v0.7.2 h1:uNztM7xDJex+Mu0JUbpBDS7uCN/J71ZiCiJyHUwdrHg=
 github.com/chromedp/chromedp v0.7.2/go.mod h1:9BUOYV/gTXtIpGCoM+kVSmh1j6M9oG48qGW1z3h72Z0=
+github.com/chromedp/chromedp v0.7.3 h1:FvgJICfjvXtDX+miuMUY0NHuY8zQvjS/TcEQEG6Ldzs=
+github.com/chromedp/chromedp v0.7.3/go.mod h1:9gC521Yzgrk078Ulv6KIgG7hJ2x9aWrxMBBobTFk30A=
 github.com/chromedp/sysutil v1.0.0 h1:+ZxhTpfpZlmchB58ih/LBHX52ky7w2VhQVKQMucy3Ic=
 github.com/chromedp/sysutil v1.0.0/go.mod h1:kgWmDdq8fTzXYcKIBqIYvRRTnYb9aNS9moAV0xufSww=
 github.com/clbanning/x2j v0.0.0-20191024224557-825249438eec/go.mod h1:jMjuTZXRI4dUb/I5gc9Hdhagfvm9+RyrPryS/auMzxE=
@@ -523,8 +524,9 @@ github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78 h1:iWcCLB7Ru5lurvN0
 github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78/go.mod h1:OlGUo0utWqPMcej0HirsoK2+65Je/ZPFNwasF/O3KYM=
 github.com/wabarc/playback v0.0.0-20210418074547-4bf9d94a794d h1:bp/VItvjD2Sx77Gx113YaeaQHjxE/Bzmd+RVY3r7U8I=
 github.com/wabarc/playback v0.0.0-20210418074547-4bf9d94a794d/go.mod h1:gQo3uKms0wQAOUwAqqlEQW1kV7IC6auoJMUZI61erVQ=
-github.com/wabarc/screenshot v1.1.2-0.20210525222550-07612de838bb h1:RPnrRcfV4gU8WrAPvrQmNJuJbyHjkDnYJ/H/vCuQw/o=
 github.com/wabarc/screenshot v1.1.2-0.20210525222550-07612de838bb/go.mod h1:49mgVjU6cu00A2HbXchIofUuRGeMycJRLl3gMq3u+dI=
+github.com/wabarc/screenshot v1.1.2 h1:/IZFih5hophqQ8MMu1IxwJ+7W8+70Zn/R4GJIZm9/AY=
+github.com/wabarc/screenshot v1.1.2/go.mod h1:E0HRBzwL3jLFonJEj8yS89VOrmfGAniQtJpX5vcCpGk=
 github.com/wabarc/telegra.ph v0.0.0-20210525222733-85ca843f6637 h1:N+syQVqAquhQjTJ/mGpOjOu11r8nUUDz2MTJr8kMdk0=
 github.com/wabarc/telegra.ph v0.0.0-20210525222733-85ca843f6637/go.mod h1:uNyE74c4n7faq9cK+4J15jpkveqW9E45B+0chMGMmFM=
 github.com/wabarc/wbipfs v0.1.3 h1:p1kMKPY7QCBq+BDPHOXkg7xizwFrWlHHNklfgdnHR58=
@@ -678,8 +680,9 @@ golang.org/x/sys v0.0.0-20210330210617-4fbd30eecc44/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20210415045647-66c3f260301c/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210423082822-04245dca01da/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210507161434-a76c4d0a0096/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea h1:+WiDlPBBaO+h9vPNZi8uJ3k4BkKQB7Iow3aqwHVA5hI=
 golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20210601080250-7ecdf8ef093b h1:qh4f65QIVFjq9eBURLEYWqaEXmOyqdUyiBSgaXWccWk=
+golang.org/x/sys v0.0.0-20210601080250-7ecdf8ef093b/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
