@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.3] - 2021-06-01
+
+### Added
+- Add Dockerfile for development
+
+### Changed
+- Refine artifact name for testing workflow
+- Supports specify boltdb file path
+- Improve metrics of web entry
+
+### Fixed
+- Fix multiple results for archiving pdf file ([wabarc/screenshot](https://github.com/wabarc/screenshot/commit/f17a852a3ae2a7c9396719c526f7bd8f2688bbe2))
+
 ## [0.12.2] - 2021-05-26
 
 ### Changed
