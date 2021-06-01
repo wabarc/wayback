@@ -6,7 +6,7 @@ go 1.16
 
 require (
 	github.com/btcsuite/btcd v0.21.0-beta // indirect
-	github.com/cretz/bine v0.1.0
+	github.com/cretz/bine v0.2.0
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
 	github.com/dghubble/oauth1 v0.7.0
 	github.com/go-shiori/obelisk v0.0.0-20201115143556-8de0d40b0a9b // indirect
@@ -35,8 +35,7 @@ require (
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.etcd.io/bbolt v1.3.5
 	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
-	golang.org/x/net v0.0.0-20210510120150-4163338589ed
+	golang.org/x/net v0.0.0-20210525063256-abc453219eb5
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/tucnak/telebot.v2 v2.3.5
 	maunium.net/go/mautrix v0.9.12
