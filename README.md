@@ -30,34 +30,34 @@ Wayback is a tool that supports running as a command-line tool and docker contai
 From source:
 
 ```sh
-$ go get -u github.com/wabarc/wayback/cmd/wayback
+go get -u github.com/wabarc/wayback/cmd/wayback
 ```
 
 From [GoBinaries](https://gobinaries.com/):
 
 ```sh
-$ curl -sf https://gobinaries.com/wabarc/wayback/cmd/wayback | sh
+curl -sf https://gobinaries.com/wabarc/wayback/cmd/wayback | sh
 ```
 
 Using [Snapcraft](https://snapcraft.io/wayback) (on GNU/Linux)
 
 ```sh
-$ sudo snap install wayback
+sudo snap install wayback
 ```
 
 Via [APT](https://github.com/wabarc/apt-repo):
 
 ```bash
-$ curl -s https://apt.wabarc.eu.org/KEY.gpg | sudo apt-key add -
-$ sudo echo "deb https://apt.wabarc.eu.org/ /" > /etc/apt/sources.list.d/wayback.list
-$ sudo apt update
-$ sudo apt install wayback
+curl -s https://apt.wabarc.eu.org/KEY.gpg | sudo apt-key add -
+sudo echo "deb https://apt.wabarc.eu.org/ /" > /etc/apt/sources.list.d/wayback.list
+sudo apt update
+sudo apt install wayback
 ```
 
 Via [RPM](https://github.com/wabarc/rpm-repo):
 
-```
-$ sudo cat > /etc/yum.repos.d/wayback.repo<< EOF
+```bash
+sudo cat > /etc/yum.repos.d/wayback.repo<< EOF
 [wayback]
 name=Wayback Repository
 baseurl=https://rpm.wabarc.eu.org/x86_64/
@@ -65,14 +65,14 @@ enabled=1
 gpgcheck=0
 EOF
 
-$ sudo yum install -y wayback
+sudo yum install -y wayback
 ```
 
 Via [Homebrew](https://github.com/wabarc/homebrew-wayback):
 
-```
-$ brew tap wabarc/wayback
-$ brew install wayback
+```shell
+brew tap wabarc/wayback
+brew install wayback
 ```
 
 See more on [releases](https://github.com/wabarc/wayback/releases).
@@ -123,9 +123,9 @@ Flags:
 Wayback one or more url to *Internet Archive* **and** *archive.today*:
 
 ```sh
-$ wayback https://www.wikipedia.org
+wayback https://www.wikipedia.org
 
-$ wayback https://www.fsf.org https://www.eff.org
+wayback https://www.fsf.org https://www.eff.org
 ```
 
 Wayback url to *Internet Archive* **or** *archive.today* **or** *IPFS*:
@@ -160,25 +160,25 @@ More details about [pinning service](https://github.com/wabarc/ipfs-pinner).
 With telegram bot:
 
 ```sh
-$ wayback --ia --is --ip -d telegram -t your-telegram-bot-token
+wayback --ia --is --ip -d telegram -t your-telegram-bot-token
 ```
 
 Publish message to your Telegram channel at the same time:
 
 ```sh
-$ wayback --ia --is --ip -d telegram -t your-telegram-bot-token --chatid your-telegram-channel-name
+wayback --ia --is --ip -d telegram -t your-telegram-bot-token --chatid your-telegram-channel-name
 ```
 
 Also can run with debug mode:
 
 ```sh
-$ wayback -d telegram -t YOUR-BOT-TOKEN --debug
+wayback -d telegram -t YOUR-BOT-TOKEN --debug
 ```
 
 Both serve on Telegram and Tor hidden service:
 
 ```sh
-$ wayback -d telegram -t YOUT-BOT-TOKEN -d web
+wayback -d telegram -t YOUT-BOT-TOKEN -d web
 ```
 
 #### Configuration Parameters
@@ -249,9 +249,9 @@ Prints the resulting options of the targets with `--print`, in a Go struct with 
 ### Docker/Podman
 
 ```sh
-$ docker pull wabarc/wayback
-$ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN # without telegram channel
-$ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNAME # with telegram channel
+docker pull wabarc/wayback
+docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN # without telegram channel
+docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNAME # with telegram channel
 ```
 
 ## Deployment
@@ -285,9 +285,9 @@ Bot friendly instance:
 
 **Q: How to keep the Tor hidden service hostname?**
 
-A: For the first time to run the `wayback` service, keep the key from the output message (the key is the part after `private key:` below) 
+A: For the first time to run the `wayback` service, keep the key from the output message (the key is the part after `private key:` below)
 and next time to run the `wayback` service to place the key to the `--tor-key` option or the `WAYBACK_TOR_PRIVKEY` environment variable.
-```
+```text
 [INFO] Web: important to keep the private key: d005473a611d2b23e54d6446dfe209cb6c52ddd698818d1233b1d750f790445fcfb5ece556fe5ee3b4724ac6bea7431898ee788c6011febba7f779c85845ae87
 ```
 
