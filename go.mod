@@ -34,7 +34,7 @@ require (
 	github.com/wabarc/telegra.ph v0.0.0-20210525222733-85ca843f6637
 	github.com/wabarc/wbipfs v0.1.3
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
-	go.etcd.io/bbolt v1.3.5
+	go.etcd.io/bbolt v1.3.6
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
 	golang.org/x/net v0.0.0-20210510120150-4163338589ed
