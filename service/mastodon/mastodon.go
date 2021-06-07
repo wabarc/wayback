@@ -149,10 +149,18 @@ func (m *Mastodon) Serve() error {
 	return errors.New("done")
 }
 
-func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) error {
+func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) {
 	if status == nil || id == "" {
 		logger.Debug("[mastodon] no status or conversation")
 		return errors.New("Mastodon: no status or conversation")
+	}
+	if inReplyToID, ok := status.InReplyToID.(string); ok {
+		logger.Debug("[mastodon] inReplyToID %s", inReplyToID)
+		if status, err = m.client.GetStatus(m.ctx, mastodon.ID(inReplyToID)); err != nil {
+			logger.Error("[mastodon] get status failed: %v", err)
+			return err
+		}
+		logger.Debug("[mastodon] got status %#v", status)
 	}
 
 	text := textContent(status.Content)
