@@ -254,6 +254,16 @@ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN # without tel
 docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANNEL-USERNAME # with telegram channel
 ```
 
+### 1-Click Deploy
+<a href="https://heroku.com/deploy?template=https://github.com/wabarc/wayback">
+    <img
+    src="https://www.herokucdn.com/deploy/button.svg"
+    alt="Deploy Wayback to Heroku with 1-Click"
+    width="200px"
+    />
+</a>
+<br>
+
 ## Deployment
 
 - [wabarc/on-heroku](https://github.com/wabarc/on-heroku)
