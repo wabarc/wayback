@@ -1,1 +1,1 @@
-worker: wayback -d web -c wayback.conf
+web: wayback -d web -c wayback.conf

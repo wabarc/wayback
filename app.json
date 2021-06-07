@@ -7,24 +7,14 @@
   "website": "https://wabarc.eu.org/",
   "repository": "https://github.com/wabarc/wayback",
   "logo": "https://avatars.githubusercontent.com/u/66000339",
-  "success_url": "/welcome",
+  "success_url": "/",
   "scripts": {
-    "target": "echo 'target'"
+    "postdeploy": "wayback --version"
   },
   "env": {
-    "SECRET_TOKEN": {
-      "description": "A secret key for verifying the integrity of signed cookies.",
-      "generator": "secret"
-    }
-  },
-  "formation": {
-    "web": {
-      "quantity": 1,
-      "size": "free"
-    },
-    "worker": {
-      "quantity": 1,
-      "size": "free"
+    "PORT": {
+      "description": "Port for web service",
+      "value": "8964"
     }
   },
   "addons": [],
@@ -34,6 +24,9 @@
     },
     {
       "url": "https://github.com/tor-actions/heroku-buildpack-tor.git"
+    },
+    {
+      "url": "heroku/go"
     }
   ],
   "environments": {
@@ -41,6 +34,11 @@
       "scripts": {
         "test": "wayback -d web"
       }
+    }
+  },
+  "formation":{
+    "web":{
+      "quantity":1
     }
   }
 }
