@@ -12,7 +12,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
-	"github.com/wabarc/wayback/service/anonymity"
+	"github.com/wabarc/wayback/service/httpd"
 	"github.com/wabarc/wayback/service/mastodon"
 	"github.com/wabarc/wayback/service/matrix"
 	"github.com/wabarc/wayback/service/relaychat"
@@ -80,7 +80,7 @@ func (srv *service) run(ctx context.Context, store *storage.Storage, pool poolin
 				errCh <- matrix.Serve()
 			}(srv.errCh)
 		case "web":
-			tor := anonymity.New(ctx, store, pool)
+			tor := httpd.New(ctx, store, pool)
 			go func(errCh chan error) {
 				errCh <- tor.Serve()
 			}(srv.errCh)

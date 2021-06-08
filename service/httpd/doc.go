@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package anonymity implements the tor network service.
+Package httpd implements the tor network service.
 */
 
-package anonymity // import "github.com/wabarc/wayback/service/anonymity"
+package httpd // import "github.com/wabarc/wayback/service/httpd"
