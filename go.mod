@@ -6,6 +6,7 @@ go 1.16
 
 require (
 	github.com/btcsuite/btcd v0.21.0-beta // indirect
+	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cretz/bine v0.1.0
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
 	github.com/dghubble/oauth1 v0.7.0
@@ -19,8 +20,8 @@ require (
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
 	github.com/multiformats/go-multiaddr v0.3.1 // indirect
 	github.com/multiformats/go-multihash v0.0.15 // indirect
-	github.com/prometheus/client_golang v1.10.0
-	github.com/prometheus/common v0.24.0
+	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/common v0.26.0
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/cobra v1.1.3
 	github.com/tdewolff/parse/v2 v2.5.15 // indirect
