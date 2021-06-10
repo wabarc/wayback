@@ -94,7 +94,6 @@ func (m *Mastodon) Serve() error {
 		fetchTick := time.NewTicker(5 * time.Second)  // Fetch conversations
 
 		m.archiving = make(map[mastodon.ID]bool)
-		var mute sync.RWMutex
 		var once sync.Once
 		for {
 			select {
@@ -129,9 +128,9 @@ func (m *Mastodon) Serve() error {
 						}
 					})
 
-					mute.Lock()
+					m.Lock()
 					m.archiving[n.Status.ID] = true
-					mute.Unlock()
+					m.Unlock()
 				}
 			case <-m.ctx.Done():
 				once.Do(func() {
@@ -170,8 +169,15 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 		if err := m.client.DismissNotification(m.ctx, id); err != nil {
 			logger.Debug("[mastodon] dismiss notification failed: %v", err)
 		}
+		m.Lock()
 		delete(m.archiving, id)
+		m.Unlock()
 	}()
+
+	// Process playback request if message has prefix `/playback`
+	if strings.Contains(text, config.PB_SLUG) {
+		return m.playback(id, status)
+	}
 
 	urls := helper.MatchURLFallback(text)
 	pub := publish.NewMastodon(m.client)
@@ -183,13 +189,34 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 
 	col, err := wayback.Wayback(urls)
 	if err != nil {
-		logger.Error("[mastodon] archives failure, ", err)
+		logger.Error("[mastodon] archives failed: %v", err)
 		return err
 	}
 
 	// Reply and publish toot as public
 	ctx := context.WithValue(m.ctx, publish.FlagMastodon, m.client)
-	go publish.To(ctx, col, publish.FlagMastodon, string(status.ID))
+	publish.To(ctx, col, publish.FlagMastodon, string(status.ID))
+
+	return nil
+}
+
+func (m *Mastodon) playback(id mastodon.ID, status *mastodon.Status) error {
+	text := textContent(status.Content)
+	urls := helper.MatchURL(text)
+	if len(urls) == 0 {
+		logger.Info("[mastodon] playback failure, URL no found.")
+		return errors.New("Mastodon: URL no found")
+	}
+
+	col, err := wayback.Playback(urls)
+	if err != nil {
+		logger.Error("[mastodon] playback failed: %v", err)
+		return err
+	}
+
+	// Reply toot as public
+	pub := publish.NewMastodon(m.client)
+	pub.ToMastodon(m.ctx, pub.Render(col), string(status.ID))
 
 	return nil
 }

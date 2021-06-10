@@ -6,6 +6,7 @@ package matrix // import "github.com/wabarc/wayback/service/matrix"
 
 import (
 	"context"
+	"strings"
 	"sync"
 
 	"github.com/wabarc/helper"
@@ -147,6 +148,10 @@ func (m *Matrix) process(ev *event.Event) error {
 	text := ev.Content.AsMessage().Body
 	logger.Debug("[matrix] from: %s message: %s", ev.Sender, text)
 
+	if strings.Contains(text, config.PB_SLUG) {
+		return m.playback(ev)
+	}
+
 	urls := helper.MatchURLFallback(text)
 	if len(urls) == 0 {
 		logger.Info("[matrix] archives failure, URL no found.")
@@ -184,6 +189,37 @@ func (m *Matrix) process(ev *event.Event) error {
 
 	ctx := context.WithValue(m.ctx, publish.FlagMatrix, m.client)
 	publish.To(ctx, col, publish.FlagMatrix)
+
+	return nil
+}
+
+func (m *Matrix) playback(ev *event.Event) error {
+	text := ev.Content.AsMessage().Body
+	urls := helper.MatchURL(text)
+	// Redact message
+	defer m.redact(ev, "URL no found. Original message: "+text)
+	if len(urls) == 0 {
+		logger.Info("[matrix] playback failure, URL no found.")
+		return errors.New("Matrix: URL no found")
+	}
+
+	col, err := wayback.Playback(urls)
+	if err != nil {
+		logger.Error("[matrix] playback failure, %v", err)
+		return err
+	}
+
+	body := publish.NewMatrix(m.client).Render(col)
+	content := &event.MessageEventContent{
+		FormattedBody: body,
+		Format:        event.FormatHTML,
+		MsgType:       event.MsgText,
+	}
+	content.SetReply(ev)
+	if _, err := m.client.SendMessageEvent(ev.RoomID, event.EventMessage, content); err != nil {
+		logger.Error("[matrix] send to Matrix room failure: %v", err)
+		return err
+	}
 
 	return nil
 }
