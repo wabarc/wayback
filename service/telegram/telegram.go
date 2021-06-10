@@ -168,7 +168,7 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 	case command == "help", command == "start":
 		t.reply(message, config.Opts.TelegramHelptext())
 	case command == "playback":
-		return t.playback(message, urls)
+		return t.playback(message)
 	case command == "metrics":
 		stats := metrics.Gather.Export("wayback")
 		if config.Opts.EnabledMetrics() && stats != "" {
@@ -234,7 +234,7 @@ func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls 
 	return nil
 }
 
-func (t *Telegram) playback(message *telegram.Message, urls []string) error {
+func (t *Telegram) playback(message *telegram.Message) error {
 	metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusRequest)
 
 	recipient, err := t.bot.ChatByID(fmt.Sprint(message.Chat.ID))
@@ -244,6 +244,7 @@ func (t *Telegram) playback(message *telegram.Message, urls []string) error {
 		return err
 	}
 
+	urls := helper.MatchURL(message.Text)
 	if len(urls) == 0 {
 		opts := &telegram.SendOptions{
 			ReplyTo:               message,

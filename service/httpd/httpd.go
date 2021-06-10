@@ -7,7 +7,9 @@ package httpd // import "github.com/wabarc/wayback/service/httpd"
 import (
 	"context"
 	"encoding/json"
+	"mime"
 	"net/http"
+	"path"
 	"strings"
 
 	"github.com/gorilla/mux"
@@ -51,11 +53,12 @@ func (web *web) handle(pool pooling.Pool) http.Handler {
 	web.router.HandleFunc("/manifest.json", web.showWebManifest).Name("manifest").Methods(http.MethodGet)
 	web.router.HandleFunc("/offline.html", web.showOfflinePage).Methods(http.MethodGet)
 
-	web.router.HandleFunc("/w", func(w http.ResponseWriter, r *http.Request) {
+	web.router.HandleFunc("/wayback", func(w http.ResponseWriter, r *http.Request) {
 		pool.Roll(func() {
 			web.process(w, r)
 		})
 	}).Methods(http.MethodPost)
+	web.router.HandleFunc("/playback", web.playback).Methods(http.MethodPost)
 
 	web.router.HandleFunc("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
@@ -160,8 +163,9 @@ func (web *web) showAppIcon(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+	ext := path.Ext(filename)
 	w.Header().Set("Cache-Control", "max-age=2592000")
-	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Content-Type", mime.TypeByExtension(ext))
 	w.Write(blob)
 }
 
@@ -208,6 +212,61 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 		logger.Info("[web] url no found.")
 	}
 	col, _ := wayback.Wayback(urls)
+	collector := transform(col)
+	ctx := context.Background()
+	switch r.PostFormValue("data-type") {
+	case "json":
+		w.Header().Set("Content-Type", "application/json")
+
+		if data, err := json.Marshal(collector); err != nil {
+			logger.Error("[web] encode for response failed, %v", err)
+			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
+		} else {
+			if len(urls) > 0 {
+				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
+				go publish.To(ctx, col, "web")
+			}
+			w.Write(data)
+		}
+	default:
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+		if html, ok := web.template.Render("layout", collector); ok {
+			if len(urls) > 0 {
+				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
+				go publish.To(ctx, col, "web")
+			}
+			w.Write(html)
+		} else {
+			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
+			logger.Error("[web] render template for response failed")
+		}
+	}
+}
+
+func (web *web) playback(w http.ResponseWriter, r *http.Request) {
+	logger.Debug("[web] playback request start...")
+	metrics.IncrementPlayback(metrics.ServiceWeb, metrics.StatusRequest)
+
+	if err := r.ParseForm(); err != nil {
+		logger.Error("[web] parse form error, %v", err)
+		http.Redirect(w, r, "/", http.StatusNotModified)
+		return
+	}
+
+	text := r.PostFormValue("text")
+	if len(strings.TrimSpace(text)) == 0 {
+		logger.Info("[web] post form value empty.")
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	logger.Debug("[web] text: %s", text)
+
+	urls := helper.MatchURL(text)
+	if len(urls) == 0 {
+		logger.Info("[web] url no found.")
+	}
+	col, _ := wayback.Playback(urls)
 	collector := transform(col)
 	ctx := context.Background()
 	switch r.PostFormValue("data-type") {

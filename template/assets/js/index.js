@@ -29,8 +29,9 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 var unblock = function (collects) {
   document.querySelector('div.form').style.backgroundColor = '';
-  document.querySelector('input[type=submit]').disabled = '';
-  document.getElementById('text').disabled = '';
+  document.querySelector('#wayback').disabled = false;
+  document.querySelector('#playback').disabled = false;
+  document.getElementById('text').disabled = false;
   document.getElementById('text').value = '';
 };
 
@@ -55,21 +56,20 @@ var render = function (collects) {
     html += '</ul>';
   })
   archived.innerHTML = html + archived.innerHTML;
-  unblock();
 };
 
-var post = function () {
+var post = function (url) {
   "use strict";
   var http = new XMLHttpRequest(),
     params = new URLSearchParams(),
-    text = document.getElementById('text').value,
-    url = "/w";
+    text = document.getElementById('text').value;
   if (!text || text.length === 0) {
     return;
   }
 
-  document.getElementById('text').disabled = 'true';
-  document.querySelector('input[type=submit]').disabled = 'true';
+  document.getElementById('text').disabled = true;
+  document.querySelector('#wayback').disabled = true;
+  document.querySelector('#playback').disabled = true;
   document.querySelector('div.form').style.backgroundColor = '#5454541f';
 
   http.open("POST", url, true);
@@ -79,14 +79,31 @@ var post = function () {
       if (http.response !== undefined && http.response) {
         var collects = JSON.parse(http.response)
         render(collects);
-      } else {
-        unblock();
       }
-    } else {
-      unblock();
     }
+    unblock();
   };
   params.append("text", text);
   params.append("data-type", "json");
   http.send(params);
-};
+}
+
+window.addEventListener('submit', (e) => {
+  // Prevent Chrome 67 and earlier from automatically showing the prompt
+  e.preventDefault();
+
+  const wayback = document.getElementById('wayback');
+  const playback = document.getElementById('playback');
+  switch (e.submitter) {
+    default:
+    case wayback: {
+      post("/wayback");
+      break
+    };
+    case playback: {
+      post("/playback");
+      break
+    };
+  }
+});
+

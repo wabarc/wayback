@@ -13,6 +13,8 @@ const (
 	SLOT_IP = "ip"
 	SLOT_PH = "ph"
 	SLOT_TT = "tt"
+
+	PB_SLUG = "/playback" // Identity for playback
 )
 
 // SlotName returns the descriptions of the wayback service.

@@ -17,7 +17,9 @@ self.addEventListener("install", (event) => {
     '/icon/icon-120.png',
     '/icon/icon-152.png',
     '/icon/icon-167.png',
-    '/icon/icon-180.png'
+    '/icon/icon-180.png',
+    '/icon/search.svg',
+    '/icon/send.svg'
   ];
   if (typeof window !== "undefined" && "caches" in window) {
     event.waitUntil(

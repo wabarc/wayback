@@ -78,7 +78,6 @@ func (t *Twitter) Serve() error {
 		fetchTick := time.NewTicker(time.Minute) // Fetch Direct Message event
 
 		t.archiving = make(map[string]bool)
-		var mute sync.RWMutex
 		var once sync.Once
 		for {
 			select {
@@ -108,9 +107,9 @@ func (t *Twitter) Serve() error {
 						})
 					}(event)
 
-					mute.Lock()
+					t.Lock()
 					t.archiving[event.ID] = true
-					mute.Unlock()
+					t.Unlock()
 				}
 			case <-t.ctx.Done():
 				once.Do(func() {
@@ -147,7 +146,9 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 		resp.Body.Close()
 
 		time.Sleep(time.Second)
+		t.Lock()
 		delete(t.archiving, event.ID)
+		t.Unlock()
 	}()
 
 	urls := helper.MatchURLFallback(text)

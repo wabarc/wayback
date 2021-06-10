@@ -261,9 +261,6 @@
       text-align: center;
       border: none;
       position: absolute;
-      bottom: .2em;
-      right: .3em;
-      left: auto;
       margin: auto;
       z-index: 2;
       outline: none;
@@ -273,6 +270,7 @@
       margin-bottom: -1px;
       margin-right: -3px;
       line-height: 1.5;
+      bottom: .2em;
       height: 1.8em;
       width: 1.8em;
       border-radius: 50%;
@@ -281,6 +279,7 @@
       background-color: #dee3e79c;
       background-position: 50% 50%;
       background-repeat: no-repeat;
+      background-size: cover;
       -webkit-font-smoothing: subpixel-antialiased;
       -webkit-transition: all .5s;
       -o-transition: all .5s;
@@ -298,16 +297,29 @@
       background-color: #dee3e7;
     }
 
+    input#wayback {
+      right: .3em;
+      left: auto;
+      background-image: url({{ route "icon" "filename" "send.svg" }});
+    }
+
+    input#playback {
+      left: .3em;
+      background-image: url({{ route "icon" "filename" "search.svg" }});
+    }
+
     @media only screen and (max-width: 1012px) {
       input[type="submit"] {
-        bottom: -1.6em;
-        right: 50%;
-        height: 4em;
-        width: 4em;
         font-size: 1.45em;
         -webkit-transform: translate(2em);
         -ms-transform: translate(2em);
         transform: translate(2em);
+      }
+      input#wayback {
+        bottom: -1.6em;
+        right: 50%;
+        height: 4em;
+        width: 4em;
       }
     }
 
@@ -412,10 +424,11 @@
       {{end}}
     </div>
     <div class="form">
-      <form action="/w" method="post" onsubmit="post(); return false;">
+      <form method="post">
         <textarea id="text" name="text" value="" autocapitalize="off" autocorrect="off" spellcheck="false"
           placeholder="e.g. https://www.eff.org https://www.wikipedia.org" autofocus></textarea>
-        <input type="submit" value="W">
+        <input type="submit" id="playback" name="action" value="" accesskey="p" formaction="/playback">
+        <input type="submit" id="wayback" name="action" value="" accesskey="s" formaction="/wayback">
       </form>
     </div>
   </div>
