@@ -55,7 +55,7 @@ four bits of information:
 
 ## Feature Requests
 
-Before submitting a feature request, try to get familiarized with the project. Find out if the 
+Before submitting a feature request, try to get familiarized with the project. Find out if the
 project has certain goals, or guidelines that describe how feature requests should be made.
 
 ## Just starting out? Looking for how to help?

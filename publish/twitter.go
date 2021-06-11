@@ -58,6 +58,7 @@ func (t *Twitter) ToTwitter(_ context.Context, text string) bool {
 	return true
 }
 
+// nolint:stylecheck
 func (m *Twitter) Render(vars []*wayback.Collect) string {
 	var tmplBytes bytes.Buffer
 

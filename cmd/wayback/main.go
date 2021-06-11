@@ -145,6 +145,7 @@ func setToEnv(cmd *cobra.Command) {
 	}
 }
 
+// nolint:gocyclo
 func handle(cmd *cobra.Command, args []string) {
 	if !ia && !is && !ip && !ph {
 		ia, is = true, true

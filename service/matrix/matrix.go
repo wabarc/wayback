@@ -224,16 +224,14 @@ func (m *Matrix) playback(ev *event.Event) error {
 	return nil
 }
 
-func (m *Matrix) redact(ev *event.Event, reason string) bool {
+func (m *Matrix) redact(ev *event.Event, reason string) {
 	if ev.ID == "" || ev.RoomID == "" || m.client == nil {
-		return false
+		return
 	}
 	extra := matrix.ReqRedact{Reason: reason}
 	if _, err := m.client.RedactEvent(ev.RoomID, ev.ID, extra); err != nil {
 		logger.Error("[matrix] react message failure, error: %v", err)
-		return false
 	}
-	return true
 }
 
 func (m *Matrix) joinedRooms() []id.RoomID {

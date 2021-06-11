@@ -72,6 +72,7 @@ func (p *Parser) parseFileContent(r io.Reader) (lines []string) {
 	return lines
 }
 
+// nolint:gocyclo,unparam
 func (p *Parser) parseLines(lines []string) (err error) {
 	for _, line := range lines {
 		fields := strings.SplitN(line, "=", 2)

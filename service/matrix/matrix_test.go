@@ -106,6 +106,7 @@ func recverClient(t *testing.T) *Matrix {
 	return New(context.Background(), &storage.Storage{}, pool)
 }
 
+// nolint:gocyclo
 func TestProcess(t *testing.T) {
 	if senderUID == "" || senderPwd == "" {
 		t.Skip("Define SENDER_UID and SENDER_PWD environment variables to test Matrix")

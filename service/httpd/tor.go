@@ -14,9 +14,9 @@ import (
 	"os/exec"
 	"time"
 
+	// "github.com/ipsn/go-libtor"
 	"github.com/cretz/bine/tor"
 	"github.com/cretz/bine/torutil/ed25519"
-	// "github.com/ipsn/go-libtor"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"

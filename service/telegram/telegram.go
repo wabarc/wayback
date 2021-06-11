@@ -139,6 +139,7 @@ func (t *Telegram) Serve() (err error) {
 	return errors.New("done")
 }
 
+// nolint:gocyclo
 func (t *Telegram) process(message *telegram.Message) (err error) {
 	content := message.Text
 	logger.Debug("[telegram] content: %s", content)
@@ -260,7 +261,7 @@ func (t *Telegram) playback(message *telegram.Message) error {
 		return nil
 	}
 
-	if err = t.bot.Notify(message.Sender, telegram.ChatAction(telegram.Typing)); err != nil {
+	if err = t.bot.Notify(message.Sender, telegram.Typing); err != nil {
 		logger.Error("[telegram] send typing action failed: %v", err)
 	}
 	col, _ := wayback.Playback(urls)
@@ -338,6 +339,7 @@ func (t *Telegram) getCommands() []telegram.Command {
 	return commands
 }
 
+// nolint:stylecheck
 func (t *Telegram) setCommands() (error, bool) {
 	commands := t.getCommands()
 	logger.Debug("[telegram] got commands: %v", commands)

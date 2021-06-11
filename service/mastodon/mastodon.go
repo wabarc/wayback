@@ -176,7 +176,7 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 
 	// Process playback request if message has prefix `/playback`
 	if strings.Contains(text, config.PB_SLUG) {
-		return m.playback(id, status)
+		return m.playback(status)
 	}
 
 	urls := helper.MatchURLFallback(text)
@@ -200,7 +200,7 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 	return nil
 }
 
-func (m *Mastodon) playback(id mastodon.ID, status *mastodon.Status) error {
+func (m *Mastodon) playback(status *mastodon.Status) error {
 	text := textContent(status.Content)
 	urls := helper.MatchURL(text)
 	if len(urls) == 0 {

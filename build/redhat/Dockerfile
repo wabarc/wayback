@@ -2,14 +2,14 @@ FROM golang:1.16-alpine AS builder
 
 RUN apk update && apk add --no-cache build-base ca-certificates git
 # Required by statically linked binary with OpenSSL
-RUN apk add linux-headers
+# RUN apk add linux-headers
 
-ADD . /go/src/app
 WORKDIR /go/src/app
+COPY . .
 RUN make linux-amd64
 
-FROM centos:latest
-RUN dnf install -y rpm-build
+FROM fedora:35
+RUN dnf install -y rpm-build systemd
 RUN mkdir -p /root/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 RUN echo "%_topdir /root/rpmbuild" >> .rpmmacros
 COPY --from=builder /go/src/app/build/binary/wayback-linux-amd64 /root/rpmbuild/SOURCES/wayback
