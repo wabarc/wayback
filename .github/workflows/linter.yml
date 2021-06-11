@@ -2,9 +2,11 @@ name: Linter
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - '**'
   pull_request:
-    branches: [ main ]
+    branches:
+      - '**'
     types: [ opened, synchronize, reopened ]
 
 jobs:
@@ -20,12 +22,20 @@ jobs:
         uses: github/super-linter@v4
         env:
           DEFAULT_BRANCH: 'main'
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_GO: true
           VALIDATE_MARKDOWN: true
           VALIDATE_SHELL_SHFMT: true
           VALIDATE_DOCKERFILE: true
-          VALIDATE_DOCKERFILE_HADOLINT: true
           VALIDATE_BASH: true
           VALIDATE_BASH_EXEC: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Golang linter
+        uses: golangci/golangci-lint-action@v2

@@ -7,6 +7,7 @@ package config // import "github.com/wabarc/wayback/config"
 // Opts holds parsed configuration options.
 var Opts *Options
 
+// nolint:stylecheck
 const (
 	SLOT_IA = "ia"
 	SLOT_IS = "is"
@@ -15,6 +16,7 @@ const (
 	SLOT_TT = "tt"
 
 	PB_SLUG = "/playback" // Identity for playback
+	UNKNOWN = "unknown"
 )
 
 // SlotName returns the descriptions of the wayback service.
@@ -31,7 +33,7 @@ func SlotName(s string) string {
 		return slots[s]
 	}
 
-	return "unknown"
+	return UNKNOWN
 }
 
 // SlotExtra returns the extra config of wayback slot.
@@ -48,5 +50,5 @@ func SlotExtra(s string) string {
 		return extra[s]
 	}
 
-	return "unknown"
+	return UNKNOWN
 }

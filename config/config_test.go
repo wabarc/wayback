@@ -24,7 +24,7 @@ func TestSlotName(t *testing.T) {
 }
 
 func TestSlotNameNotExist(t *testing.T) {
-	expected := "unknown"
+	expected := UNKNOWN
 	got := SlotName("something")
 
 	if got != expected {

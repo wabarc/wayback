@@ -8,8 +8,9 @@ ARG PKG_ARCH
 ARG PKG_VERSION
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt update -q && \
-    apt install -y -qq build-essential devscripts dh-make dh-systemd
+RUN apt-get update -q && \
+    apt-get install -y -qq --no-install-recommends build-essential devscripts dh-make dh-systemd && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /build/debian /pkg
 COPY . /src

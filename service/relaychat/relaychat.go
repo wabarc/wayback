@@ -51,7 +51,7 @@ func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *IRC {
 	conn.VerboseCallbackHandler = config.Opts.HasDebugMode()
 	conn.Debug = config.Opts.HasDebugMode()
 	conn.UseTLS = true
-	conn.TLSConfig = &tls.Config{InsecureSkipVerify: false}
+	conn.TLSConfig = &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12}
 
 	return &IRC{
 		ctx:   ctx,

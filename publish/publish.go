@@ -31,6 +31,7 @@ const (
 	FlagIRC      = "irc"
 )
 
+// nolint:gocyclo
 func To(ctx context.Context, col []*wayback.Collect, args ...string) {
 	var from string
 	if len(args) > 0 {

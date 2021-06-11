@@ -44,6 +44,12 @@ linters-settings:
   gocyclo:
     # minimal code complexity to report, 30 by default
     min-complexity: 15
+  gosec:
+    # To specify the configuration of rules.
+    # The configuration of rules is not fully documented by gosec:
+    # https://github.com/securego/gosec#configuration
+    # https://github.com/securego/gosec/blob/569328eade2ccbad4ce2d0f21ee158ab5356a5cf/rules/rulelist.go#L60-L102
+    config:
   misspell:
     # Correct spellings using locale preferences for US or UK.
     # Default is to use a neutral variety of English.
@@ -51,3 +57,9 @@ linters-settings:
     locale: US
     ignore-words:
       - someword
+  stylecheck:
+    go: "1.16"
+    # https://staticcheck.io/docs/options#checks
+    checks: [ "all", "-ST1003", "-ST1008", "-ST1016" ]
+    # https://staticcheck.io/docs/options#initialisms
+    initialisms: [ "ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "QPS", "RAM", "RPC", "SLA", "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "GID", "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS" ]

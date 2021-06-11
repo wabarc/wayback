@@ -12,7 +12,7 @@ WORKDIR /src
 COPY . .
 RUN --mount=type=bind,target=/src,rw \
     --mount=type=cache,target=/root/.cache/go-build \
-    --mount=target=/go/pkg/mod,type=cache \
+    --mount=type=cache,target=/go/pkg/mod \
     sh ./build/binary.sh $TARGETPLATFORM \
     && mv ./build/binary/wayback-* /wayback
 
