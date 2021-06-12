@@ -14,6 +14,7 @@ const (
 	SLOT_IP = "ip"
 	SLOT_PH = "ph"
 	SLOT_TT = "tt"
+	SLOT_GC = "gc"
 
 	PB_SLUG = "/playback" // Identity for playback
 	UNKNOWN = "unknown"
@@ -27,6 +28,7 @@ func SlotName(s string) string {
 		SLOT_IP: "IPFS",
 		SLOT_PH: "Telegraph",
 		SLOT_TT: "Time Travel",
+		SLOT_GC: "Google Cache",
 	}
 
 	if _, exist := slots[s]; exist {
@@ -44,6 +46,7 @@ func SlotExtra(s string) string {
 		SLOT_IP: "https://ipfs.github.io/public-gateway-checker/",
 		SLOT_PH: "https://telegra.ph/",
 		SLOT_TT: "http://timetravel.mementoweb.org/",
+		SLOT_GC: "https://webcache.googleusercontent.com/search?q=cache:",
 	}
 
 	if _, exist := extra[s]; exist {
