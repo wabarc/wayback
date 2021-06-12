@@ -143,7 +143,7 @@ func Playback(urls []string) (col []*Collect, err error) {
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 	var pb playback.Playback = &playback.Handle{URLs: urls}
-	var slots = []string{config.SLOT_IA, config.SLOT_IS, config.SLOT_IP, config.SLOT_PH, config.SLOT_TT}
+	var slots = []string{config.SLOT_IA, config.SLOT_IS, config.SLOT_IP, config.SLOT_PH, config.SLOT_TT, config.SLOT_GC}
 	for _, slot := range slots {
 		wg.Add(1)
 		go func(slot string) {
@@ -161,6 +161,8 @@ func Playback(urls []string) (col []*Collect, err error) {
 				c.Dst = pb.PH()
 			case config.SLOT_TT:
 				c.Dst = pb.TT()
+			case config.SLOT_GC:
+				c.Dst = pb.GC()
 			}
 			c.Arc = config.SlotName(slot)
 			c.Ext = config.SlotExtra(slot)
