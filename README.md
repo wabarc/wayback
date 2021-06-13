@@ -15,6 +15,8 @@
 
 Wayback is a tool that supports running as a command-line tool and docker container, purpose to snapshot webpage to time capsules.
 
+Supported Golang version: See [.github/workflows/testing.yml](./.github/workflows/testing.yml)
+
 ## Features
 
 - Cross platform
