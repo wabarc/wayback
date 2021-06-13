@@ -23,7 +23,6 @@ jobs:
         env:
           DEFAULT_BRANCH: 'main'
           VALIDATE_MARKDOWN: true
-          VALIDATE_SHELL_SHFMT: true
           VALIDATE_DOCKERFILE: true
           VALIDATE_BASH: true
           VALIDATE_BASH_EXEC: true
@@ -39,3 +38,36 @@ jobs:
 
       - name: Golang linter
         uses: golangci/golangci-lint-action@v2
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Run shellcheck with reviewdog
+        uses: reviewdog/action-shellcheck@v1
+
+  misspell:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Run misspell with reviewdog
+        uses: reviewdog/action-misspell@v1
+
+  alex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Run alex with reviewdog
+        uses: reviewdog/action-alex@v1
