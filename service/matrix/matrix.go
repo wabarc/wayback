@@ -17,6 +17,7 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/storage"
 	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
@@ -160,11 +161,13 @@ func (m *Matrix) process(ev *event.Event) error {
 		return errors.New("Matrix: URL no found")
 	}
 
-	col, err := wayback.Wayback(urls)
+	var bundles []reduxer.Bundle
+	col, err := wayback.Wayback(urls, &bundles)
 	if err != nil {
 		logger.Error("[matrix] archives failure, %v", err)
 		return err
 	}
+	logger.Debug("[matrix] bundles: %#v", bundles)
 
 	body := publish.NewMatrix(m.client).Render(col)
 	content := &event.MessageEventContent{
@@ -188,6 +191,7 @@ func (m *Matrix) process(ev *event.Event) error {
 	}
 
 	ctx := context.WithValue(m.ctx, publish.FlagMatrix, m.client)
+	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
 	publish.To(ctx, col, publish.FlagMatrix)
 
 	return nil

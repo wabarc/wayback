@@ -122,6 +122,8 @@ func TestToChannel(t *testing.T) {
 				return
 			}
 			fmt.Fprintln(w, `{"ok":true, "result":null}`)
+		case "sendMediaGroup":
+			fmt.Fprintln(w, `{"ok":true, "result":null}`)
 		}
 	})
 

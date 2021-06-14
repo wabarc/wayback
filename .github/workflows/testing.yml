@@ -52,6 +52,11 @@ jobs:
       with:
         daemon: true
 
+    - name: Set up Chrome
+      uses: browser-actions/setup-chrome@latest
+      with:
+        chrome-version: stable
+
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
       with:

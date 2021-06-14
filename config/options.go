@@ -57,6 +57,7 @@ const (
 	defEnabledChromeRemote = false
 	defBoltPathname        = "wayback.db"
 	defPoolingSize         = 3
+	defStorageDir          = ""
 )
 
 var (
@@ -83,6 +84,7 @@ type Options struct {
 	enabledChromeRemote bool
 	boltPathname        string
 	poolingSize         int
+	storageDir          string
 }
 
 type ipfs struct {
@@ -150,6 +152,7 @@ func NewOptions() *Options {
 		enabledChromeRemote: defEnabledChromeRemote,
 		boltPathname:        defBoltPathname,
 		poolingSize:         defPoolingSize,
+		storageDir:          defStorageDir,
 		ipfs: &ipfs{
 			host: defIPFSHost,
 			port: defIPFSPort,
@@ -461,4 +464,14 @@ func (o *Options) BoltPathname() string {
 // PoolingSize returns the number of worker pool
 func (o *Options) PoolingSize() int {
 	return o.poolingSize
+}
+
+// SrorageDir returns the directory to storage binary file, e.g. html file, PDF
+func (o *Options) StorageDir() string {
+	return o.storageDir
+}
+
+// EnabledReduxer returns whether enable store binary file locally.
+func (o *Options) EnabledReduxer() bool {
+	return o.storageDir != ""
 }
