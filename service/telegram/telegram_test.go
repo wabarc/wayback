@@ -101,6 +101,23 @@ var (
     }
   }
 }`
+	sendMessageJSON = `{
+  "ok": true,
+  "result": {
+    "message_id": 1002,
+    "text": "message content",
+    "from": {
+      "id": 120000000,
+      "is_bot": true,
+      "first_name": "Testing Bot",
+      "username": "username"
+    },
+    "chat": {
+      "id": 1000001,
+      "type": "private"
+    }
+  }
+}`
 )
 
 func handle(mux *http.ServeMux, updatesJSON string) {
@@ -138,7 +155,7 @@ func handle(mux *http.ServeMux, updatesJSON string) {
 				fmt.Fprintln(w, replyJSON)
 				return
 			}
-			fmt.Fprintln(w, `{"ok":true, "result":null}`)
+			fmt.Fprintln(w, sendMessageJSON)
 		case "editMessageText":
 			if !strings.Contains(text, config.SlotName("ia")) && !strings.Contains(text, "Archiving...") {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -146,6 +163,8 @@ func handle(mux *http.ServeMux, updatesJSON string) {
 			}
 			fmt.Fprintln(w, replyJSON)
 		case "sendChatAction":
+			fmt.Fprintln(w, `{"ok":true, "result":null}`)
+		case "sendMediaGroup":
 			fmt.Fprintln(w, `{"ok":true, "result":null}`)
 		default:
 			fmt.Println(slug)

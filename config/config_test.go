@@ -794,3 +794,55 @@ func TestBoltPath(t *testing.T) {
 		t.Fatalf(`Unexpected bolt db file path got %s instead of %s`, got, path)
 	}
 }
+
+func TestStorageDir(t *testing.T) {
+	dir := os.TempDir()
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_STORAGE_DIR", dir)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.StorageDir()
+	if got != dir {
+		t.Fatalf(`Unexpected storage binary directory got %s instead of %s`, got, dir)
+	}
+}
+
+func TestEnabledReduxer(t *testing.T) {
+	var tests = []struct {
+		dir string
+		exp bool
+	}{
+		{
+			dir: "",
+			exp: false,
+		},
+		{
+			dir: "/path/to/storage",
+			exp: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_STORAGE_DIR", test.dir)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.EnabledReduxer()
+			if got != test.exp {
+				t.Fatalf(`Unexpected enabled reduxer got %t instead of %t`, got, test.exp)
+			}
+		})
+	}
+}

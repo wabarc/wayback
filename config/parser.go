@@ -161,6 +161,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.poolingSize = parseInt(val, defPoolingSize)
 		case "WAYBACK_BOLT_PATH":
 			p.opts.boltPathname = parseString(val, defBoltPathname)
+		case "WAYBACK_STORAGE_DIR":
+			p.opts.storageDir = parseString(val, defStorageDir)
 		}
 	}
 

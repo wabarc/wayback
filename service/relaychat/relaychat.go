@@ -18,6 +18,7 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/storage"
 )
 
@@ -115,11 +116,13 @@ func (i *IRC) process(ev *irc.Event) error {
 		return errors.New("IRC: URL no found")
 	}
 
-	col, err := wayback.Wayback(urls)
+	var bundles []reduxer.Bundle
+	col, err := wayback.Wayback(urls, &bundles)
 	if err != nil {
 		logger.Error("[irc] archives failure, %v", err)
 		return err
 	}
+	logger.Debug("[irc] bundles: %#v", bundles)
 
 	pub := publish.NewIRC(i.conn)
 	replyText := pub.Render(col)
@@ -129,6 +132,7 @@ func (i *IRC) process(ev *irc.Event) error {
 
 	// Reply and publish toot as public
 	ctx := context.WithValue(i.ctx, publish.FlagIRC, i.conn)
+	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
 	publish.To(ctx, col, publish.FlagIRC)
 
 	return nil

@@ -20,6 +20,7 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/storage"
 	"golang.org/x/net/html"
 )
@@ -187,14 +188,17 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 		return errors.New("Mastodon: URL no found")
 	}
 
-	col, err := wayback.Wayback(urls)
+	var bundles []reduxer.Bundle
+	col, err := wayback.Wayback(urls, &bundles)
 	if err != nil {
 		logger.Error("[mastodon] archives failed: %v", err)
 		return err
 	}
+	logger.Debug("[mastodon] bundles: %#v", bundles)
 
 	// Reply and publish toot as public
 	ctx := context.WithValue(m.ctx, publish.FlagMastodon, m.client)
+	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
 	publish.To(ctx, col, publish.FlagMastodon, string(status.ID))
 
 	return nil

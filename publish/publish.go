@@ -29,6 +29,8 @@ const (
 	FlagMastodon = "mastodon"
 	FlagMatrix   = "matrix"
 	FlagIRC      = "irc"
+
+	PubBundle = "reduxer-bundle"
 )
 
 // nolint:gocyclo

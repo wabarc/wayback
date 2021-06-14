@@ -21,6 +21,7 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/template"
 	"github.com/wabarc/wayback/version"
 )
@@ -211,9 +212,13 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 	if len(urls) == 0 {
 		logger.Info("[web] url no found.")
 	}
-	col, _ := wayback.Wayback(urls)
+
+	var bundles []reduxer.Bundle
+	col, _ := wayback.Wayback(urls, &bundles)
+	logger.Debug("[web] bundles: %#v", bundles)
+
 	collector := transform(col)
-	ctx := context.Background()
+	ctx := context.WithValue(context.Background(), publish.PubBundle, bundles)
 	switch r.PostFormValue("data-type") {
 	case "json":
 		w.Header().Set("Content-Type", "application/json")

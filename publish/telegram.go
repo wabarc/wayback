@@ -13,6 +13,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/reduxer"
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -43,10 +44,10 @@ func NewTelegram(bot *telegram.Bot) *Telegram {
 
 // ToChannel for publish to message to Telegram channel,
 // returns boolean as result.
-func (t *Telegram) ToChannel(_ context.Context, text string) bool {
+func (t *Telegram) ToChannel(ctx context.Context, text string) (ok bool) {
 	if text == "" {
 		logger.Error("[publish] post to message to channel failed, text empty")
-		return false
+		return ok
 	}
 	if t.bot == nil {
 		var err error
@@ -56,18 +57,51 @@ func (t *Telegram) ToChannel(_ context.Context, text string) bool {
 			ParseMode: telegram.ModeHTML,
 		}); err != nil {
 			logger.Error("[publish] post to channel failed, %v", err)
-			return false
+			return ok
 		}
 	}
 
 	chat, err := t.bot.ChatByID("@" + config.Opts.TelegramChannel())
 	if err != nil {
 		logger.Error("[publish] open a chat failed: %v", err)
-		return false
+		return ok
 	}
-	if _, err := t.bot.Send(chat, text); err != nil {
+	stage, err := t.bot.Send(chat, text)
+	if err != nil {
 		logger.Error("[publish] post message to channel failed, %v", err)
-		return false
+		return ok
+	}
+
+	var bundles []reduxer.Bundle
+	if bundles, ok = ctx.Value(PubBundle).([]reduxer.Bundle); !ok {
+		logger.Debug("[publish] bundles empty")
+		return true
+	}
+
+	// Attach image and pdf files
+	var album telegram.Album
+	for _, bundle := range bundles {
+		paths := []string{
+			bundle.Path.Img,
+			bundle.Path.PDF,
+		}
+		for _, path := range paths {
+			if path == "" {
+				logger.Info("[publish] invalid file path: %s", path)
+				continue
+			}
+			logger.Debug("[publish] append document: %s", path)
+			album = append(album, &telegram.Document{
+				File:     telegram.FromDisk(path),
+				Caption:  bundle.Title,
+				FileName: path,
+			})
+		}
+	}
+	// Send album attach files, and reply to wayback result message
+	opts := &telegram.SendOptions{ReplyTo: stage, DisableNotification: true}
+	if _, err := t.bot.SendAlbum(stage.Chat, album, opts); err != nil {
+		logger.Error("[publish] reply failed: %v", err)
 	}
 
 	return true

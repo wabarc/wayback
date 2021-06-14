@@ -19,6 +19,7 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/storage"
 )
 
@@ -164,11 +165,13 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 		return errors.New("Twitter: URL no found")
 	}
 
-	col, err := wayback.Wayback(realURLs)
+	var bundles []reduxer.Bundle
+	col, err := wayback.Wayback(realURLs, &bundles)
 	if err != nil {
 		logger.Error("[twitter] archives failure, ", err)
 		return err
 	}
+	logger.Debug("[twitter] bundles: %#v", bundles)
 
 	replyText := pub.Render(col)
 	logger.Debug("[twitter] reply text, %s", replyText)
@@ -203,6 +206,7 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	}()
 
 	ctx := context.WithValue(t.ctx, publish.FlagTwitter, t.client)
+	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
 	go publish.To(ctx, col, publish.FlagTwitter)
 
 	return nil

@@ -5,15 +5,18 @@
 package wayback // import "github.com/wabarc/wayback"
 
 import (
+	"context"
 	"sync"
 
 	is "github.com/wabarc/archive.is"
 	ia "github.com/wabarc/archive.org"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/playback"
+	"github.com/wabarc/screenshot"
 	ph "github.com/wabarc/telegra.ph"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wbipfs"
 )
 
@@ -31,6 +34,8 @@ type Broker interface {
 
 // Handle represents a wayback handle.
 type Handle struct {
+	Bundles *[]reduxer.Bundle
+
 	URLs []string
 }
 
@@ -82,9 +87,11 @@ func (h *Handle) IP() Archived {
 
 func (h *Handle) PH() Archived {
 	wbrc := &ph.Archiver{}
+	wbrc.SetShots(h.parseShots())
 	if config.Opts.EnabledChromeRemote() {
 		wbrc.ByRemote(config.Opts.ChromeRemoteAddr())
 	}
+
 	uris, err := wbrc.Wayback(h.URLs)
 	if err != nil {
 		logger.Error("Wayback %v to Telegra.ph failed, %v", h.URLs, err)
@@ -93,13 +100,31 @@ func (h *Handle) PH() Archived {
 	return uris
 }
 
+func (h *Handle) parseShots() (s []screenshot.Screenshots) {
+	for _, bundle := range *h.Bundles {
+		s = append(s, screenshot.Screenshots{
+			URL:   bundle.URL,
+			Title: bundle.Title,
+			Image: bundle.Image,
+			HTML:  bundle.HTML,
+			PDF:   bundle.PDF,
+		})
+	}
+	return s
+}
+
 // Wayback returns URLs archived to the time capsules.
-func Wayback(urls []string) (col []*Collect, err error) {
+func Wayback(urls []string, bundles *[]reduxer.Bundle) (col []*Collect, err error) {
 	logger.Debug("[wayback] start...")
+
+	*bundles, err = reduxer.Do(context.Background(), urls...)
+	if err != nil {
+		logger.Info("[wayback] cannot to start reduxer: %v", err)
+	}
 
 	var mu sync.Mutex
 	var wg sync.WaitGroup
-	var wb Broker = &Handle{URLs: urls}
+	var wb Broker = &Handle{URLs: urls, Bundles: bundles}
 	for slot, arc := range config.Opts.Slots() {
 		if !arc {
 			continue

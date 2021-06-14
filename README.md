@@ -26,6 +26,7 @@ Supported Golang version: See [.github/workflows/testing.yml](./.github/workflow
 - Wayback to Internet Archive, archive.today, IPFS and Telegraph easier
 - Interactive with IRC, Martix, Telegram bot, Mastodon and Twitter as daemon service
 - Support publish wayback results to Telegram channel, Mastodon and GitHub Issues
+- Support store archived files to disk
 
 ## Installation
 
@@ -204,6 +205,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `CHROME_REMOTE_ADDR`              | -                       | Chrome/Chromium remote debugging address, for screenshot     |
 | -                   | `WAYBACK_POOLING_SIZE`            | `3`                     | Number of worker pool for wayback at once                    |
 | -                   | `WAYBACK_BOLT_PATH`               | `./wayback.db`          | File path of bolt database                                   |
+| -                   | `WAYBACK_STORAGE_DIR`             | -                       | Directory to store binary file, e.g. PDF, html file          |
 | `-d`, `--daemon`    | -                                 | -                       | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter` |
 | `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                  | Wayback webpages to **Internet Archive**                     |
 | `--is`              | `WAYBACK_ENABLE_IS`               | `true`                  | Wayback webpages to **Archive Today**                        |

@@ -22,6 +22,7 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/storage"
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
@@ -195,7 +196,7 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 			return
 		}
 		t.pool.Roll(func() {
-			if err := t.archive(t.ctx, message, urls); err != nil {
+			if err := t.wayback(t.ctx, message, urls); err != nil {
 				logger.Error("[telegram] archives failed: %v", err)
 				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
 				return
@@ -206,7 +207,7 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 	return nil
 }
 
-func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls []string) error {
+func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls []string) error {
 	stage, err := t.bot.Edit(message, "Archiving...")
 	if err != nil {
 		logger.Error("[telegram] send archiving message failed: %v", err)
@@ -214,11 +215,13 @@ func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls 
 	}
 	logger.Debug("[telegram] send archiving messagee result: %v", stage)
 
-	col, err := wayback.Wayback(urls)
+	var bundles []reduxer.Bundle
+	col, err := wayback.Wayback(urls, &bundles)
 	if err != nil {
 		logger.Error("[telegram] archives failure, ", err)
 		return err
 	}
+	logger.Debug("[telegram] bundles: %#v", bundles)
 
 	replyText := t.pub.Render(col)
 	logger.Debug("[telegram] reply text, %s", replyText)
@@ -230,7 +233,34 @@ func (t *Telegram) archive(ctx context.Context, message *telegram.Message, urls 
 	}
 
 	ctx = context.WithValue(ctx, publish.FlagTelegram, t.bot)
+	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
 	go publish.To(ctx, col, publish.FlagTelegram)
+
+	var album telegram.Album
+	for _, bundle := range bundles {
+		paths := []string{
+			bundle.Path.Img,
+			bundle.Path.PDF,
+			// bundle.Path.Raw,
+		}
+		for _, path := range paths {
+			if path == "" {
+				logger.Info("[telegram] invalid file path: %s", path)
+				continue
+			}
+			logger.Debug("[telegram] append document: %s", path)
+			album = append(album, &telegram.Document{
+				File:     telegram.FromDisk(path),
+				Caption:  bundle.Title,
+				FileName: path,
+			})
+		}
+	}
+	// Send album attach files, and reply to wayback result message
+	opts = &telegram.SendOptions{ReplyTo: stage, DisableNotification: true}
+	if _, err := t.bot.SendAlbum(stage.Chat, album, opts); err != nil {
+		logger.Error("[telegram] reply failed: %v", err)
+	}
 
 	return nil
 }
