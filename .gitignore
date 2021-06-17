@@ -19,6 +19,7 @@
 
 /build/binary
 /build/package
+/.flatpak-builder
 
 # Ignore Tor embedded process data directory
 **/tor-data*

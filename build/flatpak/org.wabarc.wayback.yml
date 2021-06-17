@@ -1,0 +1,13 @@
+app-id: org.wabarc.wayback
+runtime: org.freedesktop.Platform
+runtime-version: '20.08'
+sdk: org.freedesktop.Sdk
+command: wayback
+modules:
+  - name: wayback
+    buildsystem: simple
+    build-commands:
+      - install -D wayback /app/bin/wayback
+    sources:
+      - type: file
+        path: wayback

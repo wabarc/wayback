@@ -90,6 +90,10 @@ WINDOWS_ARCH_LIST = \
 	debian-packages \
 	docker-image
 
+.PHONY: build
+build:
+	$(GOBUILD) -o $(BINDIR)/$(NAME) $(GOFILES)
+
 darwin-386:
 	GOOS=darwin GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
