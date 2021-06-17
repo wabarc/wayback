@@ -18,6 +18,9 @@ on:
       - "go.sum"
   workflow_dispatch:
 
+env:
+  PRODUCT: wayback
+
 jobs:
   build:
     name: Build
@@ -118,13 +121,13 @@ jobs:
           ARGS="${ARGS}-${GOMIPSLE}"
         fi
         make ${ARGS}
-        echo "::set-output name=filename::wayback-${ARGS}"
+        echo "::set-output name=filename::${{ env.PRODUCT }}-${ARGS}"
 
     - name: Upload binary artifacts
       uses: actions/upload-artifact@v2
       with:
         name: ${{ steps.builder.outputs.filename }}
-        path: ./build/binary/wayback*
+        path: ./build/binary/${{ env.PRODUCT }}*
         if-no-files-found: error
 
   debpkg:
@@ -164,13 +167,13 @@ jobs:
         PKG_ARCH="${TARGET//v8}"
         PKG_ARCH="${PKG_ARCH//32}"
         make debian DEB_IMG_ARCH=${TARGET} PKG_ARCH=${PKG_ARCH}
-        echo "::set-output name=filename::wayback-deb-${PKG_ARCH}"
+        echo "::set-output name=filename::${{ env.PRODUCT }}-deb-${PKG_ARCH}"
 
     - name: Upload archived binary
       uses: actions/upload-artifact@v2
       with:
         name: ${{ steps.builder.outputs.filename }}
-        path: build/package/wayback*.deb
+        path: build/package/${{ env.PRODUCT }}*.deb
         if-no-files-found: error
 
   rpmpkg:
@@ -188,8 +191,8 @@ jobs:
     - name: Upload archived binary
       uses: actions/upload-artifact@v2
       with:
-        name: wayback-rpm
-        path: build/package/wayback*.rpm
+        name: ${{ env.PRODUCT }}-rpm
+        path: build/package/${{ env.PRODUCT }}*.rpm
         if-no-files-found: error
 
   aurpkg:
@@ -211,10 +214,46 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: wayback-aur
+        name: ${{ env.PRODUCT }}-aur
         path: |
           build/aur/.SRCINFO
           build/aur/PKGBUILD
-          build/aur/wayback*.pkg.tar.zst
+          build/aur/${{ env.PRODUCT }}*.pkg.tar.zst
         if-no-files-found: error
 
+  snapcraft:
+    name: Build snap
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - i386
+          - amd64
+    steps:
+    - name: Check out code base
+      if: github.event_name == 'push'
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Check out code base
+      if: github.event_name == 'pull_request'
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+
+    - id: build
+      name: Build snap
+      uses: diddlesnaps/snapcraft-multiarch-action@v1
+      with:
+        architecture: ${{ matrix.platform }}
+        snapcraft-channel: stable
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.PRODUCT }}-snap-${{ matrix.platform }}
+        path: ${{ steps.build.outputs.snap }}

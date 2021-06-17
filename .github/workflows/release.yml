@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
+env:
+  PRODUCT: wayback
+
 jobs:
   build:
     name: Build
@@ -101,8 +104,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: wayback
-        path: build/package/wayback*
+        name: ${{ env.PRODUCT }}
+        path: build/package/${{ env.PRODUCT }}*
 
   debpkg:
     name: Build DEB
@@ -146,8 +149,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: wayback
-        path: build/package/wayback*.deb
+        name: ${{ env.PRODUCT }}
+        path: build/package/${{ env.PRODUCT }}*.deb
 
   rpmpkg:
     name: Build RPM
@@ -164,8 +167,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: wayback
-        path: build/package/wayback*.rpm
+        name: ${{ env.PRODUCT }}
+        path: build/package/${{ env.PRODUCT }}*.rpm
 
   aurpkg:
     name: Build AUR
@@ -186,12 +189,48 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: wayback
+        name: ${{ env.PRODUCT }}
         path: |
           build/aur/.SRCINFO
           build/aur/PKGBUILD
-          build/aur/wayback*.pkg.tar.zst
+          build/aur/${{ env.PRODUCT }}*.pkg.tar.zst
         if-no-files-found: error
+
+  snapcraft:
+    name: Build Snap
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - amd64
+    steps:
+    - name: Check out code base
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+
+    - id: build
+      name: Build snap
+      uses: diddlesnaps/snapcraft-multiarch-action@v1
+      with:
+        architecture: ${{ matrix.platform }}
+        snapcraft-channel: stable
+
+    - name: Set env & Print wayback version
+      shell: bash
+      run: |
+        version=$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
+        echo "VERSION=${version:1}" >> $GITHUB_ENV
+        echo ${{ steps.build.outputs.snap }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.PRODUCT }}
+        path: ${{ steps.build.outputs.snap }}
 
   checksum:
     name: Get archived packages checksum
@@ -203,13 +242,13 @@ jobs:
     - name: Download math result from build job
       uses: actions/download-artifact@v2
       with:
-        name: wayback
+        name: ${{ env.PRODUCT }}
         path: .
 
     - name: Create all binary digest
       id: digest
       run: |
-        digest=$(find wayback* -type f -exec sha256sum {} +)
+        digest=$(find ${{ env.PRODUCT }}* -type f -exec sha256sum {} +)
         digest="${digest//$'%'/%25}"
         digest="${digest//$'\n'/%0A}"
         echo "::set-output name=result::$digest"
@@ -254,8 +293,8 @@ jobs:
     - name: Download math result from build and checksum jobs
       uses: actions/download-artifact@v2
       with:
-        name: wayback
-        path: wayback # Put files to wayback directory
+        name: ${{ env.PRODUCT }}
+        path: ${{ env.PRODUCT }}
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -264,7 +303,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
         body_path: gittaglogs.txt
-        files: wayback/wayback*
+        files: ${{ env.PRODUCT }}/${{ env.PRODUCT }}*
         draft: true
 
   release-apt:
@@ -282,8 +321,8 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
-        name: wayback
-        path: wayback # Put files to wayback directory
+        name: ${{ env.PRODUCT }}
+        path: ${{ env.PRODUCT }}
 
     - name: Import GPG key
       id: gpg
@@ -302,7 +341,7 @@ jobs:
     - name: Build APT Repository
       if: ${{ steps.gpg.outputs.keyid != '' }}
       run: |
-        cp ./wayback/*.deb .
+        cp ./${{ env.PRODUCT }}/*.deb .
         make build
 
     - name: Publish APT Repository
@@ -328,12 +367,12 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v2
       with:
-        name: wayback
-        path: wayback # Put files to wayback directory
+        name: ${{ env.PRODUCT }}
+        path: ${{ env.PRODUCT }}
 
     - name: Build RPM Repository
       run: |
-        cp ./wayback/*.rpm ./x86_64
+        cp ./${{ env.PRODUCT }}/*.rpm ./x86_64
         make build
 
     - name: Publish RPM Repository

@@ -33,7 +33,7 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: snap
+          name: snap-${{ matrix.platform }}
           path: ${{ steps.build.outputs.snap }}
 
       - uses: snapcore/action-publish@v1

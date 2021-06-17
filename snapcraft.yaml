@@ -25,3 +25,5 @@ parts:
 apps:
   wayback:
     command: wayback
+    plugs:
+      - network
