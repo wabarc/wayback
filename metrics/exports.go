@@ -19,7 +19,7 @@ var Gather *Collector
 func (c *Collector) Export(labels ...string) string {
 	logger.Debug("[metrics] export metrics family: %#v", prometheus.DefaultRegisterer)
 
-	var gatherer prometheus.Gatherer = prometheus.DefaultGatherer
+	var gatherer = prometheus.DefaultGatherer
 	var protobufs, err = gatherer.Gather()
 	if err != nil {
 		logger.Error("[metrics] gather metrics family failed: %v", err)

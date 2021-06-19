@@ -145,5 +145,8 @@ func funcMap() template.FuncMap {
 		"revert": func(link string) string {
 			return strings.Replace(link, cache, "", 1)
 		},
+		"not": func(text, s string) bool {
+			return !strings.Contains(text, s)
+		},
 	}
 }

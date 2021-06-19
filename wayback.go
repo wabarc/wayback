@@ -40,9 +40,9 @@ type Handle struct {
 type Collect struct {
 	sync.RWMutex
 
-	Arc string
-	Dst map[string]string
-	Ext string
+	Arc string            // Archive slot name, see config/config.go
+	Dst map[string]string // Archived destination URL
+	Ext string            // Extra identifier
 }
 
 func (h *Handle) IA() Archived {

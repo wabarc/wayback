@@ -58,17 +58,19 @@ func (t *Twitter) ToTwitter(_ context.Context, text string) bool {
 	return true
 }
 
+// Runder generate tweet of given wayback collects. It excluded telegra.ph
+// because this link has been identified by Twitter
 // nolint:stylecheck
 func (m *Twitter) Render(vars []*wayback.Collect) string {
 	var tmplBytes bytes.Buffer
 
-	const tmpl = `{{range $ := .}}{{ $.Arc }}:
+	const tmpl = `{{range $ := .}}{{if not $.Arc "Telegraph"}}{{ $.Arc }}:
 {{ range $src, $dst := $.Dst -}}
 • {{ $dst }}
-{{end}}
+{{end}}{{end}}
 {{end}}`
 
-	tpl, err := template.New("message").Parse(tmpl)
+	tpl, err := template.New("message").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
 		logger.Debug("[publish] parse Twitter template failed, %v", err)
 		return ""
@@ -80,5 +82,20 @@ func (m *Twitter) Render(vars []*wayback.Collect) string {
 		return ""
 	}
 
-	return strings.TrimSuffix(tmplBytes.String(), "\n")
+	return original(vars) + strings.TrimRight(tmplBytes.String(), "\n")
+}
+
+func original(vars []*wayback.Collect) (o string) {
+	if len(vars) == 0 {
+		return o
+	}
+
+	for url, _ := range vars[0].Dst {
+		o += "• " + url + "\n"
+	}
+	if o == "" {
+		return o
+	}
+
+	return "Origin:\n" + o + "\n====\n\n"
 }

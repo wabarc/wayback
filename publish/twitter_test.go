@@ -16,18 +16,19 @@ import (
 	"github.com/wabarc/wayback/config"
 )
 
-var tweet = `Internet Archive:
+var tweet = `Origin:
+• https://example.com/?q=%E4%B8%AD%E6%96%87
+
+====
+
+Internet Archive:
 • https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87
 
 archive.today:
 • http://archive.today/abcdE
 
 IPFS:
-• https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
-
-Telegraph:
-• http://telegra.ph/title-01-01
-`
+• https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr`
 
 func setTwitterEnv() {
 	os.Setenv("WAYBACK_TWITTER_CONSUMER_KEY", "foo")
