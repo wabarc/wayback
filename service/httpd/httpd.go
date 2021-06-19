@@ -273,7 +273,6 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 	}
 	col, _ := wayback.Playback(urls)
 	collector := transform(col)
-	ctx := context.Background()
 	switch r.PostFormValue("data-type") {
 	case "json":
 		w.Header().Set("Content-Type", "application/json")
@@ -284,7 +283,6 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 		} else {
 			if len(urls) > 0 {
 				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-				go publish.To(ctx, col, "web")
 			}
 			w.Write(data)
 		}
@@ -294,7 +292,6 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 		if html, ok := web.template.Render("layout", collector); ok {
 			if len(urls) > 0 {
 				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-				go publish.To(ctx, col, "web")
 			}
 			w.Write(html)
 		} else {
