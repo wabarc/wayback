@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.13.0] - 2021-06-19
+
+### Added
+- Add support store archived files to disk
+- Supports playback for web, mastodon and matrix
+- Supports playback from google cache
+- Supports mention from Mastodon
+- Packaging Flatpak and Snapcraft
+- Add heroku one click deploy button
+
+### Changed
+- Replace service/anonymity to service/httpd
+- Change onion service address
+- Refine some code & improve post tweet
+- Extract title for github issue
+- Chore changes
+
+### Fixed
+- Fix linter
+
 ## [0.12.3] - 2021-06-01
 
 ### Added
