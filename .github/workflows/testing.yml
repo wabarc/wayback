@@ -62,6 +62,12 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Set env
+      shell: bash
+      run: |
+        storage_dir=$GITHUB_WORKSPACE/.tmp
+        echo "WAYBACK_STORAGE_DIR=${storage_dir}" >> $GITHUB_ENV
+
     - name: Get dependencies
       run: |
         go get -v -t -d ./...
