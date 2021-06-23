@@ -26,4 +26,5 @@ apps:
   wayback:
     command: wayback
     plugs:
+      - home
       - network

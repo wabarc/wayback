@@ -212,19 +212,18 @@ jobs:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
 
+    - name: Set env & Print wayback version
+      shell: bash
+      run: |
+        version=$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
+        sed -i "s/version: 'git'/version: '${version}'/g" snapcraft.yaml
+
     - id: build
       name: Build snap
       uses: diddlesnaps/snapcraft-multiarch-action@v1
       with:
         architecture: ${{ matrix.platform }}
         snapcraft-channel: stable
-
-    - name: Set env & Print wayback version
-      shell: bash
-      run: |
-        version=$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
-        echo "VERSION=${version:1}" >> $GITHUB_ENV
-        echo ${{ steps.build.outputs.snap }}
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2

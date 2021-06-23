@@ -8,7 +8,6 @@ on:
 
 jobs:
   snapcraft:
-    if: github.repository == 'wabarc/wayback'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,6 +23,12 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
+      - name: Set env & Print wayback version
+        shell: bash
+        run: |
+          version=$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
+          sed -i "s/version: 'git'/version: '${version}'/g" snapcraft.yaml
+
       - id: build
         name: Build snap
         uses: diddlesnaps/snapcraft-multiarch-action@v1
@@ -31,14 +36,16 @@ jobs:
           architecture: ${{ matrix.platform }}
           snapcraft-channel: stable
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
         with:
           name: snap-${{ matrix.platform }}
           path: ${{ steps.build.outputs.snap }}
 
       - uses: snapcore/action-publish@v1
         name: Release Snap
+        if: github.repository == 'wabarc/wayback'
         with:
           store_login: ${{ secrets.SNAPCRAFT_TOKEN }}
           snap: ${{ steps.build.outputs.snap }}
-          release: edge
+          release: stable

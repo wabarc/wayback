@@ -35,8 +35,18 @@ jobs:
         # https://docs.github.com/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#changing-the-languages-that-are-analyzed
 
     steps:
-    - name: Checkout repository
+    - name: Check out code base
+      if: github.event_name == 'push'
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Check out code base
+      if: github.event_name == 'pull_request'
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL

@@ -13,10 +13,18 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout default branch
+      - name: Check out code base
+        if: github.event_name == 'push'
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Lint Code Base
         uses: github/super-linter@v4
@@ -31,10 +39,18 @@ jobs:
   go:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout default branch
+      - name: Check out code base
+        if: github.event_name == 'push'
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Golang linter
         uses: golangci/golangci-lint-action@v2
@@ -42,10 +58,18 @@ jobs:
   shellcheck:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout default branch
+      - name: Check out code base
+        if: github.event_name == 'push'
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run shellcheck with reviewdog
         uses: reviewdog/action-shellcheck@v1
@@ -53,10 +77,18 @@ jobs:
   misspell:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout default branch
+      - name: Check out code base
+        if: github.event_name == 'push'
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run misspell with reviewdog
         uses: reviewdog/action-misspell@v1
@@ -64,10 +96,18 @@ jobs:
   alex:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout default branch
+      - name: Check out code base
+        if: github.event_name == 'push'
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run alex with reviewdog
         uses: reviewdog/action-alex@v1
