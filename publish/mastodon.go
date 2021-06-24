@@ -64,7 +64,7 @@ func (m *Mastodon) ToMastodon(ctx context.Context, text, id string) bool {
 	return true
 }
 
-func (m *Mastodon) Render(vars []*wayback.Collect) string {
+func (m *Mastodon) Render(vars []wayback.Collect) string {
 	var tmplBytes bytes.Buffer
 
 	const tmpl = `{{range $ := .}}{{ $.Arc }}:

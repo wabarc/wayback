@@ -21,7 +21,7 @@ import (
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
-var collects = []*wayback.Collect{
+var collects = []wayback.Collect{
 	{
 		Arc: config.SlotName(config.SLOT_IA),
 		Dst: map[string]string{
@@ -52,7 +52,7 @@ var collects = []*wayback.Collect{
 	},
 }
 
-var flawed = []*wayback.Collect{
+var flawed = []wayback.Collect{
 	{
 		Arc: config.SlotName(config.SLOT_IA),
 		Dst: map[string]string{

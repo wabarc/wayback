@@ -57,7 +57,7 @@ func (i *IRC) ToChannel(ctx context.Context, text string) bool {
 	return true
 }
 
-func (i *IRC) Render(vars []*wayback.Collect) string {
+func (i *IRC) Render(vars []wayback.Collect) string {
 	var tmplBytes bytes.Buffer
 
 	const tmpl = `{{range $ := .}}{{ $.Arc }}:- {{ range $src, $dst := $.Dst }}• {{ $dst }}, {{end}}{{end}}`

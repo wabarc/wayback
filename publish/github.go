@@ -92,7 +92,7 @@ func (gh *GitHub) ToIssues(ctx context.Context, text string) bool {
 	return true
 }
 
-func (gh *GitHub) Render(vars []*wayback.Collect) string {
+func (gh *GitHub) Render(vars []wayback.Collect) string {
 	var tmplBytes bytes.Buffer
 
 	const tmpl = `{{range $ := .}}**[{{ $.Arc }}]({{ $.Ext }})**:

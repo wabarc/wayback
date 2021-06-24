@@ -107,7 +107,7 @@ func (t *Telegram) ToChannel(ctx context.Context, text string) (ok bool) {
 	return true
 }
 
-func (t *Telegram) Render(vars []*wayback.Collect) string {
+func (t *Telegram) Render(vars []wayback.Collect) string {
 	var tmplBytes bytes.Buffer
 
 	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext }}'>{{ $.Arc }}</a></b>:

@@ -301,7 +301,7 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func transform(col []*wayback.Collect) template.Collector {
+func transform(col []wayback.Collect) template.Collector {
 	collects := []template.Collect{}
 	for _, c := range col {
 		for src, dst := range c.Dst {

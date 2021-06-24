@@ -34,7 +34,7 @@ const (
 )
 
 // nolint:gocyclo
-func To(ctx context.Context, col []*wayback.Collect, args ...string) {
+func To(ctx context.Context, col []wayback.Collect, args ...string) {
 	var from string
 	if len(args) > 0 {
 		from = args[0]

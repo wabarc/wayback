@@ -74,7 +74,7 @@ func (m *Matrix) ToRoom(ctx context.Context, text string) bool {
 	return true
 }
 
-func (m *Matrix) Render(vars []*wayback.Collect) string {
+func (m *Matrix) Render(vars []wayback.Collect) string {
 	var tmplBytes bytes.Buffer
 
 	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext }}'>{{ $.Arc }}</a></b>:<br>

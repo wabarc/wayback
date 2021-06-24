@@ -43,8 +43,6 @@ type Handle struct {
 // Dst mapping the original URL and archived destination URL,
 // Ext is extra descriptions.
 type Collect struct {
-	sync.RWMutex
-
 	Arc string            // Archive slot name, see config/config.go
 	Dst map[string]string // Archived destination URL
 	Ext string            // Extra identifier
@@ -114,7 +112,7 @@ func (h *Handle) parseShots() (s []screenshot.Screenshots) {
 }
 
 // Wayback returns URLs archived to the time capsules.
-func Wayback(urls []string, bundles *[]reduxer.Bundle) (col []*Collect, err error) {
+func Wayback(urls []string, bundles *[]reduxer.Bundle) (col []Collect, err error) {
 	logger.Debug("[wayback] start...")
 
 	*bundles, err = reduxer.Do(context.Background(), urls...)
@@ -132,7 +130,7 @@ func Wayback(urls []string, bundles *[]reduxer.Bundle) (col []*Collect, err erro
 		wg.Add(1)
 		go func(slot string) {
 			defer wg.Done()
-			c := &Collect{}
+			c := Collect{}
 			logger.Debug("[wayback] archiving slot: %s", slot)
 			switch slot {
 			case config.SLOT_IA:
@@ -162,7 +160,7 @@ func Wayback(urls []string, bundles *[]reduxer.Bundle) (col []*Collect, err erro
 }
 
 // Playback returns URLs archived from the time capsules.
-func Playback(urls []string) (col []*Collect, err error) {
+func Playback(urls []string) (col []Collect, err error) {
 	logger.Debug("[playback] start...")
 
 	var mu sync.Mutex
@@ -173,7 +171,7 @@ func Playback(urls []string) (col []*Collect, err error) {
 		wg.Add(1)
 		go func(slot string) {
 			defer wg.Done()
-			c := &Collect{}
+			c := Collect{}
 			logger.Debug("[playback] searching slot: %s", slot)
 			switch slot {
 			case config.SLOT_IA:
