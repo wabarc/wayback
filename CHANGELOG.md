@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.13.1] - 2021-06-27
+
+### Added
+- Add publish to telegram private channel support
+
+### Changed
+- Improvements for playback ([wabarc/playback](https://github.com/wabarc/playback/commit/d3f173eb76b2eca0ed2fcbbaae24778bce0064ef))
+- Extract title from reduxer bundles
+- Set environment from wayback.conf automatically
+- Set env for testing and refine workflows
+- Improve some code
+
+### Fixed
+- Do not publish playback results from web request
+
 ## [0.13.0] - 2021-06-19
 
 ### Added
