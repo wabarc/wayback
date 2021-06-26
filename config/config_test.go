@@ -32,6 +32,32 @@ func TestSlotNameNotExist(t *testing.T) {
 	}
 }
 
+func TestAutoSetEnv(t *testing.T) {
+	key := "DO_NOT_EXIST"
+	val := "yes"
+	os.Clearenv()
+
+	tmpfile, err := os.CreateTemp("", "wayback-cfg-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.Remove(tmpfile.Name())
+
+	content := []byte(key + "=" + val)
+	if _, err := tmpfile.Write(content); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := NewParser().ParseFile(tmpfile.Name()); err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := os.Getenv(key)
+	if got != val {
+		t.Fatalf(`Unexpected set environment, got %v instead of %v`, got, val)
+	}
+}
+
 func TestDebugModeOn(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("DEBUG", "on")

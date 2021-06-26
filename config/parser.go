@@ -163,6 +163,10 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.boltPathname = parseString(val, defBoltPathname)
 		case "WAYBACK_STORAGE_DIR":
 			p.opts.storageDir = parseString(val, defStorageDir)
+		default:
+			if os.Getenv(key) == "" && val != "" {
+				os.Setenv(key, val)
+			}
 		}
 	}
 
