@@ -37,7 +37,7 @@ func NewTwitter(client *twitter.Client) *Twitter {
 	return &Twitter{client: client}
 }
 
-func (t *Twitter) ToTwitter(_ context.Context, text string) bool {
+func (t *Twitter) ToTwitter(ctx context.Context, text string) bool {
 	if !config.Opts.PublishToTwitter() || t.client == nil {
 		logger.Debug("[publish] Do not publish to Twitter.")
 		return false
@@ -48,6 +48,9 @@ func (t *Twitter) ToTwitter(_ context.Context, text string) bool {
 	}
 
 	// TODO: character limit
+	if head := title(ctx, text); head != "" {
+		text = "‹ " + head + " ›\n\n" + text
+	}
 	tweet, resp, err := t.client.Statuses.Update(text, nil)
 	if err != nil {
 		logger.Error("[publish] create tweet failed: %v", err)
@@ -82,7 +85,7 @@ func (m *Twitter) Render(vars []wayback.Collect) string {
 		return ""
 	}
 
-	return original(vars) + strings.TrimRight(tmplBytes.String(), "\n")
+	return original(vars) + strings.TrimRight(tmplBytes.String(), "\n") + "\n\n#wayback #存档"
 }
 
 func original(vars []wayback.Collect) (o string) {
@@ -97,5 +100,5 @@ func original(vars []wayback.Collect) (o string) {
 		return o
 	}
 
-	return "Origin:\n" + o + "\n====\n\n"
+	return "source:\n" + o + "\n====\n\n"
 }

@@ -49,6 +49,9 @@ func (m *Mastodon) ToMastodon(ctx context.Context, text, id string) bool {
 	}
 
 	// TODO: character limit
+	if head := title(ctx, text); head != "" {
+		text = "‹ " + head + " ›\n\n" + text
+	}
 	toot := &mstdn.Toot{
 		Status:     text,
 		Visibility: mstdn.VisibilityPublic,

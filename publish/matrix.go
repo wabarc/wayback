@@ -59,6 +59,9 @@ func (m *Matrix) ToRoom(ctx context.Context, text string) bool {
 		return false
 	}
 
+	if head := title(ctx, text); head != "" {
+		text = "‹ <b>" + head + "</b> ›<br><br>" + text
+	}
 	content := &event.MessageEventContent{
 		FormattedBody: text,
 		Format:        event.FormatHTML,
@@ -79,7 +82,7 @@ func (m *Matrix) Render(vars []wayback.Collect) string {
 
 	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext }}'>{{ $.Arc }}</a></b>:<br>
 {{ range $src, $dst := $.Dst -}}
-• <a href="{{ $src | revert }}">origin</a> - {{ $dst }}<br>
+• <a href="{{ $src | revert }}">source</a> - {{ $dst }}<br>
 {{end}}<br>
 {{end}}`
 

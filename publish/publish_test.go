@@ -156,7 +156,7 @@ func TestPublishTootFromMastodon(t *testing.T) {
 		switch r.URL.Path {
 		case "/api/v1/statuses":
 			status := r.FormValue("status")
-			if status != toot {
+			if status != pubToot {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}

@@ -28,6 +28,8 @@ Telegraph:
 • http://telegra.ph/title-01-01
 `
 
+var pubToot = "‹ title ›\n\n" + toot
+
 func setMastodonEnv() {
 	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
 	os.Setenv("WAYBACK_MASTODON_SECRET", "bar")
@@ -62,7 +64,7 @@ func TestToMastodon(t *testing.T) {
 		switch r.URL.Path {
 		case "/api/v1/statuses":
 			status := r.FormValue("status")
-			if status != toot {
+			if status != pubToot {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}

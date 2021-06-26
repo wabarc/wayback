@@ -18,16 +18,16 @@ import (
 )
 
 var matExp = `<b><a href='https://web.archive.org/'>Internet Archive</a></b>:<br>
-• <a href="https://example.com/?q=%E4%B8%AD%E6%96%87">origin</a> - https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87<br>
+• <a href="https://example.com/?q=%E4%B8%AD%E6%96%87">source</a> - https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87<br>
 <br>
 <b><a href='https://archive.today/'>archive.today</a></b>:<br>
-• <a href="https://example.com/">origin</a> - http://archive.today/abcdE<br>
+• <a href="https://example.com/">source</a> - http://archive.today/abcdE<br>
 <br>
 <b><a href='https://ipfs.github.io/public-gateway-checker/'>IPFS</a></b>:<br>
-• <a href="https://example.com/">origin</a> - https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr<br>
+• <a href="https://example.com/">source</a> - https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr<br>
 <br>
 <b><a href='https://telegra.ph/'>Telegraph</a></b>:<br>
-• <a href="https://example.com/">origin</a> - http://telegra.ph/title-01-01<br>
+• <a href="https://example.com/">source</a> - http://telegra.ph/title-01-01<br>
 `
 
 func setMatrixEnv() {

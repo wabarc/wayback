@@ -7,6 +7,7 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"context"
 	"net/url"
+	"regexp"
 	"strings"
 	"text/template"
 
@@ -18,6 +19,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/metrics"
+	"github.com/wabarc/wayback/reduxer"
 	telegram "gopkg.in/tucnak/telebot.v2"
 	matrix "maunium.net/go/mautrix"
 )
@@ -151,4 +153,30 @@ func funcMap() template.FuncMap {
 			return !strings.Contains(text, s)
 		},
 	}
+}
+
+func title(ctx context.Context, s string) string {
+	var words string
+	if bundles, ok := ctx.Value(PubBundle).([]reduxer.Bundle); ok && len(bundles) > 0 {
+		logger.Debug("[publish] extract title from reduxer bundles")
+		for _, bundle := range bundles {
+			words += bundle.Title + "\t"
+		}
+	} else {
+		regex := regexp.MustCompile(`(?m)[\(| ]https?:\/\/telegra\.ph\/(.*?)-\d{2}-\d{2}`)
+		match := regex.FindAllStringSubmatch(s, -1)
+		for _, m := range match {
+			if len(m) < 2 {
+				continue
+			}
+			words += m[1] + "\t"
+		}
+	}
+	t := []rune(words)
+	l := len(t)
+	if l > 256 {
+		t = t[:256]
+	}
+
+	return strings.TrimSpace(string(t))
 }

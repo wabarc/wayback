@@ -66,6 +66,9 @@ func (t *Telegram) ToChannel(ctx context.Context, text string) (ok bool) {
 		logger.Error("[publish] open a chat failed: %v", err)
 		return ok
 	}
+	if head := title(ctx, text); head != "" {
+		text = "<b>" + head + "</b>\n\n" + text
+	}
 	stage, err := t.bot.Send(chat, text)
 	if err != nil {
 		logger.Error("[publish] post message to channel failed, %v", err)
@@ -112,7 +115,7 @@ func (t *Telegram) Render(vars []wayback.Collect) string {
 
 	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext }}'>{{ $.Arc }}</a></b>:
 {{ range $src, $dst := $.Dst -}}
-• <a href="{{ $src | revert }}">origin</a> - {{ if $dst | isURL }}<a href="{{ $dst }}">{{ $dst }}</a>{{ else }}{{ $dst }}{{ end }}
+• <a href="{{ $src | revert }}">source</a> - {{ if $dst | isURL }}<a href="{{ $dst }}">{{ $dst }}</a>{{ else }}{{ $dst }}{{ end }}
 {{end}}
 {{end}}`
 
@@ -122,11 +125,10 @@ func (t *Telegram) Render(vars []wayback.Collect) string {
 		return ""
 	}
 
-	err = tpl.Execute(&tmplBytes, vars)
-	if err != nil {
+	if err = tpl.Execute(&tmplBytes, vars); err != nil {
 		logger.Debug("[publish] execute Telegram template failed, %v", err)
 		return ""
 	}
 
-	return strings.TrimSuffix(tmplBytes.String(), "\n")
+	return strings.TrimSpace(tmplBytes.String()) + "\n\n#wayback #存档"
 }

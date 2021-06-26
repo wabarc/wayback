@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"context"
 	"net/http"
-	"regexp"
 	"strings"
 	"text/template"
 	"time"
@@ -59,29 +58,13 @@ func (gh *GitHub) ToIssues(ctx context.Context, text string) bool {
 		logger.Debug("[publish] authorized GitHub user: %v", user)
 	}
 
-	title := func(s string) string {
-		regex := regexp.MustCompile(`\(https:\/\/telegra\.ph\/(.*?)-\d{2}-\d{2}`)
-		match := regex.FindAllStringSubmatch(s, -1)
-		words := ""
-		for _, m := range match {
-			if len(m) == 2 {
-				words += m[1] + "\t"
-			}
-		}
-		title := []rune(words)
-		limit := len(title)
-		switch {
-		case limit > 256:
-			title = title[:256]
-		case limit == 0:
-			title = []rune("Published at " + time.Now().Format("2006-01-02T15:04:05"))
-		case limit > 0:
-		}
-		return strings.TrimSpace(string(title))
+	t := strings.TrimSpace(title(ctx, text))
+	if t == "" {
+		t = "Published at " + time.Now().Format("2006-01-02T15:04:05")
 	}
 
 	// Create an issue to GitHub
-	ir := &github.IssueRequest{Title: github.String(title(text)), Body: github.String(text)}
+	ir := &github.IssueRequest{Title: github.String(t), Body: github.String(text)}
 	issue, _, err := gh.client.Issues.Create(ctx, config.Opts.GitHubOwner(), config.Opts.GitHubRepo(), ir)
 	if err != nil {
 		logger.Debug("[publish] create issue failed: %v", err)
@@ -97,7 +80,7 @@ func (gh *GitHub) Render(vars []wayback.Collect) string {
 
 	const tmpl = `{{range $ := .}}**[{{ $.Arc }}]({{ $.Ext }})**:
 {{ range $src, $dst := $.Dst -}}
-> origin: [{{ $src | unescape | revert }}]({{ $src | revert }})
+> source: [{{ $src | unescape | revert }}]({{ $src | revert }})
 > archived: {{ if $dst | isURL }}[{{ $dst | unescape }}]({{ $dst }}){{ else }}{{ $dst }}{{ end }}
 {{end}}
 {{end}}`

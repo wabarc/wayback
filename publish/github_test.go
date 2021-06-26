@@ -27,19 +27,19 @@ func init() {
 
 func TestRenderForGitHub(t *testing.T) {
 	expected := `**[Internet Archive](https://web.archive.org/)**:
-> origin: [https://example.com/?q=中文](https://example.com/?q=%E4%B8%AD%E6%96%87)
+> source: [https://example.com/?q=中文](https://example.com/?q=%E4%B8%AD%E6%96%87)
 > archived: [https://web.archive.org/web/20211000000001/https://example.com/?q=中文](https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87)
 
 **[archive.today](https://archive.today/)**:
-> origin: [https://example.com/](https://example.com/)
+> source: [https://example.com/](https://example.com/)
 > archived: [http://archive.today/abcdE](http://archive.today/abcdE)
 
 **[IPFS](https://ipfs.github.io/public-gateway-checker/)**:
-> origin: [https://example.com/](https://example.com/)
+> source: [https://example.com/](https://example.com/)
 > archived: [https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr](https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr)
 
 **[Telegraph](https://telegra.ph/)**:
-> origin: [https://example.com/](https://example.com/)
+> source: [https://example.com/](https://example.com/)
 > archived: [http://telegra.ph/title-01-01](http://telegra.ph/title-01-01)
 `
 
@@ -52,19 +52,19 @@ func TestRenderForGitHub(t *testing.T) {
 
 func TestRenderForGitHubFlawed(t *testing.T) {
 	expected := `**[Internet Archive](https://web.archive.org/)**:
-> origin: [https://example.com/?q=中文](https://example.com/?q=%E4%B8%AD%E6%96%87)
+> source: [https://example.com/?q=中文](https://example.com/?q=%E4%B8%AD%E6%96%87)
 > archived: Get "https://web.archive.org/save/https://example.com": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
 
 **[archive.today](https://archive.today/)**:
-> origin: [https://example.com/](https://example.com/)
+> source: [https://example.com/](https://example.com/)
 > archived: [http://archive.today/abcdE](http://archive.today/abcdE)
 
 **[IPFS](https://ipfs.github.io/public-gateway-checker/)**:
-> origin: [https://example.com/](https://example.com/)
+> source: [https://example.com/](https://example.com/)
 > archived: Archive failed.
 
 **[Telegraph](https://telegra.ph/)**:
-> origin: [https://example.com/404](https://example.com/404)
+> source: [https://example.com/404](https://example.com/404)
 > archived: [https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404](https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404)
 `
 

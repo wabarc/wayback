@@ -20,17 +20,18 @@ import (
 )
 
 var message = `<b><a href='https://web.archive.org/'>Internet Archive</a></b>:
-• <a href="https://example.com/?q=%E4%B8%AD%E6%96%87">origin</a> - <a href="https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87">https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87</a>
+• <a href="https://example.com/?q=%E4%B8%AD%E6%96%87">source</a> - <a href="https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87">https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87</a>
 
 <b><a href='https://archive.today/'>archive.today</a></b>:
-• <a href="https://example.com/">origin</a> - <a href="http://archive.today/abcdE">http://archive.today/abcdE</a>
+• <a href="https://example.com/">source</a> - <a href="http://archive.today/abcdE">http://archive.today/abcdE</a>
 
 <b><a href='https://ipfs.github.io/public-gateway-checker/'>IPFS</a></b>:
-• <a href="https://example.com/">origin</a> - <a href="https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr">https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr</a>
+• <a href="https://example.com/">source</a> - <a href="https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr">https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr</a>
 
 <b><a href='https://telegra.ph/'>Telegraph</a></b>:
-• <a href="https://example.com/">origin</a> - <a href="http://telegra.ph/title-01-01">http://telegra.ph/title-01-01</a>
-`
+• <a href="https://example.com/">source</a> - <a href="http://telegra.ph/title-01-01">http://telegra.ph/title-01-01</a>
+
+#wayback #存档`
 
 var (
 	token     = "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
@@ -76,17 +77,18 @@ func TestRenderForTelegramFlawed(t *testing.T) {
 	setTelegramEnv()
 
 	message := `<b><a href='https://web.archive.org/'>Internet Archive</a></b>:
-• <a href="https://example.com/?q=%E4%B8%AD%E6%96%87">origin</a> - Get "https://web.archive.org/save/https://example.com": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+• <a href="https://example.com/?q=%E4%B8%AD%E6%96%87">source</a> - Get "https://web.archive.org/save/https://example.com": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
 
 <b><a href='https://archive.today/'>archive.today</a></b>:
-• <a href="https://example.com/">origin</a> - <a href="http://archive.today/abcdE">http://archive.today/abcdE</a>
+• <a href="https://example.com/">source</a> - <a href="http://archive.today/abcdE">http://archive.today/abcdE</a>
 
 <b><a href='https://ipfs.github.io/public-gateway-checker/'>IPFS</a></b>:
-• <a href="https://example.com/">origin</a> - Archive failed.
+• <a href="https://example.com/">source</a> - Archive failed.
 
 <b><a href='https://telegra.ph/'>Telegraph</a></b>:
-• <a href="https://example.com/404">origin</a> - <a href="https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404">https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404</a>
-`
+• <a href="https://example.com/404">source</a> - <a href="https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404">https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404</a>
+
+#wayback #存档`
 	tel := &Telegram{}
 	got := tel.Render(flawed)
 	if got != message {

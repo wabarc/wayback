@@ -16,7 +16,7 @@ import (
 	"github.com/wabarc/wayback/config"
 )
 
-var tweet = `Origin:
+var tweet = `source:
 • https://example.com/?q=%E4%B8%AD%E6%96%87
 
 ====
@@ -28,7 +28,9 @@ archive.today:
 • http://archive.today/abcdE
 
 IPFS:
-• https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr`
+• https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
+
+#wayback #存档`
 
 func setTwitterEnv() {
 	os.Setenv("WAYBACK_TWITTER_CONSUMER_KEY", "foo")
