@@ -256,7 +256,16 @@ func (o *Options) TelegramToken() string {
 
 // TelegramChannel returns the Telegram Channel name.
 func (o *Options) TelegramChannel() string {
-	return o.telegram.channel
+	if len(o.telegram.channel) == 0 {
+		return ""
+	}
+
+	switch o.telegram.channel[:1] {
+	case "-", "@":
+		return o.telegram.channel
+	default:
+		return "@" + o.telegram.channel
+	}
 }
 
 // TelegramHelptext returns the help text for Telegram bot.

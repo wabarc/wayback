@@ -61,7 +61,7 @@ func (t *Telegram) ToChannel(ctx context.Context, text string) (ok bool) {
 		}
 	}
 
-	chat, err := t.bot.ChatByID("@" + config.Opts.TelegramChannel())
+	chat, err := t.bot.ChatByID(config.Opts.TelegramChannel())
 	if err != nil {
 		logger.Error("[publish] open a chat failed: %v", err)
 		return ok

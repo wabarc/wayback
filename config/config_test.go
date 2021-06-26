@@ -275,20 +275,46 @@ func TestTelegramToken(t *testing.T) {
 }
 
 func TestTelegramChannel(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "tg:channel:name")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	var tests = []struct {
+		name string
+		expt string
+	}{
+		{
+			name: "",
+			expt: "",
+		},
+		{
+			name: "tgchannelname",
+			expt: "@tgchannelname",
+		},
+		{
+			name: "@tgchannelname",
+			expt: "@tgchannelname",
+		},
+		{
+			name: "-123456",
+			expt: "-123456",
+		},
 	}
 
-	expected := "tg:channel:name"
-	got := opts.TelegramChannel()
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_TELEGRAM_CHANNEL", test.name)
 
-	if got != expected {
-		t.Fatalf(`Unexpected Telegram channel name, got %v instead of %s`, got, expected)
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			expected := test.expt
+			got := opts.TelegramChannel()
+
+			if got != expected {
+				t.Fatalf(`Unexpected Telegram channel name, got %v instead of %s`, got, expected)
+			}
+		})
 	}
 }
 

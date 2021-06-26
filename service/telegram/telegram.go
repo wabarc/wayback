@@ -79,6 +79,10 @@ func (t *Telegram) Serve() (err error) {
 	}
 	logger.Info("[telegram] authorized on account %s", t.bot.Me.Username)
 
+	if channel, err := t.bot.ChatByID(config.Opts.TelegramChannel()); err == nil {
+		logger.Debug("[telegram] channel name: %s, channel id: %d", channel.Title, channel.ID)
+	}
+
 	go func() {
 		<-t.ctx.Done()
 		logger.Info("[telegram] stopping receive updates...")
