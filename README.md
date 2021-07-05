@@ -30,6 +30,8 @@ Supported Golang version: See [.github/workflows/testing.yml](./.github/workflow
 
 ## Installation
 
+The simplest, cross-platform way is to download from [GitHub Releases](https://github.com/wabarc/wayback/releases) and place the executable file in your PATH.
+
 From source:
 
 ```sh
@@ -77,8 +79,6 @@ Via [Homebrew](https://github.com/wabarc/homebrew-wayback):
 brew tap wabarc/wayback
 brew install wayback
 ```
-
-See more on [releases](https://github.com/wabarc/wayback/releases).
 
 ## Usage
 
