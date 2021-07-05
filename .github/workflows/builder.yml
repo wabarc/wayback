@@ -300,7 +300,7 @@ jobs:
 
     - name: Release Snap
       uses: snapcore/action-publish@v1
-      if: github.repository == 'wabarc/wayback'
+      if: github.repository == 'wabarc/wayback' && github.event_name == 'push'
       with:
         store_login: ${{ secrets.SNAPCRAFT_TOKEN }}
         snap: ${{ steps.build.outputs.snap }}
