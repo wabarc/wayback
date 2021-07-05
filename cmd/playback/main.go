@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -29,7 +30,7 @@ func handle(cmd *cobra.Command, args []string) {
 		os.Exit(0)
 	}
 
-	collects, _ := wayback.Playback(args)
+	collects, _ := wayback.Playback(context.TODO(), args...)
 	for _, collect := range collects {
 		fmt.Printf("[%s]\n", collect.Arc)
 		for orig, dest := range collect.Dst {

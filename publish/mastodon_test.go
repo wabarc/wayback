@@ -9,41 +9,18 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/template/render"
 )
-
-var toot = `Internet Archive:
-• https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87
-
-archive.today:
-• http://archive.today/abcdE
-
-IPFS:
-• https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
-
-Telegraph:
-• http://telegra.ph/title-01-01
-`
-
-var pubToot = "‹ title ›\n\n" + toot
 
 func setMastodonEnv() {
 	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
 	os.Setenv("WAYBACK_MASTODON_SECRET", "bar")
 	os.Setenv("WAYBACK_MASTODON_TOKEN", "zoo")
-}
-
-func TestRenderForMastodon(t *testing.T) {
-	setMastodonEnv()
-
-	mstdn := &Mastodon{}
-	got := mstdn.Render(collects)
-	if got != toot {
-		t.Errorf("Unexpected render template for Mastodon got \n%s\ninstead of \n%s", got, toot)
-	}
 }
 
 func TestToMastodon(t *testing.T) {
@@ -64,7 +41,7 @@ func TestToMastodon(t *testing.T) {
 		switch r.URL.Path {
 		case "/api/v1/statuses":
 			status := r.FormValue("status")
-			if status != pubToot {
+			if !strings.Contains(status, `title`) {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
@@ -79,7 +56,8 @@ func TestToMastodon(t *testing.T) {
 	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
 
 	mstdn := NewMastodon(nil)
-	got := mstdn.ToMastodon(context.Background(), mstdn.Render(collects), "")
+	txt := render.ForPublish(&render.Telegram{Cols: collects}).String()
+	got := mstdn.ToMastodon(context.Background(), nil, txt, "")
 	if !got {
 		t.Errorf("Unexpected publish toot got %t instead of %t", got, true)
 	}

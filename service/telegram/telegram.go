@@ -24,6 +24,7 @@ import (
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/storage"
+	"github.com/wabarc/wayback/template/render"
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -32,7 +33,6 @@ type Telegram struct {
 	ctx context.Context
 
 	bot   *telegram.Bot
-	pub   *publish.Telegram
 	store *storage.Storage
 	pool  pooling.Pool
 }
@@ -65,7 +65,6 @@ func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Telegr
 	return &Telegram{
 		ctx:   ctx,
 		bot:   bot,
-		pub:   publish.NewTelegram(bot),
 		store: store,
 		pool:  pool,
 	}
@@ -219,15 +218,15 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 	}
 	logger.Debug("[telegram] send archiving messagee result: %v", stage)
 
-	var bundles []reduxer.Bundle
-	col, err := wayback.Wayback(urls, &bundles)
+	var bundles reduxer.Bundles
+	cols, err := wayback.Wayback(ctx, &bundles, urls...)
 	if err != nil {
 		logger.Error("[telegram] archives failure, ", err)
 		return err
 	}
 	logger.Debug("[telegram] bundles: %#v", bundles)
 
-	replyText := t.pub.Render(col)
+	replyText := render.ForReply(&render.Telegram{Cols: cols}).String()
 	logger.Debug("[telegram] reply text, %s", replyText)
 
 	opts := &telegram.SendOptions{DisableWebPagePreview: true}
@@ -238,7 +237,7 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 
 	ctx = context.WithValue(ctx, publish.FlagTelegram, t.bot)
 	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	go publish.To(ctx, col, publish.FlagTelegram)
+	go publish.To(ctx, cols, publish.FlagTelegram)
 
 	var album telegram.Album
 	for _, bundle := range bundles {
@@ -249,7 +248,7 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 		}
 		for _, path := range paths {
 			if path == "" {
-				logger.Info("[telegram] invalid file path: %s", path)
+				logger.Info("[telegram] invalid file path")
 				continue
 			}
 			logger.Debug("[telegram] append document: %s", path)
@@ -298,8 +297,8 @@ func (t *Telegram) playback(message *telegram.Message) error {
 	if err = t.bot.Notify(message.Sender, telegram.Typing); err != nil {
 		logger.Error("[telegram] send typing action failed: %v", err)
 	}
-	col, _ := wayback.Playback(urls)
-	logger.Debug("[telegram] playback collections: %#v", col)
+	cols, _ := wayback.Playback(t.ctx, urls...)
+	logger.Debug("[telegram] playback collections: %#v", cols)
 
 	// Due to Telegram restricted callback data to 1-64 bytes, it requires to store
 	// playback URLs to database.
@@ -322,7 +321,8 @@ func (t *Telegram) playback(message *telegram.Message) error {
 			},
 		},
 	}
-	if _, err := t.bot.Send(recipient, t.pub.Render(col), opts); err != nil {
+	replyText := render.ForReply(&render.Telegram{Cols: cols}).String()
+	if _, err := t.bot.Send(recipient, replyText, opts); err != nil {
 		metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusFailure)
 		logger.Error("[telegram] send playback results failed: %v", err)
 		return err
@@ -332,6 +332,11 @@ func (t *Telegram) playback(message *telegram.Message) error {
 }
 
 func (t *Telegram) reply(message *telegram.Message, text string) (*telegram.Message, error) {
+	if text == "" {
+		logger.Info("[telegram] text empty, skipped")
+		return nil, errors.New("text empty")
+	}
+
 	opts := &telegram.SendOptions{DisableWebPagePreview: true}
 	msg, err := t.bot.Reply(message, text, opts)
 	if err != nil {
@@ -388,20 +393,24 @@ func (t *Telegram) setCommands() (error, bool) {
 }
 
 func defaultCommands() []telegram.Command {
-	return []telegram.Command{
+	commands := []telegram.Command{
 		{
 			Text:        "help",
 			Description: "Show help information",
-		},
-		{
-			Text:        "metrics",
-			Description: "Show service metrics",
 		},
 		{
 			Text:        "playback",
 			Description: "Playback archived url",
 		},
 	}
+	if config.Opts.EnabledMetrics() {
+		commands = append(commands, telegram.Command{
+			Text:        "metrics",
+			Description: "Show service metrics",
+		})
+	}
+
+	return commands
 }
 
 func callbackPrefix() string {

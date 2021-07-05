@@ -6,10 +6,11 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"context"
+	"math/rand"
 	"net/url"
-	"regexp"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
 	mstdn "github.com/mattn/go-mastodon"
@@ -18,7 +19,6 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/reduxer"
 	telegram "gopkg.in/tucnak/telebot.v2"
 	matrix "maunium.net/go/mautrix"
@@ -33,105 +33,100 @@ const (
 	FlagIRC      = "irc"
 
 	PubBundle = "reduxer-bundle"
+
+	maxTitleLen = 256
 )
 
-// nolint:gocyclo
-func To(ctx context.Context, col []wayback.Collect, args ...string) {
-	var from string
-	if len(args) > 0 {
-		from = args[0]
+// Publisher is the interface that wraps the basic Publish method.
+//
+// Publish publish message to serveral media platforms, e.g. Telegram channel, GitHub Issues, etc.
+// The cols must either be a []wayback.Collect, args use for specific service.
+type Publisher interface {
+	Publish(ctx context.Context, cols []wayback.Collect, args ...string)
+}
+
+func process(p Publisher, ctx context.Context, cols []wayback.Collect, args ...string) {
+	// Compose the collects into multiple parts by URI
+	var parts = make(map[string][]wayback.Collect)
+	for _, col := range cols {
+		parts[col.Src] = append(parts[col.Src], col)
 	}
 
-	if config.Opts.PublishToChannel() {
-		logger.Debug("[%s] publishing to telegram channel...", from)
-		metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusRequest)
+	for _, part := range parts {
+		logger.Debug("[%s] produce part: %#v", from(args...), part)
 
+		// Nice for target server
+		rand.Seed(time.Now().UnixNano())
+		r := rand.Intn(10) //nolint:gosec,goimports
+		w := time.Duration(r) * time.Second
+		logger.Debug("[%s] produce sleep %d second", from(args...), r)
+		time.Sleep(w)
+
+		p.Publish(ctx, part, args...)
+	}
+
+	return
+}
+
+func from(args ...string) (f string) {
+	if len(args) > 0 {
+		f = args[0]
+	}
+	return f
+}
+
+// nolint:gocyclo
+func To(ctx context.Context, cols []wayback.Collect, args ...string) {
+	if config.Opts.PublishToChannel() {
+		logger.Debug("[%s] publishing to telegram channel...", from(args...))
 		var bot *telegram.Bot
 		if rev, ok := ctx.Value(FlagTelegram).(*telegram.Bot); ok {
 			bot = rev
 		}
 
-		tel := NewTelegram(bot)
-		if tel.ToChannel(ctx, tel.Render(col)) {
-			metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusSuccess)
-		} else {
-			metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusFailure)
-		}
+		t := NewTelegram(bot)
+		process(t, ctx, cols, args...)
 	}
 	if config.Opts.PublishToIssues() {
-		logger.Debug("[%s] publishing to GitHub issues...", from)
-		metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusRequest)
-
+		logger.Debug("[%s] publishing to GitHub issues...", from(args...))
 		gh := NewGitHub(nil)
-		if gh.ToIssues(ctx, gh.Render(col)) {
-			metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusSuccess)
-		} else {
-			metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusFailure)
-		}
+		process(gh, ctx, cols, args...)
 	}
 	if config.Opts.PublishToMastodon() {
-		var id string
-		if len(args) > 1 {
-			id = args[1]
-		}
-		logger.Debug("[%s] publishing to Mastodon...", from)
-		metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusRequest)
-
+		logger.Debug("[%s] publishing to Mastodon...", from(args...))
 		var client *mstdn.Client
 		if rev, ok := ctx.Value(FlagMastodon).(*mstdn.Client); ok {
 			client = rev
 		}
 		mstdn := NewMastodon(client)
-		if mstdn.ToMastodon(ctx, mstdn.Render(col), id) {
-			metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusSuccess)
-		} else {
-			metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusFailure)
-		}
+		process(mstdn, ctx, cols, args...)
 	}
 	if config.Opts.PublishToTwitter() {
-		logger.Debug("[%s] publishing to Twitter...", from)
-		metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusRequest)
-
+		logger.Debug("[%s] publishing to Twitter...", from(args...))
 		var client *twitter.Client
 		if rev, ok := ctx.Value(FlagTwitter).(*twitter.Client); ok {
 			client = rev
 		}
 		twitter := NewTwitter(client)
-		if twitter.ToTwitter(ctx, twitter.Render(col)) {
-			metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusSuccess)
-		} else {
-			metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusFailure)
-		}
+		process(twitter, ctx, cols, args...)
 	}
 	if config.Opts.PublishToIRCChannel() {
-		logger.Debug("[%s] publishing to IRC channel...", from)
-		metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusRequest)
-
+		logger.Debug("[%s] publishing to IRC channel...", from(args...))
 		var conn *irc.Connection
 		if rev, ok := ctx.Value(FlagIRC).(*irc.Connection); ok {
 			conn = rev
 		}
 		irc := NewIRC(conn)
-		if irc.ToChannel(ctx, irc.Render(col)) {
-			metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusSuccess)
-		} else {
-			metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusFailure)
-		}
+		process(irc, ctx, cols, args...)
 	}
 	if config.Opts.PublishToMatrixRoom() {
-		logger.Debug("[%s] publishing to Matrix room...", from)
-		metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusRequest)
-
+		logger.Debug("[%s] publishing to Matrix room...", from(args...))
 		var client *matrix.Client
 		if rev, ok := ctx.Value(FlagMatrix).(*matrix.Client); ok {
 			client = rev
 		}
 		mat := NewMatrix(client)
-		if mat.ToRoom(ctx, mat.Render(col)) {
-			metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusSuccess)
-		} else {
-			metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusFailure)
-		}
+		process(mat, ctx, cols, args...)
 	}
 }
 
@@ -155,27 +150,29 @@ func funcMap() template.FuncMap {
 	}
 }
 
-func title(ctx context.Context, s string) string {
-	var words string
-	if bundles, ok := ctx.Value(PubBundle).([]reduxer.Bundle); ok && len(bundles) > 0 {
-		logger.Debug("[publish] extract title from reduxer bundles")
-		for _, bundle := range bundles {
-			words += bundle.Title + "\t"
-		}
-	} else {
-		regex := regexp.MustCompile(`(?m)[\(| ]https?:\/\/telegra\.ph\/(.*?)-\d{2}-\d{2}`)
-		match := regex.FindAllStringSubmatch(s, -1)
-		for _, m := range match {
-			if len(m) < 2 {
-				continue
-			}
-			words += m[1] + "\t"
-		}
+func bundle(ctx context.Context, cols []wayback.Collect) (b reduxer.Bundle) {
+	if len(cols) == 0 {
+		return b
 	}
-	t := []rune(words)
+
+	var uri = cols[0].Src
+	if bundles, ok := ctx.Value(PubBundle).(reduxer.Bundles); ok {
+		b = bundles[uri]
+	}
+
+	return b
+}
+
+func title(_ context.Context, bundle *reduxer.Bundle) string {
+	logger.Debug("[publish] extract title from reduxer bundle: %v", bundle)
+	if bundle == nil {
+		return ""
+	}
+
+	t := []rune(bundle.Title)
 	l := len(t)
-	if l > 256 {
-		t = t[:256]
+	if l > maxTitleLen {
+		t = t[:maxTitleLen]
 	}
 
 	return strings.TrimSpace(string(t))

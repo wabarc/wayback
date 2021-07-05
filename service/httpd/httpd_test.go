@@ -5,6 +5,7 @@
 package httpd // import "github.com/wabarc/wayback/service/httpd"
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -30,8 +31,8 @@ func TestTransform(t *testing.T) {
 
 	text := "some text https://example.com"
 	urls := helper.MatchURL(text)
-	rbes := []reduxer.Bundle{}
-	col, _ := wayback.Wayback(urls, &rbes)
+	rbes := make(reduxer.Bundles)
+	col, _ := wayback.Wayback(context.TODO(), &rbes, urls...)
 	collector := transform(col)
 
 	bytes, err := json.Marshal(collector)

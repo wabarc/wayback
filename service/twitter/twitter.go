@@ -21,6 +21,7 @@ import (
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/storage"
+	"github.com/wabarc/wayback/template/render"
 )
 
 type Twitter struct {
@@ -153,7 +154,6 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	}()
 
 	urls := helper.MatchURLFallback(text)
-	pub := publish.NewTwitter(t.client)
 	var realURLs []string
 	for _, url := range urls {
 		realURLs = append(realURLs, helper.RealURI(url))
@@ -165,15 +165,15 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 		return errors.New("Twitter: URL no found")
 	}
 
-	var bundles []reduxer.Bundle
-	col, err := wayback.Wayback(realURLs, &bundles)
+	var bundles reduxer.Bundles
+	cols, err := wayback.Wayback(context.TODO(), &bundles, urls...)
 	if err != nil {
 		logger.Error("[twitter] archives failure, ", err)
 		return err
 	}
 	logger.Debug("[twitter] bundles: %#v", bundles)
 
-	replyText := pub.Render(col)
+	replyText := render.ForReply(&render.Twitter{Cols: cols}).String()
 	logger.Debug("[twitter] reply text, %s", replyText)
 
 	ev, _, err := t.client.DirectMessages.EventsNew(&twitter.DirectMessageEventsNewParams{
@@ -207,7 +207,7 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 
 	ctx := context.WithValue(t.ctx, publish.FlagTwitter, t.client)
 	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	go publish.To(ctx, col, publish.FlagTwitter)
+	go publish.To(ctx, cols, publish.FlagTwitter)
 
 	return nil
 }

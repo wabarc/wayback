@@ -5,26 +5,25 @@
 package publish // import "github.com/wabarc/wayback/publish"
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
-	"strings"
-	"text/template"
 
 	irc "github.com/thoj/go-ircevent"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/metrics"
+	"github.com/wabarc/wayback/template/render"
 )
 
-type IRC struct {
+type ircBot struct {
 	conn *irc.Connection
 }
 
-func NewIRC(conn *irc.Connection) *IRC {
+func NewIRC(conn *irc.Connection) *ircBot {
 	if !config.Opts.PublishToIRCChannel() {
 		logger.Error("Missing required environment variable, abort.")
-		return new(IRC)
+		return new(ircBot)
 	}
 
 	if conn == nil {
@@ -36,10 +35,27 @@ func NewIRC(conn *irc.Connection) *IRC {
 		conn.TLSConfig = &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12}
 	}
 
-	return &IRC{conn: conn}
+	return &ircBot{conn: conn}
 }
 
-func (i *IRC) ToChannel(ctx context.Context, text string) bool {
+func (i *ircBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+	metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusRequest)
+
+	if len(cols) == 0 {
+		logger.Debug("[publish] collects empty")
+		return
+	}
+
+	var txt = render.ForPublish(&render.Relaychat{Cols: cols}).String()
+	if i.toChannel(ctx, txt) {
+		metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusSuccess)
+		return
+	}
+	metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusFailure)
+	return
+}
+
+func (i *ircBot) toChannel(_ context.Context, text string) bool {
 	if !config.Opts.PublishToIRCChannel() || i.conn == nil {
 		logger.Debug("[publish] Do not publish to IRC channel.")
 		return false
@@ -55,24 +71,4 @@ func (i *IRC) ToChannel(ctx context.Context, text string) bool {
 	}()
 
 	return true
-}
-
-func (i *IRC) Render(vars []wayback.Collect) string {
-	var tmplBytes bytes.Buffer
-
-	const tmpl = `{{range $ := .}}{{ $.Arc }}:- {{ range $src, $dst := $.Dst }}• {{ $dst }}, {{end}}{{end}}`
-
-	tpl, err := template.New("message").Parse(tmpl)
-	if err != nil {
-		logger.Error("[publish] parse IRC template failed, %v", err)
-		return ""
-	}
-
-	err = tpl.Execute(&tmplBytes, vars)
-	if err != nil {
-		logger.Error("[publish] execute IRC template failed, %v", err)
-		return ""
-	}
-
-	return strings.TrimSuffix(tmplBytes.String(), ", ")
 }

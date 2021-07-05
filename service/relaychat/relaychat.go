@@ -20,6 +20,7 @@ import (
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/storage"
+	"github.com/wabarc/wayback/template/render"
 )
 
 type IRC struct {
@@ -116,16 +117,15 @@ func (i *IRC) process(ev *irc.Event) error {
 		return errors.New("IRC: URL no found")
 	}
 
-	var bundles []reduxer.Bundle
-	col, err := wayback.Wayback(urls, &bundles)
+	var bundles reduxer.Bundles
+	cols, err := wayback.Wayback(context.TODO(), &bundles, urls...)
 	if err != nil {
 		logger.Error("[irc] archives failure, %v", err)
 		return err
 	}
 	logger.Debug("[irc] bundles: %#v", bundles)
 
-	pub := publish.NewIRC(i.conn)
-	replyText := pub.Render(col)
+	replyText := render.ForReply(&render.Relaychat{Cols: cols}).String()
 
 	// Reply result to sender
 	i.conn.Privmsg(ev.Nick, replyText)
@@ -133,7 +133,7 @@ func (i *IRC) process(ev *irc.Event) error {
 	// Reply and publish toot as public
 	ctx := context.WithValue(i.ctx, publish.FlagIRC, i.conn)
 	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	publish.To(ctx, col, publish.FlagIRC)
+	publish.To(ctx, cols, publish.FlagIRC)
 
 	return nil
 }

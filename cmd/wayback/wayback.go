@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/wabarc/wayback"
-	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/reduxer"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -19,24 +19,18 @@ func output(tit string, args map[string]string) {
 }
 
 func archive(cmd *cobra.Command, args []string) {
+	var bundles reduxer.Bundles
 	archiving := func(ctx context.Context, urls []string) error {
 		g, ctx := errgroup.WithContext(ctx)
-		var wbrc wayback.Broker = &wayback.Handle{URLs: urls}
-
-		for slot, do := range config.Opts.Slots() {
-			slot, do := slot, do
-			g.Go(func() error {
-				switch {
-				case slot == config.SLOT_IA && do:
-					output(config.SlotName(config.SLOT_IA), wbrc.IA())
-				case slot == config.SLOT_IS && do:
-					output(config.SlotName(config.SLOT_IS), wbrc.IS())
-				case slot == config.SLOT_IP && do:
-					output(config.SlotName(config.SLOT_IP), wbrc.IP())
-				}
-				return nil
-			})
+		cols, err := wayback.Wayback(ctx, &bundles, urls...)
+		if err != nil {
+			return err
 		}
+
+		for _, col := range cols {
+			cmd.Println(col.Src, "=>", col.Dst)
+		}
+
 		if err := g.Wait(); err != nil {
 			return err
 		}

@@ -17,6 +17,7 @@ import (
 	// "github.com/ipsn/go-libtor"
 	"github.com/cretz/bine/tor"
 	"github.com/cretz/bine/torutil/ed25519"
+	aurora "github.com/logrusorgru/aurora/v3"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
@@ -69,7 +70,7 @@ func (t *Tor) Serve() error {
 		} else {
 			pvk = keypair.PrivateKey()
 		}
-		logger.Info("[web] important to keep the private key: %s", hex.EncodeToString(pvk))
+		logger.Info("[web] important to keep the private key: %s", aurora.Underline(aurora.Blue(hex.EncodeToString(pvk))))
 	} else {
 		privb, err := hex.DecodeString(config.Opts.TorPrivKey())
 		if err != nil {

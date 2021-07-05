@@ -22,6 +22,7 @@ import (
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/storage"
+	"github.com/wabarc/wayback/template/render"
 	"golang.org/x/net/html"
 )
 
@@ -184,12 +185,12 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 	pub := publish.NewMastodon(m.client)
 	if len(urls) == 0 {
 		logger.Info("[mastodon] archives failure, URL no found.")
-		pub.ToMastodon(m.ctx, "URL no found", string(status.ID))
+		pub.ToMastodon(m.ctx, nil, "URL no found", string(status.ID))
 		return errors.New("Mastodon: URL no found")
 	}
 
-	var bundles []reduxer.Bundle
-	col, err := wayback.Wayback(urls, &bundles)
+	var bundles reduxer.Bundles
+	col, err := wayback.Wayback(context.TODO(), &bundles, urls...)
 	if err != nil {
 		logger.Error("[mastodon] archives failed: %v", err)
 		return err
@@ -212,7 +213,7 @@ func (m *Mastodon) playback(status *mastodon.Status) error {
 		return errors.New("Mastodon: URL no found")
 	}
 
-	col, err := wayback.Playback(urls)
+	cols, err := wayback.Playback(m.ctx, urls...)
 	if err != nil {
 		logger.Error("[mastodon] playback failed: %v", err)
 		return err
@@ -220,7 +221,8 @@ func (m *Mastodon) playback(status *mastodon.Status) error {
 
 	// Reply toot as public
 	pub := publish.NewMastodon(m.client)
-	pub.ToMastodon(m.ctx, pub.Render(col), string(status.ID))
+	txt := render.ForReply(&render.Mastodon{Cols: cols}).String()
+	pub.ToMastodon(m.ctx, nil, txt, string(status.ID))
 
 	return nil
 }

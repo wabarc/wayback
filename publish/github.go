@@ -5,24 +5,25 @@
 package publish // import "github.com/wabarc/wayback/publish"
 
 import (
-	"bytes"
 	"context"
 	"net/http"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/google/go-github/v33/github"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/metrics"
+	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/template/render"
 )
 
-type GitHub struct {
+type gitHub struct {
 	client *github.Client
 }
 
-func NewGitHub(httpClient *http.Client) *GitHub {
+func NewGitHub(httpClient *http.Client) *gitHub {
 	if config.Opts.GitHubToken() == "" || config.Opts.GitHubOwner() == "" {
 		logger.Fatal("[publish] GitHub personal access token is required")
 	}
@@ -38,12 +39,29 @@ func NewGitHub(httpClient *http.Client) *GitHub {
 	}
 	client := github.NewClient(httpClient)
 
-	return &GitHub{
-		client: client,
-	}
+	return &gitHub{client: client}
 }
 
-func (gh *GitHub) ToIssues(ctx context.Context, text string) bool {
+func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+	metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusRequest)
+
+	if len(cols) == 0 {
+		logger.Debug("[publish] collects empty")
+		return
+	}
+
+	var bnd = bundle(ctx, cols)
+	var txt = render.ForPublish(&render.GitHub{Cols: cols}).String()
+	if gh.toIssues(ctx, &bnd, txt) {
+		metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusSuccess)
+		return
+	}
+	metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusFailure)
+	return
+}
+
+// TODO remote text
+func (gh *gitHub) toIssues(ctx context.Context, bundle *reduxer.Bundle, text string) bool {
 	if gh.client == nil {
 		logger.Error("[publish] create GitHub Issues abort")
 		return false
@@ -58,7 +76,7 @@ func (gh *GitHub) ToIssues(ctx context.Context, text string) bool {
 		logger.Debug("[publish] authorized GitHub user: %v", user)
 	}
 
-	t := strings.TrimSpace(title(ctx, text))
+	t := strings.TrimSpace(title(ctx, bundle))
 	if t == "" {
 		t = "Published at " + time.Now().Format("2006-01-02T15:04:05")
 	}
@@ -73,29 +91,4 @@ func (gh *GitHub) ToIssues(ctx context.Context, text string) bool {
 	logger.Debug("[publish] created issue: %v", issue)
 
 	return true
-}
-
-func (gh *GitHub) Render(vars []wayback.Collect) string {
-	var tmplBytes bytes.Buffer
-
-	const tmpl = `{{range $ := .}}**[{{ $.Arc }}]({{ $.Ext }})**:
-{{ range $src, $dst := $.Dst -}}
-> source: [{{ $src | unescape | revert }}]({{ $src | revert }})
-> archived: {{ if $dst | isURL }}[{{ $dst | unescape }}]({{ $dst }}){{ else }}{{ $dst }}{{ end }}
-{{end}}
-{{end}}`
-
-	tpl, err := template.New("message").Funcs(funcMap()).Parse(tmpl)
-	if err != nil {
-		logger.Debug("[publish] parse template failed, %v", err)
-		return ""
-	}
-
-	err = tpl.Execute(&tmplBytes, vars)
-	if err != nil {
-		logger.Debug("[publish] execute template failed, %v", err)
-		return ""
-	}
-
-	return strings.TrimSuffix(tmplBytes.String(), "\n")
 }

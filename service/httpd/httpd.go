@@ -213,8 +213,8 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 		logger.Info("[web] url no found.")
 	}
 
-	var bundles []reduxer.Bundle
-	col, _ := wayback.Wayback(urls, &bundles)
+	var bundles reduxer.Bundles
+	col, _ := wayback.Wayback(context.TODO(), &bundles, urls...)
 	logger.Debug("[web] bundles: %#v", bundles)
 
 	collector := transform(col)
@@ -271,7 +271,7 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 	if len(urls) == 0 {
 		logger.Info("[web] url no found.")
 	}
-	col, _ := wayback.Playback(urls)
+	col, _ := wayback.Playback(context.TODO(), urls...)
 	collector := transform(col)
 	switch r.PostFormValue("data-type") {
 	case "json":
@@ -301,16 +301,14 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func transform(col []wayback.Collect) template.Collector {
+func transform(cols []wayback.Collect) template.Collector {
 	collects := []template.Collect{}
-	for _, c := range col {
-		for src, dst := range c.Dst {
-			collects = append(collects, template.Collect{
-				Slot: c.Arc,
-				Src:  src,
-				Dst:  dst,
-			})
-		}
+	for _, col := range cols {
+		collects = append(collects, template.Collect{
+			Slot: col.Arc,
+			Src:  col.Src,
+			Dst:  col.Dst,
+		})
 	}
 	return collects
 }

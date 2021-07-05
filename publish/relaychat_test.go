@@ -17,18 +17,5 @@ func setIRCEnv() {
 
 	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
 }
-
-func TestRenderForIRC(t *testing.T) {
-	setIRCEnv()
-
-	expected := `Internet Archive:- • https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87, archive.today:- • http://archive.today/abcdE, IPFS:- • https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr, Telegraph:- • http://telegra.ph/title-01-01`
-
-	irc := NewIRC(nil)
-	got := irc.Render(collects)
-	if got != expected {
-		t.Errorf("Unexpected render template for IRC got \n%s\ninstead of \n%s", got, expected)
-	}
-}
-
 func TestToIRCChannel(t *testing.T) {
 }

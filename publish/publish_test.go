@@ -23,63 +23,28 @@ import (
 
 var collects = []wayback.Collect{
 	{
-		Arc: config.SlotName(config.SLOT_IA),
-		Dst: map[string]string{
-			"https://example.com/?q=%E4%B8%AD%E6%96%87": "https://web.archive.org/web/20211000000001/https://example.com/?q=%E4%B8%AD%E6%96%87",
-		},
-		Ext: config.SlotExtra(config.SLOT_IA),
+		Arc: config.SLOT_IA,
+		Dst: "https://web.archive.org/web/20211000000001/https://example.com/",
+		Src: "https://example.com/",
+		Ext: config.SLOT_IA,
 	},
 	{
-		Arc: config.SlotName(config.SLOT_IS),
-		Dst: map[string]string{
-			"https://example.com/": "http://archive.today/abcdE",
-		},
-		Ext: config.SlotExtra(config.SLOT_IS),
+		Arc: config.SLOT_IS,
+		Dst: "http://archive.today/abcdE",
+		Src: "https://example.com/",
+		Ext: config.SLOT_IS,
 	},
 	{
-		Arc: config.SlotName(config.SLOT_IP),
-		Dst: map[string]string{
-			"https://example.com/": "https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr",
-		},
-		Ext: config.SlotExtra(config.SLOT_IP),
+		Arc: config.SLOT_IP,
+		Dst: "https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr",
+		Src: "https://example.com/",
+		Ext: config.SLOT_IP,
 	},
 	{
-		Arc: config.SlotName(config.SLOT_PH),
-		Dst: map[string]string{
-			"https://example.com/": "http://telegra.ph/title-01-01",
-		},
-		Ext: config.SlotExtra(config.SLOT_PH),
-	},
-}
-
-var flawed = []wayback.Collect{
-	{
-		Arc: config.SlotName(config.SLOT_IA),
-		Dst: map[string]string{
-			"https://example.com/?q=%E4%B8%AD%E6%96%87": `Get "https://web.archive.org/save/https://example.com": context deadline exceeded (Client.Timeout exceeded while awaiting headers)`,
-		},
-		Ext: config.SlotExtra(config.SLOT_IA),
-	},
-	{
-		Arc: config.SlotName(config.SLOT_IS),
-		Dst: map[string]string{
-			"https://example.com/": "http://archive.today/abcdE",
-		},
-		Ext: config.SlotExtra(config.SLOT_IS),
-	},
-	{
-		Arc: config.SlotName(config.SLOT_IP),
-		Dst: map[string]string{
-			"https://example.com/": "Archive failed.",
-		},
-		Ext: config.SlotExtra(config.SLOT_IP),
-	},
-	{
-		Arc: config.SlotName(config.SLOT_PH),
-		Dst: map[string]string{
-			"https://example.com/404": "https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404",
-		},
-		Ext: config.SlotExtra(config.SLOT_PH),
+		Arc: config.SLOT_PH,
+		Dst: "http://telegra.ph/title-01-01",
+		Src: "https://example.com/",
+		Ext: config.SLOT_PH,
 	},
 }
 
@@ -156,7 +121,7 @@ func TestPublishTootFromMastodon(t *testing.T) {
 		switch r.URL.Path {
 		case "/api/v1/statuses":
 			status := r.FormValue("status")
-			if status != pubToot {
+			if !strings.Contains(status, config.SlotName(config.SLOT_IA)) {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
@@ -189,7 +154,7 @@ func TestPublishTweetFromTwitter(t *testing.T) {
 		switch r.URL.Path {
 		case "/1.1/statuses/update.json":
 			status := r.FormValue("status")
-			if status != tweet {
+			if !strings.Contains(status, config.SlotName(config.SLOT_IA)) {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}

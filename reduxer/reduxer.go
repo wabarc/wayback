@@ -8,6 +8,7 @@ import (
 	"context"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sync"
@@ -30,9 +31,12 @@ type Bundle struct {
 	Path Path
 }
 
+type Bundles map[string]Bundle
+
 // Do executes secreenshot, print PDF and export html of given URLs
 // Returns a set of bundle containing screenshot data and file path
-func Do(ctx context.Context, urls ...string) (bundles []Bundle, err error) {
+func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
+	bundles = make(Bundles)
 	if !config.Opts.EnabledReduxer() {
 		return bundles, errors.New("Specify directory to environment `WAYBACK_STORAGE_DIR` to enable reduxer")
 	}
@@ -53,7 +57,7 @@ func Do(ctx context.Context, urls ...string) (bundles []Bundle, err error) {
 	}
 
 	var wg sync.WaitGroup
-	var mu sync.RWMutex
+	var mu sync.Mutex
 	var path Path
 	for _, shot := range shots {
 		wg.Add(1)
@@ -67,6 +71,10 @@ func Do(ctx context.Context, urls ...string) (bundles []Bundle, err error) {
 				{key: "Raw", val: shot.HTML},
 			}
 			for _, slug := range slugs {
+				if slug.val == nil {
+					logger.Debug("[reduxer] file empty, skipped")
+					continue
+				}
 				ft := http.DetectContentType(slug.val)
 				fp := filepath.Join(dir, helper.FileName(shot.URL, ft))
 				logger.Debug("[reduxer] writing file: %s", fp)
@@ -79,7 +87,8 @@ func Do(ctx context.Context, urls ...string) (bundles []Bundle, err error) {
 					continue
 				}
 			}
-			bundles = append(bundles, Bundle{shot, path})
+			bundle := Bundle{shot, path}
+			bundles[shot.URL] = bundle
 		}(shot)
 	}
 	wg.Wait()
@@ -95,25 +104,45 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 		screenshot.RawHTML(true),  // export html
 		screenshot.Quality(100),   // image quality
 	}
-	if remote := remoteHeadless(config.Opts.ChromeRemoteAddr()); remote != nil {
-		addr := remote.(*net.TCPAddr)
-		headless, err := screenshot.NewChromeRemoteScreenshoter(addr.String())
-		if err != nil {
-			logger.Error("[reduxer] screenshot failed: %v", err)
-			return shots, err
-		}
-		shots, err = headless.Screenshot(ctx, urls, opts...)
-	} else {
-		shots, err = screenshot.Screenshot(ctx, urls, opts...)
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	shots = make([]screenshot.Screenshots, 0, len(urls))
+	for _, uri := range urls {
+		wg.Add(1)
+		go func(uri string) {
+			defer wg.Done()
+			input, err := url.Parse(uri)
+			if err != nil {
+				logger.Error("[reduxer] parse url failed: %v", err)
+				return
+			}
+
+			var shot screenshot.Screenshots
+			if remote := remoteHeadless(config.Opts.ChromeRemoteAddr()); remote != nil {
+				addr := remote.(*net.TCPAddr)
+				headless, err := screenshot.NewChromeRemoteScreenshoter(addr.String())
+				if err != nil {
+					logger.Error("[reduxer] screenshot failed: %v", err)
+					return
+				}
+				shot, err = headless.Screenshot(ctx, input, opts...)
+			} else {
+				shot, err = screenshot.Screenshot(ctx, input, opts...)
+			}
+			if err != nil {
+				if err == context.DeadlineExceeded {
+					logger.Error("[reduxer] screenshot deadline: %v", err)
+					return
+				}
+				logger.Debug("[reduxer] screenshot error: %v", err)
+				return
+			}
+			mu.Lock()
+			shots = append(shots, shot)
+			mu.Unlock()
+		}(uri)
 	}
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			logger.Error("[reduxer] screenshot deadline: %v", err)
-			return shots, err
-		}
-		logger.Debug("[reduxer] screenshot error: %v", err)
-		return shots, err
-	}
+	wg.Wait()
 
 	return shots, nil
 }

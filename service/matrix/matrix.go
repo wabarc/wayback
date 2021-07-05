@@ -19,6 +19,7 @@ import (
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/storage"
+	"github.com/wabarc/wayback/template/render"
 	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
@@ -161,15 +162,15 @@ func (m *Matrix) process(ev *event.Event) error {
 		return errors.New("Matrix: URL no found")
 	}
 
-	var bundles []reduxer.Bundle
-	col, err := wayback.Wayback(urls, &bundles)
+	var bundles reduxer.Bundles
+	cols, err := wayback.Wayback(context.TODO(), &bundles, urls...)
 	if err != nil {
 		logger.Error("[matrix] archives failure, %v", err)
 		return err
 	}
 	logger.Debug("[matrix] bundles: %#v", bundles)
 
-	body := publish.NewMatrix(m.client).Render(col)
+	body := render.ForReply(&render.Matrix{Cols: cols}).String()
 	content := &event.MessageEventContent{
 		FormattedBody: body,
 		Format:        event.FormatHTML,
@@ -192,7 +193,7 @@ func (m *Matrix) process(ev *event.Event) error {
 
 	ctx := context.WithValue(m.ctx, publish.FlagMatrix, m.client)
 	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	publish.To(ctx, col, publish.FlagMatrix)
+	publish.To(ctx, cols, publish.FlagMatrix)
 
 	return nil
 }
@@ -207,13 +208,13 @@ func (m *Matrix) playback(ev *event.Event) error {
 		return errors.New("Matrix: URL no found")
 	}
 
-	col, err := wayback.Playback(urls)
+	cols, err := wayback.Playback(m.ctx, urls...)
 	if err != nil {
 		logger.Error("[matrix] playback failure, %v", err)
 		return err
 	}
 
-	body := publish.NewMatrix(m.client).Render(col)
+	body := render.ForReply(&render.Matrix{Cols: cols}).String()
 	content := &event.MessageEventContent{
 		FormattedBody: body,
 		Format:        event.FormatHTML,

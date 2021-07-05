@@ -5,27 +5,28 @@
 package publish // import "github.com/wabarc/wayback/publish"
 
 import (
-	"bytes"
 	"context"
 	"strings"
-	"text/template"
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/metrics"
+	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/template/render"
 	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
 )
 
-type Matrix struct {
+type matrixBot struct {
 	client *matrix.Client
 }
 
-func NewMatrix(client *matrix.Client) *Matrix {
+func NewMatrix(client *matrix.Client) *matrixBot {
 	if !config.Opts.PublishToMatrixRoom() {
 		logger.Error("Missing required environment variable, abort.")
-		return new(Matrix)
+		return new(matrixBot)
 	}
 
 	if client == nil {
@@ -33,7 +34,7 @@ func NewMatrix(client *matrix.Client) *Matrix {
 		client, err = matrix.NewClient(config.Opts.MatrixHomeserver(), "", "")
 		if err != nil {
 			logger.Error("Dial Matrix client got unpredictable error: %v", err)
-			return new(Matrix)
+			return new(matrixBot)
 		}
 		_, err = client.Login(&matrix.ReqLogin{
 			Type:             matrix.AuthTypePassword,
@@ -46,10 +47,28 @@ func NewMatrix(client *matrix.Client) *Matrix {
 		}
 	}
 
-	return &Matrix{client: client}
+	return &matrixBot{client: client}
 }
 
-func (m *Matrix) ToRoom(ctx context.Context, text string) bool {
+func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+	metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusRequest)
+
+	if len(cols) == 0 {
+		logger.Debug("[publish] collects empty")
+		return
+	}
+
+	var bnd = bundle(ctx, cols)
+	var txt = render.ForPublish(&render.Matrix{Cols: cols}).String()
+	if m.toRoom(ctx, &bnd, txt) {
+		metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusSuccess)
+		return
+	}
+	metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusFailure)
+	return
+}
+
+func (m *matrixBot) toRoom(ctx context.Context, bundle *reduxer.Bundle, text string) bool {
 	if !config.Opts.PublishToMatrixRoom() || m.client == nil {
 		logger.Debug("[publish] publish to Matrix room abort.")
 		return false
@@ -59,9 +78,14 @@ func (m *Matrix) ToRoom(ctx context.Context, text string) bool {
 		return false
 	}
 
-	if head := title(ctx, text); head != "" {
-		text = "‹ <b>" + head + "</b> ›<br><br>" + text
+	var b strings.Builder
+	if head := title(ctx, bundle); head != "" {
+		b.WriteString(`‹ <b>`)
+		b.WriteString(head)
+		b.WriteString(`</b> ›<br><br>`)
 	}
+	b.WriteString(text)
+	text = b.String()
 	content := &event.MessageEventContent{
 		FormattedBody: text,
 		Format:        event.FormatHTML,
@@ -75,31 +99,4 @@ func (m *Matrix) ToRoom(ctx context.Context, text string) bool {
 	}
 
 	return true
-}
-
-func (m *Matrix) Render(vars []wayback.Collect) string {
-	var tmplBytes bytes.Buffer
-
-	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext }}'>{{ $.Arc }}</a></b>:<br>
-{{ range $src, $dst := $.Dst -}}
-• <a href="{{ $src | revert }}">source</a> - {{ $dst }}<br>
-{{end}}<br>
-{{end}}`
-
-	tpl, err := template.New("message").Funcs(funcMap()).Parse(tmpl)
-	if err != nil {
-		logger.Debug("[publish] parse Mastodon template failed, %v", err)
-		return ""
-	}
-
-	err = tpl.Execute(&tmplBytes, vars)
-	if err != nil {
-		logger.Debug("[publish] execute Mastodon template failed, %v", err)
-		return ""
-	}
-	html := tmplBytes.String()
-	html = strings.TrimSuffix(html, "\n")
-	html = strings.TrimSuffix(html, "<br>")
-
-	return html
 }

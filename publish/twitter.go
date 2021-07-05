@@ -5,26 +5,27 @@
 package publish // import "github.com/wabarc/wayback/publish"
 
 import (
-	"bytes"
 	"context"
 	"strings"
-	"text/template"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/metrics"
+	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/template/render"
 )
 
-type Twitter struct {
+type twitterBot struct {
 	client *twitter.Client
 }
 
-func NewTwitter(client *twitter.Client) *Twitter {
+func NewTwitter(client *twitter.Client) *twitterBot {
 	if !config.Opts.PublishToTwitter() {
 		logger.Error("Missing required environment variable")
-		return new(Twitter)
+		return new(twitterBot)
 	}
 
 	if client == nil {
@@ -34,10 +35,28 @@ func NewTwitter(client *twitter.Client) *Twitter {
 		client = twitter.NewClient(httpClient)
 	}
 
-	return &Twitter{client: client}
+	return &twitterBot{client: client}
 }
 
-func (t *Twitter) ToTwitter(ctx context.Context, text string) bool {
+func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+	metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusRequest)
+
+	if len(cols) == 0 {
+		logger.Debug("[publish] collects empty")
+		return
+	}
+
+	var bnd = bundle(ctx, cols)
+	var txt = render.ForPublish(&render.Twitter{Cols: cols}).String()
+	if t.ToTwitter(ctx, &bnd, txt) {
+		metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusSuccess)
+		return
+	}
+	metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusFailure)
+	return
+}
+
+func (t *twitterBot) ToTwitter(ctx context.Context, bundle *reduxer.Bundle, text string) bool {
 	if !config.Opts.PublishToTwitter() || t.client == nil {
 		logger.Debug("[publish] Do not publish to Twitter.")
 		return false
@@ -48,10 +67,14 @@ func (t *Twitter) ToTwitter(ctx context.Context, text string) bool {
 	}
 
 	// TODO: character limit
-	if head := title(ctx, text); head != "" {
-		text = "‹ " + head + " ›\n\n" + text
+	var b strings.Builder
+	if head := title(ctx, bundle); head != "" {
+		b.WriteString(`‹ `)
+		b.WriteString(head)
+		b.WriteString(" ›\n\n")
 	}
-	tweet, resp, err := t.client.Statuses.Update(text, nil)
+	b.WriteString(text)
+	tweet, resp, err := t.client.Statuses.Update(b.String(), nil)
 	if err != nil {
 		logger.Error("[publish] create tweet failed: %v", err)
 		return false
@@ -59,46 +82,4 @@ func (t *Twitter) ToTwitter(ctx context.Context, text string) bool {
 	logger.Debug("[publish] created tweet: %v, resp: %v, err: %v", tweet, resp, err)
 
 	return true
-}
-
-// Runder generate tweet of given wayback collects. It excluded telegra.ph
-// because this link has been identified by Twitter
-// nolint:stylecheck
-func (m *Twitter) Render(vars []wayback.Collect) string {
-	var tmplBytes bytes.Buffer
-
-	const tmpl = `{{range $ := .}}{{if not $.Arc "Telegraph"}}{{ $.Arc }}:
-{{ range $src, $dst := $.Dst -}}
-• {{ $dst }}
-{{end}}{{end}}
-{{end}}`
-
-	tpl, err := template.New("message").Funcs(funcMap()).Parse(tmpl)
-	if err != nil {
-		logger.Debug("[publish] parse Twitter template failed, %v", err)
-		return ""
-	}
-
-	err = tpl.Execute(&tmplBytes, vars)
-	if err != nil {
-		logger.Debug("[publish] execute Twitter template failed, %v", err)
-		return ""
-	}
-
-	return original(vars) + strings.TrimRight(tmplBytes.String(), "\n") + "\n\n#wayback #存档"
-}
-
-func original(vars []wayback.Collect) (o string) {
-	if len(vars) == 0 {
-		return o
-	}
-
-	for url, _ := range vars[0].Dst {
-		o += "• " + url + "\n"
-	}
-	if o == "" {
-		return o
-	}
-
-	return "source:\n" + o + "\n====\n\n"
 }

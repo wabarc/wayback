@@ -6,6 +6,8 @@ package wayback // import "github.com/wabarc/wayback"
 
 import (
 	"context"
+	"fmt"
+	"net/url"
 	"sync"
 
 	is "github.com/wabarc/archive.is"
@@ -20,181 +22,214 @@ import (
 	"github.com/wabarc/wbipfs"
 )
 
-// Archived returns result of wayback.
-type Archived map[string]string
-
-// Broker is interface of the wayback,
-// methods returns `Archived`.
-type Broker interface {
-	IA() Archived
-	IS() Archived
-	IP() Archived
-	PH() Archived
-}
-
-// Handle represents a wayback handle.
-type Handle struct {
-	Bundles *[]reduxer.Bundle
-
-	URLs []string
-}
-
-// Collect result that archived, Arc is name of the archive service,
+// Collect results that archived, Arc is name of the archive service,
 // Dst mapping the original URL and archived destination URL,
 // Ext is extra descriptions.
 type Collect struct {
-	Arc string            // Archive slot name, see config/config.go
-	Dst map[string]string // Archived destination URL
-	Ext string            // Extra identifier
+	Arc string // Archive slot name, see config/config.go
+	Dst string // Archived destination URL
+	Src string // Source URL
+	Ext string // Extra identifier
 }
 
-func (h *Handle) IA() Archived {
-	wbrc := &ia.Archiver{}
-	uris, err := wbrc.Wayback(h.URLs)
+type IA struct {
+	URL *url.URL
+	ctx context.Context
+}
+
+type IS struct {
+	ctx context.Context
+
+	URL *url.URL
+}
+
+type IP struct {
+	ctx context.Context
+
+	URL *url.URL
+}
+
+type PH struct {
+	ctx    context.Context
+	bundle reduxer.Bundle
+
+	URL *url.URL
+}
+
+// Waybacker is the interface that wraps the basic Wayback method.
+//
+// Wayback wayback *url.URL from struct of the implementations to the Wayback Machine.
+// It returns the result of string from the upstream services.
+type Waybacker interface {
+	Wayback() string
+}
+
+func (i IA) Wayback() string {
+	arc := &ia.Archiver{}
+	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("Wayback %v to Internet Archive failed, %v", h.URLs, err)
+		logger.Error("[wayback] %s to Internet Archive failed: %v", i.URL.String(), err)
+		return fmt.Sprint(err)
 	}
-
-	return uris
+	return dst
 }
 
-func (h *Handle) IS() Archived {
-	wbrc := &is.Archiver{}
-	uris, err := wbrc.Wayback(h.URLs)
+func (i IS) Wayback() string {
+	arc := &is.Archiver{}
+	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("Wayback %v to archive.today failed, %v", h.URLs, err)
+		logger.Error("[wayback] %s to archive.today failed: %v", i.URL.String(), err)
+		return fmt.Sprint(err)
 	}
-
-	return uris
+	return dst
 }
 
-func (h *Handle) IP() Archived {
-	wbrc := &wbipfs.Archiver{
+func (i IP) Wayback() string {
+	arc := &wbipfs.Archiver{
 		IPFSHost: config.Opts.IPFSHost(),
 		IPFSPort: config.Opts.IPFSPort(),
 		IPFSMode: config.Opts.IPFSMode(),
 		UseTor:   config.Opts.UseTor(),
 	}
-	uris, err := wbrc.Wayback(h.URLs)
+	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("Wayback %v to IPFS failed, %v", h.URLs, err)
+		logger.Error("[wayback] %s to IPFS failed: %v", i.URL.String(), err)
+		return fmt.Sprint(err)
 	}
-
-	return uris
+	return dst
 }
 
-func (h *Handle) PH() Archived {
-	wbrc := &ph.Archiver{}
-	wbrc.SetShots(h.parseShots())
+func (i PH) Wayback() string {
+	arc := &ph.Archiver{}
+	arc.SetShot(i.parseShot())
 	if config.Opts.EnabledChromeRemote() {
-		wbrc.ByRemote(config.Opts.ChromeRemoteAddr())
+		arc.ByRemote(config.Opts.ChromeRemoteAddr())
 	}
 
-	uris, err := wbrc.Wayback(h.URLs)
+	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("Wayback %v to Telegra.ph failed, %v", h.URLs, err)
+		logger.Error("[wayback] %s to archive.today failed: %v", i.URL.String(), err)
+		return fmt.Sprint(err)
 	}
-
-	return uris
+	return dst
 }
 
-func (h *Handle) parseShots() (s []screenshot.Screenshots) {
-	for _, bundle := range *h.Bundles {
-		s = append(s, screenshot.Screenshots{
-			URL:   bundle.URL,
-			Title: bundle.Title,
-			Image: bundle.Image,
-			HTML:  bundle.HTML,
-			PDF:   bundle.PDF,
-		})
+func (p PH) parseShot() (shot screenshot.Screenshots) {
+	return screenshot.Screenshots{
+		URL:   p.bundle.URL,
+		Title: p.bundle.Title,
+		Image: p.bundle.Image,
+		HTML:  p.bundle.HTML,
+		PDF:   p.bundle.PDF,
 	}
-	return s
+}
+
+func wayback(w Waybacker) string {
+	return w.Wayback()
 }
 
 // Wayback returns URLs archived to the time capsules.
-func Wayback(urls []string, bundles *[]reduxer.Bundle) (col []Collect, err error) {
+func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (cols []Collect, err error) {
 	logger.Debug("[wayback] start...")
 
-	*bundles, err = reduxer.Do(context.Background(), urls...)
+	*bundles, err = reduxer.Do(ctx, urls...)
 	if err != nil {
 		logger.Info("[wayback] cannot to start reduxer: %v", err)
 	}
 
 	var mu sync.Mutex
 	var wg sync.WaitGroup
-	var wb Broker = &Handle{URLs: urls, Bundles: bundles}
-	for slot, arc := range config.Opts.Slots() {
-		if !arc {
-			continue
-		}
-		wg.Add(1)
-		go func(slot string) {
-			defer wg.Done()
-			c := Collect{}
-			logger.Debug("[wayback] archiving slot: %s", slot)
-			switch slot {
-			case config.SLOT_IA:
-				c.Dst = wb.IA()
-			case config.SLOT_IS:
-				c.Dst = wb.IS()
-			case config.SLOT_IP:
-				c.Dst = wb.IP()
-			case config.SLOT_PH:
-				c.Dst = wb.PH()
+	for _, uri := range urls {
+		for slot, arc := range config.Opts.Slots() {
+			if !arc {
+				logger.Debug("[wayback] skipped %s", slot)
+				continue
 			}
-			c.Arc = config.SlotName(slot)
-			c.Ext = config.SlotExtra(slot)
-			mu.Lock()
-			col = append(col, c)
-			mu.Unlock()
-		}(slot)
+			wg.Add(1)
+			go func(slot, uri string) {
+				defer wg.Done()
+
+				logger.Debug("[wayback] archiving slot: %s", slot)
+				input, err := url.Parse(uri)
+				if err != nil {
+					logger.Error("[wayback] parse uri failed: %v", err)
+					return
+				}
+
+				bundle := (*bundles)[uri]
+				var col Collect
+				switch slot {
+				case config.SLOT_IA:
+					col.Dst = wayback(IA{URL: input, ctx: ctx})
+				case config.SLOT_IS:
+					col.Dst = wayback(IS{URL: input, ctx: ctx})
+				case config.SLOT_IP:
+					col.Dst = wayback(IP{URL: input, ctx: ctx})
+				case config.SLOT_PH:
+					col.Dst = wayback(PH{URL: input, ctx: ctx, bundle: bundle})
+				}
+				col.Src = uri
+				col.Arc = slot
+				col.Ext = slot
+				mu.Lock()
+				cols = append(cols, col)
+				mu.Unlock()
+			}(slot, uri)
+		}
 	}
 	wg.Wait()
 
-	if len(col) == 0 {
+	if len(cols) == 0 {
 		logger.Error("[wayback] archives failure")
-		return col, errors.New("archives failure")
+		return cols, errors.New("archives failure")
 	}
 
-	return col, nil
+	return cols, nil
 }
 
 // Playback returns URLs archived from the time capsules.
-func Playback(urls []string) (col []Collect, err error) {
+func Playback(ctx context.Context, urls ...string) (cols []Collect, err error) {
 	logger.Debug("[playback] start...")
 
 	var mu sync.Mutex
 	var wg sync.WaitGroup
-	var pb playback.Playback = &playback.Handle{URLs: urls}
 	var slots = []string{config.SLOT_IA, config.SLOT_IS, config.SLOT_IP, config.SLOT_PH, config.SLOT_TT, config.SLOT_GC}
-	for _, slot := range slots {
-		wg.Add(1)
-		go func(slot string) {
-			defer wg.Done()
-			c := Collect{}
-			logger.Debug("[playback] searching slot: %s", slot)
-			switch slot {
-			case config.SLOT_IA:
-				c.Dst = pb.IA()
-			case config.SLOT_IS:
-				c.Dst = pb.IS()
-			case config.SLOT_IP:
-				c.Dst = pb.IP()
-			case config.SLOT_PH:
-				c.Dst = pb.PH()
-			case config.SLOT_TT:
-				c.Dst = pb.TT()
-			case config.SLOT_GC:
-				c.Dst = pb.GC()
-			}
-			c.Arc = config.SlotName(slot)
-			c.Ext = config.SlotExtra(slot)
-			mu.Lock()
-			col = append(col, c)
-			mu.Unlock()
-		}(slot)
+	for _, uri := range urls {
+		for _, slot := range slots {
+			wg.Add(1)
+			go func(slot, uri string) {
+				defer wg.Done()
+				logger.Debug("[playback] searching slot: %s", slot)
+				input, err := url.Parse(uri)
+				if err != nil {
+					logger.Error("[playback] parse uri failed: %v", err)
+					return
+				}
+				var col Collect
+				switch slot {
+				case config.SLOT_IA:
+					col.Dst = playback.Playback(ctx, playback.IA{URL: input})
+				case config.SLOT_IS:
+					col.Dst = playback.Playback(ctx, playback.IS{URL: input})
+				case config.SLOT_IP:
+					col.Dst = playback.Playback(ctx, playback.IP{URL: input})
+				case config.SLOT_PH:
+					col.Dst = playback.Playback(ctx, playback.PH{URL: input})
+				case config.SLOT_TT:
+					col.Dst = playback.Playback(ctx, playback.TT{URL: input})
+				case config.SLOT_GC:
+					col.Dst = playback.Playback(ctx, playback.GC{URL: input})
+				}
+				col.Src = uri
+				col.Arc = slot
+				col.Ext = slot
+				mu.Lock()
+				cols = append(cols, col)
+				mu.Unlock()
+			}(slot, uri)
+		}
 	}
 	wg.Wait()
 
-	return col, nil
+	return cols, nil
 }

@@ -5,25 +5,26 @@
 package publish // import "github.com/wabarc/wayback/publish"
 
 import (
-	"bytes"
 	"context"
 	"strings"
-	"text/template"
 
 	mstdn "github.com/mattn/go-mastodon"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/metrics"
+	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/template/render"
 )
 
-type Mastodon struct {
+type mastodon struct {
 	client *mstdn.Client
 }
 
-func NewMastodon(client *mstdn.Client) *Mastodon {
+func NewMastodon(client *mstdn.Client) *mastodon {
 	if !config.Opts.PublishToMastodon() {
 		logger.Error("Missing required environment variable")
-		return new(Mastodon)
+		return new(mastodon)
 	}
 
 	if client == nil {
@@ -35,10 +36,32 @@ func NewMastodon(client *mstdn.Client) *Mastodon {
 		})
 	}
 
-	return &Mastodon{client: client}
+	return &mastodon{client: client}
 }
 
-func (m *Mastodon) ToMastodon(ctx context.Context, text, id string) bool {
+func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+	var id string
+	if len(args) > 1 {
+		id = args[1]
+	}
+	metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusRequest)
+
+	if len(cols) == 0 {
+		logger.Debug("[publish] collects empty")
+		return
+	}
+
+	var bnd = bundle(ctx, cols)
+	var txt = render.ForPublish(&render.Mastodon{Cols: cols}).String()
+	if m.ToMastodon(ctx, &bnd, txt, id) {
+		metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusSuccess)
+		return
+	}
+	metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusFailure)
+	return
+}
+
+func (m *mastodon) ToMastodon(ctx context.Context, bundle *reduxer.Bundle, text, id string) bool {
 	if !config.Opts.PublishToMastodon() || m.client == nil {
 		logger.Debug("[publish] Do not publish to Mastodon.")
 		return false
@@ -48,12 +71,15 @@ func (m *Mastodon) ToMastodon(ctx context.Context, text, id string) bool {
 		return false
 	}
 
-	// TODO: character limit
-	if head := title(ctx, text); head != "" {
-		text = "‹ " + head + " ›\n\n" + text
+	var b strings.Builder
+	if head := title(ctx, bundle); head != "" {
+		b.WriteString(`‹ `)
+		b.WriteString(head)
+		b.WriteString(" ›\n\n")
 	}
+	b.WriteString(text)
 	toot := &mstdn.Toot{
-		Status:     text,
+		Status:     b.String(),
 		Visibility: mstdn.VisibilityPublic,
 	}
 	if id != "" {
@@ -65,28 +91,4 @@ func (m *Mastodon) ToMastodon(ctx context.Context, text, id string) bool {
 	}
 
 	return true
-}
-
-func (m *Mastodon) Render(vars []wayback.Collect) string {
-	var tmplBytes bytes.Buffer
-
-	const tmpl = `{{range $ := .}}{{ $.Arc }}:
-{{ range $src, $dst := $.Dst -}}
-• {{ $dst }}
-{{end}}
-{{end}}`
-
-	tpl, err := template.New("message").Parse(tmpl)
-	if err != nil {
-		logger.Debug("[publish] parse Mastodon template failed, %v", err)
-		return ""
-	}
-
-	err = tpl.Execute(&tmplBytes, vars)
-	if err != nil {
-		logger.Debug("[publish] execute Mastodon template failed, %v", err)
-		return ""
-	}
-
-	return strings.TrimSuffix(tmplBytes.String(), "\n")
 }
