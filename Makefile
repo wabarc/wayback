@@ -278,3 +278,7 @@ debian-packages:
 submodule:
 	@echo "-> Updating Git submodule..."
 	@git submodule update --init --recursive --remote
+
+scan:
+	@echo "-> Scanning vulnerabilities..."
+	@go list -json -m all | $(DOCKER) run --rm -i sonatypecommunity/nancy sleuth --skip-update-check
