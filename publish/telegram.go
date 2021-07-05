@@ -91,6 +91,10 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 		b.WriteString(head)
 		b.WriteString("</b>\n\n")
 	}
+	if dgst := digest(ctx, bundle); dgst != "" {
+		b.WriteString(dgst)
+		b.WriteString("\n\n")
+	}
 	b.WriteString(text)
 
 	stage, err := t.bot.Send(chat, b.String())

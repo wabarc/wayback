@@ -5,6 +5,7 @@
 package reduxer // import "github.com/wabarc/wayback/reduxer"
 
 import (
+	"bytes"
 	"context"
 	"net"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cixtor/readability"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/screenshot"
@@ -28,7 +30,8 @@ type Path struct {
 type Bundle struct {
 	screenshot.Screenshots
 
-	Path Path
+	Path    Path
+	Article readability.Article
 }
 
 type Bundles map[string]Bundle
@@ -87,7 +90,12 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 					continue
 				}
 			}
-			bundle := Bundle{shot, path}
+			bundle := Bundle{shot, path, readability.Article{}}
+			article, err := readability.New().Parse(bytes.NewReader(shot.HTML), shot.URL)
+			if err != nil {
+				logger.Error("[reduxer] parse html failed: %v", err)
+			}
+			bundle.Article = article
 			bundles[shot.URL] = bundle
 		}(shot)
 	}

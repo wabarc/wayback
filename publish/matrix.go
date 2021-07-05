@@ -84,7 +84,12 @@ func (m *matrixBot) toRoom(ctx context.Context, bundle *reduxer.Bundle, text str
 		b.WriteString(head)
 		b.WriteString(`</b> ›<br><br>`)
 	}
+	if dgst := digest(ctx, bundle); dgst != "" {
+		b.WriteString(dgst)
+		b.WriteString(`<br><br>`)
+	}
 	b.WriteString(text)
+
 	text = b.String()
 	content := &event.MessageEventContent{
 		FormattedBody: text,

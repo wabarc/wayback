@@ -81,6 +81,14 @@ func (gh *gitHub) toIssues(ctx context.Context, bundle *reduxer.Bundle, text str
 		t = "Published at " + time.Now().Format("2006-01-02T15:04:05")
 	}
 
+	var b strings.Builder
+	if dgst := digest(ctx, bundle); dgst != "" {
+		b.WriteString(dgst)
+		b.WriteString("\n\n")
+	}
+	b.WriteString(text)
+	text = b.String()
+
 	// Create an issue to GitHub
 	ir := &github.IssueRequest{Title: github.String(t), Body: github.String(text)}
 	issue, _, err := gh.client.Issues.Create(ctx, config.Opts.GitHubOwner(), config.Opts.GitHubRepo(), ir)

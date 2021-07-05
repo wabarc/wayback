@@ -34,7 +34,8 @@ const (
 
 	PubBundle = "reduxer-bundle"
 
-	maxTitleLen = 256
+	maxTitleLen  = 256
+	maxDigestLen = 500
 )
 
 // Publisher is the interface that wraps the basic Publish method.
@@ -176,4 +177,23 @@ func title(_ context.Context, bundle *reduxer.Bundle) string {
 	}
 
 	return strings.TrimSpace(string(t))
+}
+
+func digest(_ context.Context, bundle *reduxer.Bundle) string {
+	logger.Debug("[publish] generate digest from bundle: %v", bundle)
+	if bundle == nil {
+		return ""
+	}
+
+	txt := []rune(bundle.Article.TextContent)
+	l := len(txt)
+	switch {
+	case l == 0:
+		return ""
+	case l > maxDigestLen:
+		txt = txt[:maxDigestLen]
+		return string(txt) + ` ...`
+	default:
+		return string(txt)
+	}
 }
