@@ -45,7 +45,7 @@ RUN set -o pipefail; \
 
 COPY --from=builder /wayback /usr/local/bin
 RUN set -o pipefail; \
-    apk add --no-cache -U ca-certificates libressl tor; \
+    apk add --no-cache -U ca-certificates libressl wget tor; \
     rm -rf /var/cache/apk/*; \
     \
     mv /etc/tor/torrc.sample /etc/tor/torrc; \

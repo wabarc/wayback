@@ -244,7 +244,7 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 		paths := []string{
 			bundle.Path.Img,
 			bundle.Path.PDF,
-			// bundle.Path.Raw,
+			bundle.Path.WARC,
 		}
 		for _, path := range paths {
 			if path == "" {

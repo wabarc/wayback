@@ -57,6 +57,18 @@ jobs:
       with:
         chrome-version: stable
 
+    - name: Set up Chocolatey
+      if: matrix.os == 'windows-latest'
+      uses: crazy-max/ghaction-chocolatey@v1
+      with:
+        args: -h
+
+    - name: Install Wget
+      if: matrix.os == 'windows-latest'
+      run: |
+        choco install wget
+        wget --help
+
     - name: Check out code base
       if: github.event_name == 'push'
       uses: actions/checkout@v2

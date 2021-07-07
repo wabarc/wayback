@@ -113,6 +113,7 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 	paths := []string{
 		bundle.Path.Img,
 		bundle.Path.PDF,
+		bundle.Path.WARC,
 	}
 
 	for _, path := range paths {

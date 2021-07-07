@@ -468,8 +468,9 @@ github.com/wabarc/archive.org v1.2.0/go.mod h1:yEmUMlNO2PPAxIvo/Hf/VxOrCS5SBwL2/
 github.com/wabarc/helper v0.0.0-20210127120855-10af37cc2616/go.mod h1:N9P4r7Rn46p4nkWtXV6ztN3p5ACVnp++bgfwjTqSxQ8=
 github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/helper v0.0.0-20210613000316-cc3df6340ab5/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
-github.com/wabarc/helper v0.0.0-20210701193643-e0fe0a807cb9 h1:cO9x2t4ruB90tdbvUrvX0dNsiaTUjhmOAYeiHBZZwAI=
 github.com/wabarc/helper v0.0.0-20210701193643-e0fe0a807cb9/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
+github.com/wabarc/helper v0.0.0-20210706220001-6ba9e89c752b h1:jtxweiDt+Moy/DJLT730bA6TK5HY/QBQexmLwcLZmDY=
+github.com/wabarc/helper v0.0.0-20210706220001-6ba9e89c752b/go.mod h1:uS6mimKlWkGvEZXkJ6JoW7LYnnB2JP6dLU9q7pgDaWQ=
 github.com/wabarc/imgbb v1.0.0 h1:vNud9qY4dRGp1nikb+GHIrc/sE3WOdNq5gfT/vhWEUQ=
 github.com/wabarc/imgbb v1.0.0/go.mod h1:piz6QXkVfFpQbaQHx70/rPDwaICkW5Ew3lShTzbnVt0=
 github.com/wabarc/ipfs-pinner v1.0.1 h1:PaWBDn1X556IyiOVd143XO9PVRjbohppA+JMJQwNBHI=
@@ -488,6 +489,8 @@ github.com/wabarc/telebot v0.0.0-20210614085950-9479567e0e0a h1:RCrMXolMzoNxmN9X
 github.com/wabarc/telebot v0.0.0-20210614085950-9479567e0e0a/go.mod h1:BgaIIx50PSRS9pG59JH+geT82cfvoJU/IaI5TJdN3v8=
 github.com/wabarc/telegra.ph v0.0.0-20210703211321-96a81d310b4b h1:H+8SV/tC/IhwNneVyQX6KkO6K9Am74tSaHoAHSTH2WA=
 github.com/wabarc/telegra.ph v0.0.0-20210703211321-96a81d310b4b/go.mod h1:DlcaknxTmrW2I6j7NnUFSR6Gu5p+ySifHiM+iXlSyus=
+github.com/wabarc/warcraft v0.1.1-0.20210707001544-e897dbede7c3 h1:P9KKKeXbGdvzJoEEMQ2M9DlusYdS/9hzimS0+rVYrJY=
+github.com/wabarc/warcraft v0.1.1-0.20210707001544-e897dbede7c3/go.mod h1:/BbCwReBjlqHRaw8Yh+7sfAicOesiMYNhiFpuL1x8Rc=
 github.com/wabarc/wbipfs v0.2.0 h1:TksxONxL/LrBGZ6TTcWD4p+FAzuQPfLQyCL7K64isW8=
 github.com/wabarc/wbipfs v0.2.0/go.mod h1:wh76ZvNbhSrDNxStkKORKcnfwjozfoTtq8XyzU7GKDw=
 github.com/whyrusleeping/tar-utils v0.0.0-20180509141711-8c6c8ba81d5c/go.mod h1:xxcJeBb7SIUl/Wzkz1eVKJE/CB34YNrqX2TQI6jY9zs=
