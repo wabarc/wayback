@@ -36,11 +36,13 @@ func (m *Mastodon) ForPublish() *Render {
 		return new(Render)
 	}
 
+	tmplBytes.WriteString(original(m.Cols))
 	err = tpl.Execute(&tmplBytes, m.Cols)
 	if err != nil {
 		logger.Error("[masatodon] execute Mastodon template failed, %v", err)
 		return new(Render)
 	}
+	tmplBytes.WriteString("#wayback #存档")
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
 
 	return &Render{buf: tmplBytes}

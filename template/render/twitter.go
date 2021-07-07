@@ -6,6 +6,7 @@ package render // import "github.com/wabarc/wayback/template/render"
 
 import (
 	"bytes"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -80,13 +81,13 @@ func original(v interface{}) (o string) {
 	var sm = make(map[string]int)
 	if vv, ok := v.([]wayback.Collect); ok && len(vv) > 0 {
 		for _, col := range vv {
-			sm[col.Src] = 0
+			sm[col.Src] += 1
 		}
 	} else if vv, ok := v.(*Collects); ok {
 		for _, cols := range *vv {
 			for _, dst := range cols.Dst {
 				for src, _ := range dst {
-					sm[src] = 0
+					sm[src] += 1
 				}
 			}
 		}
@@ -97,11 +98,25 @@ func original(v interface{}) (o string) {
 	if len(sm) == 0 {
 		return o
 	}
+
+	type kv struct {
+		Key   string
+		Value int
+	}
+
+	var ss []kv
+	for k, v := range sm {
+		ss = append(ss, kv{k, v})
+	}
+	sort.Slice(ss, func(i, j int) bool {
+		return ss[i].Value > ss[j].Value
+	})
+
 	var sb strings.Builder
 	sb.WriteString("source:\n")
-	for src, _ := range sm {
+	for _, kv := range ss {
 		sb.WriteString(`• `)
-		sb.WriteString(src)
+		sb.WriteString(kv.Key)
 		sb.WriteString("\n")
 	}
 	sb.WriteString("\n====\n\n")

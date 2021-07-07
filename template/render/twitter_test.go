@@ -5,6 +5,7 @@
 package render // import "github.com/wabarc/wayback/template/render"
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -32,13 +33,8 @@ IPFS:
 }
 
 func TestRenderTwitterForReply(t *testing.T) {
-	const tweet = `source:
-• https://example.com/
-• https://example.org/
-
-====
-
-Internet Archive:
+	const source = `• https://example.org/`
+	const tweet = `Internet Archive:
 • https://web.archive.org/123/https://example.com/
 • https://web.archive.org/123/https://example.org/
 
@@ -48,7 +44,10 @@ archive.today:
 
 #wayback #存档`
 	got := ForReply(&Twitter{Cols: multi}).String()
-	if got != tweet {
+	if !strings.Contains(got, source) {
+		t.Errorf("Unexpected render template for Twitter, got \n%s\ninstead of \n%s", got, source)
+	}
+	if !strings.Contains(got, tweet) {
 		t.Errorf("Unexpected render template for Twitter, got \n%s\ninstead of \n%s", got, tweet)
 	}
 }
