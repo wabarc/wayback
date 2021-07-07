@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.14.0] - 2021-07-07
+
+### Added
+- Summarize for publish and readability content for Telegra.ph
+- Add support to serve WARC file
+- Add Sonatype Nancy to check for vulnerabilities
+- Attaching hashtag to the Mastodon toot
+
+### Changed
+- Minor improvements: waitgroup => errgroup
+- Standardize the description of Docker images
+- Disable to releasing snap if pull requests
+- Refactor: publish multiple message
+- Improvement for web layout
+- Misc updates
+
 ## [0.13.1] - 2021-06-27
 
 ### Added
