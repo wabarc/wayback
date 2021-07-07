@@ -20,6 +20,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/reduxer"
+	"golang.org/x/sync/errgroup"
 	telegram "gopkg.in/tucnak/telebot.v2"
 	matrix "maunium.net/go/mautrix"
 )
@@ -53,17 +54,27 @@ func process(p Publisher, ctx context.Context, cols []wayback.Collect, args ...s
 		parts[col.Src] = append(parts[col.Src], col)
 	}
 
+	f := from(args...)
+	g, ctx := errgroup.WithContext(ctx)
 	for _, part := range parts {
-		logger.Debug("[%s] produce part: %#v", from(args...), part)
+		logger.Debug("[%s] produce part: %#v", f, part)
 
-		// Nice for target server
-		rand.Seed(time.Now().UnixNano())
-		r := rand.Intn(10) //nolint:gosec,goimports
-		w := time.Duration(r) * time.Second
-		logger.Debug("[%s] produce sleep %d second", from(args...), r)
-		time.Sleep(w)
+		part := part
+		g.Go(func() error {
+			// Nice for target server
+			rand.Seed(time.Now().UnixNano())
+			r := rand.Intn(10) //nolint:gosec,goimports
+			w := time.Duration(r) * time.Second
+			logger.Debug("[%s] produce sleep %d second", f, r)
+			time.Sleep(w)
 
-		p.Publish(ctx, part, args...)
+			p.Publish(ctx, part, args...)
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		logger.Error("[%s] produce failed: %v", f, err)
+		return
 	}
 
 	return
@@ -86,12 +97,12 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 		}
 
 		t := NewTelegram(bot)
-		process(t, ctx, cols, args...)
+		go process(t, ctx, cols, args...)
 	}
 	if config.Opts.PublishToIssues() {
 		logger.Debug("[%s] publishing to GitHub issues...", from(args...))
 		gh := NewGitHub(nil)
-		process(gh, ctx, cols, args...)
+		go process(gh, ctx, cols, args...)
 	}
 	if config.Opts.PublishToMastodon() {
 		logger.Debug("[%s] publishing to Mastodon...", from(args...))
@@ -100,7 +111,7 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			client = rev
 		}
 		mstdn := NewMastodon(client)
-		process(mstdn, ctx, cols, args...)
+		go process(mstdn, ctx, cols, args...)
 	}
 	if config.Opts.PublishToTwitter() {
 		logger.Debug("[%s] publishing to Twitter...", from(args...))
@@ -109,7 +120,7 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			client = rev
 		}
 		twitter := NewTwitter(client)
-		process(twitter, ctx, cols, args...)
+		go process(twitter, ctx, cols, args...)
 	}
 	if config.Opts.PublishToIRCChannel() {
 		logger.Debug("[%s] publishing to IRC channel...", from(args...))
@@ -118,7 +129,7 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			conn = rev
 		}
 		irc := NewIRC(conn)
-		process(irc, ctx, cols, args...)
+		go process(irc, ctx, cols, args...)
 	}
 	if config.Opts.PublishToMatrixRoom() {
 		logger.Debug("[%s] publishing to Matrix room...", from(args...))
@@ -127,7 +138,7 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			client = rev
 		}
 		mat := NewMatrix(client)
-		process(mat, ctx, cols, args...)
+		go process(mat, ctx, cols, args...)
 	}
 }
 

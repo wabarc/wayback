@@ -10,16 +10,18 @@ import (
 	"net/url"
 	"sync"
 
-	is "github.com/wabarc/archive.is"
-	ia "github.com/wabarc/archive.org"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/playback"
 	"github.com/wabarc/screenshot"
-	ph "github.com/wabarc/telegra.ph"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/reduxer"
-	"github.com/wabarc/wbipfs"
+	"golang.org/x/sync/errgroup"
+
+	is "github.com/wabarc/archive.is"
+	ia "github.com/wabarc/archive.org"
+	ph "github.com/wabarc/telegra.ph"
+	ip "github.com/wabarc/wbipfs"
 )
 
 // Collect results that archived, Arc is name of the archive service,
@@ -85,7 +87,7 @@ func (i IS) Wayback() string {
 }
 
 func (i IP) Wayback() string {
-	arc := &wbipfs.Archiver{
+	arc := &ip.Archiver{
 		IPFSHost: config.Opts.IPFSHost(),
 		IPFSPort: config.Opts.IPFSPort(),
 		IPFSMode: config.Opts.IPFSMode(),
@@ -137,23 +139,21 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 		logger.Info("[wayback] cannot to start reduxer: %v", err)
 	}
 
-	var mu sync.Mutex
-	var wg sync.WaitGroup
+	mu := sync.Mutex{}
+	g, ctx := errgroup.WithContext(ctx)
 	for _, uri := range urls {
 		for slot, arc := range config.Opts.Slots() {
 			if !arc {
 				logger.Debug("[wayback] skipped %s", slot)
 				continue
 			}
-			wg.Add(1)
-			go func(slot, uri string) {
-				defer wg.Done()
-
+			slot, uri := slot, uri
+			g.Go(func() error {
 				logger.Debug("[wayback] archiving slot: %s", slot)
 				input, err := url.Parse(uri)
 				if err != nil {
 					logger.Error("[wayback] parse uri failed: %v", err)
-					return
+					return err
 				}
 
 				bundle := (*bundles)[uri]
@@ -174,10 +174,14 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 				mu.Lock()
 				cols = append(cols, col)
 				mu.Unlock()
-			}(slot, uri)
+				return nil
+			})
 		}
 	}
-	wg.Wait()
+	if err := g.Wait(); err != nil {
+		logger.Error("[wayback] archives failed: %v", err)
+		return cols, err
+	}
 
 	if len(cols) == 0 {
 		logger.Error("[wayback] archives failure")
@@ -191,19 +195,18 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 func Playback(ctx context.Context, urls ...string) (cols []Collect, err error) {
 	logger.Debug("[playback] start...")
 
-	var mu sync.Mutex
-	var wg sync.WaitGroup
+	mu := sync.Mutex{}
+	g, ctx := errgroup.WithContext(ctx)
 	var slots = []string{config.SLOT_IA, config.SLOT_IS, config.SLOT_IP, config.SLOT_PH, config.SLOT_TT, config.SLOT_GC}
 	for _, uri := range urls {
 		for _, slot := range slots {
-			wg.Add(1)
-			go func(slot, uri string) {
-				defer wg.Done()
+			slot, uri := slot, uri
+			g.Go(func() error {
 				logger.Debug("[playback] searching slot: %s", slot)
 				input, err := url.Parse(uri)
 				if err != nil {
 					logger.Error("[playback] parse uri failed: %v", err)
-					return
+					return err
 				}
 				var col Collect
 				switch slot {
@@ -226,10 +229,14 @@ func Playback(ctx context.Context, urls ...string) (cols []Collect, err error) {
 				mu.Lock()
 				cols = append(cols, col)
 				mu.Unlock()
-			}(slot, uri)
+				return nil
+			})
 		}
 	}
-	wg.Wait()
+	if err := g.Wait(); err != nil {
+		logger.Error("[playback] failed: %v", err)
+		return cols, err
+	}
 
 	return cols, nil
 }
