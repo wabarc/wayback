@@ -22,9 +22,12 @@ func setMatrixEnv() {
 	os.Setenv("WAYBACK_MATRIX_USERID", "@foo:example.com")
 	os.Setenv("WAYBACK_MATRIX_ROOMID", "!bar:example.com")
 	os.Setenv("WAYBACK_MATRIX_PASSWORD", "zoo")
+
+	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
 }
 
 func TestToMatrixRoom(t *testing.T) {
+	unsetAllEnv()
 	setMatrixEnv()
 
 	_, mux, server := helper.MockServer()

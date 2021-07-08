@@ -8,6 +8,7 @@ import (
 	"context"
 	"math/rand"
 	"net/url"
+	"os"
 	"strings"
 	"text/template"
 	"time"
@@ -39,6 +40,8 @@ const (
 	maxDigestLen = 500
 )
 
+var maxDelayTime = 10
+
 // Publisher is the interface that wraps the basic Publish method.
 //
 // Publish publish message to serveral media platforms, e.g. Telegram channel, GitHub Issues, etc.
@@ -61,12 +64,14 @@ func process(p Publisher, ctx context.Context, cols []wayback.Collect, args ...s
 
 		part := part
 		g.Go(func() error {
-			// Nice for target server
-			rand.Seed(time.Now().UnixNano())
-			r := rand.Intn(10) //nolint:gosec,goimports
-			w := time.Duration(r) * time.Second
-			logger.Debug("[%s] produce sleep %d second", f, r)
-			time.Sleep(w)
+			// Nice for target server. It should be skipped on the testing mode.
+			if !strings.HasSuffix(os.Args[0], ".test") {
+				rand.Seed(time.Now().UnixNano())
+				r := rand.Intn(maxDelayTime) //nolint:gosec,goimports
+				w := time.Duration(r) * time.Second
+				logger.Debug("[%s] produce sleep %d second", f, r)
+				time.Sleep(w)
+			}
 
 			p.Publish(ctx, part, args...)
 			return nil
@@ -89,56 +94,92 @@ func from(args ...string) (f string) {
 
 // nolint:gocyclo
 func To(ctx context.Context, cols []wayback.Collect, args ...string) {
-	if config.Opts.PublishToChannel() {
-		logger.Debug("[%s] publishing to telegram channel...", from(args...))
-		var bot *telegram.Bot
-		if rev, ok := ctx.Value(FlagTelegram).(*telegram.Bot); ok {
-			bot = rev
+	f := from(args...)
+	channel := func(ctx context.Context, cols []wayback.Collect, args ...string) {
+		if config.Opts.PublishToChannel() {
+			logger.Debug("[%s] publishing to telegram channel...", f)
+			var bot *telegram.Bot
+			if rev, ok := ctx.Value(FlagTelegram).(*telegram.Bot); ok {
+				bot = rev
+			}
+			if bot == nil {
+				return
+			}
+			t := NewTelegram(bot)
+			process(t, ctx, cols, args...)
 		}
+	}
+	issue := func(ctx context.Context, cols []wayback.Collect, args ...string) {
+		if config.Opts.PublishToIssues() {
+			logger.Debug("[%s] publishing to GitHub issues...", f)
+			gh := NewGitHub(nil)
+			process(gh, ctx, cols, args...)
+		}
+	}
+	mastodon := func(ctx context.Context, cols []wayback.Collect, args ...string) {
+		if config.Opts.PublishToMastodon() {
+			logger.Debug("[%s] publishing to Mastodon...", f)
+			var client *mstdn.Client
+			if rev, ok := ctx.Value(FlagMastodon).(*mstdn.Client); ok {
+				client = rev
+			}
+			mstdn := NewMastodon(client)
+			process(mstdn, ctx, cols, args...)
+		}
+	}
+	matrix := func(ctx context.Context, cols []wayback.Collect, args ...string) {
+		if config.Opts.PublishToMatrixRoom() {
+			logger.Debug("[%s] publishing to Matrix room...", f)
+			var client *matrix.Client
+			if rev, ok := ctx.Value(FlagMatrix).(*matrix.Client); ok {
+				client = rev
+			}
+			mat := NewMatrix(client)
+			process(mat, ctx, cols, args...)
+		}
+	}
+	twitter := func(ctx context.Context, cols []wayback.Collect, args ...string) {
+		if config.Opts.PublishToTwitter() {
+			logger.Debug("[%s] publishing to Twitter...", f)
+			var client *twitter.Client
+			if rev, ok := ctx.Value(FlagTwitter).(*twitter.Client); ok {
+				client = rev
+			}
+			twitter := NewTwitter(client)
+			process(twitter, ctx, cols, args...)
+		}
+	}
+	irc := func(ctx context.Context, cols []wayback.Collect, args ...string) {
+		if config.Opts.PublishToIRCChannel() {
+			logger.Debug("[%s] publishing to IRC channel...", f)
+			var conn *irc.Connection
+			if rev, ok := ctx.Value(FlagIRC).(*irc.Connection); ok {
+				conn = rev
+			}
+			irc := NewIRC(conn)
+			process(irc, ctx, cols, args...)
+		}
+	}
+	funcs := map[string]func(context.Context, []wayback.Collect, ...string){
+		"channel":  channel,
+		"issue":    issue,
+		"mastodon": mastodon,
+		"matrix":   matrix,
+		"twitter":  twitter,
+		"irc":      irc,
+	}
 
-		t := NewTelegram(bot)
-		go process(t, ctx, cols, args...)
+	g, ctx := errgroup.WithContext(ctx)
+	for k, fn := range funcs {
+		logger.Debug(`[%s] processing func %s`, f, k)
+		fn := fn
+		g.Go(func() error {
+			fn(ctx, cols, args...)
+			return nil
+		})
 	}
-	if config.Opts.PublishToIssues() {
-		logger.Debug("[%s] publishing to GitHub issues...", from(args...))
-		gh := NewGitHub(nil)
-		go process(gh, ctx, cols, args...)
-	}
-	if config.Opts.PublishToMastodon() {
-		logger.Debug("[%s] publishing to Mastodon...", from(args...))
-		var client *mstdn.Client
-		if rev, ok := ctx.Value(FlagMastodon).(*mstdn.Client); ok {
-			client = rev
-		}
-		mstdn := NewMastodon(client)
-		go process(mstdn, ctx, cols, args...)
-	}
-	if config.Opts.PublishToTwitter() {
-		logger.Debug("[%s] publishing to Twitter...", from(args...))
-		var client *twitter.Client
-		if rev, ok := ctx.Value(FlagTwitter).(*twitter.Client); ok {
-			client = rev
-		}
-		twitter := NewTwitter(client)
-		go process(twitter, ctx, cols, args...)
-	}
-	if config.Opts.PublishToIRCChannel() {
-		logger.Debug("[%s] publishing to IRC channel...", from(args...))
-		var conn *irc.Connection
-		if rev, ok := ctx.Value(FlagIRC).(*irc.Connection); ok {
-			conn = rev
-		}
-		irc := NewIRC(conn)
-		go process(irc, ctx, cols, args...)
-	}
-	if config.Opts.PublishToMatrixRoom() {
-		logger.Debug("[%s] publishing to Matrix room...", from(args...))
-		var client *matrix.Client
-		if rev, ok := ctx.Value(FlagMatrix).(*matrix.Client); ok {
-			client = rev
-		}
-		mat := NewMatrix(client)
-		go process(mat, ctx, cols, args...)
+	if err := g.Wait(); err != nil {
+		logger.Error("[%s] process failed: %v", f, err)
 	}
 }
 

@@ -21,6 +21,8 @@ func setMastodonEnv() {
 	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
 	os.Setenv("WAYBACK_MASTODON_SECRET", "bar")
 	os.Setenv("WAYBACK_MASTODON_TOKEN", "zoo")
+
+	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
 }
 
 func TestToMastodon(t *testing.T) {
