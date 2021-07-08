@@ -244,14 +244,9 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 
 	var album telegram.Album
 	for _, bundle := range bundles {
-		paths := []string{
-			bundle.Path.Img,
-			bundle.Path.PDF,
-			bundle.Path.WARC,
-		}
-		for _, path := range paths {
+		for _, path := range bundle.Paths() {
 			if path == "" {
-				logger.Warn("[telegram] invalid file path")
+				logger.Warn("[telegram] invalid file path, skipped")
 				continue
 			}
 			logger.Debug("[telegram] append document: %s", path)

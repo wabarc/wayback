@@ -144,7 +144,7 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 	for _, uri := range urls {
 		for slot, arc := range config.Opts.Slots() {
 			if !arc {
-				logger.Warn("[wayback] skipped %s", slot)
+				logger.Warn("[wayback] skipped %s", config.SlotName(slot))
 				continue
 			}
 			slot, uri := slot, uri

@@ -176,6 +176,15 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 	return shots, nil
 }
 
+func (b Bundle) Paths() (paths []string) {
+	paths = []string{
+		b.Path.Img,
+		b.Path.PDF,
+		b.Path.WARC,
+	}
+	return
+}
+
 func remoteHeadless(addr string) net.Addr {
 	conn, err := net.DialTimeout("tcp", addr, time.Second)
 	if err != nil {

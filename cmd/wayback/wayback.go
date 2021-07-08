@@ -30,6 +30,14 @@ func archive(cmd *cobra.Command, args []string) {
 		for _, col := range cols {
 			cmd.Println(col.Src, "=>", col.Dst)
 		}
+		for src, bundle := range bundles {
+			for _, path := range bundle.Paths() {
+				if path == "" {
+					continue
+				}
+				cmd.Println(src, "=>", path)
+			}
+		}
 
 		if err := g.Wait(); err != nil {
 			return err
