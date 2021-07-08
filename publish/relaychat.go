@@ -42,7 +42,7 @@ func (i *ircBot) Publish(ctx context.Context, cols []wayback.Collect, args ...st
 	metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Debug("[publish] collects empty")
+		logger.Warn("[publish] collects empty")
 		return
 	}
 
@@ -57,11 +57,11 @@ func (i *ircBot) Publish(ctx context.Context, cols []wayback.Collect, args ...st
 
 func (i *ircBot) toChannel(_ context.Context, text string) bool {
 	if !config.Opts.PublishToIRCChannel() || i.conn == nil {
-		logger.Debug("[publish] Do not publish to IRC channel.")
+		logger.Warn("[publish] Do not publish to IRC channel.")
 		return false
 	}
 	if text == "" {
-		logger.Info("[publish] IRC validation failed: Text can't be blank")
+		logger.Warn("[publish] IRC validation failed: Text can't be blank")
 		return false
 	}
 

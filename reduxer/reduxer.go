@@ -90,7 +90,7 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 			}
 			for _, slug := range slugs {
 				if slug.buf == nil {
-					logger.Debug("[reduxer] file empty, skipped")
+					logger.Warn("[reduxer] file empty, skipped")
 					continue
 				}
 				ft := http.DetectContentType(slug.buf)
@@ -179,16 +179,16 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 func remoteHeadless(addr string) net.Addr {
 	conn, err := net.DialTimeout("tcp", addr, time.Second)
 	if err != nil {
-		logger.Debug("[reduxer] try to connect headless browser failed: %v", err)
+		logger.Warn("[reduxer] try to connect headless browser failed: %v", err)
 		return nil
 	}
 
 	if conn != nil {
 		conn.Close()
-		logger.Debug("[reduxer] connected: %v", conn.RemoteAddr().String())
+		logger.Warn("[reduxer] connected: %v", conn.RemoteAddr().String())
 		return conn.RemoteAddr()
 	} else {
-		logger.Debug("[reduxer] headless chrome don't exists")
+		logger.Warn("[reduxer] headless chrome don't exists")
 		return nil
 	}
 }

@@ -25,6 +25,8 @@ import (
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
+
+	aurora "github.com/logrusorgru/aurora/v3"
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -76,10 +78,11 @@ func (t *Telegram) Serve() (err error) {
 	if t.bot == nil {
 		return errors.New("Initialize telegram failed, error: %v", err)
 	}
-	logger.Info("[telegram] authorized on account %s", t.bot.Me.Username)
+	logger.Info("[telegram] authorized on account %s", aurora.Blue(t.bot.Me.Username))
 
 	if channel, err := t.bot.ChatByID(config.Opts.TelegramChannel()); err == nil {
-		logger.Debug("[telegram] channel name: %s, channel id: %d", channel.Title, channel.ID)
+		id := strings.TrimPrefix(config.Opts.TelegramChannel(), "@")
+		logger.Info("[telegram] channel title: %s, channel id: %s", aurora.Blue(channel.Title), aurora.Blue(id))
 	}
 
 	go func() {
@@ -99,7 +102,7 @@ func (t *Telegram) Serve() (err error) {
 			callback := update.Callback
 			id, err := strconv.Atoi(callback.Data)
 			if err != nil {
-				logger.Error("[telegram] invalid playback id: %s", callback.Data)
+				logger.Warn("[telegram] invalid playback id: %s", callback.Data)
 				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
 				return false
 			}
@@ -189,7 +192,7 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 		}
 		t.reply(message, fmt.Sprintf("/%s is an illegal command%s", command, fallback))
 	case len(urls) == 0:
-		logger.Info("[telegram] archives failure, URL no found.")
+		logger.Warn("[telegram] archives failure, URL no found.")
 		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
 		t.reply(message, "URL no found.")
 	default:
@@ -248,7 +251,7 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 		}
 		for _, path := range paths {
 			if path == "" {
-				logger.Info("[telegram] invalid file path")
+				logger.Warn("[telegram] invalid file path")
 				continue
 			}
 			logger.Debug("[telegram] append document: %s", path)
@@ -333,7 +336,7 @@ func (t *Telegram) playback(message *telegram.Message) error {
 
 func (t *Telegram) reply(message *telegram.Message, text string) (*telegram.Message, error) {
 	if text == "" {
-		logger.Info("[telegram] text empty, skipped")
+		logger.Warn("[telegram] text empty, skipped")
 		return nil, errors.New("text empty")
 	}
 

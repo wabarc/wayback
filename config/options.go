@@ -7,11 +7,14 @@ package config // import "github.com/wabarc/wayback/config"
 import (
 	"net/url"
 	"strings"
+
+	"github.com/wabarc/logger"
 )
 
 const (
 	defDebug    = false
 	defLogTime  = true
+	defLogLevel = "info"
 	defMetrics  = false
 	defOverTor  = false
 	defIPFSHost = "127.0.0.1"
@@ -65,10 +68,11 @@ var (
 )
 
 type Options struct {
-	debug   bool
-	logTime bool
-	overTor bool
-	metrics bool
+	debug    bool
+	logTime  bool
+	logLevel string
+	overTor  bool
+	metrics  bool
 
 	ipfs     *ipfs
 	slots    map[string]bool
@@ -146,6 +150,7 @@ func NewOptions() *Options {
 	opts := &Options{
 		debug:               defDebug,
 		logTime:             defLogTime,
+		logLevel:            defLogLevel,
 		overTor:             defOverTor,
 		metrics:             defMetrics,
 		chromeRemoteAddr:    defChromeRemoteAddr,
@@ -217,6 +222,24 @@ func (o *Options) HasDebugMode() bool {
 // LogTime returns if the time should be displayed in log messages.
 func (o *Options) LogTime() bool {
 	return o.logTime
+}
+
+// LogLevel returns if the log level.
+func (o *Options) LogLevel() logger.LogLevel {
+	switch strings.ToLower(o.logLevel) {
+	case "info":
+		return logger.LevelInfo
+	case "warn":
+		return logger.LevelWarn
+	case "error":
+		return logger.LevelError
+	case "fatal":
+		return logger.LevelFatal
+	case "debug":
+		return logger.LevelDebug
+	default:
+		return logger.LevelInfo
+	}
 }
 
 // EnabledMetrics returns true if metrics collector is enabled.

@@ -331,7 +331,6 @@
       overflow-x: hidden;
       overflow-y: auto;
       max-height: 65vh;
-      min-height: 45vh;
       background: #f5f5f5;
       margin: 0.5em;
       border-bottom: 1px solid #00000040;
@@ -425,8 +424,8 @@
     <div class="archived" id="archived">
       {{- range $i, $collect := . -}}
       <ul class="row">
-        <li class="src">{{ $collect.Src }}</li>
-        <li class="dst"><a href="{{ $collect.Dst }}" target="blank">{{ $collect.Dst }}</a></li>
+        <li class="src" title="{{ $collect.Src }}">{{ $collect.Src }}</li>
+        <li class="dst" title="{{ $collect.Dst }}"><a href="{{ $collect.Dst }}" target="blank">{{ $collect.Dst }}</a></li>
       </ul>
       {{end}}
     </div>

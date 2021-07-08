@@ -145,7 +145,7 @@ func (web *web) showWebManifest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (web *web) showFavicon(w http.ResponseWriter, r *http.Request) {
-	logger.Debug("[web] access favicon")
+	logger.Info("[web] access favicon")
 
 	blob, err := template.LoadImageFile("favicon.ico")
 	if err != nil {
@@ -157,7 +157,7 @@ func (web *web) showFavicon(w http.ResponseWriter, r *http.Request) {
 }
 
 func (web *web) showAppIcon(w http.ResponseWriter, r *http.Request) {
-	logger.Debug("[web] access application icon")
+	logger.Info("[web] access application icon")
 
 	filename := routeParam(r, "filename")
 	blob, err := template.LoadImageFile(filename)
@@ -172,7 +172,7 @@ func (web *web) showAppIcon(w http.ResponseWriter, r *http.Request) {
 
 func (web *web) showJavascript(w http.ResponseWriter, r *http.Request) {
 	filename := routeParam(r, "name")
-	logger.Debug("[web] access javascript %s", filename)
+	logger.Info("[web] access javascript %s", filename)
 	_, found := template.JavascriptBundleChecksums[filename]
 	if !found {
 		return
@@ -185,11 +185,11 @@ func (web *web) showJavascript(w http.ResponseWriter, r *http.Request) {
 }
 
 func (web *web) process(w http.ResponseWriter, r *http.Request) {
-	logger.Debug("[web] process request start...")
+	logger.Info("[web] process request start...")
 	metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusRequest)
 
 	if r.Method != http.MethodPost {
-		logger.Info("[web] request method no specific.")
+		logger.Warn("[web] request method no specific.")
 		http.Redirect(w, r, "/", http.StatusNotModified)
 		return
 	}
@@ -202,7 +202,7 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 
 	text := r.PostFormValue("text")
 	if len(strings.TrimSpace(text)) == 0 {
-		logger.Info("[web] post form value empty.")
+		logger.Warn("[web] post form value empty.")
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
@@ -210,7 +210,7 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 
 	urls := helper.MatchURLFallback(text)
 	if len(urls) == 0 {
-		logger.Info("[web] url no found.")
+		logger.Warn("[web] url no found.")
 	}
 
 	var bundles reduxer.Bundles
@@ -250,7 +250,7 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 }
 
 func (web *web) playback(w http.ResponseWriter, r *http.Request) {
-	logger.Debug("[web] playback request start...")
+	logger.Info("[web] playback request start...")
 	metrics.IncrementPlayback(metrics.ServiceWeb, metrics.StatusRequest)
 
 	if err := r.ParseForm(); err != nil {
@@ -261,7 +261,7 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 
 	text := r.PostFormValue("text")
 	if len(strings.TrimSpace(text)) == 0 {
-		logger.Info("[web] post form value empty.")
+		logger.Warn("[web] post form value empty.")
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
@@ -269,7 +269,7 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 
 	urls := helper.MatchURL(text)
 	if len(urls) == 0 {
-		logger.Info("[web] url no found.")
+		logger.Warn("[web] url no found.")
 	}
 	col, _ := wayback.Playback(context.TODO(), urls...)
 	collector := transform(col)

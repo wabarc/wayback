@@ -44,8 +44,8 @@ var render = function (collects) {
   var html = '';
   collects.forEach(function (collect, i) {
     html += '<ul class="row">';
-    html += '<li class="src">' + collect.src + '</li>';
-    html += ' <li class="dst">';
+    html += '<li class="src" title="' + collect.src + '">' + collect.src + '</li>';
+    html += ' <li class="dst" title="' + collect.dst + '">';
     try {
       new URL(collect.dst);
       html += '<a href="' + collect.dst + '" target="blank">' + collect.dst + '</a>';

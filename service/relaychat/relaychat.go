@@ -69,7 +69,7 @@ func (i *IRC) Serve() error {
 	if i.conn == nil {
 		return errors.New("Must initialize IRC connection.")
 	}
-	logger.Debug("[irc] Serving IRC instance: %s", config.Opts.IRCServer())
+	logger.Info("[irc] Serving IRC instance: %s", config.Opts.IRCServer())
 
 	if config.Opts.IRCChannel() != "" {
 		i.conn.AddCallback("001", func(ev *irc.Event) { i.conn.Join(config.Opts.IRCChannel()) })
@@ -104,7 +104,7 @@ func (i *IRC) Serve() error {
 
 func (i *IRC) process(ev *irc.Event) error {
 	if ev.Nick == "" || ev.Message() == "" {
-		logger.Debug("[irc] without nick or empty message")
+		logger.Warn("[irc] without nick or empty message")
 		return errors.New("IRC: without nick or enpty message")
 	}
 
@@ -113,7 +113,7 @@ func (i *IRC) process(ev *irc.Event) error {
 
 	urls := helper.MatchURLFallback(text)
 	if len(urls) == 0 {
-		logger.Info("[irc] archives failure, URL no found.")
+		logger.Warn("[irc] archives failure, URL no found.")
 		return errors.New("IRC: URL no found")
 	}
 

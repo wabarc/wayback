@@ -198,9 +198,10 @@ You can also specify configuration options either via command flags or via envir
 
 | Flags               | Environment Variable              | Default                 | Description                                                  |
 | ------------------- | --------------------------------- | ----------------------- | ------------------------------------------------------------ |
-| `--debug`           | `DEBUG`                           | `false`                 | Enable debug mode                                            |
+| `--debug`           | `DEBUG`                           | `false`                 | Enable debug mode, override `LOG_LEVEL`                      |
 | `-c`, `--config`    | -                                 | -                       | Configuration file path, defaults: `./wayback.conf`, `~/wayback.conf`, `/etc/wayback.conf` |
 | -                   | `LOG_TIME`                        | `true`                  | Display the date and time in log messages                    |
+| -                   | `LOG_LEVEL`                       | `info`                  | Log level, supported level are `debug`, `info`, `warn`, `error`, `fatal`, defaults to `info` |
 | -                   | `ENABLE_METRICS`                  | `false`                 | Enable metrics collector                                     |
 | -                   | `CHROME_REMOTE_ADDR`              | -                       | Chrome/Chromium remote debugging address, for screenshot     |
 | -                   | `WAYBACK_POOLING_SIZE`            | `3`                     | Number of worker pool for wayback at once                    |

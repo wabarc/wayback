@@ -17,7 +17,7 @@ func TestRenderMastodon(t *testing.T) {
 	const source = `source:
 • https://example.com/
 
-====
+————
 
 `
 	const toot = `Internet Archive:

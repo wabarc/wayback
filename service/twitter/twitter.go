@@ -115,7 +115,7 @@ func (t *Twitter) Serve() error {
 				}
 			case <-t.ctx.Done():
 				once.Do(func() {
-					logger.Debug("[twitter] stopping ticker...")
+					logger.Info("[twitter] stopping ticker...")
 					fetchTick.Stop()
 				})
 			}
@@ -131,7 +131,7 @@ func (t *Twitter) Serve() error {
 func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	msg := event.Message
 	if msg == nil || event.ID == "" {
-		logger.Debug("[twitter] no direct message")
+		logger.Warn("[twitter] no direct message")
 		return errors.New("Twitter: no direct message")
 	}
 	logger.Debug("[twitter] message event, event id: %s", event.ID)
@@ -161,7 +161,7 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	logger.Debug("[twitter] real urls: %v", realURLs)
 
 	if len(realURLs) == 0 {
-		logger.Info("[twitter] archives failure, URL no found.")
+		logger.Warn("[twitter] archives failure, URL no found.")
 		return errors.New("Twitter: URL no found")
 	}
 
@@ -191,7 +191,7 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	})
 	logger.Debug("[twitter] reply event: %v", ev)
 	if err != nil {
-		logger.Debug("[twitter] reply error: %v", ev, err)
+		logger.Error("[twitter] reply error: %v", ev, err)
 		return err
 	}
 

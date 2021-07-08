@@ -77,7 +77,7 @@ func (m *Matrix) Serve() error {
 	if m.client == nil {
 		return errors.New("Must initialize Matrix client.")
 	}
-	logger.Debug("[matrix] Serving Matrix account: %s", config.Opts.MatrixUserID())
+	logger.Warn("[matrix] Serving Matrix account: %s", config.Opts.MatrixUserID())
 
 	syncer := m.client.Syncer.(*matrix.DefaultSyncer)
 	// Listen join room invite event from user
@@ -123,7 +123,7 @@ func (m *Matrix) Serve() error {
 
 	go func() {
 		if err := m.client.Sync(); err != nil {
-			logger.Debug("[matrix] sync failed: %v", err)
+			logger.Warn("[matrix] sync failed: %v", err)
 		}
 	}()
 
@@ -137,7 +137,7 @@ func (m *Matrix) Serve() error {
 
 func (m *Matrix) process(ev *event.Event) error {
 	if ev.Sender == "" {
-		logger.Debug("[matrix] without sender")
+		logger.Warn("[matrix] without sender")
 		return errors.New("Matrix: without sender")
 	}
 	logger.Debug("[matrix] event id: %s, event type: %s, event content: %v", ev.ID, ev.Type.Type, ev.Content)
@@ -156,7 +156,7 @@ func (m *Matrix) process(ev *event.Event) error {
 
 	urls := helper.MatchURLFallback(text)
 	if len(urls) == 0 {
-		logger.Info("[matrix] archives failure, URL no found.")
+		logger.Warn("[matrix] archives failure, URL no found.")
 		// Redact message
 		m.redact(ev, "URL no found. Original message: "+text)
 		return errors.New("Matrix: URL no found")
@@ -204,7 +204,7 @@ func (m *Matrix) playback(ev *event.Event) error {
 	// Redact message
 	defer m.redact(ev, "URL no found. Original message: "+text)
 	if len(urls) == 0 {
-		logger.Info("[matrix] playback failure, URL no found.")
+		logger.Warn("[matrix] playback failure, URL no found.")
 		return errors.New("Matrix: URL no found")
 	}
 

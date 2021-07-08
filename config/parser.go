@@ -84,6 +84,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.debug = parseBool(val, defDebug)
 		case "LOG_TIME":
 			p.opts.logTime = parseBool(val, defLogTime)
+		case "LOG_LEVEL":
+			p.opts.logLevel = parseString(val, defLogLevel)
 		case "ENABLE_METRICS":
 			p.opts.metrics = parseBool(val, defMetrics)
 		case "CHROME_REMOTE_ADDR":

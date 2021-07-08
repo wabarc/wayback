@@ -112,10 +112,13 @@ The private key for Tor hidden service\&.
 .SH ENVIRONMENT
 .TP
 .B DEBUG
-Set the value to 1 to enable debug logs\&.
+Set the value to 1 to enable debug logs, override "LOG_LEVEL"\&.
 .TP
 .B LOG_TIME
 Display the date and time in log messages\&.
+.TP
+.B LOG_LEVEL
+Log level, supported level are "debug", "info", "warn", "error", "fatal", defaults to "info"\&.
 .TP
 .B ENABLE_METRICS
 Enable metrics collector\&.

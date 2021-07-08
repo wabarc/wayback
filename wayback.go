@@ -136,7 +136,7 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 
 	*bundles, err = reduxer.Do(ctx, urls...)
 	if err != nil {
-		logger.Info("[wayback] cannot to start reduxer: %v", err)
+		logger.Warn("[wayback] cannot to start reduxer: %v", err)
 	}
 
 	mu := sync.Mutex{}
@@ -144,7 +144,7 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 	for _, uri := range urls {
 		for slot, arc := range config.Opts.Slots() {
 			if !arc {
-				logger.Debug("[wayback] skipped %s", slot)
+				logger.Warn("[wayback] skipped %s", slot)
 				continue
 			}
 			slot, uri := slot, uri

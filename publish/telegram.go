@@ -46,7 +46,7 @@ func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args 
 	metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Debug("[publish] collects empty")
+		logger.Warn("[publish] collects empty")
 		return
 	}
 
@@ -64,7 +64,7 @@ func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args 
 // returns boolean as result.
 func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, text string) (ok bool) {
 	if text == "" {
-		logger.Error("[publish] post to message to channel failed, text empty")
+		logger.Warn("[publish] post to message to channel failed, text empty")
 		return ok
 	}
 	if t.bot == nil {
@@ -104,7 +104,7 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 	}
 
 	if bundle == nil {
-		logger.Debug("[publish] bundle empty")
+		logger.Warn("[publish] bundle empty")
 		return true
 	}
 
@@ -118,7 +118,7 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 
 	for _, path := range paths {
 		if path == "" {
-			logger.Info("[publish] invalid file path, skipped")
+			logger.Warn("[publish] invalid file path, skipped")
 			continue
 		}
 		logger.Debug("[publish] append document: %s", path)

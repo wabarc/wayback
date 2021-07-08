@@ -12,6 +12,8 @@ import (
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/wabarc/logger"
 )
 
 func TestSlotName(t *testing.T) {
@@ -894,6 +896,58 @@ func TestEnabledReduxer(t *testing.T) {
 			got := opts.EnabledReduxer()
 			if got != test.exp {
 				t.Fatalf(`Unexpected enabled reduxer got %t instead of %t`, got, test.exp)
+			}
+		})
+	}
+}
+
+func TestLogLevel(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		level    string
+		expected logger.LogLevel
+	}{
+		{
+			level:    "",
+			expected: logger.LevelInfo,
+		},
+		{
+			level:    "info",
+			expected: logger.LevelInfo,
+		},
+		{
+			level:    "warn",
+			expected: logger.LevelWarn,
+		},
+		{
+			level:    "error",
+			expected: logger.LevelError,
+		},
+		{
+			level:    "fatal",
+			expected: logger.LevelFatal,
+		},
+		{
+			level:    "unknown",
+			expected: logger.LevelInfo,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.level, func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("LOG_LEVEL", test.level)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.LogLevel()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set log level got %d instead of %d`, got, test.expected)
 			}
 		})
 	}

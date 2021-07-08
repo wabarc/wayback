@@ -13,7 +13,7 @@ func TestRenderTwitter(t *testing.T) {
 	const tweet = `source:
 • https://example.com/
 
-====
+————
 
 Internet Archive:
 • https://web.archive.org/web/20211000000001/https://example.com/

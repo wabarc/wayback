@@ -54,7 +54,7 @@ func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ..
 	metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Debug("[publish] collects empty")
+		logger.Warn("[publish] collects empty")
 		return
 	}
 
@@ -70,11 +70,11 @@ func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ..
 
 func (m *matrixBot) toRoom(ctx context.Context, bundle *reduxer.Bundle, text string) bool {
 	if !config.Opts.PublishToMatrixRoom() || m.client == nil {
-		logger.Debug("[publish] publish to Matrix room abort.")
+		logger.Warn("[publish] publish to Matrix room abort.")
 		return false
 	}
 	if text == "" {
-		logger.Info("[publish] matrix validation failed: Text can't be blank")
+		logger.Warn("[publish] matrix validation failed: Text can't be blank")
 		return false
 	}
 

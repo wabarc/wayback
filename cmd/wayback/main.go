@@ -173,6 +173,7 @@ func handle(cmd *cobra.Command, args []string) {
 		logger.DisableTime()
 	}
 
+	logger.SetLogLevel(config.Opts.LogLevel())
 	if debug || config.Opts.HasDebugMode() {
 		logger.EnableDebug()
 	}

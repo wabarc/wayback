@@ -119,7 +119,7 @@ func original(v interface{}) (o string) {
 		sb.WriteString(kv.Key)
 		sb.WriteString("\n")
 	}
-	sb.WriteString("\n====\n\n")
+	sb.WriteString("\n————\n\n")
 
 	return sb.String()
 }

@@ -13,7 +13,7 @@ require (
 	github.com/dghubble/oauth1 v0.7.0
 	github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65 // indirect
 	github.com/go-shiori/obelisk v0.0.0-20201115143556-8de0d40b0a9b // indirect
-	github.com/google/go-github/v33 v33.0.0
+	github.com/google/go-github/v37 v37.0.0
 	github.com/gorilla/mux v1.8.0
 	github.com/klauspost/cpuid/v2 v2.0.8 // indirect
 	// github.com/ipsn/go-libtor v1.0.329
@@ -31,9 +31,9 @@ require (
 	github.com/wabarc/archive.is v1.3.0
 	github.com/wabarc/archive.org v1.2.0
 	github.com/wabarc/helper v0.0.0-20210706220001-6ba9e89c752b
-	github.com/wabarc/logger v0.0.0-20210417045349-d0d82e8e99ee
+	github.com/wabarc/logger v0.0.0-20210708144517-a9651f538672
 	github.com/wabarc/playback v0.0.0-20210706162327-6ba67b324cc8
-	github.com/wabarc/screenshot v1.2.1-0.20210706220510-48726ae5afed
+	github.com/wabarc/screenshot v1.2.1-0.20210708041031-92addf723bba
 	github.com/wabarc/telegra.ph v0.0.0-20210706221033-79350ef1df55
 	github.com/wabarc/warcraft v0.1.1-0.20210707001544-e897dbede7c3
 	github.com/wabarc/wbipfs v0.2.0

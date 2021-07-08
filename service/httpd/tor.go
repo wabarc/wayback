@@ -70,7 +70,7 @@ func (t *Tor) Serve() error {
 		} else {
 			pvk = keypair.PrivateKey()
 		}
-		logger.Info("[web] important to keep the private key: %s", aurora.Underline(aurora.Blue(hex.EncodeToString(pvk))))
+		logger.Info("[web] important to keep the private key: %s", aurora.Blue(hex.EncodeToString(pvk)))
 	} else {
 		privb, err := hex.DecodeString(config.Opts.TorPrivKey())
 		if err != nil {
@@ -104,7 +104,7 @@ func (t *Tor) Serve() error {
 	defer onion.Close()
 	onion.CloseLocalListenerOnClose = false
 
-	logger.Info(`[web] listening on %q without TLS`, onion.LocalListener.Addr())
+	logger.Info(`[web] listening on "%s" without TLS`, aurora.Blue(onion.LocalListener.Addr()))
 	logger.Info("[web] please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
 
 	server := http.Server{Handler: newWeb().handle(t.pool)}
@@ -141,12 +141,12 @@ func torPortBusy() bool {
 	addr := net.JoinHostPort("127.0.0.1", "9050")
 	conn, err := net.DialTimeout("tcp", addr, time.Second)
 	if err != nil {
-		logger.Debug("[web] defaults tor port is idle")
+		logger.Warn("[web] defaults tor port is idle")
 		return false
 	}
 	if conn != nil {
 		conn.Close()
-		logger.Debug("[web] defaults tor port is busy")
+		logger.Warn("[web] defaults tor port is busy")
 		return true
 	}
 

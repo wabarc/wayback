@@ -72,7 +72,7 @@ func (m *Mastodon) Serve() error {
 	if m.client == nil {
 		return errors.New("Must initialize Mastodon client.")
 	}
-	logger.Debug("[mastodon] Serving Mastodon instance: %s", config.Opts.MastodonServer())
+	logger.Info("[mastodon] Serving Mastodon instance: %s", config.Opts.MastodonServer())
 
 	// rcv, err := m.client.StreamingUser(m.ctx)
 	// if err != nil {
@@ -136,7 +136,7 @@ func (m *Mastodon) Serve() error {
 				}
 			case <-m.ctx.Done():
 				once.Do(func() {
-					logger.Debug("[mastodon] stopping ticker...")
+					logger.Info("[mastodon] stopping ticker...")
 					clearTick.Stop()
 					fetchTick.Stop()
 				})
@@ -152,7 +152,7 @@ func (m *Mastodon) Serve() error {
 
 func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) {
 	if status == nil || id == "" {
-		logger.Debug("[mastodon] no status or conversation")
+		logger.Warn("[mastodon] no status or conversation")
 		return errors.New("Mastodon: no status or conversation")
 	}
 	if inReplyToID, ok := status.InReplyToID.(string); ok {
@@ -169,7 +169,7 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 	defer func() {
 		time.Sleep(time.Second)
 		if err := m.client.DismissNotification(m.ctx, id); err != nil {
-			logger.Debug("[mastodon] dismiss notification failed: %v", err)
+			logger.Warn("[mastodon] dismiss notification failed: %v", err)
 		}
 		m.Lock()
 		delete(m.archiving, id)
@@ -184,7 +184,7 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 	urls := helper.MatchURLFallback(text)
 	pub := publish.NewMastodon(m.client)
 	if len(urls) == 0 {
-		logger.Info("[mastodon] archives failure, URL no found.")
+		logger.Warn("[mastodon] archives failure, URL no found.")
 		pub.ToMastodon(m.ctx, nil, "URL no found", string(status.ID))
 		return errors.New("Mastodon: URL no found")
 	}
@@ -209,7 +209,7 @@ func (m *Mastodon) playback(status *mastodon.Status) error {
 	text := textContent(status.Content)
 	urls := helper.MatchURL(text)
 	if len(urls) == 0 {
-		logger.Info("[mastodon] playback failure, URL no found.")
+		logger.Warn("[mastodon] playback failure, URL no found.")
 		return errors.New("Mastodon: URL no found")
 	}
 

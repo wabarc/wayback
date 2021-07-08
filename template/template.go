@@ -85,7 +85,7 @@ func (t *Template) ParseTemplates() error {
 
 // Render template with Collector
 func (t *Template) Render(name string, data interface{}) ([]byte, bool) {
-	logger.Debug("[template] render template: %s", name)
+	logger.Info("[template] render template: %s", name)
 
 	name = strings.TrimSuffix(name, ".html") + ".html"
 	tpl, ok := t.templates[name]
