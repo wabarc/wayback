@@ -33,6 +33,9 @@ ARG TOR_EXCLUDE_EXIT_NODE="{cn},{hk},{mo},{sg},{kp},{th},{pk},{by},{ru},{ir},{sy
 ENV BASE_DIR /wayback
 ENV PUSER wayback
 ENV PGROUP wayback
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
 
 WORKDIR $BASE_DIR
 
