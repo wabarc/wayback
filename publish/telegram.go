@@ -8,6 +8,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -112,7 +113,10 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 	var album telegram.Album
 	for _, path := range bundle.Paths() {
 		if path == "" {
-			logger.Warn("[publish] invalid file path, skipped")
+			continue
+		}
+		if !helper.Exists(path) {
+			logger.Warn("[publish] invalid file %s", path)
 			continue
 		}
 		logger.Debug("[publish] append document: %s", path)

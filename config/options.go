@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/dustin/go-humanize"
 	"github.com/wabarc/logger"
 )
 
@@ -61,6 +62,7 @@ const (
 	defBoltPathname        = "wayback.db"
 	defPoolingSize         = 3
 	defStorageDir          = ""
+	defMaxMediaSize        = "512MB"
 )
 
 var (
@@ -89,6 +91,7 @@ type Options struct {
 	boltPathname        string
 	poolingSize         int
 	storageDir          string
+	maxMediaSize        string
 }
 
 type ipfs struct {
@@ -158,6 +161,7 @@ func NewOptions() *Options {
 		boltPathname:        defBoltPathname,
 		poolingSize:         defPoolingSize,
 		storageDir:          defStorageDir,
+		maxMediaSize:        defMaxMediaSize,
 		ipfs: &ipfs{
 			host: defIPFSHost,
 			port: defIPFSPort,
@@ -506,4 +510,13 @@ func (o *Options) StorageDir() string {
 // EnabledReduxer returns whether enable store binary file locally.
 func (o *Options) EnabledReduxer() bool {
 	return o.storageDir != ""
+}
+
+// MaxMediaSize returns max size to limit download stream media.
+func (o *Options) MaxMediaSize() uint64 {
+	size, err := humanize.ParseBytes(o.maxMediaSize)
+	if err != nil {
+		return 0
+	}
+	return size
 }

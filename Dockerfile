@@ -71,6 +71,7 @@ ONBUILD RUN set -o pipefail; \
     chromium \
     dbus \
     dumb-init \
+    ffmpeg \
     freetype \
     libstdc++ \
     harfbuzz \
