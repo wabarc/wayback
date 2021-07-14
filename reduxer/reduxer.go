@@ -11,11 +11,18 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/cixtor/readability"
+	"github.com/dustin/go-humanize"
+	"github.com/iawia002/annie/downloader"
+	"github.com/iawia002/annie/extractors"
+	"github.com/iawia002/annie/extractors/types"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/screenshot"
@@ -25,7 +32,7 @@ import (
 )
 
 type Path struct {
-	Img, PDF, Raw, WARC string
+	Img, PDF, Raw, WARC, Media string
 }
 
 type Bundle struct {
@@ -37,8 +44,11 @@ type Bundle struct {
 
 type Bundles map[string]Bundle
 
+var existFFmpeg = ffmpeg()
+
 // Do executes secreenshot, print PDF and export html of given URLs
 // Returns a set of bundle containing screenshot data and file path
+// nolint:gocyclo
 func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 	bundles = make(Bundles)
 	if !config.Opts.EnabledReduxer() {
@@ -57,7 +67,6 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 
 	var wg sync.WaitGroup
 	var mu sync.Mutex
-	var path Path
 	var warc = &warcraft.Warcraft{BasePath: dir}
 	var craft = func(in string) string {
 		u, err := url.Parse(in)
@@ -71,6 +80,53 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 			return ""
 		}
 		return path
+	}
+	var media = func(in string) string {
+		if !existFFmpeg {
+			logger.Warn("[reduxer] FFmpeg no found, skipped")
+			return ""
+		}
+
+		data, err := extractors.Extract(in, types.Options{})
+		if err != nil && len(data) == 0 {
+			logger.Warn("[reduxer] data empty or error %v", err)
+			return ""
+		}
+		dt := data[0]
+		// Only download first media
+		ct := string(dt.Type)
+		if !strings.HasPrefix(ct, "video") {
+			logger.Warn("[reduxer] resource isn't video, skipped")
+			return ""
+		}
+		fn := strings.TrimSuffix(helper.FileName(in, ct), ".html")
+		fp := filepath.Join(dir, fn) + ".mp4"
+		dl := downloader.New(downloader.Options{
+			OutputPath:   dir,
+			OutputName:   fn,
+			MultiThread:  true,
+			ThreadNumber: 10,
+		})
+		sortedStreams := sortStreams(dt.Streams)
+		if len(sortedStreams) == 0 {
+			logger.Warn("[reduxer] stream not found")
+			return ""
+		}
+		streamName := sortedStreams[0].ID
+		stream, ok := dt.Streams[streamName]
+		if !ok {
+			logger.Warn("[reduxer] stream not found")
+			return ""
+		}
+		logger.Debug("[reduxer] stream size: %s", humanize.Bytes(uint64(stream.Size)))
+		if stream.Size > int64(config.Opts.MaxMediaSize()) {
+			logger.Warn("[reduxer] video size large than %s, skipped", humanize.Bytes(config.Opts.MaxMediaSize()))
+			return ""
+		}
+		if err := dl.Download(dt); err != nil {
+			return ""
+		}
+		return fp
 	}
 
 	type m struct {
@@ -88,6 +144,7 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 				{key: "PDF", buf: shot.PDF},
 				{key: "Raw", buf: shot.HTML},
 			}
+			var path Path
 			for _, slug := range slugs {
 				if slug.buf == nil {
 					logger.Warn("[reduxer] file empty, skipped")
@@ -101,13 +158,16 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 					continue
 				}
 				if err := helper.SetField(&path, slug.key, fp); err != nil {
-					logger.Error("[reduxer] assign field to path struct failed: %v", err)
+					logger.Error("[reduxer] assign field %s to path struct failed: %v", slug.key, err)
 					continue
 				}
 			}
 			// Set path of WARC file directly to avoid read file as buffer
 			if err := helper.SetField(&path, "WARC", craft(shot.URL)); err != nil {
-				logger.Error("[reduxer] assign field to path struct failed: %v", err)
+				logger.Error("[reduxer] assign field WARC to path struct failed: %v", err)
+			}
+			if err := helper.SetField(&path, "Media", media(shot.URL)); err != nil {
+				logger.Error("[reduxer] assign field Media to path struct failed: %v", err)
 			}
 			bundle := Bundle{shot, path, readability.Article{}}
 			article, err := readability.New().Parse(bytes.NewReader(shot.HTML), shot.URL)
@@ -181,6 +241,7 @@ func (b Bundle) Paths() (paths []string) {
 		b.Path.Img,
 		b.Path.PDF,
 		b.Path.WARC,
+		b.Path.Media,
 	}
 	return
 }
@@ -209,4 +270,28 @@ func createDir(baseDir string) (dir string, err error) {
 		return "", err
 	}
 	return dir, nil
+}
+
+func ffmpeg() bool {
+	locations := []string{"ffmpeg", "ffmpeg.exe"}
+	for _, path := range locations {
+		found, err := exec.LookPath(path)
+		if err == nil {
+			return found != ""
+		}
+	}
+	return false
+}
+
+func sortStreams(streams map[string]*types.Stream) []*types.Stream {
+	sortedStreams := make([]*types.Stream, 0, len(streams))
+	for _, data := range streams {
+		sortedStreams = append(sortedStreams, data)
+	}
+	if len(sortedStreams) > 1 {
+		sort.Slice(
+			sortedStreams, func(i, j int) bool { return sortedStreams[i].Size > sortedStreams[j].Size },
+		)
+	}
+	return sortedStreams
 }

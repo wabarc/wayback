@@ -952,3 +952,43 @@ func TestLogLevel(t *testing.T) {
 		})
 	}
 }
+
+func TestMaxMediaSize(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		size     string
+		expected uint64
+	}{
+		{
+			size:     "",
+			expected: 512000000,
+		},
+		{
+			size:     "invalid",
+			expected: 0,
+		},
+		{
+			size:     "10KB",
+			expected: 10000,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.size, func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_MAX_MEDIA_SIZE", test.size)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.MaxMediaSize()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set max media size got %d instead of %d`, got, test.expected)
+			}
+		})
+	}
+}

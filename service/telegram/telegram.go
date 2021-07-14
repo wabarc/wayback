@@ -246,7 +246,10 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 	for _, bundle := range bundles {
 		for _, path := range bundle.Paths() {
 			if path == "" {
-				logger.Warn("[telegram] invalid file path, skipped")
+				continue
+			}
+			if !helper.Exists(path) {
+				logger.Warn("[publish] invalid file %s", path)
 				continue
 			}
 			logger.Debug("[telegram] append document: %s", path)

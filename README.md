@@ -25,8 +25,9 @@ Supported Golang version: See [.github/workflows/testing.yml](./.github/workflow
 - Serve as Tor Hidden Service or local web entry
 - Wayback to Internet Archive, archive.today, IPFS and Telegraph easier
 - Interactive with IRC, Martix, Telegram bot, Mastodon and Twitter as daemon service
-- Support publish wayback results to Telegram channel, Mastodon and GitHub Issues
-- Support store archived files to disk
+- Supports publish wayback results to Telegram channel, Mastodon and GitHub Issues
+- Supports store archived files to disk
+- Download stream media (requires [FFmpeg](https://ffmpeg.org/))
 
 ## Installation
 
@@ -207,6 +208,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_POOLING_SIZE`            | `3`                     | Number of worker pool for wayback at once                    |
 | -                   | `WAYBACK_BOLT_PATH`               | `./wayback.db`          | File path of bolt database                                   |
 | -                   | `WAYBACK_STORAGE_DIR`             | -                       | Directory to store binary file, e.g. PDF, html file          |
+| -                   | `WAYBACK_MAX_MEDIA_SIZE`          | `512MB`                 | Max size to limit download stream media                      |
 | `-d`, `--daemon`    | -                                 | -                       | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter` |
 | `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                  | Wayback webpages to **Internet Archive**                     |
 | `--is`              | `WAYBACK_ENABLE_IS`               | `true`                  | Wayback webpages to **Archive Today**                        |

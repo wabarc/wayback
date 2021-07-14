@@ -69,6 +69,26 @@ jobs:
         choco install wget
         wget --help
 
+    - name: Install FFmpeg
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo add-apt-repository universe
+        sudo apt-get -y update
+        sudo apt-get -y install ffmpeg
+        ffmpeg -version
+
+    - name: Install FFmpeg
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install ffmpeg
+        ffmpeg -version
+
+    - name: Install FFmpeg
+      if: matrix.os == 'windows-latest'
+      run: |
+        choco install ffmpeg
+        ffmpeg -version
+
     - name: Check out code base
       if: github.event_name == 'push'
       uses: actions/checkout@v2
