@@ -42,6 +42,9 @@ const (
 	defTwitterConsumerSecret = ""
 	defTwitterAccessToken    = ""
 	defTwitterAccessSecret   = ""
+	defDiscordBotToken       = ""
+	defDiscordChannel        = ""
+	defDiscordHelptext       = ""
 
 	defIRCNick     = ""
 	defIRCPassword = ""
@@ -80,6 +83,7 @@ type Options struct {
 	slots    map[string]bool
 	telegram *telegram
 	mastodon *mastodon
+	discord  *discord
 	twitter  *twitter
 	github   *github
 	matrix   *matrix
@@ -111,6 +115,13 @@ type mastodon struct {
 	clientKey    string
 	clientSecret string
 	accessToken  string
+}
+
+type discord struct {
+	appID    string
+	botToken string
+	channel  string
+	helptext string
 }
 
 type twitter struct {
@@ -183,6 +194,12 @@ func NewOptions() *Options {
 			clientKey:    defMastodonClientKey,
 			clientSecret: defMastodonClientSecret,
 			accessToken:  defMastodonAccessToken,
+		},
+		discord: &discord{
+			appID:    defDiscordBotToken,
+			botToken: defDiscordBotToken,
+			channel:  defDiscordChannel,
+			helptext: defDiscordHelptext,
 		},
 		twitter: &twitter{
 			consumerKey:    defTwitterConsumerKey,
@@ -297,12 +314,7 @@ func (o *Options) TelegramChannel() string {
 
 // TelegramHelptext returns the help text for Telegram bot.
 func (o *Options) TelegramHelptext() string {
-	o.telegram.helptext = strings.ReplaceAll(o.telegram.helptext, `\r`, "\n")
-	o.telegram.helptext = strings.ReplaceAll(o.telegram.helptext, `\n`, "\n")
-	o.telegram.helptext = strings.ReplaceAll(o.telegram.helptext, `\r\n`, "\n")
-	o.telegram.helptext = strings.ReplaceAll(o.telegram.helptext, `<br>`, "\n")
-	o.telegram.helptext = strings.ReplaceAll(o.telegram.helptext, `<br/>`, "\n")
-	return o.telegram.helptext
+	return breakLine(o.telegram.helptext)
 }
 
 // PublishToChannel returns whether to publish results to Telegram Channel.
@@ -461,6 +473,32 @@ func (o *Options) PublishToMatrixRoom() bool {
 		o.MatrixPassword() != ""
 }
 
+// DiscordBotToken returns the token of Discord bot
+func (o *Options) DiscordBotToken() string {
+	return o.discord.botToken
+}
+
+// DiscordChannel returns the channel on Discord.
+func (o *Options) DiscordChannel() string {
+	// if strings.HasPrefix(o.discord.channel, "#") {
+	// 	return o.discord.channel
+	// }
+	// if o.discord.channel != "" {
+	// 	return "#" + o.discord.channel
+	// }
+	return o.discord.channel
+}
+
+// DiscordHelptext returns the help text for Discord bot
+func (o *Options) DiscordHelptext() string {
+	return breakLine(o.discord.helptext)
+}
+
+// PublishToDiscordChannel returns whether publish results to Discord channel.
+func (o *Options) PublishToDiscordChannel() bool {
+	return o.DiscordBotToken() != "" && o.DiscordChannel() != ""
+}
+
 // TorPrivKey returns the private key of Tor service.
 func (o *Options) TorPrivKey() string {
 	return o.tor.pvk
@@ -526,6 +564,7 @@ func (o *Options) MaxMediaSize() uint64 {
 func (o *Options) MaxAttachSize(scope string) int64 {
 	scopes := map[string]int64{
 		"telegram": 50000000, // 50MB
+		"discord":  8000000,  // 8MB
 	}
 	return scopes[scope]
 }

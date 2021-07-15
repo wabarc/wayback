@@ -7,6 +7,7 @@ go 1.16
 require (
 	github.com/PuerkitoBio/goquery v1.7.1 // indirect
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
+	github.com/bwmarrin/discordgo v0.23.3-0.20210627161652-421e14965030
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cretz/bine v0.2.0
 	github.com/davecgh/go-spew v1.1.1
@@ -19,6 +20,7 @@ require (
 	github.com/google/go-github/v37 v37.0.0
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/websocket v1.4.2
 	github.com/iawia002/annie v0.0.0-20210714033020-3c20ed1e6f07
 	github.com/klauspost/cpuid/v2 v2.0.8 // indirect
 	github.com/kr/pretty v0.2.1 // indirect

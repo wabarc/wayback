@@ -19,6 +19,7 @@ const (
 	ServiceIRC      = "irc"
 	ServiceWeb      = "web"
 	ServiceMatrix   = "matrix"
+	ServiceDiscord  = "discord"
 	ServiceMastodon = "mastodon"
 	ServiceTelegram = "telegram"
 	ServiceTwitter  = "twitter"
@@ -28,6 +29,7 @@ const (
 	PublishMstdn   = "mastodon" // Mastodon toot
 	PublishGithub  = "github"   // GitHub issues
 	PublishMatrix  = "room"
+	PublishDiscord = "discord" // Discord channel
 	PublishTwitter = "tweet"
 
 	StatusRequest = "request"

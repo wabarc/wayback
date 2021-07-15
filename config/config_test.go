@@ -762,6 +762,96 @@ func TestPublishToMatrixRoom(t *testing.T) {
 	}
 }
 
+func TestDiscordBotToken(t *testing.T) {
+	expected := "foo-bar"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_DISCORD_BOT_TOKEN", expected)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.DiscordBotToken()
+	if got != expected {
+		t.Fatalf(`Unexpected Discord bot token got %v instead of %v`, got, expected)
+	}
+}
+
+func TestDiscordHelptext(t *testing.T) {
+	expected := "some text"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_DISCORD_HELPTEXT", expected)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.DiscordHelptext()
+	if got != expected {
+		t.Fatalf(`Unexpected Discord help text got %v instead of %v`, got, expected)
+	}
+}
+
+func TestDiscordChannel(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		channel, expected string
+	}{
+		{
+			channel:  "",
+			expected: "",
+		},
+		{
+			channel:  "865981235815140000",
+			expected: "865981235815140000",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.channel, func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_DISCORD_CHANNEL", test.channel)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.DiscordChannel()
+			if got != test.expected {
+				t.Fatalf(`Unexpected Discord channel got %v instead of %v`, got, test.expected)
+			}
+		})
+	}
+}
+
+func TestPublishToDiscordChannel(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_DISCORD_BOT_TOKEN", "discord-bot-token")
+	os.Setenv("WAYBACK_DISCORD_CHANNEL", "865981235815140000")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := true
+	got := opts.PublishToDiscordChannel()
+
+	if got != expected {
+		t.Fatalf(`Unexpected publish to Discord channel got %t instead of %v`, got, expected)
+	}
+}
+
 func TestEnabledChromeRemote(t *testing.T) {
 	addr := "127.0.0.1:1234"
 
