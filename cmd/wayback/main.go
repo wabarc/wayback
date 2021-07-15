@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/cobra"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
@@ -188,7 +189,7 @@ func handle(cmd *cobra.Command, args []string) {
 	}
 
 	if print {
-		cmd.Printf("%#v\n", config.Opts)
+		cmd.Println(spew.Sdump(config.Opts))
 		return
 	}
 
