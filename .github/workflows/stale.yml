@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Mark stale issues and pull requests
-        uses: actions/stale@v3
+        uses: actions/stale@v4
         with:
           repo-token: ${{ github.token }}
           stale-issue-message: "This issue is stale because it has been open 120 days with no activity. Remove stale label or comment or this will be closed in 5 days"
