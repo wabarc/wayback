@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/url"
 	"sync"
+	"time"
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/playback"
@@ -138,6 +139,9 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 	if err != nil {
 		logger.Warn("[wayback] cannot to start reduxer: %v", err)
 	}
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+	defer cancel()
 
 	mu := sync.Mutex{}
 	g, ctx := errgroup.WithContext(ctx)

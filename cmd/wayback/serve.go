@@ -43,7 +43,11 @@ func serve(_ *cobra.Command, _ []string) {
 
 	select {
 	case err := <-ran.err():
-		logger.Error("%v", err.Error())
+		if err != nil {
+			logger.Error("%v", err.Error())
+		} else {
+			logger.Error("unknown error")
+		}
 	case <-ctx.Done():
 		logger.Info("wayback service stopping...")
 		time.Sleep(100 * time.Millisecond)
