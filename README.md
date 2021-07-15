@@ -7,7 +7,7 @@
 [![Releases](https://img.shields.io/github/v/release/wabarc/wayback.svg?include_prereleases&color=blue)](https://github.com/wabarc/wayback/releases)
 
 [![Telegram Bot](https://img.shields.io/badge/Telegram-bot-3dbeff.svg)](https://t.me/wabarc_bot)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-channel-3dbeff.svg)](https://t.me/wabarc)
+[![Discord Bot](https://img.shields.io/badge/Discord-bot-3dbeff.svg)](https://discord.com/api/oauth2/authorize?client_id=863324809206169640&permissions=2147796992&scope=bot%20applications.commands)
 [![Matrix Bot](https://img.shields.io/badge/Matrix-bot-0a976f.svg)](https://matrix.to/#/@wabarc_bot:matrix.org)
 [![Matrix Room](https://img.shields.io/badge/Matrix-room-0a976f.svg)](https://matrix.to/#/#wabarc:matrix.org)
 [![Tor Hidden Service](https://img.shields.io/badge/Tor%20Hidden%20Service-472756.svg)](http://wabarcoww2bxmdbixj7sjwggv3fonh2rpflfiildegcydk5udkdckdyd.onion/)
@@ -24,7 +24,7 @@ Supported Golang version: See [.github/workflows/testing.yml](./.github/workflow
 - Builtin CLI (`wayback`)
 - Serve as Tor Hidden Service or local web entry
 - Wayback to Internet Archive, archive.today, IPFS and Telegraph easier
-- Interactive with IRC, Martix, Telegram bot, Mastodon and Twitter as daemon service
+- Interactive with IRC, Martix, Telegram bot, Discord bot, Mastodon and Twitter as daemon service
 - Supports publish wayback results to Telegram channel, Mastodon and GitHub Issues
 - Supports store archived files to disk
 - Download stream media (requires [FFmpeg](https://ffmpeg.org/))
@@ -209,7 +209,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_BOLT_PATH`               | `./wayback.db`          | File path of bolt database                                   |
 | -                   | `WAYBACK_STORAGE_DIR`             | -                       | Directory to store binary file, e.g. PDF, html file          |
 | -                   | `WAYBACK_MAX_MEDIA_SIZE`          | `512MB`                 | Max size to limit download stream media                      |
-| `-d`, `--daemon`    | -                                 | -                       | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter` |
+| `-d`, `--daemon`    | -                                 | -                       | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter`, `discord` |
 | `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                  | Wayback webpages to **Internet Archive**                     |
 | `--is`              | `WAYBACK_ENABLE_IS`               | `true`                  | Wayback webpages to **Archive Today**                        |
 | `--ip`              | `WAYBACK_ENABLE_IP`               | `false`                 | Wayback webpages to **IPFS**                                 |
@@ -222,7 +222,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_GITHUB_REPO`             | -                       | GitHub repository to publish results                         |
 | `-t`, `--token`     | `WAYBACK_TELEGRAM_TOKEN`          | -                       | Telegram Bot API Token                                       |
 | `--chatid`          | `WAYBACK_TELEGRAM_CHANNEL`        | -                       | The Telegram public/private channel id to publish archive result |
-| -                   | `WAYBACK_TELEGRAM_HELPTEXT`       | -                       | The help text for Telegram bot command                       |
+| -                   | `WAYBACK_TELEGRAM_HELPTEXT`       | -                       | The help text for Telegram command                           |
 | -                   | `WAYBACK_MASTODON_SERVER`         | -                       | Domain of Mastodon instance                                  |
 | -                   | `WAYBACK_MASTODON_KEY`            | -                       | The client key of your Mastodon application                  |
 | -                   | `WAYBACK_MASTODON_SECRET`         | -                       | The client secret of your Mastodon application               |
@@ -239,6 +239,9 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_MATRIX_USERID`           | -                       | Matrix unique user ID, format: `@foo:example.com`            |
 | -                   | `WAYBACK_MATRIX_ROOMID`           | -                       | Matrix internal room ID, format: `!bar:example.com`          |
 | -                   | `WAYBACK_MATRIX_PASSWORD`         | -                       | Matrix password                                              |
+| -                   | `WAYBACK_DISCORD_BOT_TOKEN`       | -                       | Discord bot authorization token                              |
+| -                   | `WAYBACK_DISCORD_CHANNEL`         | -                       | Discord channel ID, [find channel ID](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-server-ID-)  |
+| -                   | `WAYBACK_DISCORD_HELPTEXT`        | -                       | The help text for Discord command                            |
 | `--tor`             | `WAYBACK_USE_TOR`                 | `false`                 | Snapshot webpage via Tor anonymity network                   |
 | `--tor-key`         | `WAYBACK_TOR_PRIVKEY`             | -                       | The private key for Tor Hidden Service                       |
 | -                   | `WAYBACK_TOR_LOCAL_PORT`          | `8964`                  | Local port for Tor Hidden Service, also support for a **reverse proxy** |

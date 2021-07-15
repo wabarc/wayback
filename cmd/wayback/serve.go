@@ -12,6 +12,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
+	"github.com/wabarc/wayback/service/discord"
 	"github.com/wabarc/wayback/service/httpd"
 	"github.com/wabarc/wayback/service/mastodon"
 	"github.com/wabarc/wayback/service/matrix"
@@ -62,6 +63,11 @@ func (srv *service) run(ctx context.Context, store *storage.Storage, pool poolin
 			irc := relaychat.New(ctx, store, pool)
 			go func(errCh chan error) {
 				errCh <- irc.Serve()
+			}(srv.errCh)
+		case "discord":
+			discord := discord.New(ctx, store, pool)
+			go func(errCh chan error) {
+				errCh <- discord.Serve()
 			}(srv.errCh)
 		case "mastodon", "mstdn":
 			mastodon := mastodon.New(ctx, store, pool)
