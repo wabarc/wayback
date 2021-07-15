@@ -151,6 +151,12 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.matrix.roomID = parseString(val, defMatrixRoomID)
 		case "WAYBACK_MATRIX_PASSWORD":
 			p.opts.matrix.password = parseString(val, defMatrixPassword)
+		case "WAYBACK_DISCORD_BOT_TOKEN":
+			p.opts.discord.botToken = parseString(val, defDiscordBotToken)
+		case "WAYBACK_DISCORD_CHANNEL":
+			p.opts.discord.channel = parseString(val, defDiscordChannel)
+		case "WAYBACK_DISCORD_HELPTEXT":
+			p.opts.discord.helptext = parseString(val, defDiscordHelptext)
 		case "WAYBACK_TOR_PRIVKEY":
 			p.opts.tor.pvk = parseString(val, defTorPrivateKey)
 		case "WAYBACK_TOR_LOCAL_PORT":

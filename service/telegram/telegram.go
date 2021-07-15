@@ -224,7 +224,7 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 	var bundles reduxer.Bundles
 	cols, err := wayback.Wayback(ctx, &bundles, urls...)
 	if err != nil {
-		logger.Error("archives failure, ", err)
+		logger.Error("archives failed: %v", err)
 		return err
 	}
 	logger.Debug("bundles: %#v", bundles)
@@ -367,7 +367,7 @@ func (t *Telegram) commandFallback() string {
 func (t *Telegram) getCommands() []telegram.Command {
 	commands, err := t.bot.GetCommands()
 	if err != nil {
-		logger.Error("got my failed: %v", err)
+		logger.Error("got my commands failed: %v", err)
 	}
 
 	var maps = make(map[string]bool, len(commands))

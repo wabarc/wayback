@@ -14,14 +14,16 @@ import (
 	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
-	mstdn "github.com/mattn/go-mastodon"
-	irc "github.com/thoj/go-ircevent"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/reduxer"
 	"golang.org/x/sync/errgroup"
+
+	discord "github.com/bwmarrin/discordgo"
+	mstdn "github.com/mattn/go-mastodon"
+	irc "github.com/thoj/go-ircevent"
 	telegram "gopkg.in/tucnak/telebot.v2"
 	matrix "maunium.net/go/mautrix"
 )
@@ -31,6 +33,7 @@ const (
 	FlagTelegram = "telegram"
 	FlagTwitter  = "twitter"
 	FlagMastodon = "mastodon"
+	FlagDiscord  = "discord"
 	FlagMatrix   = "matrix"
 	FlagIRC      = "irc"
 
@@ -127,6 +130,17 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			process(mstdn, ctx, cols, args...)
 		}
 	}
+	discord := func(ctx context.Context, cols []wayback.Collect, args ...string) {
+		if config.Opts.PublishToDiscordChannel() {
+			logger.Debug("[%s] publishing to Discord channel...", f)
+			var s *discord.Session
+			if rev, ok := ctx.Value(FlagDiscord).(*discord.Session); ok {
+				s = rev
+			}
+			d := NewDiscord(s)
+			process(d, ctx, cols, args...)
+		}
+	}
 	matrix := func(ctx context.Context, cols []wayback.Collect, args ...string) {
 		if config.Opts.PublishToMatrixRoom() {
 			logger.Debug("[%s] publishing to Matrix room...", f)
@@ -164,6 +178,7 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 		"channel":  channel,
 		"issue":    issue,
 		"mastodon": mastodon,
+		"discord":  discord,
 		"matrix":   matrix,
 		"twitter":  twitter,
 		"irc":      irc,
