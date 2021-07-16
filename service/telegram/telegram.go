@@ -243,6 +243,7 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 	go publish.To(ctx, cols, publish.FlagTelegram)
 
 	var album telegram.Album
+	var fsize int64
 	for _, bundle := range bundles {
 		for _, path := range bundle.Paths() {
 			if path == "" {
@@ -250,6 +251,11 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 			}
 			if !helper.Exists(path) {
 				logger.Warn("[publish] invalid file %s", path)
+				continue
+			}
+			fsize += helper.FileSize(path)
+			if fsize > config.Opts.MaxAttachSize("telegram") {
+				logger.Warn("total file size large than 50MB, skipped")
 				continue
 			}
 			logger.Debug("append document: %s", path)

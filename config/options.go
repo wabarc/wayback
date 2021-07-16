@@ -520,3 +520,12 @@ func (o *Options) MaxMediaSize() uint64 {
 	}
 	return size
 }
+
+// MaxAttachSize returns max attach size limits for several services.
+// scope: telegram
+func (o *Options) MaxAttachSize(scope string) int64 {
+	scopes := map[string]int64{
+		"telegram": 50000000, // 50MB
+	}
+	return scopes[scope]
+}

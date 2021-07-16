@@ -106,6 +106,7 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 			OutputName:   fn,
 			MultiThread:  true,
 			ThreadNumber: 10,
+			ChunkSizeMB:  10,
 		})
 		sortedStreams := sortStreams(dt.Streams)
 		if len(sortedStreams) == 0 {
@@ -240,6 +241,7 @@ func (b Bundle) Paths() (paths []string) {
 	paths = []string{
 		b.Path.Img,
 		b.Path.PDF,
+		b.Path.Raw,
 		b.Path.WARC,
 		b.Path.Media,
 	}

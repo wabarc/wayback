@@ -111,12 +111,18 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 
 	// Attach image and pdf files
 	var album telegram.Album
+	var fsize int64
 	for _, path := range bundle.Paths() {
 		if path == "" {
 			continue
 		}
 		if !helper.Exists(path) {
 			logger.Warn("invalid file %s", path)
+			continue
+		}
+		fsize += helper.FileSize(path)
+		if fsize > config.Opts.MaxAttachSize("telegram") {
+			logger.Warn("total file size large than 50MB, skipped")
 			continue
 		}
 		logger.Debug("append document: %s", path)
