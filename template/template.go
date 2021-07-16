@@ -62,7 +62,7 @@ func New(router *mux.Router) *Template {
 func (t *Template) ParseTemplates() error {
 	entries, err := templateFiles.ReadDir("views")
 	if err != nil {
-		logger.Error("[template] read views directory failed, %v", err)
+		logger.Error("read views directory failed, %v", err)
 		return err
 	}
 
@@ -71,10 +71,10 @@ func (t *Template) ParseTemplates() error {
 		filename := entry.Name()
 		fileData, err := templateFiles.ReadFile("views/" + filename)
 		if err != nil {
-			logger.Error("[template] read views file %s failed, %v", err)
+			logger.Error("read views file %s failed, %v", err)
 			return err
 		}
-		logger.Debug("[template] parsing: %s", filename)
+		logger.Debug("parsing: %s", filename)
 
 		templateContents.Write(fileData)
 		t.templates[filename] = template.Must(template.New("web").Funcs(t.funcMap.wrap()).Parse(templateContents.String()))
@@ -85,18 +85,18 @@ func (t *Template) ParseTemplates() error {
 
 // Render template with Collector
 func (t *Template) Render(name string, data interface{}) ([]byte, bool) {
-	logger.Info("[template] render template: %s", name)
+	logger.Info("render template: %s", name)
 
 	name = strings.TrimSuffix(name, ".html") + ".html"
 	tpl, ok := t.templates[name]
 	if !ok {
-		logger.Error("[template] the template %s does not exists", name)
+		logger.Error("the template %s does not exists", name)
 		return []byte{}, false
 	}
 
 	var b bytes.Buffer
 	if err := tpl.Execute(&b, data); err != nil {
-		logger.Error("[template] execute template failed: %v", err)
+		logger.Error("execute template failed: %v", err)
 		return []byte{}, false
 	}
 
@@ -153,7 +153,7 @@ func (f *funcMap) wrap() template.FuncMap {
 func Path(router *mux.Router, name string, args ...interface{}) string {
 	route := router.Get(name)
 	if route == nil {
-		logger.Error("[template] route not found: %s", name)
+		logger.Error("route not found: %s", name)
 		return ""
 	}
 
@@ -168,7 +168,7 @@ func Path(router *mux.Router, name string, args ...interface{}) string {
 
 	result, err := route.URLPath(pairs...)
 	if err != nil {
-		logger.Error("[template] parse URL path failed: %v", err)
+		logger.Error("parse URL path failed: %v", err)
 		return ""
 	}
 

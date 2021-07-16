@@ -28,12 +28,12 @@ func (m *Matrix) ForReply() *Render {
 
 	tpl, err := template.New("matrix").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
-		logger.Error("[render] parse Mastodon template failed, %v", err)
+		logger.Error("parse Mastodon template failed, %v", err)
 		return new(Render)
 	}
 
 	if err := tpl.Execute(&tmplBytes, m.Cols); err != nil {
-		logger.Error("[render] execute Mastodon template failed, %v", err)
+		logger.Error("execute Mastodon template failed, %v", err)
 		return new(Render)
 	}
 	b := bytes.TrimSpace(tmplBytes.Bytes())

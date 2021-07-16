@@ -581,8 +581,9 @@ github.com/wabarc/imgbb v1.0.0/go.mod h1:piz6QXkVfFpQbaQHx70/rPDwaICkW5Ew3lShTzb
 github.com/wabarc/ipfs-pinner v1.0.1 h1:PaWBDn1X556IyiOVd143XO9PVRjbohppA+JMJQwNBHI=
 github.com/wabarc/ipfs-pinner v1.0.1/go.mod h1:3EsCzUMiCsqnHr/fbHHj3r8s72CHQIm3JdiOpYyh27E=
 github.com/wabarc/logger v0.0.0-20210417045349-d0d82e8e99ee/go.mod h1:4uYr9fnQaQoDk1ttTzLnSB3lZm3i/vrJwN8EZIB2YuI=
-github.com/wabarc/logger v0.0.0-20210708144517-a9651f538672 h1:mFurKiLk9CxHzRdcPUYqQXpjt33X2fYMtDToDJtA0SM=
 github.com/wabarc/logger v0.0.0-20210708144517-a9651f538672/go.mod h1:4uYr9fnQaQoDk1ttTzLnSB3lZm3i/vrJwN8EZIB2YuI=
+github.com/wabarc/logger v0.0.0-20210716144136-d595151ad4cc h1:s1kjLBI1OeHAKd77HyG5qsdGNDOgj1DMwmaIilKvMSc=
+github.com/wabarc/logger v0.0.0-20210716144136-d595151ad4cc/go.mod h1:4uYr9fnQaQoDk1ttTzLnSB3lZm3i/vrJwN8EZIB2YuI=
 github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae h1:7TLEQYM7GxeysDd6IbK5F7krZuYEipdXno9qV3eedWU=
 github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae/go.mod h1:qP6GisnqoSDc5Ivj34yV+Qar3B6tYyLDKx42oCDX1zY=
 github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78 h1:iWcCLB7Ru5lurvN0aehmRj00ETjuGSBUhJJ9EOHfHyk=

@@ -29,12 +29,12 @@ func (i *Relaychat) ForPublish() *Render {
 
 	tpl, err := template.New("relaychat").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
-		logger.Error("[render] parse IRC template failed, %v", err)
+		logger.Error("parse IRC template failed, %v", err)
 		return new(Render)
 	}
 
 	if err := tpl.Execute(&tmplBytes, i.Cols); err != nil {
-		logger.Error("[render] execute IRC template failed, %v", err)
+		logger.Error("execute IRC template failed, %v", err)
 		return new(Render)
 	}
 	tmplBytes = *bytes.NewBuffer(bytes.TrimRight(tmplBytes.Bytes(), `, `))

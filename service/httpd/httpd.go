@@ -38,10 +38,10 @@ func newWeb() *web {
 		template: template.New(router),
 	}
 	if err := web.template.ParseTemplates(); err != nil {
-		logger.Fatal("[web] unable to parse templates: %v", err)
+		logger.Fatal("unable to parse templates: %v", err)
 	}
 	if err := template.GenerateJavascriptBundles(); err != nil {
-		logger.Fatal("[web] unable to generate JavaScript bundles: %v", err)
+		logger.Fatal("unable to generate JavaScript bundles: %v", err)
 	}
 	return web
 }
@@ -80,31 +80,31 @@ func (web *web) handle(pool pooling.Pool) http.Handler {
 }
 
 func (web *web) home(w http.ResponseWriter, r *http.Request) {
-	logger.Debug("[web] access home")
+	logger.Debug("access home")
 	w.Header().Set("Cache-Control", "max-age=2592000")
 	if html, ok := web.template.Render("layout", nil); ok {
 		w.Write(html)
 	} else {
-		logger.Error("[web] render template for home request failed")
+		logger.Error("render template for home request failed")
 		http.Error(w, "Internal Server Error", 500)
 	}
 }
 
 func (web *web) showOfflinePage(w http.ResponseWriter, r *http.Request) {
-	logger.Debug("[web] access offline page")
+	logger.Debug("access offline page")
 	// if f, ok := w.(http.Flusher); ok {
 	// 	f.Flush()
 	// }
 	if html, ok := web.template.Render("offline", nil); ok {
 		w.Write(html)
 	} else {
-		logger.Error("[web] render template for offline request failed")
+		logger.Error("render template for offline request failed")
 		http.Error(w, "Internal Server Error", 500)
 	}
 }
 
 func (web *web) showWebManifest(w http.ResponseWriter, r *http.Request) {
-	logger.Debug("[web] access manifest")
+	logger.Debug("access manifest")
 	type webManifestIcon struct {
 		Source string `json:"src"`
 		Sizes  string `json:"sizes"`
@@ -138,14 +138,14 @@ func (web *web) showWebManifest(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "max-age=259200")
 	w.Header().Set("Content-Type", "application/manifest+json")
 	if data, err := json.Marshal(manifest); err != nil {
-		logger.Error("[web] encode for response failed, %v", err)
+		logger.Error("encode for response failed, %v", err)
 	} else {
 		w.Write(data)
 	}
 }
 
 func (web *web) showFavicon(w http.ResponseWriter, r *http.Request) {
-	logger.Info("[web] access favicon")
+	logger.Info("access favicon")
 
 	blob, err := template.LoadImageFile("favicon.ico")
 	if err != nil {
@@ -157,7 +157,7 @@ func (web *web) showFavicon(w http.ResponseWriter, r *http.Request) {
 }
 
 func (web *web) showAppIcon(w http.ResponseWriter, r *http.Request) {
-	logger.Info("[web] access application icon")
+	logger.Info("access application icon")
 
 	filename := routeParam(r, "filename")
 	blob, err := template.LoadImageFile(filename)
@@ -172,7 +172,7 @@ func (web *web) showAppIcon(w http.ResponseWriter, r *http.Request) {
 
 func (web *web) showJavascript(w http.ResponseWriter, r *http.Request) {
 	filename := routeParam(r, "name")
-	logger.Info("[web] access javascript %s", filename)
+	logger.Info("access javascript %s", filename)
 	_, found := template.JavascriptBundleChecksums[filename]
 	if !found {
 		return
@@ -185,37 +185,37 @@ func (web *web) showJavascript(w http.ResponseWriter, r *http.Request) {
 }
 
 func (web *web) process(w http.ResponseWriter, r *http.Request) {
-	logger.Info("[web] process request start...")
+	logger.Info("process request start...")
 	metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusRequest)
 
 	if r.Method != http.MethodPost {
-		logger.Warn("[web] request method no specific.")
+		logger.Warn("request method no specific.")
 		http.Redirect(w, r, "/", http.StatusNotModified)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		logger.Error("[web] parse form error, %v", err)
+		logger.Error("parse form error, %v", err)
 		http.Redirect(w, r, "/", http.StatusNotModified)
 		return
 	}
 
 	text := r.PostFormValue("text")
 	if len(strings.TrimSpace(text)) == 0 {
-		logger.Warn("[web] post form value empty.")
+		logger.Warn("post form value empty.")
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	logger.Debug("[web] text: %s", text)
+	logger.Debug("text: %s", text)
 
 	urls := helper.MatchURLFallback(text)
 	if len(urls) == 0 {
-		logger.Warn("[web] url no found.")
+		logger.Warn("url no found.")
 	}
 
 	var bundles reduxer.Bundles
 	col, _ := wayback.Wayback(context.TODO(), &bundles, urls...)
-	logger.Debug("[web] bundles: %#v", bundles)
+	logger.Debug("bundles: %#v", bundles)
 
 	collector := transform(col)
 	ctx := context.WithValue(context.Background(), publish.PubBundle, bundles)
@@ -224,7 +224,7 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if data, err := json.Marshal(collector); err != nil {
-			logger.Error("[web] encode for response failed, %v", err)
+			logger.Error("encode for response failed, %v", err)
 			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
 		} else {
 			if len(urls) > 0 {
@@ -244,32 +244,32 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 			w.Write(html)
 		} else {
 			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
-			logger.Error("[web] render template for response failed")
+			logger.Error("render template for response failed")
 		}
 	}
 }
 
 func (web *web) playback(w http.ResponseWriter, r *http.Request) {
-	logger.Info("[web] playback request start...")
+	logger.Info("playback request start...")
 	metrics.IncrementPlayback(metrics.ServiceWeb, metrics.StatusRequest)
 
 	if err := r.ParseForm(); err != nil {
-		logger.Error("[web] parse form error, %v", err)
+		logger.Error("parse form error, %v", err)
 		http.Redirect(w, r, "/", http.StatusNotModified)
 		return
 	}
 
 	text := r.PostFormValue("text")
 	if len(strings.TrimSpace(text)) == 0 {
-		logger.Warn("[web] post form value empty.")
+		logger.Warn("post form value empty.")
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	logger.Debug("[web] text: %s", text)
+	logger.Debug("text: %s", text)
 
 	urls := helper.MatchURL(text)
 	if len(urls) == 0 {
-		logger.Warn("[web] url no found.")
+		logger.Warn("url no found.")
 	}
 	col, _ := wayback.Playback(context.TODO(), urls...)
 	collector := transform(col)
@@ -278,7 +278,7 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if data, err := json.Marshal(collector); err != nil {
-			logger.Error("[web] encode for response failed, %v", err)
+			logger.Error("encode for response failed, %v", err)
 			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
 		} else {
 			if len(urls) > 0 {
@@ -296,7 +296,7 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 			w.Write(html)
 		} else {
 			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
-			logger.Error("[web] render template for response failed")
+			logger.Error("render template for response failed")
 		}
 	}
 }

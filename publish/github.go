@@ -25,7 +25,7 @@ type gitHub struct {
 
 func NewGitHub(httpClient *http.Client) *gitHub {
 	if config.Opts.GitHubToken() == "" || config.Opts.GitHubOwner() == "" {
-		logger.Error("[publish] GitHub personal access token is required")
+		logger.Error("GitHub personal access token is required")
 		return new(gitHub)
 	}
 
@@ -47,7 +47,7 @@ func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...s
 	metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("[publish] collects empty")
+		logger.Warn("collects empty")
 		return
 	}
 
@@ -63,17 +63,17 @@ func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...s
 
 func (gh *gitHub) toIssues(ctx context.Context, bundle *reduxer.Bundle, text string) bool {
 	if gh.client == nil {
-		logger.Error("[publish] create GitHub Issues abort")
+		logger.Error("create GitHub Issues abort")
 		return false
 	}
 	if text == "" {
-		logger.Warn("[publish] github validation failed: Text can't be blank")
+		logger.Warn("github validation failed: Text can't be blank")
 		return false
 	}
 
 	if config.Opts.HasDebugMode() {
 		user, _, _ := gh.client.Users.Get(ctx, "")
-		logger.Debug("[publish] authorized GitHub user: %v", user)
+		logger.Debug("authorized GitHub user: %v", user)
 	}
 
 	t := strings.TrimSpace(title(ctx, bundle))
@@ -93,10 +93,10 @@ func (gh *gitHub) toIssues(ctx context.Context, bundle *reduxer.Bundle, text str
 	ir := &github.IssueRequest{Title: github.String(t), Body: github.String(text)}
 	issue, _, err := gh.client.Issues.Create(ctx, config.Opts.GitHubOwner(), config.Opts.GitHubRepo(), ir)
 	if err != nil {
-		logger.Error("[publish] create issue failed: %v", err)
+		logger.Error("create issue failed: %v", err)
 		return false
 	}
-	logger.Debug("[publish] created issue: %v", issue)
+	logger.Debug("created issue: %v", issue)
 
 	return true
 }

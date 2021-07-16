@@ -53,13 +53,13 @@ func (p Pool) Roll(service func()) {
 		defer wg.Done()
 		r, err := p.pull()
 		if err != nil {
-			logger.Error("[pooling] pull resources failed: %v", err)
+			logger.Error("pull resources failed: %v", err)
 			return
 		}
-		logger.Debug("[pooling] roll service on #%d", r.id)
+		logger.Debug("roll service on #%d", r.id)
 		defer p.push(r)
 
-		logger.Debug("[pooling] roll service func: %#v", service)
+		logger.Debug("roll service func: %#v", service)
 		service()
 	}
 

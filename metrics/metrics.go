@@ -145,7 +145,7 @@ func (c *Collector) collect(ch chan<- prometheus.Metric) error {
 // Describe sends the descriptors of each Collector related metrics we have defined
 // to the provided prometheus channel.
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
-	logger.Debug("[metrics] defined wayback metrics")
+	logger.Debug("defined wayback metrics")
 
 	for _, metric := range c.metricsList() {
 		metric.Describe(ch)
@@ -155,9 +155,9 @@ func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
 // Collect sends all the collected metrics to the provided prometheus channel.
 // It requires the caller to handle synchronization.
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
-	logger.Debug("[metrics] collecting wayback stats")
+	logger.Debug("collecting wayback stats")
 	if err := c.collect(ch); err != nil {
-		logger.Error("[metrics] error collecting metrics: %v", err)
+		logger.Error("error collecting metrics: %v", err)
 		return
 	}
 

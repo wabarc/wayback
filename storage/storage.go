@@ -27,7 +27,7 @@ func Open(path string) (*Storage, error) {
 	}
 	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {
-		logger.Fatal("[storage] open bolt database failed: %v", err)
+		logger.Fatal("open bolt database failed: %v", err)
 		return nil, err
 	}
 	return &Storage{db: db}, nil
@@ -38,7 +38,7 @@ func (s *Storage) Close() error {
 	if s.db != nil {
 		return s.db.Close()
 	}
-	return errors.New("[storage] database not found.")
+	return errors.New("database not found.")
 }
 
 func itob(v int) []byte {

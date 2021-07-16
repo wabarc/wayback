@@ -217,10 +217,10 @@ func bundle(ctx context.Context, cols []wayback.Collect) (b reduxer.Bundle) {
 }
 
 func title(_ context.Context, bundle *reduxer.Bundle) string {
-	logger.Debug("[publish] extract title from reduxer bundle: %v", bundle)
 	if bundle == nil {
 		return ""
 	}
+	logger.Debug("extract title from reduxer bundle title: %s", bundle.Title)
 
 	t := []rune(bundle.Title)
 	l := len(t)
@@ -232,10 +232,10 @@ func title(_ context.Context, bundle *reduxer.Bundle) string {
 }
 
 func digest(_ context.Context, bundle *reduxer.Bundle) string {
-	logger.Debug("[publish] generate digest from bundle: %v", bundle)
 	if bundle == nil {
 		return ""
 	}
+	logger.Debug("generate digest from article content: %s", bundle.Article.TextContent)
 
 	txt := []rune(bundle.Article.TextContent)
 	l := len(txt)

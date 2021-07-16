@@ -38,13 +38,13 @@ type Twitter struct {
 // New returns Twitter struct.
 func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Twitter {
 	if !config.Opts.PublishToTwitter() {
-		logger.Fatal("[twitter] missing required environment variable")
+		logger.Fatal("missing required environment variable")
 	}
 	if store == nil {
-		logger.Fatal("[twitter] must initialize storage")
+		logger.Fatal("must initialize storage")
 	}
 	if pool == nil {
-		logger.Fatal("[twitter] must initialize pooling")
+		logger.Fatal("must initialize pooling")
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -67,14 +67,14 @@ func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Twitte
 // Serve always returns a nil error.
 func (t *Twitter) Serve() error {
 	if t.client == nil {
-		return errors.New("[twitter] Initialize Twitter cilent failed.")
+		return errors.New("Initialize Twitter cilent failed.")
 	}
 
 	user, _, err := t.client.Accounts.VerifyCredentials(&twitter.AccountVerifyParams{IncludeEntities: twitter.Bool(false)})
 	if err != nil {
-		return errors.New("[twitter] Get account failed, err: %v", err)
+		return errors.New("Get account failed, err: %v", err)
 	}
-	logger.Info("[twitter] authorized on account %s", user.ScreenName)
+	logger.Info("authorized on account %s", user.ScreenName)
 
 	go func() {
 		fetchTick := time.NewTicker(time.Minute) // Fetch Direct Message event
@@ -87,9 +87,9 @@ func (t *Twitter) Serve() error {
 				messages, resp, err := t.client.DirectMessages.EventsList(
 					&twitter.DirectMessageEventsListParams{Count: 3},
 				)
-				logger.Debug("[twitter] messages: %v", messages)
+				logger.Debug("messages: %v", messages)
 				if err != nil {
-					logger.Error("[twitter] get direct messages failed, %v", err)
+					logger.Error("get direct messages failed, %v", err)
 				}
 				resp.Body.Close()
 
@@ -101,7 +101,7 @@ func (t *Twitter) Serve() error {
 						metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusRequest)
 						t.pool.Roll(func() {
 							if err := t.process(event); err != nil {
-								logger.Error("[twitter] process failure, message: %#v, error: %v", event.Message, err)
+								logger.Error("process failure, message: %#v, error: %v", event.Message, err)
 								metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusFailure)
 							} else {
 								metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusSuccess)
@@ -115,7 +115,7 @@ func (t *Twitter) Serve() error {
 				}
 			case <-t.ctx.Done():
 				once.Do(func() {
-					logger.Info("[twitter] stopping ticker...")
+					logger.Info("stopping ticker...")
 					fetchTick.Stop()
 				})
 			}
@@ -123,7 +123,7 @@ func (t *Twitter) Serve() error {
 	}()
 
 	<-t.ctx.Done()
-	logger.Info("[twitter] stopping service...")
+	logger.Info("stopping service...")
 
 	return errors.New("done")
 }
@@ -131,14 +131,14 @@ func (t *Twitter) Serve() error {
 func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	msg := event.Message
 	if msg == nil || event.ID == "" {
-		logger.Warn("[twitter] no direct message")
+		logger.Warn("no direct message")
 		return errors.New("Twitter: no direct message")
 	}
-	logger.Debug("[twitter] message event, event id: %s", event.ID)
-	logger.Debug("[twitter] message event, message data: %v", msg.Data)
+	logger.Debug("message event, event id: %s", event.ID)
+	logger.Debug("message event, message data: %v", msg.Data)
 
 	text := msg.Data.Text
-	logger.Debug("[twitter] message event id: %s message: %s", event.ID, text)
+	logger.Debug("message event id: %s message: %s", event.ID, text)
 	defer func() {
 		// Destroy Direct Message
 		resp, err := t.client.DirectMessages.EventsDestroy(event.ID)
@@ -158,23 +158,23 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	for _, url := range urls {
 		realURLs = append(realURLs, helper.RealURI(url))
 	}
-	logger.Debug("[twitter] real urls: %v", realURLs)
+	logger.Debug("real urls: %v", realURLs)
 
 	if len(realURLs) == 0 {
-		logger.Warn("[twitter] archives failure, URL no found.")
+		logger.Warn("archives failure, URL no found.")
 		return errors.New("Twitter: URL no found")
 	}
 
 	var bundles reduxer.Bundles
 	cols, err := wayback.Wayback(context.TODO(), &bundles, urls...)
 	if err != nil {
-		logger.Error("[twitter] archives failure, ", err)
+		logger.Error("archives failure, ", err)
 		return err
 	}
-	logger.Debug("[twitter] bundles: %#v", bundles)
+	logger.Debug("bundles: %#v", bundles)
 
 	replyText := render.ForReply(&render.Twitter{Cols: cols}).String()
-	logger.Debug("[twitter] reply text, %s", replyText)
+	logger.Debug("reply text, %s", replyText)
 
 	ev, _, err := t.client.DirectMessages.EventsNew(&twitter.DirectMessageEventsNewParams{
 		Event: &twitter.DirectMessageEvent{
@@ -189,9 +189,9 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 			},
 		},
 	})
-	logger.Debug("[twitter] reply event: %v", ev)
+	logger.Debug("reply event: %v", ev)
 	if err != nil {
-		logger.Error("[twitter] reply error: %v", ev, err)
+		logger.Error("reply error: %v", ev, err)
 		return err
 	}
 
@@ -217,10 +217,10 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 // func (t *Twitter) isRateLimit() bool {
 // 	rateLimits, _, err := t.client.RateLimits.Status(&twitter.RateLimitParams{Resources: []string{"statuses", "users"}})
 // 	if err != nil {
-// 		logger.Error("[twitter] request application/rate_limit_status failure, err: %v", err)
+// 		logger.Error("request application/rate_limit_status failure, err: %v", err)
 // 		return false
 // 	}
-// 	logger.Debug("[twitter] rate limits: %v", rateLimits)
+// 	logger.Debug("rate limits: %v", rateLimits)
 //
 // 	return true
 // }

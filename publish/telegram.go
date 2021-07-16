@@ -36,7 +36,7 @@ func NewTelegram(bot *telegram.Bot) *telegramBot {
 			Verbose:   config.Opts.HasDebugMode(),
 			ParseMode: telegram.ModeHTML,
 		}); err != nil {
-			logger.Error("[telegram] create telegram bot instance failed: %v", err)
+			logger.Error("create telegram bot instance failed: %v", err)
 		}
 	}
 
@@ -47,7 +47,7 @@ func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args 
 	metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("[publish] collects empty")
+		logger.Warn("collects empty")
 		return
 	}
 
@@ -65,7 +65,7 @@ func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args 
 // returns boolean as result.
 func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, text string) (ok bool) {
 	if text == "" {
-		logger.Warn("[publish] post to message to channel failed, text empty")
+		logger.Warn("post to message to channel failed, text empty")
 		return ok
 	}
 	if t.bot == nil {
@@ -75,14 +75,14 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 			Verbose:   config.Opts.HasDebugMode(),
 			ParseMode: telegram.ModeHTML,
 		}); err != nil {
-			logger.Error("[publish] post to channel failed, %v", err)
+			logger.Error("post to channel failed, %v", err)
 			return ok
 		}
 	}
 
 	chat, err := t.bot.ChatByID(config.Opts.TelegramChannel())
 	if err != nil {
-		logger.Error("[publish] open a chat failed: %v", err)
+		logger.Error("open a chat failed: %v", err)
 		return ok
 	}
 
@@ -100,12 +100,12 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 
 	stage, err := t.bot.Send(chat, b.String())
 	if err != nil {
-		logger.Error("[publish] post message to channel failed, %v", err)
+		logger.Error("post message to channel failed, %v", err)
 		return ok
 	}
 
 	if bundle == nil {
-		logger.Warn("[publish] bundle empty")
+		logger.Warn("bundle empty")
 		return true
 	}
 
@@ -116,10 +116,10 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 			continue
 		}
 		if !helper.Exists(path) {
-			logger.Warn("[publish] invalid file %s", path)
+			logger.Warn("invalid file %s", path)
 			continue
 		}
-		logger.Debug("[publish] append document: %s", path)
+		logger.Debug("append document: %s", path)
 		album = append(album, &telegram.Document{
 			File:     telegram.FromDisk(path),
 			Caption:  bundle.Title,
@@ -132,7 +132,7 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 	// Send album attach files, and reply to wayback result message
 	opts := &telegram.SendOptions{ReplyTo: stage, DisableNotification: true}
 	if _, err := t.bot.SendAlbum(stage.Chat, album, opts); err != nil {
-		logger.Error("[publish] reply failed: %v", err)
+		logger.Error("reply failed: %v", err)
 	}
 
 	return true

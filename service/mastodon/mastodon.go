@@ -40,13 +40,13 @@ type Mastodon struct {
 // New mastodon struct.
 func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Mastodon {
 	if !config.Opts.PublishToMastodon() {
-		logger.Fatal("[mastodon] missing required environment variable")
+		logger.Fatal("missing required environment variable")
 	}
 	if store == nil {
-		logger.Fatal("[mastodon] must initialize storage")
+		logger.Fatal("must initialize storage")
 	}
 	if pool == nil {
-		logger.Fatal("[mastodon] must initialize pooling")
+		logger.Fatal("must initialize pooling")
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -72,7 +72,7 @@ func (m *Mastodon) Serve() error {
 	if m.client == nil {
 		return errors.New("Must initialize Mastodon client.")
 	}
-	logger.Info("[mastodon] Serving Mastodon instance: %s", config.Opts.MastodonServer())
+	logger.Info("Serving Mastodon instance: %s", config.Opts.MastodonServer())
 
 	// rcv, err := m.client.StreamingUser(m.ctx)
 	// if err != nil {
@@ -100,14 +100,14 @@ func (m *Mastodon) Serve() error {
 		for {
 			select {
 			case <-clearTick.C:
-				logger.Debug("[mastodon] clear notifications...")
+				logger.Debug("clear notifications...")
 				m.client.ClearNotifications(m.ctx)
 			case <-fetchTick.C:
 				noti, err := m.client.GetNotifications(m.ctx, nil)
 				if err != nil {
-					logger.Error("[mastodon] get notifications failed: %v", err)
+					logger.Error("get notifications failed: %v", err)
 				}
-				logger.Debug("[mastodon] notifications: %v", noti)
+				logger.Debug("notifications: %v", noti)
 
 				for _, n := range noti {
 					if n.Type != "mention" {
@@ -123,7 +123,7 @@ func (m *Mastodon) Serve() error {
 					go m.pool.Roll(func() {
 						metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusRequest)
 						if err := m.process(n.ID, n.Status); err != nil {
-							logger.Error("[mastodon] process failure, notification: %#v, error: %v", n, err)
+							logger.Error("process failure, notification: %#v, error: %v", n, err)
 							metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusFailure)
 						} else {
 							metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusSuccess)
@@ -136,7 +136,7 @@ func (m *Mastodon) Serve() error {
 				}
 			case <-m.ctx.Done():
 				once.Do(func() {
-					logger.Info("[mastodon] stopping ticker...")
+					logger.Info("stopping ticker...")
 					clearTick.Stop()
 					fetchTick.Stop()
 				})
@@ -145,31 +145,31 @@ func (m *Mastodon) Serve() error {
 	}()
 
 	<-m.ctx.Done()
-	logger.Info("[mastodon] stopping service...")
+	logger.Info("stopping service...")
 
 	return errors.New("done")
 }
 
 func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) {
 	if status == nil || id == "" {
-		logger.Warn("[mastodon] no status or conversation")
+		logger.Warn("no status or conversation")
 		return errors.New("Mastodon: no status or conversation")
 	}
 	if inReplyToID, ok := status.InReplyToID.(string); ok {
-		logger.Debug("[mastodon] inReplyToID %s", inReplyToID)
+		logger.Debug("inReplyToID %s", inReplyToID)
 		if status, err = m.client.GetStatus(m.ctx, mastodon.ID(inReplyToID)); err != nil {
-			logger.Error("[mastodon] get status failed: %v", err)
+			logger.Error("get status failed: %v", err)
 			return err
 		}
-		logger.Debug("[mastodon] got status %#v", status)
+		logger.Debug("got status %#v", status)
 	}
 
 	text := textContent(status.Content)
-	logger.Debug("[mastodon] conversation id: %s message: %s", id, text)
+	logger.Debug("conversation id: %s message: %s", id, text)
 	defer func() {
 		time.Sleep(time.Second)
 		if err := m.client.DismissNotification(m.ctx, id); err != nil {
-			logger.Warn("[mastodon] dismiss notification failed: %v", err)
+			logger.Warn("dismiss notification failed: %v", err)
 		}
 		m.Lock()
 		delete(m.archiving, id)
@@ -184,7 +184,7 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 	urls := helper.MatchURLFallback(text)
 	pub := publish.NewMastodon(m.client)
 	if len(urls) == 0 {
-		logger.Warn("[mastodon] archives failure, URL no found.")
+		logger.Warn("archives failure, URL no found.")
 		pub.ToMastodon(m.ctx, nil, "URL no found", string(status.ID))
 		return errors.New("Mastodon: URL no found")
 	}
@@ -192,10 +192,10 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 	var bundles reduxer.Bundles
 	col, err := wayback.Wayback(context.TODO(), &bundles, urls...)
 	if err != nil {
-		logger.Error("[mastodon] archives failed: %v", err)
+		logger.Error("archives failed: %v", err)
 		return err
 	}
-	logger.Debug("[mastodon] bundles: %#v", bundles)
+	logger.Debug("bundles: %#v", bundles)
 
 	// Reply and publish toot as public
 	ctx := context.WithValue(m.ctx, publish.FlagMastodon, m.client)
@@ -209,13 +209,13 @@ func (m *Mastodon) playback(status *mastodon.Status) error {
 	text := textContent(status.Content)
 	urls := helper.MatchURL(text)
 	if len(urls) == 0 {
-		logger.Warn("[mastodon] playback failure, URL no found.")
+		logger.Warn("playback failure, URL no found.")
 		return errors.New("Mastodon: URL no found")
 	}
 
 	cols, err := wayback.Playback(m.ctx, urls...)
 	if err != nil {
-		logger.Error("[mastodon] playback failed: %v", err)
+		logger.Error("playback failed: %v", err)
 		return err
 	}
 

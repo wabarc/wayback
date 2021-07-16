@@ -179,9 +179,9 @@ func TestProcess(t *testing.T) {
 	})
 	recvSyncer.OnEventType(event.EventEncrypted, func(source matrix.EventSource, ev *event.Event) {
 		t.Log("Unsupport encryption message")
-		// logger.Debug("[matrix] event: %v", ev)
+		// logger.Debug("event: %v", ev)
 		// if err := m.process(context.Background(), ev); err != nil {
-		// 	logger.Error("[matrix] process request failure, error: %v", err)
+		// 	logger.Error("process request failure, error: %v", err)
 		// }
 	})
 

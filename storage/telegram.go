@@ -49,7 +49,7 @@ func (s *Storage) Playback(id int) (*entity.Playback, error) {
 // CreatePlayback creates a playback callback data.
 func (s *Storage) CreatePlayback(pb *entity.Playback) error {
 	if err := s.createPlaybackBucket(); err != nil {
-		logger.Error("[storage] create playback buckte failed: %v", err)
+		logger.Error("create playback buckte failed: %v", err)
 		return err
 	}
 
@@ -57,10 +57,10 @@ func (s *Storage) CreatePlayback(pb *entity.Playback) error {
 		b := tx.Bucket([]byte(entity.EntityPlayback))
 		id, err := b.NextSequence()
 		if err != nil {
-			logger.Error("[storage] generate id for playback failed: %v", err)
+			logger.Error("generate id for playback failed: %v", err)
 			return err
 		}
-		logger.Debug("[storage] putting data to bucket, id: %d, value: %s", id, pb.Source)
+		logger.Debug("putting data to bucket, id: %d, value: %s", id, pb.Source)
 
 		pb.ID = int(id)
 		buf := bytes.NewBufferString(pb.Source).Bytes()

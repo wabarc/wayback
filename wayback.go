@@ -71,7 +71,7 @@ func (i IA) Wayback() string {
 	arc := &ia.Archiver{}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("[wayback] %s to Internet Archive failed: %v", i.URL.String(), err)
+		logger.Error("%s to Internet Archive failed: %v", i.URL.String(), err)
 		return fmt.Sprint(err)
 	}
 	return dst
@@ -81,7 +81,7 @@ func (i IS) Wayback() string {
 	arc := &is.Archiver{}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("[wayback] %s to archive.today failed: %v", i.URL.String(), err)
+		logger.Error("%s to archive.today failed: %v", i.URL.String(), err)
 		return fmt.Sprint(err)
 	}
 	return dst
@@ -96,7 +96,7 @@ func (i IP) Wayback() string {
 	}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("[wayback] %s to IPFS failed: %v", i.URL.String(), err)
+		logger.Error("%s to IPFS failed: %v", i.URL.String(), err)
 		return fmt.Sprint(err)
 	}
 	return dst
@@ -111,7 +111,7 @@ func (i PH) Wayback() string {
 
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("[wayback] %s to archive.today failed: %v", i.URL.String(), err)
+		logger.Error("%s to archive.today failed: %v", i.URL.String(), err)
 		return fmt.Sprint(err)
 	}
 	return dst
@@ -133,11 +133,11 @@ func wayback(w Waybacker) string {
 
 // Wayback returns URLs archived to the time capsules.
 func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (cols []Collect, err error) {
-	logger.Debug("[wayback] start...")
+	logger.Debug("start...")
 
 	*bundles, err = reduxer.Do(ctx, urls...)
 	if err != nil {
-		logger.Warn("[wayback] cannot to start reduxer: %v", err)
+		logger.Warn("cannot to start reduxer: %v", err)
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
@@ -148,15 +148,15 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 	for _, uri := range urls {
 		for slot, arc := range config.Opts.Slots() {
 			if !arc {
-				logger.Warn("[wayback] skipped %s", config.SlotName(slot))
+				logger.Warn("skipped %s", config.SlotName(slot))
 				continue
 			}
 			slot, uri := slot, uri
 			g.Go(func() error {
-				logger.Debug("[wayback] archiving slot: %s", slot)
+				logger.Debug("archiving slot: %s", slot)
 				input, err := url.Parse(uri)
 				if err != nil {
-					logger.Error("[wayback] parse uri failed: %v", err)
+					logger.Error("parse uri failed: %v", err)
 					return err
 				}
 
@@ -183,12 +183,12 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 		}
 	}
 	if err := g.Wait(); err != nil {
-		logger.Error("[wayback] archives failed: %v", err)
+		logger.Error("archives failed: %v", err)
 		return cols, err
 	}
 
 	if len(cols) == 0 {
-		logger.Error("[wayback] archives failure")
+		logger.Error("archives failure")
 		return cols, errors.New("archives failure")
 	}
 
@@ -197,7 +197,7 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 
 // Playback returns URLs archived from the time capsules.
 func Playback(ctx context.Context, urls ...string) (cols []Collect, err error) {
-	logger.Debug("[playback] start...")
+	logger.Debug("start...")
 
 	mu := sync.Mutex{}
 	g, ctx := errgroup.WithContext(ctx)
@@ -206,10 +206,10 @@ func Playback(ctx context.Context, urls ...string) (cols []Collect, err error) {
 		for _, slot := range slots {
 			slot, uri := slot, uri
 			g.Go(func() error {
-				logger.Debug("[playback] searching slot: %s", slot)
+				logger.Debug("searching slot: %s", slot)
 				input, err := url.Parse(uri)
 				if err != nil {
-					logger.Error("[playback] parse uri failed: %v", err)
+					logger.Error("parse uri failed: %v", err)
 					return err
 				}
 				var col Collect
@@ -238,7 +238,7 @@ func Playback(ctx context.Context, urls ...string) (cols []Collect, err error) {
 		}
 	}
 	if err := g.Wait(); err != nil {
-		logger.Error("[playback] failed: %v", err)
+		logger.Error("failed: %v", err)
 		return cols, err
 	}
 

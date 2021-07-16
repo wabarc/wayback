@@ -71,32 +71,32 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 	var craft = func(in string) string {
 		u, err := url.Parse(in)
 		if err != nil {
-			logger.Debug("[reduxer] create warc for %s failed", u.String())
+			logger.Debug("create warc for %s failed", u.String())
 			return ""
 		}
 		path, err := warc.Download(u)
 		if err != nil {
-			logger.Debug("[reduxer] create warc for %s failed: %v", u.String(), err)
+			logger.Debug("create warc for %s failed: %v", u.String(), err)
 			return ""
 		}
 		return path
 	}
 	var media = func(in string) string {
 		if !existFFmpeg {
-			logger.Warn("[reduxer] FFmpeg no found, skipped")
+			logger.Warn("FFmpeg no found, skipped")
 			return ""
 		}
 
 		data, err := extractors.Extract(in, types.Options{})
 		if err != nil && len(data) == 0 {
-			logger.Warn("[reduxer] data empty or error %v", err)
+			logger.Warn("data empty or error %v", err)
 			return ""
 		}
 		dt := data[0]
 		// Only download first media
 		ct := string(dt.Type)
 		if !strings.HasPrefix(ct, "video") {
-			logger.Warn("[reduxer] resource isn't video, skipped")
+			logger.Warn("resource isn't video, skipped")
 			return ""
 		}
 		fn := strings.TrimSuffix(helper.FileName(in, ct), ".html")
@@ -109,18 +109,18 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 		})
 		sortedStreams := sortStreams(dt.Streams)
 		if len(sortedStreams) == 0 {
-			logger.Warn("[reduxer] stream not found")
+			logger.Warn("stream not found")
 			return ""
 		}
 		streamName := sortedStreams[0].ID
 		stream, ok := dt.Streams[streamName]
 		if !ok {
-			logger.Warn("[reduxer] stream not found")
+			logger.Warn("stream not found")
 			return ""
 		}
-		logger.Debug("[reduxer] stream size: %s", humanize.Bytes(uint64(stream.Size)))
+		logger.Debug("stream size: %s", humanize.Bytes(uint64(stream.Size)))
 		if stream.Size > int64(config.Opts.MaxMediaSize()) {
-			logger.Warn("[reduxer] video size large than %s, skipped", humanize.Bytes(config.Opts.MaxMediaSize()))
+			logger.Warn("video size large than %s, skipped", humanize.Bytes(config.Opts.MaxMediaSize()))
 			return ""
 		}
 		if err := dl.Download(dt); err != nil {
@@ -147,32 +147,32 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 			var path Path
 			for _, slug := range slugs {
 				if slug.buf == nil {
-					logger.Warn("[reduxer] file empty, skipped")
+					logger.Warn("file empty, skipped")
 					continue
 				}
 				ft := http.DetectContentType(slug.buf)
 				fp := filepath.Join(dir, helper.FileName(shot.URL, ft))
-				logger.Debug("[reduxer] writing file: %s", fp)
+				logger.Debug("writing file: %s", fp)
 				if err := os.WriteFile(fp, slug.buf, 0o600); err != nil {
-					logger.Error("[reduxer] write %s file failed: %v", ft, err)
+					logger.Error("write %s file failed: %v", ft, err)
 					continue
 				}
 				if err := helper.SetField(&path, slug.key, fp); err != nil {
-					logger.Error("[reduxer] assign field %s to path struct failed: %v", slug.key, err)
+					logger.Error("assign field %s to path struct failed: %v", slug.key, err)
 					continue
 				}
 			}
 			// Set path of WARC file directly to avoid read file as buffer
 			if err := helper.SetField(&path, "WARC", craft(shot.URL)); err != nil {
-				logger.Error("[reduxer] assign field WARC to path struct failed: %v", err)
+				logger.Error("assign field WARC to path struct failed: %v", err)
 			}
 			if err := helper.SetField(&path, "Media", media(shot.URL)); err != nil {
-				logger.Error("[reduxer] assign field Media to path struct failed: %v", err)
+				logger.Error("assign field Media to path struct failed: %v", err)
 			}
 			bundle := Bundle{shot, path, readability.Article{}}
 			article, err := readability.New().Parse(bytes.NewReader(shot.HTML), shot.URL)
 			if err != nil {
-				logger.Error("[reduxer] parse html failed: %v", err)
+				logger.Error("parse html failed: %v", err)
 			}
 			bundle.Article = article
 			mu.Lock()
@@ -202,7 +202,7 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 			defer wg.Done()
 			input, err := url.Parse(uri)
 			if err != nil {
-				logger.Error("[reduxer] parse url failed: %v", err)
+				logger.Error("parse url failed: %v", err)
 				return
 			}
 
@@ -211,7 +211,7 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 				addr := remote.(*net.TCPAddr)
 				headless, err := screenshot.NewChromeRemoteScreenshoter(addr.String())
 				if err != nil {
-					logger.Error("[reduxer] screenshot failed: %v", err)
+					logger.Error("screenshot failed: %v", err)
 					return
 				}
 				shot, err = headless.Screenshot(ctx, input, opts...)
@@ -220,10 +220,10 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 			}
 			if err != nil {
 				if err == context.DeadlineExceeded {
-					logger.Error("[reduxer] screenshot deadline: %v", err)
+					logger.Error("screenshot deadline: %v", err)
 					return
 				}
-				logger.Debug("[reduxer] screenshot error: %v", err)
+				logger.Debug("screenshot error: %v", err)
 				return
 			}
 			mu.Lock()
@@ -249,16 +249,16 @@ func (b Bundle) Paths() (paths []string) {
 func remoteHeadless(addr string) net.Addr {
 	conn, err := net.DialTimeout("tcp", addr, time.Second)
 	if err != nil {
-		logger.Warn("[reduxer] try to connect headless browser failed: %v", err)
+		logger.Warn("try to connect headless browser failed: %v", err)
 		return nil
 	}
 
 	if conn != nil {
 		conn.Close()
-		logger.Warn("[reduxer] connected: %v", conn.RemoteAddr().String())
+		logger.Warn("connected: %v", conn.RemoteAddr().String())
 		return conn.RemoteAddr()
 	} else {
-		logger.Warn("[reduxer] headless chrome don't exists")
+		logger.Warn("headless chrome don't exists")
 		return nil
 	}
 }
@@ -266,7 +266,7 @@ func remoteHeadless(addr string) net.Addr {
 func createDir(baseDir string) (dir string, err error) {
 	dir = filepath.Join(baseDir, time.Now().Format("200601"))
 	if err := os.MkdirAll(dir, 0o755); err != nil {
-		logger.Error("[reduxer] mkdir failed: %v", err)
+		logger.Error("mkdir failed: %v", err)
 		return "", err
 	}
 	return dir, nil

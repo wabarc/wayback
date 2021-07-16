@@ -41,7 +41,7 @@ require (
 	github.com/wabarc/archive.is v1.3.0
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/helper v0.0.0-20210706220001-6ba9e89c752b
-	github.com/wabarc/logger v0.0.0-20210708144517-a9651f538672
+	github.com/wabarc/logger v0.0.0-20210716144136-d595151ad4cc
 	github.com/wabarc/playback v0.0.0-20210706162327-6ba67b324cc8
 	github.com/wabarc/screenshot v1.2.1-0.20210713083422-eee9add4752d
 	github.com/wabarc/telegra.ph v0.0.0-20210708231234-c10dbc08962f

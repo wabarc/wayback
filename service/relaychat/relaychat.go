@@ -35,13 +35,13 @@ type IRC struct {
 // New IRC struct.
 func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *IRC {
 	if config.Opts.IRCNick() == "" {
-		logger.Fatal("[irc] missing required environment variable")
+		logger.Fatal("missing required environment variable")
 	}
 	if store == nil {
-		logger.Fatal("[irc] must initialize storage")
+		logger.Fatal("must initialize storage")
 	}
 	if pool == nil {
-		logger.Fatal("[irc] must initialize pooling")
+		logger.Fatal("must initialize pooling")
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -69,7 +69,7 @@ func (i *IRC) Serve() error {
 	if i.conn == nil {
 		return errors.New("Must initialize IRC connection.")
 	}
-	logger.Info("[irc] Serving IRC instance: %s", config.Opts.IRCServer())
+	logger.Info("Serving IRC instance: %s", config.Opts.IRCServer())
 
 	if config.Opts.IRCChannel() != "" {
 		i.conn.AddCallback("001", func(ev *irc.Event) { i.conn.Join(config.Opts.IRCChannel()) })
@@ -79,7 +79,7 @@ func (i *IRC) Serve() error {
 			metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusRequest)
 			go i.pool.Roll(func() {
 				if err := i.process(ev); err != nil {
-					logger.Error("[irc] process failure, message: %s, error: %v", ev.Message(), err)
+					logger.Error("process failure, message: %s, error: %v", ev.Message(), err)
 					metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusFailure)
 				} else {
 					metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusSuccess)
@@ -89,7 +89,7 @@ func (i *IRC) Serve() error {
 	})
 	err := i.conn.Connect(config.Opts.IRCServer())
 	if err != nil {
-		logger.Error("[irc] Get conversations failure, error: %v", err)
+		logger.Error("Get conversations failure, error: %v", err)
 		return err
 	}
 
@@ -104,26 +104,26 @@ func (i *IRC) Serve() error {
 
 func (i *IRC) process(ev *irc.Event) error {
 	if ev.Nick == "" || ev.Message() == "" {
-		logger.Warn("[irc] without nick or empty message")
+		logger.Warn("without nick or empty message")
 		return errors.New("IRC: without nick or enpty message")
 	}
 
 	text := ev.MessageWithoutFormat()
-	logger.Debug("[irc] from: %s message: %s", ev.Nick, text)
+	logger.Debug("from: %s message: %s", ev.Nick, text)
 
 	urls := helper.MatchURLFallback(text)
 	if len(urls) == 0 {
-		logger.Warn("[irc] archives failure, URL no found.")
+		logger.Warn("archives failure, URL no found.")
 		return errors.New("IRC: URL no found")
 	}
 
 	var bundles reduxer.Bundles
 	cols, err := wayback.Wayback(context.TODO(), &bundles, urls...)
 	if err != nil {
-		logger.Error("[irc] archives failure, %v", err)
+		logger.Error("archives failure, %v", err)
 		return err
 	}
-	logger.Debug("[irc] bundles: %#v", bundles)
+	logger.Debug("bundles: %#v", bundles)
 
 	replyText := render.ForReply(&render.Relaychat{Cols: cols}).String()
 

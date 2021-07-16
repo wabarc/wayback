@@ -47,7 +47,7 @@ func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...
 	metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("[publish] collects empty")
+		logger.Warn("collects empty")
 		return
 	}
 
@@ -63,11 +63,11 @@ func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...
 
 func (m *mastodon) ToMastodon(ctx context.Context, bundle *reduxer.Bundle, text, id string) bool {
 	if !config.Opts.PublishToMastodon() || m.client == nil {
-		logger.Warn("[publish] Do not publish to Mastodon.")
+		logger.Warn("Do not publish to Mastodon.")
 		return false
 	}
 	if text == "" {
-		logger.Warn("[publish] mastodon validation failed: Text can't be blank")
+		logger.Warn("mastodon validation failed: Text can't be blank")
 		return false
 	}
 
@@ -86,7 +86,7 @@ func (m *mastodon) ToMastodon(ctx context.Context, bundle *reduxer.Bundle, text,
 		toot.InReplyToID = mstdn.ID(id)
 	}
 	if _, err := m.client.PostStatus(ctx, toot); err != nil {
-		logger.Error("[publish] post Mastodon status failed: %v", err)
+		logger.Error("post Mastodon status failed: %v", err)
 		return false
 	}
 

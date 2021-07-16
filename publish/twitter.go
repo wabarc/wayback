@@ -42,7 +42,7 @@ func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 	metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("[publish] collects empty")
+		logger.Warn("collects empty")
 		return
 	}
 
@@ -58,11 +58,11 @@ func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 
 func (t *twitterBot) ToTwitter(ctx context.Context, bundle *reduxer.Bundle, text string) bool {
 	if !config.Opts.PublishToTwitter() || t.client == nil {
-		logger.Warn("[publish] Do not publish to Twitter.")
+		logger.Warn("Do not publish to Twitter.")
 		return false
 	}
 	if text == "" {
-		logger.Warn("[publish] twitter validation failed: Text can't be blank")
+		logger.Warn("twitter validation failed: Text can't be blank")
 		return false
 	}
 
@@ -76,10 +76,10 @@ func (t *twitterBot) ToTwitter(ctx context.Context, bundle *reduxer.Bundle, text
 	b.WriteString(text)
 	tweet, resp, err := t.client.Statuses.Update(b.String(), nil)
 	if err != nil {
-		logger.Error("[publish] create tweet failed: %v", err)
+		logger.Error("create tweet failed: %v", err)
 		return false
 	}
-	logger.Debug("[publish] created tweet: %v, resp: %v, err: %v", tweet, resp, err)
+	logger.Debug("created tweet: %v, resp: %v, err: %v", tweet, resp, err)
 
 	return true
 }

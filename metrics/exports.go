@@ -17,21 +17,21 @@ import (
 var Gather *Collector
 
 func (c *Collector) Export(labels ...string) string {
-	logger.Debug("[metrics] export metrics family: %#v", prometheus.DefaultRegisterer)
+	logger.Debug("export metrics family: %#v", prometheus.DefaultRegisterer)
 
 	var gatherer = prometheus.DefaultGatherer
 	var protobufs, err = gatherer.Gather()
 	if err != nil {
-		logger.Error("[metrics] gather metrics family failed: %v", err)
+		logger.Error("gather metrics family failed: %v", err)
 	}
 
 	var s string
 	for _, pb := range protobufs {
 		var buf bytes.Buffer
 		if _, err := expfmt.MetricFamilyToText(&buf, pb); err != nil {
-			logger.Error("[metrics] export to text failed: %v", err)
+			logger.Error("export to text failed: %v", err)
 		}
-		logger.Debug("[metrics] string: %v\nname: %v\nhelp: %v\ntype: %v\nmetric: %v\nvalue: %v",
+		logger.Debug("string: %v\nname: %v\nhelp: %v\ntype: %v\nmetric: %v\nvalue: %v",
 			buf.String(), pb.GetName(), pb.GetHelp(), pb.GetType(), pb.GetMetric(), pb.GetMetric()[0].GetGauge().GetValue())
 		if match(pb.GetName(), labels...) {
 			s += buf.String()

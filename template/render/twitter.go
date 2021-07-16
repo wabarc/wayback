@@ -32,16 +32,16 @@ func (t *Twitter) ForReply() *Render {
 
 	tpl, err := template.New("twitter").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
-		logger.Error("[render] parse Twitter template failed: %v", err)
+		logger.Error("parse Twitter template failed: %v", err)
 		return new(Render)
 	}
 
 	groups := groupBySlot(t.Cols)
-	logger.Debug("[render] for reply telegram: %#v", groups)
+	logger.Debug("for reply telegram: %#v", groups)
 
 	tmplBytes.WriteString(original(groups))
 	if err := tpl.Execute(&tmplBytes, groups); err != nil {
-		logger.Error("[render] execute Twitter template failed: %v", err)
+		logger.Error("execute Twitter template failed: %v", err)
 		return new(Render)
 	}
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
@@ -62,13 +62,13 @@ func (t *Twitter) ForPublish() *Render {
 
 	tpl, err := template.New("twitter").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
-		logger.Error("[render] parse Twitter template failed: %v", err)
+		logger.Error("parse Twitter template failed: %v", err)
 		return new(Render)
 	}
 
 	tmplBytes.WriteString(original(t.Cols))
 	if err := tpl.Execute(&tmplBytes, t.Cols); err != nil {
-		logger.Error("[render] execute Twitter template failed: %v", err)
+		logger.Error("execute Twitter template failed: %v", err)
 		return new(Render)
 	}
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))

@@ -34,12 +34,12 @@ func (gh *GitHub) ForPublish() *Render {
 
 	tpl, err := template.New("github").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
-		logger.Error("[render] parse template failed, %v", err)
+		logger.Error("parse template failed, %v", err)
 		return new(Render)
 	}
 
 	if err := tpl.Execute(&tmplBytes, gh.Cols); err != nil {
-		logger.Error("[render] execute template failed, %v", err)
+		logger.Error("execute template failed, %v", err)
 		return new(Render)
 	}
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
