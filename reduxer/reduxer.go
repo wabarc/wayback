@@ -18,8 +18,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cixtor/readability"
 	"github.com/dustin/go-humanize"
+	"github.com/go-shiori/go-readability"
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/extractors/types"
@@ -93,14 +93,7 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 			return ""
 		}
 		dt := data[0]
-		// Only download first media
-		ct := string(dt.Type)
-		if !strings.HasPrefix(ct, "video") {
-			logger.Warn("resource isn't video, skipped")
-			return ""
-		}
-		fn := strings.TrimSuffix(helper.FileName(in, ct), ".html")
-		fp := filepath.Join(dir, fn) + ".mp4"
+		fn := strings.TrimSuffix(helper.FileName(in, ""), ".html")
 		dl := downloader.New(downloader.Options{
 			OutputPath:   dir,
 			OutputName:   fn,
@@ -121,12 +114,14 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 		}
 		logger.Debug("stream size: %s", humanize.Bytes(uint64(stream.Size)))
 		if stream.Size > int64(config.Opts.MaxMediaSize()) {
-			logger.Warn("video size large than %s, skipped", humanize.Bytes(config.Opts.MaxMediaSize()))
+			logger.Warn("media size large than %s, skipped", humanize.Bytes(config.Opts.MaxMediaSize()))
 			return ""
 		}
 		if err := dl.Download(dt); err != nil {
+			logger.Error("download media failed: %v", err)
 			return ""
 		}
+		fp := filepath.Join(dir, fn) + "." + stream.Ext
 		return fp
 	}
 
@@ -170,7 +165,8 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 			if err := helper.SetField(&path, "Media", media(shot.URL)); err != nil {
 				logger.Error("assign field Media to path struct failed: %v", err)
 			}
-			article, err := readability.New().Parse(bytes.NewReader(shot.HTML), shot.URL)
+			u, _ := url.Parse(shot.URL)
+			article, err := readability.FromReader(bytes.NewReader(shot.HTML), u)
 			if err != nil {
 				logger.Error("parse html failed: %v", err)
 			}
