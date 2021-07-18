@@ -32,7 +32,7 @@ import (
 )
 
 type Path struct {
-	Img, PDF, Raw, WARC, Media string
+	Img, PDF, Raw, Txt, WARC, Media string
 }
 
 type Bundle struct {
@@ -170,12 +170,18 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 			if err := helper.SetField(&path, "Media", media(shot.URL)); err != nil {
 				logger.Error("assign field Media to path struct failed: %v", err)
 			}
-			bundle := Bundle{shot, path, readability.Article{}}
 			article, err := readability.New().Parse(bytes.NewReader(shot.HTML), shot.URL)
 			if err != nil {
 				logger.Error("parse html failed: %v", err)
 			}
-			bundle.Article = article
+			fn := strings.TrimRight(helper.FileName(shot.URL, ""), "html") + "txt"
+			fp := filepath.Join(dir, fn)
+			if err := os.WriteFile(fp, []byte(article.TextContent), 0o600); err == nil {
+				if err := helper.SetField(&path, "Txt", fp); err != nil {
+					logger.Error("assign field Txt to path struct failed: %v", err)
+				}
+			}
+			bundle := Bundle{shot, path, article}
 			mu.Lock()
 			bundles[shot.URL] = bundle
 			mu.Unlock()
@@ -242,6 +248,7 @@ func (b Bundle) Paths() (paths []string) {
 		b.Path.Img,
 		b.Path.PDF,
 		b.Path.Raw,
+		b.Path.Txt,
 		b.Path.WARC,
 		b.Path.Media,
 	}
