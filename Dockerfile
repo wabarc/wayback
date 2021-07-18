@@ -76,6 +76,7 @@ ONBUILD RUN set -o pipefail; \
     libstdc++ \
     harfbuzz \
     nss \
+    libwebp-tools \
     ttf-freefont \
     ttf-font-awesome \
     font-noto \

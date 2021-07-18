@@ -63,31 +63,29 @@ jobs:
       with:
         args: -h
 
-    - name: Install Wget
-      if: matrix.os == 'windows-latest'
-      run: |
-        choco install wget
-        wget --help
-
-    - name: Install FFmpeg
+    - name: Install Packages
       if: matrix.os == 'ubuntu-latest'
       run: |
+        # search package https://pkgs.org/
         sudo add-apt-repository universe
         sudo apt-get -y update
-        sudo apt-get -y install ffmpeg
+        sudo apt-get -y install ffmpeg libwebp-dev
         ffmpeg -version
 
-    - name: Install FFmpeg
+    - name: Install Packages
       if: matrix.os == 'macos-latest'
       run: |
-        brew install ffmpeg
+        # search package https://brew.sh/
+        brew install ffmpeg webp
         ffmpeg -version
 
-    - name: Install FFmpeg
+    - name: Install Packages
       if: matrix.os == 'windows-latest'
       run: |
-        choco install ffmpeg
+        # search package https://community.chocolatey.org/packages
+        choco install wget ffmpeg webp
         ffmpeg -version
+        wget --help
 
     - name: Check out code base
       if: github.event_name == 'push'
