@@ -223,7 +223,7 @@ vet:
 test:
 	@echo "-> Running go test"
 	@go clean -testcache
-	@CGO_ENABLED=1 go test -v -race -cover -coverprofile=coverage.out -covermode=atomic ./...
+	@CGO_ENABLED=1 go test -v -race -cover -coverprofile=coverage.out -covermode=atomic -parallel=1 ./...
 
 test-integration:
 	@echo 'mode: atomic' > coverage.out
