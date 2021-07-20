@@ -60,7 +60,7 @@ func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ..
 
 	var bnd = bundle(ctx, cols)
 	var txt = render.ForPublish(&render.Matrix{Cols: cols}).String()
-	if m.toRoom(ctx, &bnd, txt) {
+	if m.toRoom(ctx, bnd, txt) {
 		metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusSuccess)
 		return
 	}

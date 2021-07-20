@@ -23,6 +23,7 @@ import (
 
 	discord "github.com/bwmarrin/discordgo"
 	mstdn "github.com/mattn/go-mastodon"
+	slack "github.com/slack-go/slack"
 	irc "github.com/thoj/go-ircevent"
 	telegram "gopkg.in/tucnak/telebot.v2"
 	matrix "maunium.net/go/mautrix"
@@ -35,6 +36,7 @@ const (
 	FlagMastodon = "mastodon"
 	FlagDiscord  = "discord"
 	FlagMatrix   = "matrix"
+	FlagSlack    = "slack"
 	FlagIRC      = "irc"
 
 	PubBundle = "reduxer-bundle"
@@ -163,6 +165,17 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			process(twitter, ctx, cols, args...)
 		}
 	}
+	slack := func(ctx context.Context, cols []wayback.Collect, args ...string) {
+		if config.Opts.PublishToSlackChannel() {
+			logger.Debug("[%s] publishing to Slack...", f)
+			var client *slack.Client
+			if rev, ok := ctx.Value(FlagTwitter).(*slack.Client); ok {
+				client = rev
+			}
+			slack := NewSlack(client)
+			process(slack, ctx, cols, args...)
+		}
+	}
 	irc := func(ctx context.Context, cols []wayback.Collect, args ...string) {
 		if config.Opts.PublishToIRCChannel() {
 			logger.Debug("[%s] publishing to IRC channel...", f)
@@ -181,6 +194,7 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 		"discord":  discord,
 		"matrix":   matrix,
 		"twitter":  twitter,
+		"slack":    slack,
 		"irc":      irc,
 	}
 
@@ -218,7 +232,7 @@ func funcMap() template.FuncMap {
 	}
 }
 
-func bundle(ctx context.Context, cols []wayback.Collect) (b reduxer.Bundle) {
+func bundle(ctx context.Context, cols []wayback.Collect) (b *reduxer.Bundle) {
 	if len(cols) == 0 {
 		return b
 	}

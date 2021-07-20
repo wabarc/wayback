@@ -157,6 +157,14 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.discord.channel = parseString(val, defDiscordChannel)
 		case "WAYBACK_DISCORD_HELPTEXT":
 			p.opts.discord.helptext = parseString(val, defDiscordHelptext)
+		case "WAYBACK_SLACK_APP_TOKEN":
+			p.opts.slack.appToken = parseString(val, defSlackAppToken)
+		case "WAYBACK_SLACK_BOT_TOKEN":
+			p.opts.slack.botToken = parseString(val, defSlackBotToken)
+		case "WAYBACK_SLACK_CHANNEL":
+			p.opts.slack.channel = parseString(val, defSlackChannel)
+		case "WAYBACK_SLACK_HELPTEXT":
+			p.opts.slack.helptext = parseString(val, defSlackHelptext)
 		case "WAYBACK_TOR_PRIVKEY":
 			p.opts.tor.pvk = parseString(val, defTorPrivateKey)
 		case "WAYBACK_TOR_LOCAL_PORT":

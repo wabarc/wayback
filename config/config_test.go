@@ -852,6 +852,98 @@ func TestPublishToDiscordChannel(t *testing.T) {
 	}
 }
 
+func TestSlackAppToken(t *testing.T) {
+	expected := "xapp-1-A0000000FC7-2300600000035-a000000bc7d104f053f66000000e589dafabcde70c5152abaacbcaea00000000"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_SLACK_APP_TOKEN", expected)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.SlackAppToken()
+	if got != expected {
+		t.Fatalf(`Unexpected Slack app-level token got %v instead of %v`, got, expected)
+	}
+}
+
+func TestSlackBotToken(t *testing.T) {
+	expected := "xoxb-2306408000000-2300127000000-GgLHgzqK3fXH5KA50AAbcdef"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_SLACK_BOT_TOKEN", expected)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.SlackBotToken()
+	if got != expected {
+		t.Fatalf(`Unexpected Slack bot token got %v instead of %v`, got, expected)
+	}
+}
+
+func TestSlackChannel(t *testing.T) {
+	expected := "C123ABCXY89"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_SLACK_CHANNEL", expected)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.SlackChannel()
+	if got != expected {
+		t.Fatalf(`Unexpected Slack channel id got %v instead of %v`, got, expected)
+	}
+}
+
+func TestSlackHelptext(t *testing.T) {
+	expected := "some text"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_SLACK_HELPTEXT", expected)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.SlackHelptext()
+	if got != expected {
+		t.Fatalf(`Unexpected Slack help text got %v instead of %v`, got, expected)
+	}
+}
+
+func TestPublishToSlackChannel(t *testing.T) {
+	os.Clearenv()
+	// os.Setenv("WAYBACK_SLACK_APP_TOKEN", "slack-app-token")
+	os.Setenv("WAYBACK_SLACK_BOT_TOKEN", "slack-bot-token")
+	os.Setenv("WAYBACK_SLACK_CHANNEL", "C123ABCXY89")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := true
+	got := opts.PublishToSlackChannel()
+
+	if got != expected {
+		t.Fatalf(`Unexpected publish to Slack channel got %t instead of %v`, got, expected)
+	}
+}
+
 func TestEnabledChromeRemote(t *testing.T) {
 	addr := "127.0.0.1:1234"
 

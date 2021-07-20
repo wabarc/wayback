@@ -54,7 +54,7 @@ type IP struct {
 
 type PH struct {
 	ctx    context.Context
-	bundle reduxer.Bundle
+	bundle *reduxer.Bundle
 
 	URL *url.URL
 }

@@ -242,6 +242,10 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_DISCORD_BOT_TOKEN`       | -                       | Discord bot authorization token                              |
 | -                   | `WAYBACK_DISCORD_CHANNEL`         | -                       | Discord channel ID, [find channel ID](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-server-ID-)  |
 | -                   | `WAYBACK_DISCORD_HELPTEXT`        | -                       | The help text for Discord command                            |
+| -                   | `WAYBACK_SLACK_APP_TOKEN`         | -                       | App-Level Token of Slack app                                 |
+| -                   | `WAYBACK_SLACK_BOT_TOKEN`         | -                       | `Bot User OAuth Token` for Slack workspace, use `User OAuth Token` if requires create external link |
+| -                   | `WAYBACK_SLACK_CHANNEL`           | -                       | Channel ID of Slack channel                                  |
+| -                   | `WAYBACK_SLACK_HELPTEXT`          | -                       | The help text for Slack slash command                        |
 | `--tor`             | `WAYBACK_USE_TOR`                 | `false`                 | Snapshot webpage via Tor anonymity network                   |
 | `--tor-key`         | `WAYBACK_TOR_PRIVKEY`             | -                       | The private key for Tor Hidden Service                       |
 | -                   | `WAYBACK_TOR_LOCAL_PORT`          | `8964`                  | Local port for Tor Hidden Service, also support for a **reverse proxy** |
