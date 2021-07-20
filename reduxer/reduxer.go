@@ -42,7 +42,7 @@ type Bundle struct {
 	Article readability.Article
 }
 
-type Bundles map[string]Bundle
+type Bundles map[string]*Bundle
 
 var existFFmpeg = ffmpeg()
 
@@ -172,12 +172,12 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 			}
 			fn := strings.TrimRight(helper.FileName(shot.URL, ""), "html") + "txt"
 			fp := filepath.Join(dir, fn)
-			if err := os.WriteFile(fp, []byte(article.TextContent), 0o600); err == nil {
+			if err := os.WriteFile(fp, []byte(article.TextContent), 0o600); err == nil && article.TextContent != "" {
 				if err := helper.SetField(&path, "Txt", fp); err != nil {
 					logger.Error("assign field Txt to path struct failed: %v", err)
 				}
 			}
-			bundle := Bundle{shot, path, article}
+			bundle := &Bundle{shot, path, article}
 			mu.Lock()
 			bundles[shot.URL] = bundle
 			mu.Unlock()

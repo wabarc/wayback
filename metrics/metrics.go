@@ -18,6 +18,7 @@ import (
 const (
 	ServiceIRC      = "irc"
 	ServiceWeb      = "web"
+	ServiceSlack    = "slack"
 	ServiceMatrix   = "matrix"
 	ServiceDiscord  = "discord"
 	ServiceMastodon = "mastodon"
@@ -29,6 +30,7 @@ const (
 	PublishMstdn   = "mastodon" // Mastodon toot
 	PublishGithub  = "github"   // GitHub issues
 	PublishMatrix  = "room"
+	PublishSlack   = "slack"
 	PublishDiscord = "discord" // Discord channel
 	PublishTwitter = "tweet"
 

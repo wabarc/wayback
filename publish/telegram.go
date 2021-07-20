@@ -53,7 +53,7 @@ func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args 
 
 	var bnd = bundle(ctx, cols)
 	var txt = render.ForPublish(&render.Telegram{Cols: cols}).String()
-	if t.toChannel(ctx, &bnd, txt) {
+	if t.toChannel(ctx, bnd, txt) {
 		metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusSuccess)
 		return
 	}

@@ -48,7 +48,7 @@ func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 
 	var bnd = bundle(ctx, cols)
 	var txt = render.ForPublish(&render.Twitter{Cols: cols}).String()
-	if t.ToTwitter(ctx, &bnd, txt) {
+	if t.ToTwitter(ctx, bnd, txt) {
 		metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusSuccess)
 		return
 	}

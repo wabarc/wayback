@@ -53,7 +53,7 @@ func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...
 
 	var bnd = bundle(ctx, cols)
 	var txt = render.ForPublish(&render.Mastodon{Cols: cols}).String()
-	if m.ToMastodon(ctx, &bnd, txt, id) {
+	if m.ToMastodon(ctx, bnd, txt, id) {
 		metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusSuccess)
 		return
 	}

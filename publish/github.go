@@ -53,7 +53,7 @@ func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...s
 
 	var bnd = bundle(ctx, cols)
 	var txt = render.ForPublish(&render.GitHub{Cols: cols}).String()
-	if gh.toIssues(ctx, &bnd, txt) {
+	if gh.toIssues(ctx, bnd, txt) {
 		metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusSuccess)
 		return
 	}

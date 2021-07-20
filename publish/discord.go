@@ -54,7 +54,7 @@ func (d *discordBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 
 	var bnd = bundle(ctx, cols)
 	var txt = render.ForPublish(&render.Discord{Cols: cols}).String()
-	if d.toChannel(ctx, &bnd, txt) {
+	if d.toChannel(ctx, bnd, txt) {
 		metrics.IncrementPublish(metrics.PublishDiscord, metrics.StatusSuccess)
 		return
 	}

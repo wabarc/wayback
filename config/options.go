@@ -29,7 +29,7 @@ const (
 
 	defTelegramToken    = ""
 	defTelegramChannel  = ""
-	defTelegramHelptext = ""
+	defTelegramHelptext = "Hi there."
 	defGitHubToken      = ""
 	defGitHubOwner      = ""
 	defGitHubRepo       = ""
@@ -44,7 +44,11 @@ const (
 	defTwitterAccessSecret   = ""
 	defDiscordBotToken       = ""
 	defDiscordChannel        = ""
-	defDiscordHelptext       = ""
+	defDiscordHelptext       = "Hi there."
+	defSlackAppToken         = ""
+	defSlackBotToken         = ""
+	defSlackChannel          = ""
+	defSlackHelptext         = "Hi there."
 
 	defIRCNick     = ""
 	defIRCPassword = ""
@@ -87,6 +91,7 @@ type Options struct {
 	twitter  *twitter
 	github   *github
 	matrix   *matrix
+	slack    *slack
 	irc      *irc
 	tor      *tor
 
@@ -142,6 +147,13 @@ type matrix struct {
 	userID     string
 	roomID     string
 	password   string
+}
+
+type slack struct {
+	appToken string
+	botToken string
+	channel  string
+	helptext string
 }
 
 type irc struct {
@@ -212,6 +224,12 @@ func NewOptions() *Options {
 			userID:     defMatrixUserID,
 			roomID:     defMatrixRoomID,
 			password:   defMatrixPassword,
+		},
+		slack: &slack{
+			appToken: defSlackAppToken,
+			botToken: defSlackBotToken,
+			channel:  defSlackChannel,
+			helptext: defSlackHelptext,
 		},
 		github: &github{
 			token: defGitHubToken,
@@ -499,6 +517,31 @@ func (o *Options) PublishToDiscordChannel() bool {
 	return o.DiscordBotToken() != "" && o.DiscordChannel() != ""
 }
 
+// SlackAppToken returns the app-level token of Slack bot.
+func (o *Options) SlackAppToken() string {
+	return o.slack.appToken
+}
+
+// SlackBotToken returns the bot user auth token of Slack bot.
+func (o *Options) SlackBotToken() string {
+	return o.slack.botToken
+}
+
+// SlackChannel returns the Slack channel id.
+func (o *Options) SlackChannel() string {
+	return o.slack.channel
+}
+
+// SlackHelptext returns the help text for Slack bot.
+func (o *Options) SlackHelptext() string {
+	return breakLine(o.slack.helptext)
+}
+
+// PublishToSlackChannel returns whether publish results to Slack channel.
+func (o *Options) PublishToSlackChannel() bool {
+	return o.SlackBotToken() != "" && o.SlackChannel() != ""
+}
+
 // TorPrivKey returns the private key of Tor service.
 func (o *Options) TorPrivKey() string {
 	return o.tor.pvk
@@ -563,8 +606,9 @@ func (o *Options) MaxMediaSize() uint64 {
 // scope: telegram
 func (o *Options) MaxAttachSize(scope string) int64 {
 	scopes := map[string]int64{
-		"telegram": 50000000, // 50MB
-		"discord":  8000000,  // 8MB
+		"telegram": 50000000,   // 50MB
+		"discord":  8000000,    // 8MB
+		"slack":    5000000000, // 5GB
 	}
 	return scopes[scope]
 }
