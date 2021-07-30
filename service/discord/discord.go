@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/dustin/go-humanize"
+	"github.com/fatih/color"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
@@ -27,7 +28,6 @@ import (
 	"github.com/wabarc/wayback/template/render"
 
 	discord "github.com/bwmarrin/discordgo"
-	aurora "github.com/logrusorgru/aurora/v3"
 )
 
 // Discord handles a discord service.
@@ -78,11 +78,11 @@ func (d *Discord) Serve() (err error) {
 		return errors.New("Initialize discord failed, error: %v", err)
 	}
 	d.bot.AddHandler(func(s *discord.Session, _ *discord.Ready) {
-		logger.Info("authorized on account %s", aurora.Blue(s.State.User.Username))
+		logger.Info("authorized on account %s", color.BlueString(s.State.User.Username))
 	})
 
 	if channel, err := d.bot.UserChannelCreate(config.Opts.DiscordChannel()); err == nil {
-		logger.Info("channel name: %s, channel id: %s", aurora.Blue(channel.Name), aurora.Blue(channel.ID))
+		logger.Info("channel name: %s, channel id: %s", color.BlueString(channel.Name), color.BlueString(channel.ID))
 	}
 
 	commandHandlers := d.commandHandlers()

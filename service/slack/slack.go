@@ -7,6 +7,7 @@ package slack // import "github.com/wabarc/wayback/service/slack"
 import (
 	"context"
 
+	"github.com/fatih/color"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 	"github.com/slack-go/slack/socketmode"
@@ -110,8 +111,7 @@ func (s *Slack) Serve() (err error) {
 	if err != nil {
 		return err
 	}
-	// TODO: color
-	logger.Info("authorized on account %s", user.User)
+	logger.Info("authorized on account %s", color.BlueString(user.User))
 
 	go func() {
 		for evt := range s.client.Events {

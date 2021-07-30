@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -101,7 +100,7 @@ func (srv *service) run(ctx context.Context, store *storage.Storage, pool poolin
 				errCh <- tor.Serve()
 			}(srv.errCh)
 		default:
-			fmt.Printf("Unrecognize %s in `--daemon`\n", s)
+			logger.Error("unrecognize %s in `--daemon`", s)
 			srv.errCh <- ctx.Err()
 		}
 	}

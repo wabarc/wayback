@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
@@ -26,7 +27,6 @@ import (
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
 
-	aurora "github.com/logrusorgru/aurora/v3"
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -78,11 +78,11 @@ func (t *Telegram) Serve() (err error) {
 	if t.bot == nil {
 		return errors.New("Initialize telegram failed, error: %v", err)
 	}
-	logger.Info("authorized on account %s", aurora.Blue(t.bot.Me.Username))
+	logger.Info("authorized on account %s", color.BlueString(t.bot.Me.Username))
 
 	if channel, err := t.bot.ChatByID(config.Opts.TelegramChannel()); err == nil {
 		id := strings.TrimPrefix(config.Opts.TelegramChannel(), "@")
-		logger.Info("channel title: %s, channel id: %s", aurora.Blue(channel.Title), aurora.Blue(id))
+		logger.Info("channel title: %s, channel id: %s", color.BlueString(channel.Title), color.BlueString(id))
 	}
 
 	go func() {
