@@ -8,7 +8,7 @@ WORKDIR /go/src/app
 COPY . .
 RUN make linux-amd64
 
-FROM fedora:35
+FROM fedora:34
 RUN dnf install -y rpm-build systemd
 RUN mkdir -p /root/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 RUN echo "%_topdir /root/rpmbuild" >> .rpmmacros
