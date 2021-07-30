@@ -17,7 +17,7 @@ import (
 	// "github.com/ipsn/go-libtor"
 	"github.com/cretz/bine/tor"
 	"github.com/cretz/bine/torutil/ed25519"
-	aurora "github.com/logrusorgru/aurora/v3"
+	"github.com/fatih/color"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
@@ -70,7 +70,7 @@ func (t *Tor) Serve() error {
 		} else {
 			pvk = keypair.PrivateKey()
 		}
-		logger.Info("important to keep the private key: %s", aurora.Blue(hex.EncodeToString(pvk)))
+		logger.Info("important to keep the private key: %s", color.BlueString(hex.EncodeToString(pvk)))
 	} else {
 		privb, err := hex.DecodeString(config.Opts.TorPrivKey())
 		if err != nil {
@@ -104,7 +104,7 @@ func (t *Tor) Serve() error {
 	defer onion.Close()
 	onion.CloseLocalListenerOnClose = false
 
-	logger.Info(`listening on "%s" without TLS`, aurora.Blue(onion.LocalListener.Addr()))
+	logger.Info(`listening on "%s" without TLS`, color.BlueString(onion.LocalListener.Addr().String()))
 	logger.Info("please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
 
 	server := http.Server{Handler: newWeb().handle(t.pool)}
