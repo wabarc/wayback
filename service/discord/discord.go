@@ -107,9 +107,20 @@ func (d *Discord) Serve() (err error) {
 
 	// Handle message
 	d.bot.AddHandler(func(s *discord.Session, m *discord.MessageCreate) {
+		logger.Debug("received message create event: %#v", m.Message)
 		// Ignore all messages created by the bot itself
 		if m.Author.ID == s.State.User.ID {
 			return
+		}
+		// Reply message and mention bot on the channel
+		ref := m.Message.MessageReference
+		if ref != nil {
+			if msg, err := d.bot.ChannelMessage(ref.ChannelID, ref.MessageID); err != nil {
+				logger.Debug("received message reference event error: %v", err)
+			} else {
+				logger.Debug("received message reference event: %#v", msg)
+				m.Message.Content += msg.Content
+			}
 		}
 		d.process(m)
 	})

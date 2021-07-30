@@ -126,6 +126,10 @@ func (t *Telegram) Serve() (err error) {
 			go t.process(callback.Message)
 		case update.Message != nil && update.Message.FromGroup():
 			logger.Debug("message: %#v", update.Message)
+			// Reply message and mention bot on the group
+			if update.Message.ReplyTo != nil {
+				update.Message.Text += update.Message.ReplyTo.Text
+			}
 			if !strings.Contains(update.Message.Text, "@"+t.bot.Me.Username) {
 				return false
 			}
