@@ -8,7 +8,6 @@ import (
 	"context"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/dustin/go-humanize"
 	"github.com/wabarc/helper"
@@ -53,7 +52,7 @@ func (d *discordBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 	}
 
 	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Discord{Cols: cols}).String()
+	var txt = render.ForPublish(&render.Discord{Cols: cols, Data: bnd}).String()
 	if d.toChannel(ctx, bnd, txt) {
 		metrics.IncrementPublish(metrics.PublishDiscord, metrics.StatusSuccess)
 		return
@@ -64,7 +63,7 @@ func (d *discordBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 
 // toChannel for publish to message to Discord channel,
 // returns boolean as result.
-func (d *discordBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, text string) (ok bool) {
+func (d *discordBot) toChannel(_ context.Context, bundle *reduxer.Bundle, text string) (ok bool) {
 	if text == "" {
 		logger.Warn("post to message to channel failed, text empty")
 		return ok
@@ -78,58 +77,51 @@ func (d *discordBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, text
 		}
 	}
 
-	// TODO: move to render
-	var b strings.Builder
-	if head := title(ctx, bundle); head != "" {
-		b.WriteString(`**`)
-		b.WriteString(head)
-		b.WriteString(`**`)
-		b.WriteString("\n\n")
-	}
-	if dgst := digest(ctx, bundle); dgst != "" {
-		b.WriteString(dgst)
-		b.WriteString("\n\n")
-	}
-	b.WriteString(text)
-
-	msg := &discord.MessageSend{Content: b.String()}
-	if bundle != nil {
-		var fsize int64
-		var files []*discord.File
-		upper := config.Opts.MaxAttachSize("discord")
-		for _, p := range bundle.Paths() {
-			if p == "" {
-				continue
-			}
-			if !helper.Exists(p) {
-				logger.Warn("invalid file %s", p)
-				continue
-			}
-			fsize += helper.FileSize(p)
-			if fsize > upper {
-				logger.Warn("total file size large than %s, skipped", humanize.Bytes(uint64(upper)))
-				continue
-			}
-			logger.Debug("open file: %s", p)
-			rd, err := os.Open(p)
-			if err != nil {
-				logger.Error("open file failed: %v", err)
-				continue
-			}
-			files = append(files, &discord.File{Name: path.Base(p), Reader: rd})
-		}
-		if len(files) == 0 {
-			logger.Warn("files empty")
-			return ok
-		}
-		msg.Files = files
-	}
-
-	_, err := d.bot.ChannelMessageSendComplex(config.Opts.DiscordChannel(), msg)
+	msg, err := d.bot.ChannelMessageSendComplex(config.Opts.DiscordChannel(), &discord.MessageSend{Content: text})
 	if err != nil {
 		logger.Error("post message to channel failed, %v", err)
 		return ok
 	}
 
+	// Send files as reference
+	files := UploadToDiscord(bundle)
+	if len(files) == 0 {
+		logger.Debug("without files, complete.")
+		return true
+	}
+	ms := &discord.MessageSend{Files: files, Reference: msg.Reference()}
+	if _, err := d.bot.ChannelMessageSendComplex(config.Opts.DiscordChannel(), ms); err != nil {
+		logger.Error("upload files failed, %v", err)
+	}
+
 	return true
+}
+
+func UploadToDiscord(bundle *reduxer.Bundle) (files []*discord.File) {
+	if bundle != nil {
+		var fsize int64
+		upper := config.Opts.MaxAttachSize("discord")
+		for _, asset := range bundle.Asset() {
+			if asset.Local == "" {
+				continue
+			}
+			if !helper.Exists(asset.Local) {
+				logger.Warn("invalid file %s", asset.Local)
+				continue
+			}
+			fsize += helper.FileSize(asset.Local)
+			if fsize > upper {
+				logger.Warn("total file size large than %s, skipped", humanize.Bytes(uint64(upper)))
+				continue
+			}
+			logger.Debug("open file: %s", asset.Local)
+			rd, err := os.Open(asset.Local)
+			if err != nil {
+				logger.Error("open file failed: %v", err)
+				continue
+			}
+			files = append(files, &discord.File{Name: path.Base(asset.Local), Reader: rd})
+		}
+	}
+	return
 }

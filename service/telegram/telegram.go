@@ -233,7 +233,7 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 	}
 	logger.Debug("bundles: %#v", bundles)
 
-	replyText := render.ForReply(&render.Telegram{Cols: cols}).String()
+	replyText := render.ForReply(&render.Telegram{Cols: cols, Data: bundles}).String()
 	logger.Debug("reply text, %s", replyText)
 
 	opts := &telegram.SendOptions{DisableWebPagePreview: true}
@@ -247,28 +247,8 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 	go publish.To(ctx, cols, publish.FlagTelegram)
 
 	var album telegram.Album
-	var fsize int64
 	for _, bundle := range bundles {
-		for _, path := range bundle.Paths() {
-			if path == "" {
-				continue
-			}
-			if !helper.Exists(path) {
-				logger.Warn("[publish] invalid file %s", path)
-				continue
-			}
-			fsize += helper.FileSize(path)
-			if fsize > config.Opts.MaxAttachSize("telegram") {
-				logger.Warn("total file size large than 50MB, skipped")
-				continue
-			}
-			logger.Debug("append document: %s", path)
-			album = append(album, &telegram.Document{
-				File:     telegram.FromDisk(path),
-				Caption:  bundle.Title,
-				FileName: path,
-			})
-		}
+		album = append(album, publish.UploadToTelegram(bundle)...)
 	}
 	// Send album attach files, and reply to wayback result message
 	opts = &telegram.SendOptions{ReplyTo: stage, DisableNotification: true}

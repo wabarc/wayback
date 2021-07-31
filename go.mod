@@ -31,6 +31,7 @@ require (
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
 	github.com/multiformats/go-multiaddr v0.3.3 // indirect
 	github.com/multiformats/go-multihash v0.0.15 // indirect
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
 	github.com/prometheus/common v0.30.0
 	github.com/robertkrimen/otto v0.0.0-20210614181706-373ff5438452 // indirect
@@ -41,12 +42,14 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/wabarc/archive.is v1.3.0
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
+	github.com/wabarc/go-anonfile v0.1.0
+	github.com/wabarc/go-catbox v0.1.0
 	github.com/wabarc/helper v0.0.0-20210718171053-59c70d0b20c2
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
 	github.com/wabarc/playback v0.0.0-20210718054702-cab6c6004933
 	github.com/wabarc/screenshot v1.2.1-0.20210713083422-eee9add4752d
 	github.com/wabarc/telegra.ph v0.0.0-20210718173528-f72fc9cdc365
-	github.com/wabarc/warcraft v0.1.1-0.20210707001544-e897dbede7c3
+	github.com/wabarc/warcraft v0.1.1-0.20210711171056-a5eec617b86c
 	github.com/wabarc/wbipfs v0.2.0
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.etcd.io/bbolt v1.3.6
@@ -55,6 +58,7 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/tucnak/telebot.v2 v2.3.5
 	maunium.net/go/mautrix v0.9.17
+	mvdan.cc/xurls/v2 v2.3.0 // indirect
 )
 
 replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78

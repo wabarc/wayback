@@ -31,11 +31,11 @@ func archive(cmd *cobra.Command, args []string) {
 			cmd.Println(col.Src, "=>", col.Dst)
 		}
 		for src, bundle := range bundles {
-			for _, path := range bundle.Paths() {
-				if path == "" {
+			for _, asset := range bundle.Asset() {
+				if asset.Local == "" {
 					continue
 				}
-				cmd.Println(src, "=>", path)
+				cmd.Println(src, "=>", asset.Local)
 			}
 		}
 

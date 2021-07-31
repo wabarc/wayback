@@ -5,7 +5,6 @@
 package publish // import "github.com/wabarc/wayback/publish"
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -94,7 +93,7 @@ func TestToChannel(t *testing.T) {
 
 	tel := &telegramBot{bot: bot}
 	txt := render.ForPublish(&render.Telegram{Cols: collects}).String()
-	got := tel.toChannel(context.Background(), nil, txt)
+	got := tel.toChannel(nil, txt)
 	if !got {
 		t.Errorf("Unexpected publish Telegram Channel message got %t instead of %t", got, true)
 	}

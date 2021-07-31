@@ -7,7 +7,6 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"context"
 	"os"
-	"strings"
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
@@ -54,8 +53,8 @@ func (s *slackBot) Publish(ctx context.Context, cols []wayback.Collect, args ...
 	}
 
 	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Slack{Cols: cols}).String()
-	if s.toChannel(ctx, bnd, txt) {
+	var txt = render.ForPublish(&render.Slack{Cols: cols, Data: bnd}).String()
+	if s.toChannel(bnd, txt) {
 		metrics.IncrementPublish(metrics.PublishSlack, metrics.StatusSuccess)
 		return
 	}
@@ -65,7 +64,7 @@ func (s *slackBot) Publish(ctx context.Context, cols []wayback.Collect, args ...
 
 // toChannel for publish to message to Slack channel,
 // returns boolean as result.
-func (s *slackBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, text string) (ok bool) {
+func (s *slackBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
 	if text == "" {
 		logger.Warn("post to message to channel failed, text empty")
 		return ok
@@ -74,21 +73,8 @@ func (s *slackBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, text s
 		s.bot = slack.New(config.Opts.SlackBotToken())
 	}
 
-	// TODO: move to render
-	var b strings.Builder
-	if head := title(ctx, bundle); head != "" {
-		b.WriteString(`‹ `)
-		b.WriteString(head)
-		b.WriteString(" ›\n\n")
-	}
-	if dgst := digest(ctx, bundle); dgst != "" {
-		b.WriteString(dgst)
-		b.WriteString("\n\n")
-	}
-	b.WriteString(text)
-
 	msgOpts := []slack.MsgOption{
-		slack.MsgOptionText(b.String(), false),
+		slack.MsgOptionText(text, false),
 		slack.MsgOptionDisableMarkdown(),
 	}
 	_, tstamp, err := s.bot.PostMessage(config.Opts.SlackChannel(), msgOpts...)
@@ -104,48 +90,45 @@ func (s *slackBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, text s
 }
 
 // UploadToSlack upload files to channel and attach as a reply by the given bundle
-func UploadToSlack(client *slack.Client, bundle *reduxer.Bundle, channel, timestamp string) error {
+func UploadToSlack(client *slack.Client, bundle *reduxer.Bundle, channel, timestamp string) (err error) {
 	if client == nil {
 		return errors.New("client invalid")
 	}
 
 	var fsize int64
-	// TODO: clean code and wrap errors
-	for _, path := range bundle.Paths() {
-		if path == "" {
+	for _, asset := range bundle.Asset() {
+		if asset.Local == "" {
 			continue
 		}
-		if !helper.Exists(path) {
-			logger.Warn("[publish] invalid file %s", path)
+		if !helper.Exists(asset.Local) {
+			err = errors.Wrap(err, "invalid file "+asset.Local)
 			continue
 		}
-		fsize += helper.FileSize(path)
+		fsize += helper.FileSize(asset.Local)
 		if fsize > config.Opts.MaxAttachSize("slack") {
-			logger.Warn("total file size large than 5GB, skipped")
+			err = errors.Wrap(err, "total file size large than 5GB, skipped")
 			continue
 		}
-		logger.Debug("append document: %s", path)
-		reader, err := os.Open(path)
-		if err != nil {
-			logger.Error("open file failed: %v", err)
+		reader, e := os.Open(asset.Local)
+		if e != nil {
+			err = errors.Wrap(err, e.Error())
 			continue
 		}
 		params := slack.FileUploadParameters{
-			Filename:        path,
+			Filename:        asset.Local,
 			Reader:          reader,
 			Title:           bundle.Title,
 			Channels:        []string{channel},
 			ThreadTimestamp: timestamp,
 		}
-		file, err := client.UploadFile(params)
-		if err != nil {
-			logger.Error("unexpected error: %s", err)
+		file, e := client.UploadFile(params)
+		if e != nil {
+			err = errors.Wrap(err, e.Error())
 			continue
 		}
-		logger.Debug("uploaded file: %#v", file)
-		file, _, _, err = client.ShareFilePublicURL(file.ID)
-		if err != nil {
-			logger.Warn("create external link failed: %v", err)
+		file, _, _, e = client.ShareFilePublicURL(file.ID)
+		if e != nil {
+			err = errors.Wrap(err, e.Error())
 			continue
 		}
 		logger.Info("slack external file permalink: %s", file.PermalinkPublic)

@@ -7,12 +7,9 @@ package discord // import "github.com/wabarc/wayback/service/discord"
 import (
 	"context"
 	"encoding/base64"
-	"os"
-	"path"
 	"strconv"
 	"strings"
 
-	"github.com/dustin/go-humanize"
 	"github.com/fatih/color"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
@@ -284,37 +281,15 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 	}
 
 	msg := &discord.MessageSend{Content: replyText, Reference: stage.Message.Reference()}
-	var fsize int64
 	var files []*discord.File
-	upper := config.Opts.MaxAttachSize("discord")
 	for _, bundle := range bundles {
-		for _, p := range bundle.Paths() {
-			if p == "" {
-				continue
-			}
-			if !helper.Exists(p) {
-				logger.Warn("invalid file %s", p)
-				continue
-			}
-			fsize += helper.FileSize(p)
-			if fsize > upper {
-				logger.Warn("total file size large than %s, skipped", humanize.Bytes(uint64(upper)))
-				continue
-			}
-			logger.Debug("open file: %s", p)
-			rd, err := os.Open(p)
-			if err != nil {
-				logger.Error("open file failed: %v", err)
-				continue
-			}
-			files = append(files, &discord.File{Name: path.Base(p), Reader: rd})
-		}
-		msg.Files = files
+		files = append(files, publish.UploadToDiscord(bundle)...)
 	}
 	if len(files) == 0 {
 		logger.Warn("files empty")
 		return nil
 	}
+	msg.Files = files
 
 	if _, err := d.bot.ChannelMessageSendComplex(m.ChannelID, msg); err != nil {
 		logger.Error("post message to channel failed, %v", err)

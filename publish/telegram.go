@@ -6,7 +6,6 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"context"
-	"strings"
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
@@ -52,8 +51,8 @@ func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args 
 	}
 
 	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Telegram{Cols: cols}).String()
-	if t.toChannel(ctx, bnd, txt) {
+	var txt = render.ForPublish(&render.Telegram{Cols: cols, Data: bnd}).String()
+	if t.toChannel(bnd, txt) {
 		metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusSuccess)
 		return
 	}
@@ -63,7 +62,7 @@ func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args 
 
 // toChannel for publish to message to Telegram channel,
 // returns boolean as result.
-func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, text string) (ok bool) {
+func (t *telegramBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
 	if text == "" {
 		logger.Warn("post to message to channel failed, text empty")
 		return ok
@@ -86,19 +85,7 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 		return ok
 	}
 
-	var b strings.Builder
-	if head := title(ctx, bundle); head != "" {
-		b.WriteString("<b>")
-		b.WriteString(head)
-		b.WriteString("</b>\n\n")
-	}
-	if dgst := digest(ctx, bundle); dgst != "" {
-		b.WriteString(dgst)
-		b.WriteString("\n\n")
-	}
-	b.WriteString(text)
-
-	stage, err := t.bot.Send(chat, b.String())
+	stage, err := t.bot.Send(chat, text)
 	if err != nil {
 		logger.Error("post message to channel failed, %v", err)
 		return ok
@@ -109,29 +96,7 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 		return true
 	}
 
-	// Attach image and pdf files
-	var album telegram.Album
-	var fsize int64
-	for _, path := range bundle.Paths() {
-		if path == "" {
-			continue
-		}
-		if !helper.Exists(path) {
-			logger.Warn("invalid file %s", path)
-			continue
-		}
-		fsize += helper.FileSize(path)
-		if fsize > config.Opts.MaxAttachSize("telegram") {
-			logger.Warn("total file size large than 50MB, skipped")
-			continue
-		}
-		logger.Debug("append document: %s", path)
-		album = append(album, &telegram.Document{
-			File:     telegram.FromDisk(path),
-			Caption:  bundle.Title,
-			FileName: path,
-		})
-	}
+	album := UploadToTelegram(bundle)
 	if len(album) == 0 {
 		return true
 	}
@@ -142,4 +107,31 @@ func (t *telegramBot) toChannel(ctx context.Context, bundle *reduxer.Bundle, tex
 	}
 
 	return true
+}
+
+func UploadToTelegram(bundle *reduxer.Bundle) telegram.Album {
+	// Attach image and pdf files
+	var album telegram.Album
+	var fsize int64
+	for _, asset := range bundle.Asset() {
+		if asset.Local == "" {
+			continue
+		}
+		if !helper.Exists(asset.Local) {
+			logger.Warn("invalid file %s", asset.Local)
+			continue
+		}
+		fsize += helper.FileSize(asset.Local)
+		if fsize > config.Opts.MaxAttachSize("telegram") {
+			logger.Warn("total file size large than 50MB, skipped")
+			continue
+		}
+		logger.Debug("append document: %s", asset.Local)
+		album = append(album, &telegram.Document{
+			File:     telegram.FromDisk(asset.Local),
+			Caption:  bundle.Title,
+			FileName: asset.Local,
+		})
+	}
+	return album
 }

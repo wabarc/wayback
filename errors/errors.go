@@ -4,7 +4,11 @@
 
 package errors // import "github.com/wabarc/wayback/errors"
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/pkg/errors"
+)
 
 // Error represents an error
 type Error struct {
@@ -20,4 +24,8 @@ func (e Error) Error() string {
 // New returns error handler.
 func New(message string, args ...interface{}) *Error {
 	return &Error{message: message, args: args}
+}
+
+func Wrap(err error, message string) error {
+	return errors.Wrap(err, message)
 }

@@ -23,28 +23,36 @@ import (
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/extractors"
 	"github.com/iawia002/annie/extractors/types"
+	"github.com/wabarc/go-anonfile"
+	"github.com/wabarc/go-catbox"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/screenshot"
 	"github.com/wabarc/warcraft"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"golang.org/x/sync/errgroup"
 )
-
-type file struct {
-	Local  string
-	Remote map[string]string
-}
-
-type Assets struct {
-	Img, PDF, Raw, Txt, WARC, Media file
-}
 
 type Bundle struct {
 	screenshot.Screenshots
 
 	Assets  Assets
 	Article readability.Article
+}
+
+type Assets struct {
+	Img, PDF, Raw, Txt, WARC, Media Asset
+}
+
+type Asset struct {
+	Local  string
+	Remote Remote
+}
+
+type Remote struct {
+	Anonfile string
+	Catbox   string
 }
 
 type Bundles map[string]*Bundle
@@ -80,7 +88,7 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 			logger.Debug("create warc for %s failed", u.String())
 			return ""
 		}
-		path, err := warc.Download(u)
+		path, err := warc.Download(ctx, u)
 		if err != nil {
 			logger.Debug("create warc for %s failed: %v", u.String(), err)
 			return ""
@@ -89,7 +97,7 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 	}
 
 	type m struct {
-		key *file
+		key *Asset
 		buf []byte
 	}
 
@@ -139,6 +147,10 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 				if err := helper.SetField(&assets.Txt, "Local", fp); err != nil {
 					logger.Error("assign field Txt to assets struct failed: %v", err)
 				}
+			}
+			// Upload files to third-party server
+			if err := remotely(ctx, &assets); err != nil {
+				logger.Error("upload files to third-party failed: %v", err)
 			}
 			bundle := &Bundle{shot, assets, article}
 			mu.Lock()
@@ -202,15 +214,15 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 	return shots, nil
 }
 
-func (b *Bundle) Paths() (paths []string) {
+func (b *Bundle) Asset() (paths []Asset) {
 	logger.Debug("assets: %#v", b.Assets)
-	paths = []string{
-		b.Assets.Img.Local,
-		b.Assets.PDF.Local,
-		b.Assets.Raw.Local,
-		b.Assets.Txt.Local,
-		b.Assets.WARC.Local,
-		b.Assets.Media.Local,
+	paths = []Asset{
+		b.Assets.Img,
+		b.Assets.PDF,
+		b.Assets.Raw,
+		b.Assets.Txt,
+		b.Assets.WARC,
+		b.Assets.Media,
 	}
 	return
 }
@@ -280,8 +292,7 @@ func media(ctx context.Context, dir, in string) string {
 		}
 		cmd := exec.CommandContext(ctx, "youtube-dl", args...)
 		if err := cmd.Run(); err != nil {
-			logger.Error("start youtube-dl failed: %v", err)
-			return ""
+			logger.Warn("start youtube-dl failed: %v", err)
 		}
 		paths, err := filepath.Glob(fp + "*")
 		if err != nil || len(paths) == 0 {
@@ -358,4 +369,46 @@ func sortStreams(streams map[string]*types.Stream) []*types.Stream {
 		)
 	}
 	return sortedStreams
+}
+
+func remotely(ctx context.Context, assets *Assets) (err error) {
+	v := []*Asset{
+		&assets.Img,
+		&assets.PDF,
+		&assets.Raw,
+		&assets.Txt,
+		&assets.WARC,
+		&assets.Media,
+	}
+
+	c := &http.Client{}
+	cat := catbox.New(c)
+	anon := anonfile.NewAnonfile(c)
+	g, ctx := errgroup.WithContext(ctx)
+	for _, asset := range v {
+		if !helper.Exists(asset.Local) {
+			continue
+		}
+		asset := asset
+		g.Go(func() error {
+			r, e := anon.Upload(asset.Local)
+			if e != nil {
+				err = errors.Wrap(err, e.Error())
+				return e
+			}
+			asset.Remote.Anonfile = r.Short()
+			c, e := cat.Upload(asset.Local)
+			if e != nil {
+				err = errors.Wrap(err, e.Error())
+				return e
+			}
+			asset.Remote.Catbox = c
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	return err
 }

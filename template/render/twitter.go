@@ -18,6 +18,7 @@ var _ Renderer = (*Twitter)(nil)
 
 type Twitter struct {
 	Cols []wayback.Collect
+	Data interface{}
 }
 
 func (t *Twitter) ForReply() *Render {
@@ -54,6 +55,12 @@ func (t *Twitter) ForReply() *Render {
 // It excluded telegra.ph, because this link has been identified by Twitter.
 func (t *Twitter) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
+
+	if head := Title(bundle(t.Data)); head != "" {
+		tmplBytes.WriteString(`‹ `)
+		tmplBytes.WriteString(head)
+		tmplBytes.WriteString(" ›\n\n")
+	}
 
 	const tmpl = `{{range $ := .}}{{ if not $.Arc "ph" }}{{ $.Arc | name }}:
 • {{ $.Dst }}

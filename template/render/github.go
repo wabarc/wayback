@@ -10,12 +10,14 @@ import (
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
+	"github.com/wabarc/wayback/reduxer"
 )
 
 var _ Renderer = (*GitHub)(nil)
 
 type GitHub struct {
 	Cols []wayback.Collect
+	Data interface{}
 }
 
 func (gh *GitHub) ForReply() *Render {
@@ -24,6 +26,12 @@ func (gh *GitHub) ForReply() *Render {
 
 func (gh *GitHub) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
+
+	bundle := bundle(gh.Data)
+	if dgst := Digest(bundle); dgst != "" {
+		tmplBytes.WriteString(dgst)
+		tmplBytes.WriteString("\n\n")
+	}
 
 	const tmpl = `{{range $ := .}}**[{{ $.Arc | name }}]({{ $.Ext | extra }})**:
 > source: [{{ $.Src | unescape | revert }}]({{ $.Src | revert }})
@@ -43,6 +51,30 @@ func (gh *GitHub) ForPublish() *Render {
 		return new(Render)
 	}
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
+	if bundle != nil {
+		tmplBytes.WriteString("\n")
+		gh.renderAssets(bundle.Assets, &tmplBytes)
+	}
 
 	return &Render{buf: tmplBytes}
+}
+
+func (gh *GitHub) renderAssets(assets reduxer.Assets, tmplBytes *bytes.Buffer) {
+	tmpl := `**[AnonFiles](https://anonfiles.com/)** - [ [IMG]({{ .Img.Remote.Anonfile -}}
+) ¦ [PDF]({{ .PDF.Remote.Anonfile }}) ¦ [RAW]({{ .Raw.Remote.Anonfile -}}
+) ¦ [TXT]({{ .Txt.Remote.Anonfile }}) ¦ [WARC]({{ .WARC.Remote.Anonfile -}}
+) ¦ [MEDIA]({{ .Media.Remote.Anonfile }}) ]
+**[Catbox](https://catbox.moe/)** - [ [IMG]({{ .Img.Remote.Catbox -}}
+) ¦ [PDF]({{ .PDF.Remote.Catbox }}) ¦ [RAW]({{ .Raw.Remote.Catbox -}}
+) ¦ [TXT]({{ .Txt.Remote.Catbox }}) ¦ [WARC]({{ .WARC.Remote.Catbox -}}
+) ¦ [MEDIA]({{ .Media.Remote.Catbox }}) ]`
+
+	tpl, err := template.New("assets").Funcs(funcMap()).Parse(tmpl)
+	if err != nil {
+		logger.Error("parse Telegram template failed, %v", err)
+	}
+	tmplBytes.WriteString("\n")
+	if err = tpl.Execute(tmplBytes, assets); err != nil {
+		logger.Error("execute Telegram template failed, %v", err)
+	}
 }

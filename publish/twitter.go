@@ -6,7 +6,6 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"context"
-	"strings"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -47,7 +46,7 @@ func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 	}
 
 	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Twitter{Cols: cols}).String()
+	var txt = render.ForPublish(&render.Twitter{Cols: cols, Data: bnd}).String()
 	if t.ToTwitter(ctx, bnd, txt) {
 		metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusSuccess)
 		return
@@ -66,15 +65,7 @@ func (t *twitterBot) ToTwitter(ctx context.Context, bundle *reduxer.Bundle, text
 		return false
 	}
 
-	// TODO: character limit
-	var b strings.Builder
-	if head := title(ctx, bundle); head != "" {
-		b.WriteString(`‹ `)
-		b.WriteString(head)
-		b.WriteString(" ›\n\n")
-	}
-	b.WriteString(text)
-	tweet, resp, err := t.client.Statuses.Update(b.String(), nil)
+	tweet, resp, err := t.client.Statuses.Update(text, nil)
 	if err != nil {
 		logger.Error("create tweet failed: %v", err)
 		return false
