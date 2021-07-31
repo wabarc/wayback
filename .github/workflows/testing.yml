@@ -67,25 +67,31 @@ jobs:
 
     - name: Install Packages
       if: matrix.os == 'ubuntu-latest'
+      shell: bash
       run: |
         # search package https://pkgs.org/
         sudo add-apt-repository universe
         sudo apt-get -y update
-        sudo apt-get -y install ffmpeg libwebp-dev
+        sudo apt-get -y install ffmpeg libwebp-dev youtube-dl
+        echo "youtube-dl version $(youtube-dl --version)"
         ffmpeg -version
 
     - name: Install Packages
       if: matrix.os == 'macos-latest'
+      shell: bash
       run: |
         # search package https://brew.sh/
-        brew install ffmpeg webp
+        brew install ffmpeg webp youtube-dl
+        echo "youtube-dl version $(youtube-dl --version)"
         ffmpeg -version
 
     - name: Install Packages
       if: matrix.os == 'windows-latest'
+      shell: bash
       run: |
         # search package https://community.chocolatey.org/packages
-        choco install wget ffmpeg webp
+        choco install wget ffmpeg webp youtube-dl
+        echo "youtube-dl version $(youtube-dl --version)"
         ffmpeg -version
         wget --help
 

@@ -31,20 +31,26 @@ import (
 	"github.com/wabarc/wayback/errors"
 )
 
-type Path struct {
-	Img, PDF, Raw, Txt, WARC, Media string
+type file struct {
+	Local  string
+	Remote map[string]string
+}
+
+type Assets struct {
+	Img, PDF, Raw, Txt, WARC, Media file
 }
 
 type Bundle struct {
 	screenshot.Screenshots
 
-	Path    Path
+	Assets  Assets
 	Article readability.Article
 }
 
 type Bundles map[string]*Bundle
 
-var existFFmpeg = ffmpeg()
+var existFFmpeg = exists("ffmpeg")
+var existYoutubeDL = exists("youtube-dl")
 
 // Do executes secreenshot, print PDF and export html of given URLs
 // Returns a set of bundle containing screenshot data and file path
@@ -81,52 +87,9 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 		}
 		return path
 	}
-	var media = func(in string) string {
-		if !existFFmpeg {
-			logger.Warn("FFmpeg no found, skipped")
-			return ""
-		}
-
-		data, err := extractors.Extract(in, types.Options{})
-		if err != nil && len(data) == 0 {
-			logger.Warn("data empty or error %v", err)
-			return ""
-		}
-		dt := data[0]
-		fn := strings.TrimSuffix(helper.FileName(in, ""), ".html")
-		dl := downloader.New(downloader.Options{
-			OutputPath:   dir,
-			OutputName:   fn,
-			MultiThread:  true,
-			ThreadNumber: 10,
-			ChunkSizeMB:  10,
-		})
-		sortedStreams := sortStreams(dt.Streams)
-		if len(sortedStreams) == 0 {
-			logger.Warn("stream not found")
-			return ""
-		}
-		streamName := sortedStreams[0].ID
-		stream, ok := dt.Streams[streamName]
-		if !ok {
-			logger.Warn("stream not found")
-			return ""
-		}
-		logger.Debug("stream size: %s", humanize.Bytes(uint64(stream.Size)))
-		if stream.Size > int64(config.Opts.MaxMediaSize()) {
-			logger.Warn("media size large than %s, skipped", humanize.Bytes(config.Opts.MaxMediaSize()))
-			return ""
-		}
-		if err := dl.Download(dt); err != nil {
-			logger.Error("download media failed: %v", err)
-			return ""
-		}
-		fp := filepath.Join(dir, fn) + "." + stream.Ext
-		return fp
-	}
 
 	type m struct {
-		key string
+		key *file
 		buf []byte
 	}
 
@@ -135,12 +98,12 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 		go func(shot screenshot.Screenshots) {
 			defer wg.Done()
 
+			var assets Assets
 			slugs := []m{
-				{key: "Img", buf: shot.Image},
-				{key: "PDF", buf: shot.PDF},
-				{key: "Raw", buf: shot.HTML},
+				{key: &assets.Img, buf: shot.Image},
+				{key: &assets.PDF, buf: shot.PDF},
+				{key: &assets.Raw, buf: shot.HTML},
 			}
-			var path Path
 			for _, slug := range slugs {
 				if slug.buf == nil {
 					logger.Warn("file empty, skipped")
@@ -153,16 +116,16 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 					logger.Error("write %s file failed: %v", ft, err)
 					continue
 				}
-				if err := helper.SetField(&path, slug.key, fp); err != nil {
+				if err := helper.SetField(slug.key, "Local", fp); err != nil {
 					logger.Error("assign field %s to path struct failed: %v", slug.key, err)
 					continue
 				}
 			}
 			// Set path of WARC file directly to avoid read file as buffer
-			if err := helper.SetField(&path, "WARC", craft(shot.URL)); err != nil {
+			if err := helper.SetField(&assets.WARC, "Local", craft(shot.URL)); err != nil {
 				logger.Error("assign field WARC to path struct failed: %v", err)
 			}
-			if err := helper.SetField(&path, "Media", media(shot.URL)); err != nil {
+			if err := helper.SetField(&assets.Media, "Local", media(ctx, dir, shot.URL)); err != nil {
 				logger.Error("assign field Media to path struct failed: %v", err)
 			}
 			u, _ := url.Parse(shot.URL)
@@ -173,11 +136,11 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 			fn := strings.TrimRight(helper.FileName(shot.URL, ""), "html") + "txt"
 			fp := filepath.Join(dir, fn)
 			if err := os.WriteFile(fp, []byte(article.TextContent), 0o600); err == nil && article.TextContent != "" {
-				if err := helper.SetField(&path, "Txt", fp); err != nil {
-					logger.Error("assign field Txt to path struct failed: %v", err)
+				if err := helper.SetField(&assets.Txt, "Local", fp); err != nil {
+					logger.Error("assign field Txt to assets struct failed: %v", err)
 				}
 			}
-			bundle := &Bundle{shot, path, article}
+			bundle := &Bundle{shot, assets, article}
 			mu.Lock()
 			bundles[shot.URL] = bundle
 			mu.Unlock()
@@ -239,14 +202,15 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 	return shots, nil
 }
 
-func (b Bundle) Paths() (paths []string) {
+func (b *Bundle) Paths() (paths []string) {
+	logger.Debug("assets: %#v", b.Assets)
 	paths = []string{
-		b.Path.Img,
-		b.Path.PDF,
-		b.Path.Raw,
-		b.Path.Txt,
-		b.Path.WARC,
-		b.Path.Media,
+		b.Assets.Img.Local,
+		b.Assets.PDF.Local,
+		b.Assets.Raw.Local,
+		b.Assets.Txt.Local,
+		b.Assets.WARC.Local,
+		b.Assets.Media.Local,
 	}
 	return
 }
@@ -277,15 +241,110 @@ func createDir(baseDir string) (dir string, err error) {
 	return dir, nil
 }
 
-func ffmpeg() bool {
-	locations := []string{"ffmpeg", "ffmpeg.exe"}
+func exists(tool string) bool {
+	var locations []string
+	switch tool {
+	case "ffmpeg":
+		locations = []string{"ffmpeg", "ffmpeg.exe"}
+	case "youtube-dl":
+		locations = []string{"youtube-dl"}
+	}
+
 	for _, path := range locations {
 		found, err := exec.LookPath(path)
 		if err == nil {
 			return found != ""
 		}
 	}
+
 	return false
+}
+
+func media(ctx context.Context, dir, in string) string {
+	logger.Debug("download media to %s, url: %s", dir, in)
+	fn := strings.TrimSuffix(helper.FileName(in, ""), ".html")
+	fp := filepath.Join(dir, fn)
+
+	var viaYoutubeDL = func() string {
+		if !existYoutubeDL {
+			return ""
+		}
+		// Download media via youtube-dl
+		logger.Debug("download media via youtube-dl")
+		args := []string{
+			"--http-chunk-size=10M", "--prefer-free-formats",
+			"--no-color", "--no-cache-dir", "--no-warnings",
+			"--no-progress", "--no-check-certificate",
+			"--format=best[ext=mp4]/best",
+			"--quiet", "--output=" + fp + ".mp4", in,
+		}
+		cmd := exec.CommandContext(ctx, "youtube-dl", args...)
+		if err := cmd.Run(); err != nil {
+			logger.Error("start youtube-dl failed: %v", err)
+			return ""
+		}
+		paths, err := filepath.Glob(fp + "*")
+		if err != nil || len(paths) == 0 {
+			logger.Warn("file %s* not found", fp)
+			return ""
+		}
+		logger.Debug("matched paths: %v", paths)
+		return paths[0]
+	}
+
+	var viaAnnie = func() string {
+		if !existFFmpeg {
+			logger.Warn("missing FFmpeg, skipped")
+			return ""
+		}
+		// Download media via Annie
+		logger.Debug("download media via annie")
+		data, err := extractors.Extract(in, types.Options{})
+		if err != nil || len(data) == 0 {
+			logger.Warn("data empty or error %v", err)
+			return ""
+		}
+		dt := data[0]
+		dl := downloader.New(downloader.Options{
+			OutputPath:   dir,
+			OutputName:   fn,
+			MultiThread:  true,
+			ThreadNumber: 10,
+			ChunkSizeMB:  10,
+		})
+		sortedStreams := sortStreams(dt.Streams)
+		if len(sortedStreams) == 0 {
+			logger.Warn("stream not found")
+			return ""
+		}
+		streamName := sortedStreams[0].ID
+		stream, ok := dt.Streams[streamName]
+		if !ok {
+			logger.Warn("stream not found")
+			return ""
+		}
+		logger.Debug("stream size: %s", humanize.Bytes(uint64(stream.Size)))
+		if stream.Size > int64(config.Opts.MaxMediaSize()) {
+			logger.Warn("media size large than %s, skipped", humanize.Bytes(config.Opts.MaxMediaSize()))
+			return ""
+		}
+		if err := dl.Download(dt); err != nil {
+			logger.Error("download media failed: %v", err)
+			return ""
+		}
+		fp += "." + stream.Ext
+		return fp
+	}
+
+	v := viaYoutubeDL()
+	if v == "" {
+		v = viaAnnie()
+	}
+	if !helper.Exists(v) {
+		logger.Warn("file %s not exists", fp)
+		return ""
+	}
+	return v
 }
 
 func sortStreams(streams map[string]*types.Stream) []*types.Stream {
