@@ -465,6 +465,7 @@ github.com/orisano/pixelmatch v0.0.0-20210112091706-4fa4c7ba91d5/go.mod h1:nZgzb
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/pelletier/go-toml v1.9.3/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
+github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
@@ -508,6 +509,7 @@ github.com/rogpeppe/fastuuid v0.0.0-20150106093220-6724a57986af/go.mod h1:XWv6So
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.5.2/go.mod h1:xXDCJY+GAPziupqXw64V24skbSoqbTEfhy4qGm1nDQc=
+github.com/rogpeppe/go-internal v1.8.0/go.mod h1:WmiCO8CzOY8rg0OYDC4/i/2WRWAB6poM+XZ2dLUbcbE=
 github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f/go.mod h1:sm1tb6uqfes/u+d4ooFouqFdy9/2g9QGwK3SQygK0Ts=
@@ -587,9 +589,14 @@ github.com/wabarc/archive.is v1.3.0/go.mod h1:01mgwPSUip7WkigtaZypTTHSpv3NVbtWpK
 github.com/wabarc/archive.org v1.2.0/go.mod h1:yEmUMlNO2PPAxIvo/Hf/VxOrCS5SBwL2/vCW8pyTWjA=
 github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896 h1:c3uD+IKXpNhtAHC2/fTt7R9dXnNhw1Q6sQrHUX3xo64=
 github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896/go.mod h1:yEmUMlNO2PPAxIvo/Hf/VxOrCS5SBwL2/vCW8pyTWjA=
+github.com/wabarc/go-anonfile v0.1.0 h1:M4jKUAMROxxVaqLQt30ONmaHA/0YnvyJtX8qg/zI9+I=
+github.com/wabarc/go-anonfile v0.1.0/go.mod h1:CH1LzSKQ0x/RlKpEG2gi+hXaOOZrfeRx6Rp717o+65A=
+github.com/wabarc/go-catbox v0.1.0 h1:/UhV9md3MJrjZtm+EToSyFjawXgPiHSExLNRqsWNisg=
+github.com/wabarc/go-catbox v0.1.0/go.mod h1:Zjs9Y55f2WOwGWwmKSCrUuMfwh+nDktkjub9jgHq4CQ=
 github.com/wabarc/helper v0.0.0-20210127120855-10af37cc2616/go.mod h1:N9P4r7Rn46p4nkWtXV6ztN3p5ACVnp++bgfwjTqSxQ8=
 github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/helper v0.0.0-20210613000316-cc3df6340ab5/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
+github.com/wabarc/helper v0.0.0-20210614160629-1a5ba5e551eb/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/helper v0.0.0-20210701193643-e0fe0a807cb9/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/helper v0.0.0-20210718171053-59c70d0b20c2 h1:6rMZse2rdD7N6GxHRZqHlkSptBWh/Vf9aHiFVQjlQNo=
 github.com/wabarc/helper v0.0.0-20210718171053-59c70d0b20c2/go.mod h1:uS6mimKlWkGvEZXkJ6JoW7LYnnB2JP6dLU9q7pgDaWQ=
@@ -614,8 +621,8 @@ github.com/wabarc/telebot v0.0.0-20210614085950-9479567e0e0a h1:RCrMXolMzoNxmN9X
 github.com/wabarc/telebot v0.0.0-20210614085950-9479567e0e0a/go.mod h1:BgaIIx50PSRS9pG59JH+geT82cfvoJU/IaI5TJdN3v8=
 github.com/wabarc/telegra.ph v0.0.0-20210718173528-f72fc9cdc365 h1:AZeSe84nDyD5bYNpkCVVaOxdvaHIOj5tjVJPqcjjFLI=
 github.com/wabarc/telegra.ph v0.0.0-20210718173528-f72fc9cdc365/go.mod h1:e2nxaKoyr34W/jZefnrTn4HGXKdg0HBygLvIDJKFAiw=
-github.com/wabarc/warcraft v0.1.1-0.20210707001544-e897dbede7c3 h1:P9KKKeXbGdvzJoEEMQ2M9DlusYdS/9hzimS0+rVYrJY=
-github.com/wabarc/warcraft v0.1.1-0.20210707001544-e897dbede7c3/go.mod h1:/BbCwReBjlqHRaw8Yh+7sfAicOesiMYNhiFpuL1x8Rc=
+github.com/wabarc/warcraft v0.1.1-0.20210711171056-a5eec617b86c h1:HPTqoafOgXbqEMD54v3cTTJKKK3fd79UqG1ILR9S640=
+github.com/wabarc/warcraft v0.1.1-0.20210711171056-a5eec617b86c/go.mod h1:/BbCwReBjlqHRaw8Yh+7sfAicOesiMYNhiFpuL1x8Rc=
 github.com/wabarc/wbipfs v0.2.0 h1:TksxONxL/LrBGZ6TTcWD4p+FAzuQPfLQyCL7K64isW8=
 github.com/wabarc/wbipfs v0.2.0/go.mod h1:wh76ZvNbhSrDNxStkKORKcnfwjozfoTtq8XyzU7GKDw=
 github.com/whyrusleeping/tar-utils v0.0.0-20180509141711-8c6c8ba81d5c/go.mod h1:xxcJeBb7SIUl/Wzkz1eVKJE/CB34YNrqX2TQI6jY9zs=
@@ -1066,8 +1073,9 @@ honnef.co/go/tools v0.0.1-2020.1.4/go.mod h1:X/FiERA/W4tHapMX5mGpAtMSVEeEUOyHaw9
 maunium.net/go/maulogger/v2 v2.2.4/go.mod h1:TYWy7wKwz/tIXTpsx8G3mZseIRiC5DoMxSZazOHy68A=
 maunium.net/go/mautrix v0.9.17 h1:4rRAN11LPQGS0TOGEb4uppUzGet7nSwT9C0jHzSWmtg=
 maunium.net/go/mautrix v0.9.17/go.mod h1:7IzKfWvpQtN+W2Lzxc0rLvIxFM3ryKX6Ys3S/ZoWbg8=
-mvdan.cc/xurls/v2 v2.2.0 h1:NSZPykBXJFCetGZykLAxaL6SIpvbVy/UFEniIfHAa8A=
 mvdan.cc/xurls/v2 v2.2.0/go.mod h1:EV1RMtya9D6G5DMYPGD8zTQzaHet6Jh8gFlRgGRJeO8=
+mvdan.cc/xurls/v2 v2.3.0 h1:59Olnbt67UKpxF1EwVBopJvkSUBmgtb468E4GVWIZ1I=
+mvdan.cc/xurls/v2 v2.3.0/go.mod h1:AjuTy7gEiUArFMjgBBDU4SMxlfUYsRokpJQgNWOt3e4=
 rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=
 rsc.io/quote/v3 v3.1.0/go.mod h1:yEA65RcK8LyAZtP9Kv3t0HmxON59tX3rD+tICJqUlj0=
 rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9JXDnKaTXpA=

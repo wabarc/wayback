@@ -170,8 +170,8 @@ func TestToDiscordChannel(t *testing.T) {
 	}
 	bot.Client = httpClient
 	d := NewDiscord(bot)
-	txt := render.ForPublish(&render.Discord{Cols: collects}).String()
-	got := d.toChannel(context.Background(), nil, txt)
+	txt := render.ForPublish(&render.Discord{Cols: collects, Data: bundleExample}).String()
+	got := d.toChannel(context.Background(), bundleExample, txt)
 	if !got {
 		t.Errorf("Unexpected publish to discord channel got %t instead of %t", got, true)
 	}

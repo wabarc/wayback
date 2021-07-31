@@ -52,7 +52,7 @@ func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...s
 	}
 
 	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.GitHub{Cols: cols}).String()
+	var txt = render.ForPublish(&render.GitHub{Cols: cols, Data: bnd}).String()
 	if gh.toIssues(ctx, bnd, txt) {
 		metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusSuccess)
 		return
@@ -76,18 +76,10 @@ func (gh *gitHub) toIssues(ctx context.Context, bundle *reduxer.Bundle, text str
 		logger.Debug("authorized GitHub user: %v", user)
 	}
 
-	t := strings.TrimSpace(title(ctx, bundle))
+	t := strings.TrimSpace(render.Title(bundle))
 	if t == "" {
 		t = "Published at " + time.Now().Format("2006-01-02T15:04:05")
 	}
-
-	var b strings.Builder
-	if dgst := digest(ctx, bundle); dgst != "" {
-		b.WriteString(dgst)
-		b.WriteString("\n\n")
-	}
-	b.WriteString(text)
-	text = b.String()
 
 	// Create an issue to GitHub
 	ir := &github.IssueRequest{Title: github.String(t), Body: github.String(text)}

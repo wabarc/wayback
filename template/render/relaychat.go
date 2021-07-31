@@ -16,6 +16,7 @@ var _ Renderer = (*Relaychat)(nil)
 
 type Relaychat struct {
 	Cols []wayback.Collect
+	Data interface{}
 }
 
 func (i *Relaychat) ForReply() *Render {

@@ -279,7 +279,7 @@ func (s *Slack) wayback(ctx context.Context, ev *event, urls []string) error {
 	}
 	logger.Debug("bundles: %#v", bundles)
 
-	replyText := render.ForReply(&render.Slack{Cols: cols}).String()
+	replyText := render.ForReply(&render.Slack{Cols: cols, Data: bundles}).String()
 	logger.Debug("reply text, %s", replyText)
 
 	if _, err := s.edit(ev.Channel, tstamp, replyText); err != nil {

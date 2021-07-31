@@ -6,13 +6,11 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"context"
-	"strings"
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/metrics"
-	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/template/render"
 	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
@@ -59,8 +57,8 @@ func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ..
 	}
 
 	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Matrix{Cols: cols}).String()
-	if m.toRoom(ctx, bnd, txt) {
+	var txt = render.ForPublish(&render.Matrix{Cols: cols, Data: bnd}).String()
+	if m.toRoom(txt) {
 		metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusSuccess)
 		return
 	}
@@ -68,7 +66,7 @@ func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ..
 	return
 }
 
-func (m *matrixBot) toRoom(ctx context.Context, bundle *reduxer.Bundle, text string) bool {
+func (m *matrixBot) toRoom(text string) bool {
 	if !config.Opts.PublishToMatrixRoom() || m.client == nil {
 		logger.Warn("publish to Matrix room abort.")
 		return false
@@ -78,19 +76,6 @@ func (m *matrixBot) toRoom(ctx context.Context, bundle *reduxer.Bundle, text str
 		return false
 	}
 
-	var b strings.Builder
-	if head := title(ctx, bundle); head != "" {
-		b.WriteString(`‹ <b>`)
-		b.WriteString(head)
-		b.WriteString(`</b> ›<br><br>`)
-	}
-	if dgst := digest(ctx, bundle); dgst != "" {
-		b.WriteString(dgst)
-		b.WriteString(`<br><br>`)
-	}
-	b.WriteString(text)
-
-	text = b.String()
 	content := &event.MessageEventContent{
 		FormattedBody: text,
 		Format:        event.FormatHTML,

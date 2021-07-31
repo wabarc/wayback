@@ -18,6 +18,7 @@ import (
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/reduxer"
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
@@ -45,6 +46,53 @@ var collects = []wayback.Collect{
 		Dst: "http://telegra.ph/title-01-01",
 		Src: "https://example.com/",
 		Ext: config.SLOT_PH,
+	},
+}
+
+var bundleExample = &reduxer.Bundle{
+	Assets: reduxer.Assets{
+		Img: reduxer.Asset{
+			Local: "/path/to/image",
+			Remote: reduxer.Remote{
+				Anonfile: "https://anonfiles.com/FbZfSa9eu4",
+				Catbox:   "https://files.catbox.moe/9u6yvu.png",
+			},
+		},
+		PDF: reduxer.Asset{
+			Local: "/path/to/pdf",
+			Remote: reduxer.Remote{
+				Anonfile: "https://anonfiles.com/r4G8Sb90ud",
+				Catbox:   "https://files.catbox.moe/q73uqh.pdf",
+			},
+		},
+		Raw: reduxer.Asset{
+			Local: "/path/to/htm",
+			Remote: reduxer.Remote{
+				Anonfile: "https://anonfiles.com/pbG4Se94ua",
+				Catbox:   "https://files.catbox.moe/bph1g6.htm",
+			},
+		},
+		Txt: reduxer.Asset{
+			Local: "/path/to/txt",
+			Remote: reduxer.Remote{
+				Anonfile: "https://anonfiles.com/naG6S09bu1",
+				Catbox:   "https://files.catbox.moe/wwrby6.txt",
+			},
+		},
+		WARC: reduxer.Asset{
+			Local: "/path/to/warc",
+			Remote: reduxer.Remote{
+				Anonfile: "https://anonfiles.com/v4G4S09auc",
+				Catbox:   "https://files.catbox.moe/kkai0w.warc",
+			},
+		},
+		Media: reduxer.Asset{
+			Local: "",
+			Remote: reduxer.Remote{
+				Anonfile: "",
+				Catbox:   "",
+			},
+		},
 	},
 }
 
@@ -99,6 +147,7 @@ func TestPublishToChannelFromTelegram(t *testing.T) {
 	}
 
 	ctx := context.WithValue(context.Background(), FlagTelegram, bot)
+	ctx = context.WithValue(ctx, PubBundle, bundleExample)
 	To(ctx, collects, FlagTelegram)
 }
 

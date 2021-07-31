@@ -6,7 +6,6 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"context"
-	"strings"
 
 	mstdn "github.com/mattn/go-mastodon"
 	"github.com/wabarc/logger"
@@ -52,7 +51,7 @@ func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...
 	}
 
 	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Mastodon{Cols: cols}).String()
+	var txt = render.ForPublish(&render.Mastodon{Cols: cols, Data: bnd}).String()
 	if m.ToMastodon(ctx, bnd, txt, id) {
 		metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusSuccess)
 		return
@@ -71,15 +70,8 @@ func (m *mastodon) ToMastodon(ctx context.Context, bundle *reduxer.Bundle, text,
 		return false
 	}
 
-	var b strings.Builder
-	if head := title(ctx, bundle); head != "" {
-		b.WriteString(`‹ `)
-		b.WriteString(head)
-		b.WriteString(" ›\n\n")
-	}
-	b.WriteString(text)
 	toot := &mstdn.Toot{
-		Status:     b.String(),
+		Status:     text,
 		Visibility: mstdn.VisibilityPublic,
 	}
 	if id != "" {

@@ -5,7 +5,6 @@
 package publish // import "github.com/wabarc/wayback/publish"
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -53,7 +52,7 @@ func TestToMatrixRoom(t *testing.T) {
 
 	mat := NewMatrix(nil)
 	txt := render.ForPublish(&render.Mastodon{Cols: collects}).String()
-	got := mat.toRoom(context.Background(), nil, txt)
+	got := mat.toRoom(txt)
 	if !got {
 		t.Errorf("Unexpected publish room message got %t instead of %t", got, true)
 	}

@@ -19,7 +19,11 @@ IPFS:
 • https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
 
 Telegraph:
-• http://telegra.ph/title-01-01`
+• http://telegra.ph/title-01-01
+
+
+<https://anonfiles.com/|AnonFiles> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|WARC> ¦ <|MEDIA> ]
+<https://catbox.moe/|Catbox> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|WARC> ¦ <|MEDIA> ]`
 	got := ForPublish(&Slack{Cols: collects}).String()
 	if got != message {
 		t.Errorf("Unexpected render template for Slack got \n%s\ninstead of \n%s", got, message)
@@ -37,7 +41,11 @@ IPFS:
 • Archive failed.
 
 Telegraph:
-• https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404`
+• https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404
+
+
+<https://anonfiles.com/|AnonFiles> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|WARC> ¦ <|MEDIA> ]
+<https://catbox.moe/|Catbox> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|WARC> ¦ <|MEDIA> ]`
 	got := ForPublish(&Slack{Cols: flawed}).String()
 	if got != message {
 		t.Errorf("Unexpected render template for Slack, got \n%s\ninstead of \n%s", got, message)

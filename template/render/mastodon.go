@@ -16,6 +16,7 @@ var _ Renderer = (*Mastodon)(nil)
 
 type Mastodon struct {
 	Cols []wayback.Collect
+	Data interface{}
 }
 
 func (m *Mastodon) ForReply() *Render {
@@ -24,6 +25,12 @@ func (m *Mastodon) ForReply() *Render {
 
 func (m *Mastodon) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
+
+	if head := Title(bundle(m.Data)); head != "" {
+		tmplBytes.WriteString(`‹ `)
+		tmplBytes.WriteString(head)
+		tmplBytes.WriteString(" ›\n\n")
+	}
 
 	const tmpl = `{{range $ := .}}{{ $.Arc | name }}:
 • {{ $.Dst }}

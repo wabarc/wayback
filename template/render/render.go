@@ -11,8 +11,15 @@ import (
 	"text/template"
 
 	"github.com/wabarc/helper"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/reduxer"
+)
+
+const (
+	maxTitleLen  = 256
+	maxDigestLen = 500
 )
 
 type Render struct {
@@ -32,7 +39,7 @@ func ForPublish(r Renderer) *Render {
 	return r.ForPublish()
 }
 
-func (r *Render) String() (text string) {
+func (r *Render) String() string {
 	if r != nil {
 		return r.buf.String()
 	}
@@ -84,4 +91,52 @@ func groupBySlot(cols []wayback.Collect) *Collects {
 		}
 	}
 	return &c
+}
+
+func bundle(data interface{}) *reduxer.Bundle {
+	if bundle, ok := data.(*reduxer.Bundle); ok {
+		return bundle
+	}
+	return new(reduxer.Bundle)
+}
+
+func bundles(data interface{}) reduxer.Bundles {
+	if bundles, ok := data.(reduxer.Bundles); ok {
+		return bundles
+	}
+	return make(reduxer.Bundles)
+}
+
+func Title(bundle *reduxer.Bundle) string {
+	if bundle == nil {
+		return ""
+	}
+	logger.Debug("extract title from reduxer bundle title: %s", bundle.Title)
+
+	t := []rune(bundle.Title)
+	l := len(t)
+	if l > maxTitleLen {
+		t = t[:maxTitleLen]
+	}
+
+	return strings.TrimSpace(string(t))
+}
+
+func Digest(bundle *reduxer.Bundle) string {
+	if bundle == nil {
+		return ""
+	}
+	logger.Debug("generate digest from article content: %s", bundle.Article.TextContent)
+
+	txt := []rune(bundle.Article.TextContent)
+	l := len(txt)
+	switch {
+	case l == 0:
+		return ""
+	case l > maxDigestLen:
+		txt = txt[:maxDigestLen]
+		return string(txt) + ` ...`
+	default:
+		return string(txt)
+	}
 }

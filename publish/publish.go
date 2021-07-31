@@ -40,9 +40,6 @@ const (
 	FlagIRC      = "irc"
 
 	PubBundle = "reduxer-bundle"
-
-	maxTitleLen  = 256
-	maxDigestLen = 500
 )
 
 var maxDelayTime = 10
@@ -243,38 +240,4 @@ func bundle(ctx context.Context, cols []wayback.Collect) (b *reduxer.Bundle) {
 	}
 
 	return b
-}
-
-func title(_ context.Context, bundle *reduxer.Bundle) string {
-	if bundle == nil {
-		return ""
-	}
-	logger.Debug("extract title from reduxer bundle title: %s", bundle.Title)
-
-	t := []rune(bundle.Title)
-	l := len(t)
-	if l > maxTitleLen {
-		t = t[:maxTitleLen]
-	}
-
-	return strings.TrimSpace(string(t))
-}
-
-func digest(_ context.Context, bundle *reduxer.Bundle) string {
-	if bundle == nil {
-		return ""
-	}
-	logger.Debug("generate digest from article content: %s", bundle.Article.TextContent)
-
-	txt := []rune(bundle.Article.TextContent)
-	l := len(txt)
-	switch {
-	case l == 0:
-		return ""
-	case l > maxDigestLen:
-		txt = txt[:maxDigestLen]
-		return string(txt) + ` ...`
-	default:
-		return string(txt)
-	}
 }
