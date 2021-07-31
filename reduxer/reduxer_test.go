@@ -46,7 +46,7 @@ func TestDo(t *testing.T) {
 	}
 
 	for _, r := range res {
-		if r.Path.Img == "" || r.Path.PDF == "" || r.Path.Raw == "" {
+		if r.Assets.Img.Local == "" || r.Assets.PDF.Local == "" || r.Assets.Raw.Local == "" {
 			t.Fatal("Unexpected file path")
 		}
 	}
