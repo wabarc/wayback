@@ -19,6 +19,7 @@ on:
       - "go.sum"
       - ".github/workflows/testing.yml"
       - "Makefile"
+  workflow_dispatch:
 
 jobs:
   testing:
@@ -73,7 +74,9 @@ jobs:
         sudo add-apt-repository universe
         sudo apt-get -y update
         sudo apt-get -y install ffmpeg libwebp-dev youtube-dl
+        pip3 install you-get
         echo "youtube-dl version $(youtube-dl --version)"
+        you-get --version
         ffmpeg -version
 
     - name: Install Packages
@@ -81,8 +84,9 @@ jobs:
       shell: bash
       run: |
         # search package https://brew.sh/
-        brew install ffmpeg webp youtube-dl
+        brew install ffmpeg webp youtube-dl you-get
         echo "youtube-dl version $(youtube-dl --version)"
+        you-get --version
         ffmpeg -version
 
     - name: Install Packages
@@ -90,8 +94,9 @@ jobs:
       shell: bash
       run: |
         # search package https://community.chocolatey.org/packages
-        choco install wget ffmpeg webp youtube-dl
+        choco install --no-progress wget ffmpeg webp youtube-dl you-get
         echo "youtube-dl version $(youtube-dl --version)"
+        you-get --version
         ffmpeg -version
         wget --help
 
