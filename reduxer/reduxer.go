@@ -50,6 +50,7 @@ type Bundle struct {
 type Bundles map[string]*Bundle
 
 var existFFmpeg = exists("ffmpeg")
+var existYouGet = exists("you-get")
 var existYoutubeDL = exists("youtube-dl")
 
 // Do executes secreenshot, print PDF and export html of given URLs
@@ -248,6 +249,8 @@ func exists(tool string) bool {
 		locations = []string{"ffmpeg", "ffmpeg.exe"}
 	case "youtube-dl":
 		locations = []string{"youtube-dl"}
+	case "you-get":
+		locations = []string{"you-get"}
 	}
 
 	for _, path := range locations {
@@ -260,16 +263,28 @@ func exists(tool string) bool {
 	return false
 }
 
+// nolint:gocyclo
 func media(ctx context.Context, dir, in string) string {
 	logger.Debug("download media to %s, url: %s", dir, in)
 	fn := strings.TrimSuffix(helper.FileName(in, ""), ".html")
 	fp := filepath.Join(dir, fn)
 
+	// Glob files by given pattern and return first file
+	var match = func(pattern string) string {
+		paths, err := filepath.Glob(pattern)
+		if err != nil || len(paths) == 0 {
+			logger.Warn("file %s* not found", fp)
+			return ""
+		}
+		logger.Debug("matched paths: %v", paths)
+		return paths[0]
+	}
+
+	// Download media via youtube-dl
 	var viaYoutubeDL = func() string {
 		if !existYoutubeDL {
 			return ""
 		}
-		// Download media via youtube-dl
 		logger.Debug("download media via youtube-dl")
 		args := []string{
 			"--http-chunk-size=10M", "--prefer-free-formats",
@@ -283,13 +298,23 @@ func media(ctx context.Context, dir, in string) string {
 			logger.Error("start youtube-dl failed: %v", err)
 			return ""
 		}
-		paths, err := filepath.Glob(fp + "*")
-		if err != nil || len(paths) == 0 {
-			logger.Warn("file %s* not found", fp)
+		return match(fp + "*")
+	}
+
+	// Download media via you-get
+	var viaYouGet = func() string {
+		if !existYouGet || !existFFmpeg {
 			return ""
 		}
-		logger.Debug("matched paths: %v", paths)
-		return paths[0]
+		logger.Debug("download media via you-get")
+		args := []string{
+			"--output-filename=" + fp, in,
+		}
+		cmd := exec.CommandContext(ctx, "you-get", args...)
+		if err := cmd.Run(); err != nil {
+			logger.Warn("run you-get failed: %v", err)
+		}
+		return match(fp + "*")
 	}
 
 	var viaAnnie = func() string {
@@ -337,6 +362,9 @@ func media(ctx context.Context, dir, in string) string {
 	}
 
 	v := viaYoutubeDL()
+	if v == "" {
+		v = viaYouGet()
+	}
 	if v == "" {
 		v = viaAnnie()
 	}
