@@ -34,7 +34,7 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/prometheus/common v0.30.0
 	github.com/robertkrimen/otto v0.0.0-20210614181706-373ff5438452 // indirect
-	github.com/slack-go/slack v0.9.3
+	github.com/slack-go/slack v0.9.4
 	github.com/spf13/cobra v1.2.1
 	github.com/tdewolff/parse/v2 v2.5.19 // indirect
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
