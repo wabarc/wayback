@@ -15,6 +15,7 @@ require (
 	github.com/dghubble/oauth1 v0.7.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.12.0
+	github.com/gabriel-vasile/mimetype v1.3.1
 	github.com/go-shiori/go-readability v0.0.0-20210627123243-82cc33435520
 	github.com/go-shiori/obelisk v0.0.0-20201115143556-8de0d40b0a9b // indirect
 	github.com/google/go-github/v37 v37.0.0

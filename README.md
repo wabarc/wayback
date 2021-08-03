@@ -104,7 +104,7 @@ Examples:
 Flags:
       --chatid string      Telegram channel id.
   -c, --config string      Configuration file path, defaults: ./wayback.conf, ~/wayback.conf, /etc/wayback.conf
-  -d, --daemon strings     Run as daemon service, supported services are telegram, web, mastodon, twitter, irc
+  -d, --daemon strings     Run as daemon service, supported services are telegram, web, mastodon, twitter, discord, slack, irc
       --debug              Enable debug mode. (default false)
   -h, --help               help for wayback
       --ia                 Wayback webpages to Internet Archive.

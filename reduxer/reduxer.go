@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/go-shiori/go-readability"
 	"github.com/iawia002/annie/downloader"
 	"github.com/iawia002/annie/extractors"
@@ -383,7 +384,12 @@ func media(ctx context.Context, dir, in string) string {
 		logger.Warn("file %s not exists", fp)
 		return ""
 	}
-	return v
+	mtype, _ := mimetype.DetectFile(v)
+	if strings.HasPrefix(mtype.String(), "video") || strings.HasPrefix(mtype.String(), "audio") {
+		return v
+	}
+
+	return ""
 }
 
 func sortStreams(streams map[string]*types.Stream) []*types.Stream {
