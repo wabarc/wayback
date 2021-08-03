@@ -123,6 +123,90 @@ jobs:
           path: ./dist/*
           if-no-files-found: error
 
+  allinone:
+    if: github.repository == 'wabarc/wayback'
+    name: AllInOne Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Prepare
+        id: prep
+        run: |
+          GHCR_HOST=ghcr.io
+          DOCKER_IMAGE_SCOPE=${{ github.repository }} # foo/bar
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            DOCKER_IMAGE_VERSION=nightly-bundle
+          elif [[ $GITHUB_REF == refs/tags/* ]]; then
+            DOCKER_IMAGE_VERSION=${GITHUB_REF#refs/*/v}-bundle
+            TAGS="${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}"
+          else
+            DOCKER_IMAGE_VERSION=edge-bundle
+          fi
+          TAGS="${TAGS},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}:${DOCKER_IMAGE_VERSION}"
+          echo ::set-output name=tags::${TAGS}
+          echo ::set-output name=version::${DOCKER_IMAGE_VERSION}
+          echo ::set-output name=ghcr::${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}
+          echo ::set-output name=images::${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ steps.prep.outputs.images }}
+          tags: |
+            type=semver,pattern=${{ steps.prep.outputs.version }}
+            type=raw,${{ steps.prep.outputs.version }}
+
+      - name: Build artifacts
+        uses: docker/bake-action@v1
+        with:
+          files: ./docker-bake.hcl
+          targets: artifact-all
+          set: |
+            *.cache-from=type=local,src=/tmp/.image-cache/artifacts
+            *.cache-to=type=local,dest=/tmp/.image-cache-new/artifacts
+
+      - name: Build and push Docker image
+        uses: docker/bake-action@v1
+        with:
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file }}
+          targets: bundle
+          push: ${{ github.event_name != 'pull_request' }}
+          set: |
+            *.cache-from=type=local,src=/tmp/.image-cache/image
+            *.cache-to=type=local,dest=/tmp/.image-cache-new/image
+
+      - name: Check manifest
+        if: github.event_name != 'pull_request'
+        run: |
+          docker buildx imagetools inspect ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+
+      - name: Inspect image
+        if: github.event_name != 'pull_request'
+        run: |
+          docker pull ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+          docker image inspect ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+
   dispatch:
     if: github.repository == 'wabarc/wayback'
     name: Repository Dispatch
