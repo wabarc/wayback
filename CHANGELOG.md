@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.15.0] - 2021-08-05
+
+### Added
+- Add support for Slack
+- Add support for Discord
+- Add support for download stream media
+- Bundle all requirements in one image
+- Upload files remotely for sharing
+- Supports to serve text content
+
+### Changed
+- Minor improvements
+- Download media via you-get
+- Download media via youtube-dl
+- Support for replying to message from group/channel and mention bot to wayback
+- Apply logger color
+- Use Fedora 34 to build RPM package
+- Use parallel flag for testing
+- Minor improvements for readability
+- Minor improvements
+- Refine logger message
+- Format output for print configurations
+- Add timeout for wayback context
+- Bump actions/stale from 3 to 4
+
 ## [0.14.1] - 2021-07-12
 
 ### Changed
