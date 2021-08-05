@@ -67,15 +67,17 @@ EXPOSE 8964
 # add flag `--format=docker` if using podman.
 # Ref: https://wiki.alpinelinux.org/wiki/Fonts
 ONBUILD RUN set -o pipefail; \
+    echo @edge https://dl-cdn.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories; \
+    echo @edge https://dl-cdn.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories; \
     apk add --no-cache -U \
-    chromium \
+    chromium@edge \
     dbus \
     dumb-init \
-    ffmpeg \
-    freetype \
+    ffmpeg@edge \
+    freetype@edge \
     libstdc++ \
-    harfbuzz \
-    nss \
+    harfbuzz@edge \
+    nss@edge \
     you-get \
     rtmpdump \
     youtube-dl \

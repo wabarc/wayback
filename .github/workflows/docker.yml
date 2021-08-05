@@ -139,12 +139,12 @@ jobs:
           GHCR_HOST=ghcr.io
           DOCKER_IMAGE_SCOPE=${{ github.repository }} # foo/bar
           if [ "${{ github.event_name }}" = "schedule" ]; then
-            DOCKER_IMAGE_VERSION=nightly-bundle
+            DOCKER_IMAGE_VERSION=nightly
           elif [[ $GITHUB_REF == refs/tags/* ]]; then
-            DOCKER_IMAGE_VERSION=${GITHUB_REF#refs/*/v}-bundle
+            DOCKER_IMAGE_VERSION=${GITHUB_REF#refs/*/v}
             TAGS="${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}"
           else
-            DOCKER_IMAGE_VERSION=edge-bundle
+            DOCKER_IMAGE_VERSION=edge
           fi
           TAGS="${TAGS},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}:${DOCKER_IMAGE_VERSION}"
           echo ::set-output name=tags::${TAGS}
@@ -171,6 +171,8 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ${{ steps.prep.outputs.images }}
+          flavor: |
+            suffix=-bundle,onlatest=true
           tags: |
             type=semver,pattern=${{ steps.prep.outputs.version }}
             type=raw,${{ steps.prep.outputs.version }}
