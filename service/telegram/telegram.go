@@ -55,6 +55,11 @@ func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Telegr
 		// Verbose:   config.Opts.HasDebugMode(),
 		ParseMode: telegram.ModeHTML,
 		Poller:    &telegram.LongPoller{Timeout: 3 * time.Second},
+		Reporter: func(err error) {
+			if err != nil {
+				logger.Warn(err.Error())
+			}
+		},
 	})
 	if err != nil {
 		logger.Fatal("create telegram bot instance failed: %v", err)
