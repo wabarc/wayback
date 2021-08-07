@@ -51,13 +51,14 @@ func New(size int) Pool {
 func (p Pool) Roll(service func()) {
 	do := func(service func(), wg *sync.WaitGroup) {
 		defer wg.Done()
+
 		r, err := p.pull()
+		defer p.push(r)
 		if err != nil {
 			logger.Error("pull resources failed: %v", err)
 			return
 		}
 		logger.Debug("roll service on #%d", r.id)
-		defer p.push(r)
 
 		logger.Debug("roll service func: %#v", service)
 		service()
@@ -74,7 +75,7 @@ func (p Pool) pull() (r *resource, err error) {
 	case r := <-p:
 		return r, nil
 	case <-time.After(maxTime):
-		return nil, ErrTimeout
+		return new(resource), ErrTimeout
 	}
 }
 
