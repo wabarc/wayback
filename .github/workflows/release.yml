@@ -347,7 +347,8 @@ jobs:
       with:
         body_path: gittaglogs.txt
         files: ${{ env.PRODUCT }}/*${{ env.PRODUCT }}*
-        draft: true
+        prerelease: true
+        draft: false
 
   release-apt:
     if: github.repository == 'wabarc/wayback'
