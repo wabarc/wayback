@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.15.1] - 2021-08-13
+
+### Changed
+- Handle debugging message from tucnak/telebot
+- Upgrade dependencies
+
+### Fixed
+- Fix docker tag
+- Fix pooling scalable
+
 ## [0.15.0] - 2021-08-05
 
 ### Added
