@@ -18,7 +18,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.3.1
 	github.com/go-shiori/go-readability v0.0.0-20210627123243-82cc33435520
 	github.com/go-shiori/obelisk v0.0.0-20201115143556-8de0d40b0a9b // indirect
-	github.com/google/go-github/v37 v37.0.0
+	github.com/google/go-github/v38 v38.1.0
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
@@ -57,11 +57,9 @@ require (
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
 	golang.org/x/net v0.0.0-20210726213435-c6fcb2dbf985
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	gopkg.in/tucnak/telebot.v2 v2.3.5
+	gopkg.in/tucnak/telebot.v2 v2.4.0
 	maunium.net/go/mautrix v0.9.17
 	mvdan.cc/xurls/v2 v2.3.0 // indirect
 )
 
 replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78
-
-replace gopkg.in/tucnak/telebot.v2 => github.com/wabarc/telebot v0.0.0-20210614085950-9479567e0e0a
