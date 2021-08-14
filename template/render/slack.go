@@ -86,12 +86,12 @@ func (s *Slack) ForPublish() (r *Render) {
 func (s *Slack) renderAssets(assets reduxer.Assets, tmplBytes *bytes.Buffer) {
 	tmpl := `<https://anonfiles.com/|AnonFiles> - [ <{{ .Img.Remote.Anonfile -}}
 |IMG> ¦ <{{ .PDF.Remote.Anonfile }}|PDF> ¦ <{{ .Raw.Remote.Anonfile -}}
-|RAW> ¦ <{{ .Txt.Remote.Anonfile }}|TXT> ¦ <{{ .WARC.Remote.Anonfile -}}
-|WARC> ¦ <{{ .Media.Remote.Anonfile }}|MEDIA> ]
+|RAW> ¦ <{{ .Txt.Remote.Anonfile }}|TXT> ¦ <{{ .HAR.Remote.Anonfile -}}
+|HAR> ¦ <{{ .WARC.Remote.Anonfile }}|WARC> ¦ <{{ .Media.Remote.Anonfile }}|MEDIA> ]
 <https://catbox.moe/|Catbox> - [ <{{ .Img.Remote.Catbox -}}
 |IMG> ¦ <{{ .PDF.Remote.Catbox }}|PDF> ¦ <{{ .Raw.Remote.Catbox -}}
-|RAW> ¦ <{{ .Txt.Remote.Catbox }}|TXT> ¦ <{{ .WARC.Remote.Catbox -}}
-|WARC> ¦ <{{ .Media.Remote.Catbox }}|MEDIA> ]`
+|RAW> ¦ <{{ .Txt.Remote.Catbox }}|TXT> ¦ <{{ .HAR.Remote.Catbox -}}
+|HAR> ¦ <{{ .WARC.Remote.Catbox }}|WARC> ¦ <{{ .Media.Remote.Catbox }}|MEDIA> ]`
 
 	tpl, err := template.New("assets").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {

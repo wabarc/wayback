@@ -55,8 +55,8 @@ func TestRenderGitHub(t *testing.T) {
 > source: [https://example.com/?q=中文](https://example.com/?q=%E4%B8%AD%E6%96%87)
 > archived: [http://telegra.ph/title-01-01](http://telegra.ph/title-01-01)
 
-**[AnonFiles](https://anonfiles.com/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [WARC]() ¦ [MEDIA]() ]
-**[Catbox](https://catbox.moe/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [WARC]() ¦ [MEDIA]() ]`
+**[AnonFiles](https://anonfiles.com/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [HAR]() ¦ [WARC]() ¦ [MEDIA]() ]
+**[Catbox](https://catbox.moe/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [HAR]() ¦ [WARC]() ¦ [MEDIA]() ]`
 
 	got := ForPublish(&GitHub{Cols: collects}).String()
 	if got != expected {
@@ -81,8 +81,8 @@ func TestRenderGitHubFlawed(t *testing.T) {
 > source: [https://example.com/404](https://example.com/404)
 > archived: [https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404](https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404)
 
-**[AnonFiles](https://anonfiles.com/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [WARC]() ¦ [MEDIA]() ]
-**[Catbox](https://catbox.moe/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [WARC]() ¦ [MEDIA]() ]`
+**[AnonFiles](https://anonfiles.com/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [HAR]() ¦ [WARC]() ¦ [MEDIA]() ]
+**[Catbox](https://catbox.moe/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [HAR]() ¦ [WARC]() ¦ [MEDIA]() ]`
 
 	got := ForPublish(&GitHub{Cols: flawed}).String()
 	if got != expected {

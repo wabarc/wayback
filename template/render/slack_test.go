@@ -22,8 +22,8 @@ Telegraph:
 • http://telegra.ph/title-01-01
 
 
-<https://anonfiles.com/|AnonFiles> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|WARC> ¦ <|MEDIA> ]
-<https://catbox.moe/|Catbox> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|WARC> ¦ <|MEDIA> ]`
+<https://anonfiles.com/|AnonFiles> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|HAR> ¦ <|WARC> ¦ <|MEDIA> ]
+<https://catbox.moe/|Catbox> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|HAR> ¦ <|WARC> ¦ <|MEDIA> ]`
 	got := ForPublish(&Slack{Cols: collects}).String()
 	if got != message {
 		t.Errorf("Unexpected render template for Slack got \n%s\ninstead of \n%s", got, message)
@@ -44,8 +44,8 @@ Telegraph:
 • https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404
 
 
-<https://anonfiles.com/|AnonFiles> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|WARC> ¦ <|MEDIA> ]
-<https://catbox.moe/|Catbox> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|WARC> ¦ <|MEDIA> ]`
+<https://anonfiles.com/|AnonFiles> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|HAR> ¦ <|WARC> ¦ <|MEDIA> ]
+<https://catbox.moe/|Catbox> - [ <|IMG> ¦ <|PDF> ¦ <|RAW> ¦ <|TXT> ¦ <|HAR> ¦ <|WARC> ¦ <|MEDIA> ]`
 	got := ForPublish(&Slack{Cols: flawed}).String()
 	if got != message {
 		t.Errorf("Unexpected render template for Slack, got \n%s\ninstead of \n%s", got, message)

@@ -43,7 +43,7 @@ type Bundle struct {
 }
 
 type Assets struct {
-	Img, PDF, Raw, Txt, WARC, Media Asset
+	Img, PDF, Raw, Txt, HAR, WARC, Media Asset
 }
 
 type Asset struct {
@@ -113,14 +113,20 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 				{key: &assets.Img, buf: shot.Image},
 				{key: &assets.PDF, buf: shot.PDF},
 				{key: &assets.Raw, buf: shot.HTML},
+				{key: &assets.HAR, buf: shot.HAR},
 			}
 			for _, slug := range slugs {
 				if slug.buf == nil {
 					logger.Warn("file empty, skipped")
 					continue
 				}
-				ft := http.DetectContentType(slug.buf)
+				mt := mimetype.Detect(slug.buf)
+				ft := mt.String()
 				fp := filepath.Join(dir, helper.FileName(shot.URL, ft))
+				// Replace json with har
+				if strings.HasSuffix(fp, ".json") {
+					fp = strings.TrimSuffix(fp, ".json") + mt.Extension()
+				}
 				logger.Debug("writing file: %s", fp)
 				if err := os.WriteFile(fp, slug.buf, 0o600); err != nil {
 					logger.Error("write %s file failed: %v", ft, err)
@@ -170,6 +176,7 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 	opts := []screenshot.ScreenshotOption{
 		screenshot.ScaleFactor(1),
 		screenshot.PrintPDF(true), // print pdf
+		screenshot.DumpHAR(true),  // export har
 		screenshot.RawHTML(true),  // export html
 		screenshot.Quality(100),   // image quality
 	}
@@ -223,6 +230,7 @@ func (b *Bundle) Asset() (paths []Asset) {
 		b.Assets.PDF,
 		b.Assets.Raw,
 		b.Assets.Txt,
+		b.Assets.HAR,
 		b.Assets.WARC,
 		b.Assets.Media,
 	}
@@ -411,6 +419,7 @@ func remotely(ctx context.Context, assets *Assets) (err error) {
 		&assets.PDF,
 		&assets.Raw,
 		&assets.Txt,
+		&assets.HAR,
 		&assets.WARC,
 		&assets.Media,
 	}
