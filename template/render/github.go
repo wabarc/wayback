@@ -68,12 +68,12 @@ func (gh *GitHub) ForPublish() *Render {
 func (gh *GitHub) renderAssets(assets reduxer.Assets, tmplBytes *bytes.Buffer) {
 	tmpl := `**[AnonFiles](https://anonfiles.com/)** - [ [IMG]({{ .Img.Remote.Anonfile -}}
 ) ¦ [PDF]({{ .PDF.Remote.Anonfile }}) ¦ [RAW]({{ .Raw.Remote.Anonfile -}}
-) ¦ [TXT]({{ .Txt.Remote.Anonfile }}) ¦ [WARC]({{ .WARC.Remote.Anonfile -}}
-) ¦ [MEDIA]({{ .Media.Remote.Anonfile }}) ]
+) ¦ [TXT]({{ .Txt.Remote.Anonfile }}) ¦ [HAR]({{ .HAR.Remote.Anonfile -}}
+) ¦ [WARC]({{ .WARC.Remote.Anonfile }}) ¦ [MEDIA]({{ .Media.Remote.Anonfile }}) ]
 **[Catbox](https://catbox.moe/)** - [ [IMG]({{ .Img.Remote.Catbox -}}
 ) ¦ [PDF]({{ .PDF.Remote.Catbox }}) ¦ [RAW]({{ .Raw.Remote.Catbox -}}
-) ¦ [TXT]({{ .Txt.Remote.Catbox }}) ¦ [WARC]({{ .WARC.Remote.Catbox -}}
-) ¦ [MEDIA]({{ .Media.Remote.Catbox }}) ]`
+) ¦ [TXT]({{ .Txt.Remote.Catbox }}) ¦ [HAR]({{ .HAR.Remote.Catbox -}}
+) ¦ [WARC]({{ .WARC.Remote.Catbox }}) ¦ [MEDIA]({{ .Media.Remote.Catbox }}) ]`
 
 	tpl, err := template.New("assets").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {

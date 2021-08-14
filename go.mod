@@ -9,6 +9,7 @@ require (
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
 	github.com/bwmarrin/discordgo v0.23.3-0.20210627161652-421e14965030
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
+	github.com/chromedp/cdproto v0.0.0-20210808225517-c36c1bd4c35e // indirect
 	github.com/cretz/bine v0.2.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
@@ -28,7 +29,6 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	// github.com/ipsn/go-libtor v1.0.329
 	github.com/libp2p/go-libp2p-core v0.8.6 // indirect
-	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
 	github.com/multiformats/go-multiaddr v0.3.3 // indirect
 	github.com/multiformats/go-multihash v0.0.15 // indirect
@@ -48,18 +48,22 @@ require (
 	github.com/wabarc/helper v0.0.0-20210718171053-59c70d0b20c2
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
 	github.com/wabarc/playback v0.0.0-20210718054702-cab6c6004933
-	github.com/wabarc/screenshot v1.2.1-0.20210713083422-eee9add4752d
+	github.com/wabarc/screenshot v1.3.0
 	github.com/wabarc/telegra.ph v0.0.0-20210718173528-f72fc9cdc365
 	github.com/wabarc/warcraft v0.1.1-0.20210711171056-a5eec617b86c
 	github.com/wabarc/wbipfs v0.2.0
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97 // indirect
-	golang.org/x/net v0.0.0-20210726213435-c6fcb2dbf985
+	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
+	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/tucnak/telebot.v2 v2.4.0
 	maunium.net/go/mautrix v0.9.17
 	mvdan.cc/xurls/v2 v2.3.0 // indirect
 )
 
 replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78
+
+replace github.com/gabriel-vasile/mimetype => github.com/wabarc/mimetype v1.3.2-0.20210814000005-c49e03777d46

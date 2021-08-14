@@ -121,6 +121,13 @@ var bundleExample = &reduxer.Bundle{
 				Catbox:   "https://files.catbox.moe/wwrby6.txt",
 			},
 		},
+		HAR: reduxer.Asset{
+			Local: "/path/to/har",
+			Remote: reduxer.Remote{
+				Anonfile: "https://anonfiles.com/n1paZfB3ub",
+				Catbox:   "https://files.catbox.moe/3agtva.har",
+			},
+		},
 		WARC: reduxer.Asset{
 			Local: "/path/to/warc",
 			Remote: reduxer.Remote{
