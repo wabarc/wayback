@@ -72,8 +72,8 @@ jobs:
       run: |
         # search package https://pkgs.org/
         sudo add-apt-repository universe
-        sudo apt-get -y update
-        sudo apt-get -y install ffmpeg libwebp-dev youtube-dl
+        sudo apt-get -y -qq update
+        sudo apt-get -y -qq install ffmpeg libwebp-dev youtube-dl
         pip3 install you-get
         echo "youtube-dl version $(youtube-dl --version)"
         you-get --version
@@ -84,7 +84,7 @@ jobs:
       shell: bash
       run: |
         # search package https://brew.sh/
-        brew install ffmpeg webp youtube-dl you-get
+        brew install --quiet ffmpeg webp youtube-dl you-get
         echo "youtube-dl version $(youtube-dl --version)"
         you-get --version
         ffmpeg -version
@@ -100,6 +100,18 @@ jobs:
         ffmpeg -version
         wget --help
 
+    - name: Set environments
+      shell: bash
+      run: |
+        # Set env to enable reduxer
+        storage_dir=$GITHUB_WORKSPACE/.tmp
+        echo "WAYBACK_STORAGE_DIR=${storage_dir}" >> $GITHUB_ENV
+        # Append paths to environment path
+        # echo "$(which youtube-dl)" >> $GITHUB_PATH
+        # echo "$(which you-get)" >> $GITHUB_PATH
+        # echo "$(which ffmpeg)" >> $GITHUB_PATH
+        # echo "$(which wget)" >> $GITHUB_PATH
+
     - name: Check out code base
       if: github.event_name == 'push'
       uses: actions/checkout@v2
@@ -112,12 +124,6 @@ jobs:
       with:
         fetch-depth: 0
         ref: ${{ github.event.pull_request.head.sha }}
-
-    - name: Set env
-      shell: bash
-      run: |
-        storage_dir=$GITHUB_WORKSPACE/.tmp
-        echo "WAYBACK_STORAGE_DIR=${storage_dir}" >> $GITHUB_ENV
 
     - name: Get dependencies
       run: |

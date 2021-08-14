@@ -58,9 +58,9 @@ type Remote struct {
 
 type Bundles map[string]*Bundle
 
-var existFFmpeg = exists("ffmpeg")
-var existYouGet = exists("you-get")
-var existYoutubeDL = exists("youtube-dl")
+var _, existFFmpeg = exists("ffmpeg")
+var youget, existYouGet = exists("you-get")
+var ytdl, existYoutubeDL = exists("youtube-dl")
 
 // Do executes secreenshot, print PDF and export html of given URLs
 // Returns a set of bundle containing screenshot data and file path
@@ -255,7 +255,7 @@ func createDir(baseDir string) (dir string, err error) {
 	return dir, nil
 }
 
-func exists(tool string) bool {
+func exists(tool string) (string, bool) {
 	var locations []string
 	switch tool {
 	case "ffmpeg":
@@ -269,11 +269,11 @@ func exists(tool string) bool {
 	for _, path := range locations {
 		found, err := exec.LookPath(path)
 		if err == nil {
-			return found != ""
+			return found, found != ""
 		}
 	}
 
-	return false
+	return "", false
 }
 
 // nolint:gocyclo
@@ -306,7 +306,7 @@ func media(ctx context.Context, dir, in string) string {
 			"--format=best[ext=mp4]/best",
 			"--quiet", "--output=" + fp + ".mp4", in,
 		}
-		cmd := exec.CommandContext(ctx, "youtube-dl", args...)
+		cmd := exec.CommandContext(ctx, ytdl, args...)
 		if err := cmd.Run(); err != nil {
 			logger.Warn("start youtube-dl failed: %v", err)
 		}
@@ -322,7 +322,7 @@ func media(ctx context.Context, dir, in string) string {
 		args := []string{
 			"--output-filename=" + fp, in,
 		}
-		cmd := exec.CommandContext(ctx, "you-get", args...)
+		cmd := exec.CommandContext(ctx, youget, args...)
 		if err := cmd.Run(); err != nil {
 			logger.Warn("run you-get failed: %v", err)
 		}
