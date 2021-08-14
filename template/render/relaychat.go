@@ -14,15 +14,20 @@ import (
 
 var _ Renderer = (*Relaychat)(nil)
 
+// Relaychat represents a Relaychat template data for render.
 type Relaychat struct {
 	Cols []wayback.Collect
 	Data interface{}
 }
 
+// ForReply implements the standard Renderer interface:
+// it returns a Render from the ForPublish.
 func (i *Relaychat) ForReply() *Render {
 	return i.ForPublish()
 }
 
+// ForPublish implements the standard Renderer interface:
+// it reads `[]wayback.Collect` from the Relaychat and returns a *Render.
 func (i *Relaychat) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
 

@@ -5,5 +5,4 @@
 /*
 Package telegram implements the telegram bot daemon service.
 */
-
 package telegram // import "github.com/wabarc/wayback/service/telegram"

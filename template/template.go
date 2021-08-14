@@ -38,6 +38,7 @@ type Collect struct {
 	Dst  string `json:"dst"`
 }
 
+// Collector represents a group of Collect.
 type Collector []Collect
 
 type funcMap struct {

@@ -14,15 +14,21 @@ import (
 
 var _ Renderer = (*Mastodon)(nil)
 
+// Mastodon represents a Mastodon template data for render.
 type Mastodon struct {
 	Cols []wayback.Collect
 	Data interface{}
 }
 
+// ForReply implements the standard Renderer interface:
+// it returns a Render from the ForPublish.
 func (m *Mastodon) ForReply() *Render {
 	return m.ForPublish()
 }
 
+// ForPublish implements the standard Renderer interface:
+// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// the Mastodon and returns a *Render.
 func (m *Mastodon) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
 

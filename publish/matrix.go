@@ -21,6 +21,7 @@ type matrixBot struct {
 	client *matrix.Client
 }
 
+// NewMatrix returns a matrixBot client.
 func NewMatrix(client *matrix.Client) *matrixBot {
 	if !config.Opts.PublishToMatrixRoom() {
 		logger.Error("Missing required environment variable, abort.")
@@ -48,6 +49,8 @@ func NewMatrix(client *matrix.Client) *matrixBot {
 	return &matrixBot{client: client}
 }
 
+// Publish publish text to the Matrix room of given cols and args.
+// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
 func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusRequest)
 

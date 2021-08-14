@@ -14,11 +14,14 @@ import (
 
 var _ Renderer = (*Discord)(nil)
 
+// Discord represents a Discord template data for render.
 type Discord struct {
 	Cols []wayback.Collect
 	Data interface{}
 }
 
+// ForReply implements the standard Renderer interface:
+// it reads `[]wayback.Collect` from the Discord and returns a *Render.
 func (d *Discord) ForReply() (r *Render) {
 	var tmplBytes bytes.Buffer
 
@@ -42,6 +45,9 @@ func (d *Discord) ForReply() (r *Render) {
 	return &Render{buf: tmplBytes}
 }
 
+// ForPublish implements the standard Renderer interface:
+// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// the Discord and returns a *Render.
 func (d *Discord) ForPublish() (r *Render) {
 	var tmplBytes bytes.Buffer
 

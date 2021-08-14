@@ -4,6 +4,7 @@
 
 package entity // import "github.com/wabarc/entity"
 
+// EntityPlayback represents a keyword for playback entity.
 const EntityPlayback = "playback"
 
 // Playback represents a Playback in the application.

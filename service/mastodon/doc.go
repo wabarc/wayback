@@ -5,5 +5,4 @@
 /*
 Package mastodon implements the mastodon daemon service.
 */
-
 package mastodon // import "github.com/wabarc/wayback/service/mastodon"

@@ -9,12 +9,12 @@ var Opts *Options
 
 // nolint:stylecheck
 const (
-	SLOT_IA = "ia"
-	SLOT_IS = "is"
-	SLOT_IP = "ip"
-	SLOT_PH = "ph"
-	SLOT_TT = "tt"
-	SLOT_GC = "gc"
+	SLOT_IA = "ia" // Internet Archive
+	SLOT_IS = "is" // archive.today
+	SLOT_IP = "ip" // IPFS
+	SLOT_PH = "ph" // Telegraph
+	SLOT_TT = "tt" // Time Travel
+	SLOT_GC = "gc" // Google Cache
 
 	PB_SLUG = "/playback" // Identity for playback
 	UNKNOWN = "unknown"

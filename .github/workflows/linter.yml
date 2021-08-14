@@ -111,3 +111,12 @@ jobs:
 
       - name: Run alex with reviewdog
         uses: reviewdog/action-alex@v1
+
+  goreportcard:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Go report card
+        run: |
+          path=$(curl -sf -X POST -F "repo=github.com/$GITHUB_REPOSITORY" https://goreportcard.com/checks | jq -r '.redirect')
+          echo -e "\nSee report for https://goreportcard.com${path}"

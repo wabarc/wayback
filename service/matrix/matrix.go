@@ -25,6 +25,7 @@ import (
 	"maunium.net/go/mautrix/id"
 )
 
+// Matrix represents a Matrix service in the application
 type Matrix struct {
 	sync.RWMutex
 
@@ -193,7 +194,7 @@ func (m *Matrix) process(ev *event.Event) error {
 
 	ctx := context.WithValue(m.ctx, publish.FlagMatrix, m.client)
 	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	publish.To(ctx, cols, publish.FlagMatrix)
+	publish.To(ctx, cols, publish.FlagMatrix.String())
 
 	return nil
 }

@@ -5,5 +5,4 @@
 /*
 Package discord implements the discord bot daemon service.
 */
-
 package discord // import "github.com/wabarc/wayback/service/discord"

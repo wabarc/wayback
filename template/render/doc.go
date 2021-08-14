@@ -5,5 +5,4 @@
 /*
 Package render handles template parsing and execution for services.
 */
-
 package render // import "github.com/wabarc/wayback/template/render"

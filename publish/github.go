@@ -23,6 +23,7 @@ type gitHub struct {
 	client *github.Client
 }
 
+// NewGitHub returns a gitHub client.
 func NewGitHub(httpClient *http.Client) *gitHub {
 	if config.Opts.GitHubToken() == "" || config.Opts.GitHubOwner() == "" {
 		logger.Error("GitHub personal access token is required")
@@ -43,6 +44,8 @@ func NewGitHub(httpClient *http.Client) *gitHub {
 	return &gitHub{client: client}
 }
 
+// Publish publish markdown text to the GitHub issues of given cols and args.
+// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
 func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusRequest)
 

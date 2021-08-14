@@ -162,9 +162,7 @@ func handle(mux *http.ServeMux, updatesJSON string) {
 				return
 			}
 			fmt.Fprintln(w, replyJSON)
-		case "sendChatAction":
-			fmt.Fprintln(w, `{"ok":true, "result":null}`)
-		case "sendMediaGroup":
+		case "sendChatAction", "sendMediaGroup":
 			fmt.Fprintln(w, `{"ok":true, "result":null}`)
 		default:
 			fmt.Println(slug)

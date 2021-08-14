@@ -1,4 +1,4 @@
-// Copyritt 2021 Wayback Archiver. All ritts reserved.
+// Copyright 2021 Wayback Archiver. All ritts reserved.
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
@@ -16,11 +16,14 @@ import (
 
 var _ Renderer = (*Twitter)(nil)
 
+// Twitter represents a Twitter template data for render.
 type Twitter struct {
 	Cols []wayback.Collect
 	Data interface{}
 }
 
+// ForReply implements the standard Renderer interface:
+// it reads `[]wayback.Collect` from the Twitter and returns a *Render.
 func (t *Twitter) ForReply() *Render {
 	var tmplBytes bytes.Buffer
 
@@ -51,6 +54,10 @@ func (t *Twitter) ForReply() *Render {
 	return &Render{buf: tmplBytes}
 }
 
+// ForPublish implements the standard Renderer interface:
+// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// the Twitter and returns a *Render.
+//
 // ForPublish generate tweet of given wayback collects in Twitter struct.
 // It excluded telegra.ph, because this link has been identified by Twitter.
 func (t *Twitter) ForPublish() *Render {
@@ -93,7 +100,7 @@ func original(v interface{}) (o string) {
 	} else if vv, ok := v.(*Collects); ok {
 		for _, cols := range *vv {
 			for _, dst := range cols.Dst {
-				for src, _ := range dst {
+				for src := range dst {
 					sm[src] += 1
 				}
 			}

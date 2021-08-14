@@ -5,5 +5,4 @@
 /*
 Package entity contains all data structures used by the application.
 */
-
-package entity // import "github.com/wabarc/entity"
+package entity // import "github.com/wabarc/wayback/entity"

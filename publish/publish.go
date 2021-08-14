@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -29,17 +30,20 @@ import (
 	matrix "maunium.net/go/mautrix"
 )
 
-const (
-	FlagWeb      = "web"
-	FlagTelegram = "telegram"
-	FlagTwitter  = "twitter"
-	FlagMastodon = "mastodon"
-	FlagDiscord  = "discord"
-	FlagMatrix   = "matrix"
-	FlagSlack    = "slack"
-	FlagIRC      = "irc"
+// Flag represents a type of uint8
+type Flag uint8
 
-	PubBundle = "reduxer-bundle"
+const (
+	FlagWeb      Flag = iota // FlagWeb publish from httpd service
+	FlagTelegram             // FlagTelegram publish from telegram service
+	FlagTwitter              // FlagTwitter publish from twitter srvice
+	FlagMastodon             // FlagMastodon publish from mastodon service
+	FlagDiscord              // FlagDiscord publish from discord service
+	FlagMatrix               // FlagMatrix publish from matrix service
+	FlagSlack                // FlagSlack publish from slack service
+	FlagIRC                  // FlagIRC publish from relaychat service
+
+	PubBundle = "reduxer-bundle" // Publish bundle key in a context with value
 )
 
 var maxDelayTime = 10
@@ -52,7 +56,12 @@ type Publisher interface {
 	Publish(ctx context.Context, cols []wayback.Collect, args ...string)
 }
 
-func process(p Publisher, ctx context.Context, cols []wayback.Collect, args ...string) {
+// String returns the flag as a string.
+func (f Flag) String() string {
+	return strconv.Itoa(int(f))
+}
+
+func process(ctx context.Context, pub Publisher, cols []wayback.Collect, args ...string) {
 	// Compose the collects into multiple parts by URI
 	var parts = make(map[string][]wayback.Collect)
 	for _, col := range cols {
@@ -75,7 +84,7 @@ func process(p Publisher, ctx context.Context, cols []wayback.Collect, args ...s
 				time.Sleep(w)
 			}
 
-			p.Publish(ctx, part, args...)
+			pub.Publish(ctx, part, args...)
 			return nil
 		})
 	}
@@ -94,6 +103,7 @@ func from(args ...string) (f string) {
 	return f
 }
 
+// To publish to specific destination services
 // nolint:gocyclo
 func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 	f := from(args...)
@@ -107,15 +117,15 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			if bot == nil {
 				return
 			}
-			t := NewTelegram(bot)
-			process(t, ctx, cols, args...)
+			pub := NewTelegram(bot)
+			process(ctx, pub, cols, args...)
 		}
 	}
 	issue := func(ctx context.Context, cols []wayback.Collect, args ...string) {
 		if config.Opts.PublishToIssues() {
 			logger.Debug("[%s] publishing to GitHub issues...", f)
-			gh := NewGitHub(nil)
-			process(gh, ctx, cols, args...)
+			pub := NewGitHub(nil)
+			process(ctx, pub, cols, args...)
 		}
 	}
 	mastodon := func(ctx context.Context, cols []wayback.Collect, args ...string) {
@@ -125,8 +135,8 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			if rev, ok := ctx.Value(FlagMastodon).(*mstdn.Client); ok {
 				client = rev
 			}
-			mstdn := NewMastodon(client)
-			process(mstdn, ctx, cols, args...)
+			pub := NewMastodon(client)
+			process(ctx, pub, cols, args...)
 		}
 	}
 	discord := func(ctx context.Context, cols []wayback.Collect, args ...string) {
@@ -136,8 +146,8 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			if rev, ok := ctx.Value(FlagDiscord).(*discord.Session); ok {
 				s = rev
 			}
-			d := NewDiscord(s)
-			process(d, ctx, cols, args...)
+			pub := NewDiscord(s)
+			process(ctx, pub, cols, args...)
 		}
 	}
 	matrix := func(ctx context.Context, cols []wayback.Collect, args ...string) {
@@ -147,8 +157,8 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			if rev, ok := ctx.Value(FlagMatrix).(*matrix.Client); ok {
 				client = rev
 			}
-			mat := NewMatrix(client)
-			process(mat, ctx, cols, args...)
+			pub := NewMatrix(client)
+			process(ctx, pub, cols, args...)
 		}
 	}
 	twitter := func(ctx context.Context, cols []wayback.Collect, args ...string) {
@@ -158,8 +168,8 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			if rev, ok := ctx.Value(FlagTwitter).(*twitter.Client); ok {
 				client = rev
 			}
-			twitter := NewTwitter(client)
-			process(twitter, ctx, cols, args...)
+			pub := NewTwitter(client)
+			process(ctx, pub, cols, args...)
 		}
 	}
 	slack := func(ctx context.Context, cols []wayback.Collect, args ...string) {
@@ -169,8 +179,8 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			if rev, ok := ctx.Value(FlagTwitter).(*slack.Client); ok {
 				client = rev
 			}
-			slack := NewSlack(client)
-			process(slack, ctx, cols, args...)
+			pub := NewSlack(client)
+			process(ctx, pub, cols, args...)
 		}
 	}
 	irc := func(ctx context.Context, cols []wayback.Collect, args ...string) {
@@ -180,8 +190,8 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			if rev, ok := ctx.Value(FlagIRC).(*irc.Connection); ok {
 				conn = rev
 			}
-			irc := NewIRC(conn)
-			process(irc, ctx, cols, args...)
+			pub := NewIRC(conn)
+			process(ctx, pub, cols, args...)
 		}
 	}
 	funcs := map[string]func(context.Context, []wayback.Collect, ...string){

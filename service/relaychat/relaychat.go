@@ -23,6 +23,7 @@ import (
 	"github.com/wabarc/wayback/template/render"
 )
 
+// IRC represents an IRC service in the application.
 type IRC struct {
 	sync.RWMutex
 
@@ -133,7 +134,7 @@ func (i *IRC) process(ev *irc.Event) error {
 	// Reply and publish toot as public
 	ctx := context.WithValue(i.ctx, publish.FlagIRC, i.conn)
 	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	publish.To(ctx, cols, publish.FlagIRC)
+	publish.To(ctx, cols, publish.FlagIRC.String())
 
 	return nil
 }

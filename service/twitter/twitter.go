@@ -24,6 +24,7 @@ import (
 	"github.com/wabarc/wayback/template/render"
 )
 
+// Twitter represents a Twitter service in the application
 type Twitter struct {
 	sync.RWMutex
 
@@ -207,7 +208,7 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 
 	ctx := context.WithValue(t.ctx, publish.FlagTwitter, t.client)
 	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	go publish.To(ctx, cols, publish.FlagTwitter)
+	go publish.To(ctx, cols, publish.FlagTwitter.String())
 
 	return nil
 }

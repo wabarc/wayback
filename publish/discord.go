@@ -43,6 +43,8 @@ func NewDiscord(bot *discord.Session) *discordBot {
 	return &discordBot{bot: bot}
 }
 
+// Publish publish text to the Discord channel of given cols and args.
+// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
 func (d *discordBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishDiscord, metrics.StatusRequest)
 
@@ -97,6 +99,7 @@ func (d *discordBot) toChannel(_ context.Context, bundle *reduxer.Bundle, text s
 	return true
 }
 
+// UploadToDiscord composes files that share with Discord by a given bundle.
 func UploadToDiscord(bundle *reduxer.Bundle) (files []*discord.File) {
 	if bundle != nil {
 		var fsize int64

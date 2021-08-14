@@ -27,7 +27,7 @@ import (
 	discord "github.com/bwmarrin/discordgo"
 )
 
-// Discord handles a discord service.
+// Discord represents a discord service in the application.
 type Discord struct {
 	ctx context.Context
 
@@ -277,7 +277,7 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 	if m.ChannelID != config.Opts.DiscordChannel() {
 		ctx = context.WithValue(ctx, publish.FlagDiscord, d.bot)
 		ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-		go publish.To(ctx, cols, publish.FlagDiscord)
+		go publish.To(ctx, cols, publish.FlagDiscord.String())
 	}
 
 	msg := &discord.MessageSend{Content: replyText, Reference: stage.Message.Reference()}

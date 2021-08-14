@@ -20,6 +20,7 @@ type ircBot struct {
 	conn *irc.Connection
 }
 
+// NewIRC returns a ircBot struct
 func NewIRC(conn *irc.Connection) *ircBot {
 	if !config.Opts.PublishToIRCChannel() {
 		logger.Error("Missing required environment variable, abort.")
@@ -38,6 +39,8 @@ func NewIRC(conn *irc.Connection) *ircBot {
 	return &ircBot{conn: conn}
 }
 
+// Publish publish text to IRC channel of given cols and args.
+// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
 func (i *ircBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusRequest)
 

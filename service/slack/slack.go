@@ -102,7 +102,6 @@ func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Slack 
 
 // Serve loop request message from the Slack api server.
 // Serve always returns an error.
-// nolint:gocyclo
 func (s *Slack) Serve() (err error) {
 	if s.bot == nil {
 		return errors.New("Initialize slack failed, error: %v", err)
@@ -123,102 +122,11 @@ func (s *Slack) Serve() (err error) {
 			case socketmode.EventTypeConnected:
 				logger.Info("connected to Slack with Socket Mode.")
 			case socketmode.EventTypeEventsAPI:
-				eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
-				if !ok {
-					logger.Warn("unsupported event: %+v", evt)
-					continue
-				}
-				logger.Debug("event received: %+v", eventsAPIEvent)
-
-				s.client.Ack(*evt.Request)
-
-				switch eventsAPIEvent.Type {
-				case slackevents.CallbackEvent:
-					innerEvent := eventsAPIEvent.InnerEvent
-					switch ev := innerEvent.Data.(type) {
-					case *slackevents.AppMentionEvent:
-						logger.Debug("channel mention message event: %+v", ev)
-						go s.process(&event{ev.User, ev.Text, ev.Channel, ev.TimeStamp, ev.ThreadTimeStamp})
-					case *slackevents.MessageEvent:
-						logger.Debug("direct message event: %+v", ev)
-						// Message event https://api.slack.com/events/message
-						// Exclude message from bot, https://api.slack.com/events/message/bot_message
-						// Exclude message changed event
-						if ev.BotID != "" || ev.SubType != "" {
-							logger.Debug("skipped event from bot")
-							continue
-						}
-						go s.process(&event{ev.User, ev.Text, ev.Channel, ev.TimeStamp, ev.ThreadTimeStamp})
-					}
-				default:
-					logger.Warn("unsupported Events API event received")
-				}
+				s.handleRequest(evt)
 			case socketmode.EventTypeInteractive:
-				callback, ok := evt.Data.(slack.InteractionCallback)
-				if !ok {
-					logger.Warn("unsupported event: %+v", evt)
-					continue
-				}
-				logger.Debug("interaction received: %+v", callback)
-
-				s.client.Ack(*evt.Request)
-
-				switch callback.Type {
-				case slack.InteractionTypeBlockActions:
-					// See https://api.slack.com/apis/connections/socket-implement#button
-					if len(callback.ActionCallback.BlockActions) == 0 {
-						logger.Debug("received wayback action empty")
-						continue
-					}
-					// Process wayback request from a playback action
-					block := callback.ActionCallback.BlockActions[0]
-					logger.Debug("received wayback action: %+v", block)
-					go s.process(&event{callback.User.ID, block.Value, callback.Container.ChannelID, callback.Container.MessageTs, callback.Container.ThreadTs})
-				case slack.InteractionTypeViewSubmission:
-					// See https://api.slack.com/apis/connections/socket-implement#modal
-					logger.Debug("received view submission: %+v", callback.View)
-					s.playback(callback.View.ExternalID, callback.View.State.Values[callbackKey][callbackKey].Value, callback.TriggerID)
-				}
+				s.handleButton(evt)
 			case socketmode.EventTypeSlashCommand:
-				cmd, ok := evt.Data.(slack.SlashCommand)
-				if !ok {
-					continue
-				}
-
-				logger.Debug("slash command received: %+v", cmd)
-
-				var payload interface{}
-				switch cmd.Command {
-				case "/help":
-					payload = map[string]interface{}{
-						"blocks": []slack.Block{
-							slack.NewSectionBlock(
-								&slack.TextBlockObject{
-									Type: slack.PlainTextType,
-									Text: config.Opts.SlackHelptext(),
-								},
-								nil, nil,
-							),
-						}}
-				case "/metrics":
-					stats := metrics.Gather.Export("wayback")
-					if config.Opts.EnabledMetrics() && stats != "" {
-						payload = map[string]interface{}{
-							"blocks": []slack.Block{
-								slack.NewSectionBlock(
-									&slack.TextBlockObject{
-										Type: slack.PlainTextType,
-										Text: stats,
-									},
-									nil, nil,
-								),
-							}}
-					}
-				case "/playback":
-					s.playback(cmd.ChannelID, cmd.Text, cmd.TriggerID)
-				default:
-				}
-				s.client.Ack(*evt.Request, payload)
+				s.handleCommand(evt)
 			default:
 				logger.Warn("unexpected event type received: %s", evt.Type)
 			}
@@ -234,6 +142,109 @@ func (s *Slack) Serve() (err error) {
 	s.client.RunContext(s.ctx)
 
 	return errors.New("done")
+}
+
+func (s *Slack) handleRequest(evt socketmode.Event) {
+	eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
+	if !ok {
+		logger.Warn("unsupported event: %+v", evt)
+		return
+	}
+	logger.Debug("event received: %+v", eventsAPIEvent)
+
+	s.client.Ack(*evt.Request)
+
+	switch eventsAPIEvent.Type {
+	case slackevents.CallbackEvent:
+		innerEvent := eventsAPIEvent.InnerEvent
+		switch ev := innerEvent.Data.(type) {
+		case *slackevents.AppMentionEvent:
+			logger.Debug("channel mention message event: %+v", ev)
+			go s.process(&event{ev.User, ev.Text, ev.Channel, ev.TimeStamp, ev.ThreadTimeStamp})
+		case *slackevents.MessageEvent:
+			logger.Debug("direct message event: %+v", ev)
+			// Message event https://api.slack.com/events/message
+			// Exclude message from bot, https://api.slack.com/events/message/bot_message
+			// Exclude message changed event
+			if ev.BotID != "" || ev.SubType != "" {
+				logger.Debug("skipped event from bot")
+				return
+			}
+			go s.process(&event{ev.User, ev.Text, ev.Channel, ev.TimeStamp, ev.ThreadTimeStamp})
+		}
+	default:
+		logger.Warn("unsupported Events API event received")
+	}
+}
+
+func (s *Slack) handleButton(evt socketmode.Event) {
+	callback, ok := evt.Data.(slack.InteractionCallback)
+	if !ok {
+		logger.Warn("unsupported event: %+v", evt)
+		return
+	}
+	logger.Debug("interaction received: %+v", callback)
+
+	s.client.Ack(*evt.Request)
+
+	switch callback.Type {
+	case slack.InteractionTypeBlockActions:
+		// See https://api.slack.com/apis/connections/socket-implement#button
+		if len(callback.ActionCallback.BlockActions) > 0 {
+			// Process wayback request from a playback action
+			block := callback.ActionCallback.BlockActions[0]
+			logger.Debug("received wayback action: %+v", block)
+			go s.process(&event{callback.User.ID, block.Value, callback.Container.ChannelID, callback.Container.MessageTs, callback.Container.ThreadTs})
+		}
+	case slack.InteractionTypeViewSubmission:
+		// See https://api.slack.com/apis/connections/socket-implement#modal
+		logger.Debug("received view submission: %+v", callback.View)
+		s.playback(callback.View.ExternalID, callback.View.State.Values[callbackKey][callbackKey].Value, callback.TriggerID)
+	}
+	return
+}
+
+func (s *Slack) handleCommand(evt socketmode.Event) {
+	cmd, ok := evt.Data.(slack.SlashCommand)
+	if !ok {
+		return
+	}
+
+	logger.Debug("slash command received: %+v", cmd)
+
+	var payload interface{}
+	switch cmd.Command {
+	case "/help":
+		payload = map[string]interface{}{
+			"blocks": []slack.Block{
+				slack.NewSectionBlock(
+					&slack.TextBlockObject{
+						Type: slack.PlainTextType,
+						Text: config.Opts.SlackHelptext(),
+					},
+					nil, nil,
+				),
+			}}
+	case "/metrics":
+		stats := metrics.Gather.Export("wayback")
+		if config.Opts.EnabledMetrics() && stats != "" {
+			payload = map[string]interface{}{
+				"blocks": []slack.Block{
+					slack.NewSectionBlock(
+						&slack.TextBlockObject{
+							Type: slack.PlainTextType,
+							Text: stats,
+						},
+						nil, nil,
+					),
+				}}
+		}
+	case "/playback":
+		s.playback(cmd.ChannelID, cmd.Text, cmd.TriggerID)
+	default:
+	}
+	s.client.Ack(*evt.Request, payload)
+	return
 }
 
 func (s *Slack) process(ev *event) (err error) {
@@ -289,7 +300,7 @@ func (s *Slack) wayback(ctx context.Context, ev *event, urls []string) error {
 
 	ctx = context.WithValue(ctx, publish.FlagSlack, s.bot)
 	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	go publish.To(ctx, cols, publish.FlagSlack)
+	go publish.To(ctx, cols, publish.FlagSlack.String())
 
 	for _, bundle := range bundles {
 		if err := publish.UploadToSlack(s.bot, bundle, ev.Channel, ev.TimeStamp); err != nil {

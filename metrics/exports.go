@@ -16,6 +16,7 @@ import (
 // Gather holds configured collector.
 var Gather *Collector
 
+// Export export metrics by the given labels for matching.
 func (c *Collector) Export(labels ...string) string {
 	logger.Debug("export metrics family: %#v", prometheus.DefaultRegisterer)
 

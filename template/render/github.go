@@ -15,15 +15,21 @@ import (
 
 var _ Renderer = (*GitHub)(nil)
 
+// GitHub represents a GitHub template data for render.
 type GitHub struct {
 	Cols []wayback.Collect
 	Data interface{}
 }
 
+// ForReply implements the standard Renderer interface:
+// it returns a Render from the ForPublish.
 func (gh *GitHub) ForReply() *Render {
 	return gh.ForPublish()
 }
 
+// ForPublish implements the standard Renderer interface:
+// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// the GitHub and returns a *Render.
 func (gh *GitHub) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
 

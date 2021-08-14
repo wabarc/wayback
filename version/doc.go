@@ -5,5 +5,4 @@
 /*
 Package version contains application and build information.
 */
-
 package version // import "github.com/wabarc/wayback/version"

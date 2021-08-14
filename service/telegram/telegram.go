@@ -30,7 +30,7 @@ import (
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
-// Telegram handles a telegram service.
+// Telegram represents a Telegram service in the application.
 type Telegram struct {
 	ctx context.Context
 
@@ -249,7 +249,7 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 
 	ctx = context.WithValue(ctx, publish.FlagTelegram, t.bot)
 	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	go publish.To(ctx, cols, publish.FlagTelegram)
+	go publish.To(ctx, cols, publish.FlagTelegram.String())
 
 	var album telegram.Album
 	for _, bundle := range bundles {
@@ -375,17 +375,17 @@ func (t *Telegram) getCommands() []telegram.Command {
 }
 
 // nolint:stylecheck
-func (t *Telegram) setCommands() (error, bool) {
+func (t *Telegram) setCommands() error {
 	commands := t.getCommands()
 	logger.Debug("got commands: %v", commands)
 
 	if err := t.bot.SetCommands(commands); err != nil {
 		logger.Error("set commands failed: %v", err)
-		return err, false
+		return err
 	}
 	logger.Debug("set commands succeed")
 
-	return nil, true
+	return nil
 }
 
 func defaultCommands() []telegram.Command {

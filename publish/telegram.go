@@ -42,6 +42,8 @@ func NewTelegram(bot *telegram.Bot) *telegramBot {
 	return &telegramBot{bot: bot}
 }
 
+// Publish publish text to the Telegram channel of given cols and args.
+// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
 func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusRequest)
 
@@ -109,6 +111,7 @@ func (t *telegramBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
 	return true
 }
 
+// UploadToTelegram composes files into an album by the given bundle.
 func UploadToTelegram(bundle *reduxer.Bundle) telegram.Album {
 	// Attach image and pdf files
 	var album telegram.Album

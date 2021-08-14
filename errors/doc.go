@@ -5,5 +5,4 @@
 /*
 Package errors handles errors.
 */
-
 package errors // import "github.com/wabarc/wayback/errors"

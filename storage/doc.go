@@ -5,5 +5,4 @@
 /*
 Package storage implements a set of functions to interact with the database.
 */
-
 package storage // import "github.com/wabarc/wayback/storage"

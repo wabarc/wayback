@@ -20,6 +20,7 @@ type mastodon struct {
 	client *mstdn.Client
 }
 
+// NewMastodon returns a mastodon client.
 func NewMastodon(client *mstdn.Client) *mastodon {
 	if !config.Opts.PublishToMastodon() {
 		logger.Error("Missing required environment variable")
@@ -38,6 +39,8 @@ func NewMastodon(client *mstdn.Client) *mastodon {
 	return &mastodon{client: client}
 }
 
+// Publish publish toot to the Mastodon of given cols and args.
+// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
 func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	var id string
 	if len(args) > 1 {

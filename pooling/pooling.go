@@ -15,8 +15,8 @@ import (
 const maxTime = 5 * time.Minute
 
 var (
-	ErrPoolNotExist = errors.New("pool not exist")
-	ErrTimeout      = errors.New("process timeout")
+	ErrPoolNotExist = errors.New("pool not exist")  // ErrPoolNotExist pool not exist
+	ErrTimeout      = errors.New("process timeout") // ErrTimeout process timeout
 )
 
 type resource struct {

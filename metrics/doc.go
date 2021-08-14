@@ -5,5 +5,4 @@
 /*
 Package metrics exposes wayback service status.
 */
-
 package metrics // import "github.com/wabarc/wayback/metrics"

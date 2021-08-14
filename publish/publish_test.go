@@ -148,7 +148,7 @@ func TestPublishToChannelFromTelegram(t *testing.T) {
 
 	ctx := context.WithValue(context.Background(), FlagTelegram, bot)
 	ctx = context.WithValue(ctx, PubBundle, bundleExample)
-	To(ctx, collects, FlagTelegram)
+	To(ctx, collects, FlagTelegram.String())
 }
 
 func TestPublishTootFromMastodon(t *testing.T) {
@@ -187,7 +187,7 @@ func TestPublishTootFromMastodon(t *testing.T) {
 	mstdn := NewMastodon(nil)
 
 	ctx := context.WithValue(context.Background(), FlagMastodon, mstdn.client)
-	To(ctx, collects, FlagMastodon)
+	To(ctx, collects, FlagMastodon.String())
 }
 
 func TestPublishTweetFromTwitter(t *testing.T) {
@@ -215,7 +215,7 @@ func TestPublishTweetFromTwitter(t *testing.T) {
 
 	twi := NewTwitter(twitter.NewClient(httpClient))
 	ctx := context.WithValue(context.Background(), FlagTwitter, twi.client)
-	To(ctx, collects, FlagTwitter)
+	To(ctx, collects, FlagTwitter.String())
 }
 
 func TestPublishToIRCChannelFromIRC(t *testing.T) {

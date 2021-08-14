@@ -35,6 +35,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// Bundle represents a bundle data of a webpage.
 type Bundle struct {
 	screenshot.Screenshots
 
@@ -42,20 +43,24 @@ type Bundle struct {
 	Article readability.Article
 }
 
+// Assets represents the file paths stored on the local disk.
 type Assets struct {
 	Img, PDF, Raw, Txt, WARC, Media Asset
 }
 
+// Asset represents the files on the local disk and the remote servers.
 type Asset struct {
 	Local  string
 	Remote Remote
 }
 
+// Remote represents the file on the remote server.
 type Remote struct {
 	Anonfile string
 	Catbox   string
 }
 
+// Bundles represents a set of the Bundle in a map, and its key is a URL string.
 type Bundles map[string]*Bundle
 
 var _, existFFmpeg = exists("ffmpeg")
@@ -189,9 +194,9 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 			var shot screenshot.Screenshots
 			if remote := remoteHeadless(config.Opts.ChromeRemoteAddr()); remote != nil {
 				addr := remote.(*net.TCPAddr)
-				headless, err := screenshot.NewChromeRemoteScreenshoter(addr.String())
-				if err != nil {
-					logger.Error("screenshot failed: %v", err)
+				headless, er := screenshot.NewChromeRemoteScreenshoter(addr.String())
+				if er != nil {
+					logger.Error("screenshot failed: %v", er)
 					return
 				}
 				shot, err = headless.Screenshot(ctx, input, opts...)
@@ -216,6 +221,7 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 	return shots, nil
 }
 
+// Asset returns paths of asset on the local disk.
 func (b *Bundle) Asset() (paths []Asset) {
 	logger.Debug("assets: %#v", b.Assets)
 	paths = []Asset{
@@ -240,10 +246,9 @@ func remoteHeadless(addr string) net.Addr {
 		conn.Close()
 		logger.Warn("connected: %v", conn.RemoteAddr().String())
 		return conn.RemoteAddr()
-	} else {
-		logger.Warn("headless chrome don't exists")
-		return nil
 	}
+	logger.Warn("headless chrome don't exists")
+	return nil
 }
 
 func createDir(baseDir string) (dir string, err error) {
@@ -418,7 +423,7 @@ func remotely(ctx context.Context, assets *Assets) (err error) {
 	c := &http.Client{}
 	cat := catbox.New(c)
 	anon := anonfile.NewAnonfile(c)
-	g, ctx := errgroup.WithContext(ctx)
+	g, _ := errgroup.WithContext(ctx)
 	for _, asset := range v {
 		if !helper.Exists(asset.Local) {
 			continue

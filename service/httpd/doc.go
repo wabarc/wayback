@@ -5,5 +5,4 @@
 /*
 Package httpd implements the tor network service.
 */
-
 package httpd // import "github.com/wabarc/wayback/service/httpd"

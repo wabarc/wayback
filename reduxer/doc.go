@@ -5,5 +5,4 @@
 /*
 Package reduxer implements a set of functions to transform webpage to various formats.
 */
-
 package reduxer // import "github.com/wabarc/wayback/reduxer"

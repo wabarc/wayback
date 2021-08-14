@@ -5,5 +5,4 @@
 /*
 Package slack implements the slack bot daemon service.
 */
-
 package slack // import "github.com/wabarc/wayback/service/slack"

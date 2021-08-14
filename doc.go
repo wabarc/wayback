@@ -3,8 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Wayback is a toolkit for snapshot webpage to
+Package wayback is a toolkit for snapshot webpage to
 Internet Archive, archive.today, IPFS and beyond.
 */
-
 package wayback // import "github.com/wabarc/wayback"

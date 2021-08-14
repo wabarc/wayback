@@ -21,6 +21,7 @@ type twitterBot struct {
 	client *twitter.Client
 }
 
+// NewTwitter returns a twitterBot client.
 func NewTwitter(client *twitter.Client) *twitterBot {
 	if !config.Opts.PublishToTwitter() {
 		logger.Error("Missing required environment variable")
@@ -37,6 +38,8 @@ func NewTwitter(client *twitter.Client) *twitterBot {
 	return &twitterBot{client: client}
 }
 
+// Publish publish tweet to Twitter of given cols and args.
+// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
 func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusRequest)
 

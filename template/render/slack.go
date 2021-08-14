@@ -15,11 +15,14 @@ import (
 
 var _ Renderer = (*Slack)(nil)
 
+// Slack represents a Slack template data for render.
 type Slack struct {
 	Cols []wayback.Collect
 	Data interface{}
 }
 
+// ForReply implements the standard Renderer interface:
+// it reads `[]wayback.Collect` from the Slack and returns a *Render.
 func (s *Slack) ForReply() (r *Render) {
 	var tmplBytes bytes.Buffer
 
@@ -46,6 +49,9 @@ func (s *Slack) ForReply() (r *Render) {
 	return &Render{buf: tmplBytes}
 }
 
+// ForPublish implements the standard Renderer interface:
+// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// the Slack and returns a *Render.
 func (s *Slack) ForPublish() (r *Render) {
 	var tmplBytes bytes.Buffer
 

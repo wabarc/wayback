@@ -5,5 +5,4 @@
 /*
 Package config handles configuration management for the application.
 */
-
 package config // import "github.com/wabarc/wayback/config"

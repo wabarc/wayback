@@ -25,6 +25,7 @@ import (
 	"github.com/wabarc/wayback/storage"
 )
 
+// Tor represents a Tor service in the application.
 type Tor struct {
 	ctx   context.Context
 	pool  pooling.Pool

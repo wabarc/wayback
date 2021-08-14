@@ -5,5 +5,4 @@
 /*
 Package pooling implements the wayback workers pool.
 */
-
 package pooling // import "github.com/wabarc/wayback/pooling"

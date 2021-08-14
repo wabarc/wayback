@@ -5,5 +5,4 @@
 /*
 Package twitter implements the twitter daemon service.
 */
-
 package twitter // import "github.com/wabarc/wayback/service/twitter"

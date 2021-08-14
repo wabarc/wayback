@@ -76,6 +76,7 @@ var (
 	defTorRemotePorts = []int{80}
 )
 
+// Options represents a configuration options in the application.
 type Options struct {
 	debug    bool
 	logTime  bool
@@ -583,7 +584,7 @@ func (o *Options) PoolingSize() int {
 	return o.poolingSize
 }
 
-// SrorageDir returns the directory to storage binary file, e.g. html file, PDF
+// StorageDir returns the directory to storage binary file, e.g. html file, PDF
 func (o *Options) StorageDir() string {
 	return o.storageDir
 }

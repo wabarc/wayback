@@ -22,23 +22,33 @@ const (
 	maxDigestLen = 500
 )
 
+// Render represents a Render result.
 type Render struct {
 	buf bytes.Buffer
 }
 
+// Renderer is the interface that wraps the ForReply and ForPublish method.
 type Renderer interface {
+	// ForReply render text for reply to user.
 	ForReply() *Render
+
+	// ForPublish render text for publish.
 	ForPublish() *Render
 }
 
+// ForReply handles render template for replying to user, it
+// returns a Render.
 func ForReply(r Renderer) *Render {
 	return r.ForReply()
 }
 
+// ForPublish handles render template for publishing, it
+// returns a Render.
 func ForPublish(r Renderer) *Render {
 	return r.ForPublish()
 }
 
+// String returns a string from the Render.
 func (r *Render) String() string {
 	if r != nil {
 		return r.buf.String()
@@ -68,12 +78,17 @@ func funcMap() template.FuncMap {
 	}
 }
 
+// Collect represents a render data collection.
+// Arc is name of the archive service,
+// Dst mapping the original URL and archived destination URL,
+// Ext is extra descriptions.
 type Collect struct {
 	Arc, Ext, Src string
 
 	Dst []map[string]string
 }
 
+// Collects represents a set of Collect in a map, and its key is a URL string.
 type Collects map[string]Collect
 
 func groupBySlot(cols []wayback.Collect) *Collects {
@@ -107,6 +122,8 @@ func bundles(data interface{}) reduxer.Bundles {
 	return make(reduxer.Bundles)
 }
 
+// Title returns the title of the webpage of given `reduxer.Bundle`.
+// Its maximum length is defined by `maxTitleLen`.
 func Title(bundle *reduxer.Bundle) string {
 	if bundle == nil {
 		return ""
@@ -122,6 +139,8 @@ func Title(bundle *reduxer.Bundle) string {
 	return strings.TrimSpace(string(t))
 }
 
+// Digest returns digest of the webpage content of given `reduxer.Bundle`.
+// Its maximum length is defined by `maxDigestLen`.
 func Digest(bundle *reduxer.Bundle) string {
 	if bundle == nil {
 		return ""

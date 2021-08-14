@@ -44,6 +44,8 @@ func NewSlack(bot *slack.Client) *slackBot {
 	return &slackBot{bot: bot}
 }
 
+// Publish publish text to the Slack channel of given cols and args.
+// A context should contains a `reduxer.Bundle` via `publish.PubBundle` constant.
 func (s *slackBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishSlack, metrics.StatusRequest)
 

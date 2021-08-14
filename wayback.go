@@ -35,23 +35,27 @@ type Collect struct {
 	Ext string // Extra identifier
 }
 
+// IA represents the Internet Archive slot.
 type IA struct {
 	URL *url.URL
 	ctx context.Context
 }
 
+// IS represents the archive.today slot.
 type IS struct {
 	ctx context.Context
 
 	URL *url.URL
 }
 
+// IP represents the IPFS slot.
 type IP struct {
 	ctx context.Context
 
 	URL *url.URL
 }
 
+// PH represents the Telegra.ph slot.
 type PH struct {
 	ctx    context.Context
 	bundle *reduxer.Bundle
@@ -67,6 +71,8 @@ type Waybacker interface {
 	Wayback() string
 }
 
+// Wayback implements the standard Waybacker interface:
+// it reads URL from the IA and returns archived URL as a string.
 func (i IA) Wayback() string {
 	arc := &ia.Archiver{}
 	dst, err := arc.Wayback(i.ctx, i.URL)
@@ -77,6 +83,8 @@ func (i IA) Wayback() string {
 	return dst
 }
 
+// Wayback implements the standard Waybacker interface:
+// it reads URL from the IS and returns archived URL as a string.
 func (i IS) Wayback() string {
 	arc := &is.Archiver{}
 	dst, err := arc.Wayback(i.ctx, i.URL)
@@ -87,6 +95,8 @@ func (i IS) Wayback() string {
 	return dst
 }
 
+// Wayback implements the standard Waybacker interface:
+// it reads URL from the IP and returns archived URL as a string.
 func (i IP) Wayback() string {
 	arc := &ip.Archiver{
 		IPFSHost: config.Opts.IPFSHost(),
@@ -102,6 +112,8 @@ func (i IP) Wayback() string {
 	return dst
 }
 
+// Wayback implements the standard Waybacker interface:
+// it reads URL from the PH and returns archived URL as a string.
 func (i PH) Wayback() string {
 	arc := &ph.Archiver{}
 	arc.SetShot(i.parseShot())
@@ -117,13 +129,13 @@ func (i PH) Wayback() string {
 	return dst
 }
 
-func (p PH) parseShot() (shot screenshot.Screenshots) {
+func (i PH) parseShot() (shot screenshot.Screenshots) {
 	return screenshot.Screenshots{
-		URL:   p.bundle.URL,
-		Title: p.bundle.Title,
-		Image: p.bundle.Image,
-		HTML:  p.bundle.HTML,
-		PDF:   p.bundle.PDF,
+		URL:   i.bundle.URL,
+		Title: i.bundle.Title,
+		Image: i.bundle.Image,
+		HTML:  i.bundle.HTML,
+		PDF:   i.bundle.PDF,
 	}
 }
 
@@ -131,7 +143,7 @@ func wayback(w Waybacker) string {
 	return w.Wayback()
 }
 
-// Wayback returns URLs archived to the time capsules.
+// Wayback returns URLs archived to the time capsules of given URLs.
 func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (cols []Collect, err error) {
 	logger.Debug("start...")
 

@@ -15,11 +15,14 @@ import (
 
 var _ Renderer = (*Telegram)(nil)
 
+// Telegram represents a Telegram template data for render.
 type Telegram struct {
 	Cols []wayback.Collect
 	Data interface{}
 }
 
+// ForReply implements the standard Renderer interface:
+// it reads `[]wayback.Collect` from the Telegram and returns a *Render.
 func (t *Telegram) ForReply() (r *Render) {
 	var tmplBytes bytes.Buffer
 
@@ -52,6 +55,9 @@ func (t *Telegram) ForReply() (r *Render) {
 	return &Render{buf: tmplBytes}
 }
 
+// ForPublish implements the standard Renderer interface:
+// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// the Telegram and returns a *Render.
 func (t *Telegram) ForPublish() (r *Render) {
 	var tmplBytes bytes.Buffer
 

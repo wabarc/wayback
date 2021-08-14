@@ -29,9 +29,8 @@ func NewParser() *Parser {
 func (p *Parser) ParseEnvironmentVariables() (*Options, error) {
 	if err := p.parseLines(os.Environ()); err != nil {
 		return nil, err
-	} else {
-		return p.opts, nil
 	}
+	return p.opts, nil
 }
 
 // ParseFile loads configuration values from a local file.
@@ -73,6 +72,7 @@ func (p *Parser) parseFileContent(r io.Reader) (lines []string) {
 }
 
 // nolint:gocyclo,unparam
+// gocyclo:ignore
 func (p *Parser) parseLines(lines []string) (err error) {
 	for _, line := range lines {
 		fields := strings.SplitN(line, "=", 2)

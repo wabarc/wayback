@@ -6,5 +6,4 @@
 Package matrix implements the matrix daemon service.
 Spec: https://matrix.org/docs/spec/
 */
-
 package matrix // import "github.com/wabarc/wayback/service/matrix"

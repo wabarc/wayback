@@ -6,5 +6,4 @@
 Package relaychat implements the internet relay chat daemon service.
 RFC: https://tools.ietf.org/html/rfc1459
 */
-
 package relaychat // import "github.com/wabarc/wayback/service/relaychat"

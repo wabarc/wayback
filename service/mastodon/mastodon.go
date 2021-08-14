@@ -26,6 +26,7 @@ import (
 	"golang.org/x/net/html"
 )
 
+// Mastodon represents a Mastodon service in the application
 type Mastodon struct {
 	sync.RWMutex
 
@@ -200,7 +201,7 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 	// Reply and publish toot as public
 	ctx := context.WithValue(m.ctx, publish.FlagMastodon, m.client)
 	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	publish.To(ctx, col, publish.FlagMastodon, string(status.ID))
+	publish.To(ctx, col, publish.FlagMastodon.String(), string(status.ID))
 
 	return nil
 }

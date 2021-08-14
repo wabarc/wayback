@@ -15,11 +15,14 @@ import (
 
 var _ Renderer = (*Matrix)(nil)
 
+// Matrix represents a Matrix template data for render.
 type Matrix struct {
 	Cols []wayback.Collect
 	Data interface{}
 }
 
+// ForReply implements the standard Renderer interface:
+// it reads `[]wayback.Collect` from the Matrix and returns a *Render.
 func (m *Matrix) ForReply() *Render {
 	var tmplBytes bytes.Buffer
 
@@ -49,6 +52,9 @@ func (m *Matrix) ForReply() *Render {
 	return &Render{buf: tmplBytes}
 }
 
+// ForPublish implements the standard Renderer interface:
+// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// the Matrix and returns a *Render.
 func (m *Matrix) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
 

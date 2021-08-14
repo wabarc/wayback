@@ -5,5 +5,4 @@
 /*
 Package template handles template parsing and execution.
 */
-
 package template // import "github.com/wabarc/wayback/template"
