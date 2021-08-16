@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-ARG GO_VERSION=1.16
+ARG GO_VERSION=1.17
 
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS builder
 COPY --from=tonistiigi/xx:golang / /
