@@ -85,7 +85,7 @@ func TestGetDefaultFilenames(t *testing.T) {
 	}
 
 	home, _ := os.UserHomeDir()
-	paths := fmt.Sprintf("%s %s %s", "wayback.conf", filepath.Join(home, "wayback.conf"), "/etc/wayback.conf")
+	paths := fmt.Sprintf("%s %s %s", "wayback.conf", filepath.Join(home, "wayback.conf"), filepath.Join("/", "etc", "wayback.conf"))
 	for _, path := range files {
 		if !strings.Contains(paths, path) {
 			t.Errorf(`Unexpected file path got %s instead within '%s'`, path, paths)

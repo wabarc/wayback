@@ -252,7 +252,7 @@ func defaultFilenames() []string {
 	return []string{
 		name,
 		filepath.Join(home, name),
-		filepath.Join("/etc", name),
+		filepath.Join("/", "etc", name),
 	}
 }
 

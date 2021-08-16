@@ -80,7 +80,7 @@ jobs:
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
-        go-version: ^1.16
+        go-version: ^1.17
 
     - name: Build fat binary
       id: builder
@@ -243,7 +243,7 @@ jobs:
     - name: Set up Go 1.x
       uses: actions/setup-go@v2
       with:
-        go-version: ^1.16
+        go-version: ^1.17
 
     - name: Setup Flatpak
       run: |
@@ -316,7 +316,7 @@ jobs:
         git log --oneline ${PREVVER}..${GITVER} > gittaglogs.txt
         MORE=$(echo "See full [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/CHANGELOG.md)")
         echo -e "*Release ${GITVER}* #wayback\n" > release-note.md
-        cut -c9- gittaglogs.txt | sed -e 's/^/- /' >> release-note.md
+        cut -c9- gittaglogs.txt | sed -e 's/^/- /' | sed -e 's/\"/\\"/g' >> release-note.md
         echo -e "\n${MORE}" | tee -a release-note.md gittaglogs.txt > /dev/null
         # Append digests
         echo '
