@@ -60,7 +60,7 @@ require (
 	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/tucnak/telebot.v2 v2.4.0
-	maunium.net/go/mautrix v0.9.19
+	maunium.net/go/mautrix v0.9.20
 	mvdan.cc/xurls/v2 v2.3.0 // indirect
 )
 
