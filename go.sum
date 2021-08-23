@@ -617,8 +617,8 @@ github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78/go.mod h1:OlGUo0utW
 github.com/wabarc/playback v0.0.0-20210718054702-cab6c6004933 h1:KZHhUK+ZRhe4OxQ0+/H40jsS8NCCGJlY1jO7mzOdYyY=
 github.com/wabarc/playback v0.0.0-20210718054702-cab6c6004933/go.mod h1:or8QaM2wUqIX45GfmLbky8AZKgOQm78VueJpqY2TwXY=
 github.com/wabarc/screenshot v1.2.1-0.20210708225510-eb68213a95f1/go.mod h1:lT2loRSha0/gQni5A5JAv807xaEOztrIzCPuTQIs9zs=
-github.com/wabarc/screenshot v1.3.0 h1:5gTP6lWHn77qnRM47Ap3vx/9/HV3fHPV5jX0an9Nilw=
-github.com/wabarc/screenshot v1.3.0/go.mod h1:YGY7i/ZyMqJM3aYBjpsp+j7m68W2hW1d+sDAA61p90g=
+github.com/wabarc/screenshot v1.3.1 h1:Ih8nUfAla7ax4uyFJ1fKME+3NGZRUlGq3wce7K0jUl4=
+github.com/wabarc/screenshot v1.3.1/go.mod h1:ei8rqXW5mdztkqcsb81YUVwBZFROgyjAQJrEKEiMWfY=
 github.com/wabarc/telegra.ph v0.0.0-20210718173528-f72fc9cdc365 h1:AZeSe84nDyD5bYNpkCVVaOxdvaHIOj5tjVJPqcjjFLI=
 github.com/wabarc/telegra.ph v0.0.0-20210718173528-f72fc9cdc365/go.mod h1:e2nxaKoyr34W/jZefnrTn4HGXKdg0HBygLvIDJKFAiw=
 github.com/wabarc/warcraft v0.1.1-0.20210711171056-a5eec617b86c h1:HPTqoafOgXbqEMD54v3cTTJKKK3fd79UqG1ILR9S640=
@@ -862,9 +862,8 @@ golang.org/x/sys v0.0.0-20210603081109-ebe580a85c40/go.mod h1:oPkhp1MJrh7nUepCBc
 golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20210616094352-59db8d763f22/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.0.0-20210806184541-e5e7981a1069/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e h1:WUoyKPm6nCo1BnNUvPGnFG3T5DUVem42yDJZZ4CNxMA=
-golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20210820121016-41cdb8703e55 h1:rw6UNGRMfarCepjI8qOepea/SXwIBVfTKjztZ5gBbq4=
+golang.org/x/sys v0.0.0-20210820121016-41cdb8703e55/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
