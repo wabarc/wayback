@@ -27,7 +27,7 @@ func (m *Matrix) ForReply() *Render {
 	var tmplBytes bytes.Buffer
 
 	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext | extra }}'>{{ $.Arc | name }}</a></b>:<br>
-• <a href="{{ $.Src | revert }}">source</a> - {{ $.Dst }}<br>
+• <a href="{{ $.Src | revert }}">source</a> - {{ $.Dst | escapeString }}<br>
 <br>
 {{ end }}`
 
@@ -70,7 +70,7 @@ func (m *Matrix) ForPublish() *Render {
 	}
 
 	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext | extra }}'>{{ $.Arc | name }}</a></b>:<br>
-• <a href="{{ $.Src | revert }}">source</a> - {{ $.Dst }}<br>
+• <a href="{{ $.Src | revert }}">source</a> - {{ $.Dst | escapeString }}<br>
 <br>
 {{ end }}`
 

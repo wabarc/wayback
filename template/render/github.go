@@ -41,7 +41,7 @@ func (gh *GitHub) ForPublish() *Render {
 
 	const tmpl = `{{range $ := .}}**[{{ $.Arc | name }}]({{ $.Ext | extra }})**:
 > source: [{{ $.Src | unescape | revert }}]({{ $.Src | revert }})
-> archived: {{ if $.Dst | isURL }}[{{ $.Dst | unescape }}]({{ $.Dst }})
+> archived: {{ if $.Dst | isURL }}[{{ $.Dst | unescape }}]({{ $.Dst | escapeString }})
 {{ else }}{{ $.Dst }}
 {{ end }}
 {{ end }}`

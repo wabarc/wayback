@@ -230,15 +230,17 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 
 // Asset returns paths of asset on the local disk.
 func (b *Bundle) Asset() (paths []Asset) {
-	logger.Debug("assets: %#v", b.Assets)
-	paths = []Asset{
-		b.Assets.Img,
-		b.Assets.PDF,
-		b.Assets.Raw,
-		b.Assets.Txt,
-		b.Assets.HAR,
-		b.Assets.WARC,
-		b.Assets.Media,
+	if b != nil {
+		logger.Debug("assets: %#v", b.Assets)
+		paths = []Asset{
+			b.Assets.Img,
+			b.Assets.PDF,
+			b.Assets.Raw,
+			b.Assets.Txt,
+			b.Assets.HAR,
+			b.Assets.WARC,
+			b.Assets.Media,
+		}
 	}
 	return
 }

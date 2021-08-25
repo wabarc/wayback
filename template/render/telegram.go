@@ -26,10 +26,10 @@ type Telegram struct {
 func (t *Telegram) ForReply() (r *Render) {
 	var tmplBytes bytes.Buffer
 
-	const tmpl = `{{range $ := .}}<b><a href='{{ $.Ext | extra }}'>{{ $.Arc | name }}</a></b>:
+	const tmpl = `{{range $ := .}}<b><a href="{{ $.Ext | extra }}">{{ $.Arc | name }}</a></b>:
 {{ range $map := $.Dst -}}
 {{ range $src, $dst := $map -}}
-• <a href="{{ $src | revert }}">source</a> - {{ if $dst | isURL }}<a href="{{ $dst }}">{{ $dst }}</a>{{ else }}{{ $dst }}{{ end }}
+• <a href="{{ $src | revert }}">source</a> - {{ if $dst | isURL }}<a href="{{ $dst }}">{{ $dst }}</a>{{ else }}{{ $dst | escapeString }}{{ end }}
 {{ end }}{{ end }}
 {{ end }}`
 
@@ -73,8 +73,8 @@ func (t *Telegram) ForPublish() (r *Render) {
 	}
 
 	tmpl := `{{range $ := .}}
-<b><a href='{{ $.Ext | extra }}'>{{ $.Arc | name }}</a></b>:
-• <a href="{{ $.Src | revert }}">source</a> - {{ if $.Dst | isURL }}<a href="{{ $.Dst }}">{{ $.Dst }}</a>{{ else }}{{ $.Dst }}{{ end }}
+<b><a href="{{ $.Ext | extra }}">{{ $.Arc | name }}</a></b>:
+• <a href="{{ $.Src | revert }}">source</a> - {{ if $.Dst | isURL }}<a href="{{ $.Dst }}">{{ $.Dst }}</a>{{ else }}{{ $.Dst | escapeString }}{{ end }}
 {{ end }}`
 
 	tpl, err := template.New("message").Funcs(funcMap()).Parse(tmpl)

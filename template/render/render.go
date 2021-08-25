@@ -15,6 +15,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/reduxer"
+	"golang.org/x/net/html"
 )
 
 const (
@@ -59,6 +60,7 @@ func (r *Render) String() string {
 func funcMap() template.FuncMap {
 	cache := "https://webcache.googleusercontent.com/search?q=cache:"
 	return template.FuncMap{
+		"escapeString": html.EscapeString,
 		"unescape": func(link string) string {
 			unescaped, err := url.QueryUnescape(link)
 			if err != nil {

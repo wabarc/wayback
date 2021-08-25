@@ -8,16 +8,19 @@ import (
 	"sync"
 	"time"
 
+	"github.com/phf/go-queue/queue"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/errors"
 )
 
-const maxTime = 5 * time.Minute
+var maxTime = 5 * time.Minute
 
 var (
 	ErrPoolNotExist = errors.New("pool not exist")  // ErrPoolNotExist pool not exist
 	ErrTimeout      = errors.New("process timeout") // ErrTimeout process timeout
 )
+
+var q = queue.New()
 
 type resource struct {
 	id int
@@ -49,8 +52,13 @@ func New(size int) Pool {
 
 // Roll wrapper service as function to the resource pool.
 func (p Pool) Roll(service func()) {
-	do := func(service func(), wg *sync.WaitGroup) {
+	do := func(wg *sync.WaitGroup) {
 		defer wg.Done()
+		fn, ok := q.PopBack().(func())
+		if !ok {
+			logger.Error("pop service failed")
+			return
+		}
 
 		r, err := p.pull()
 		defer p.push(r)
@@ -60,13 +68,18 @@ func (p Pool) Roll(service func()) {
 		}
 		logger.Debug("roll service on #%d", r.id)
 
-		logger.Debug("roll service func: %#v", service)
-		service()
+		logger.Debug("roll service func: %#v", fn)
+		fn()
 	}
+
+	// Inserts a new value service at the front of queue q.
+	q.PushFront(service)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go do(service, &wg)
+
+	// TODO: retry
+	go do(&wg)
 	wg.Wait()
 }
 

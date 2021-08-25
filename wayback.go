@@ -77,7 +77,7 @@ func (i IA) Wayback() string {
 	arc := &ia.Archiver{}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("%s to Internet Archive failed: %v", i.URL.String(), err)
+		logger.Error("wayback %s to Internet Archive failed: %v", i.URL.String(), err)
 		return fmt.Sprint(err)
 	}
 	return dst
@@ -89,7 +89,7 @@ func (i IS) Wayback() string {
 	arc := &is.Archiver{}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("%s to archive.today failed: %v", i.URL.String(), err)
+		logger.Error("wayback %s to archive.today failed: %v", i.URL.String(), err)
 		return fmt.Sprint(err)
 	}
 	return dst
@@ -106,7 +106,7 @@ func (i IP) Wayback() string {
 	}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("%s to IPFS failed: %v", i.URL.String(), err)
+		logger.Error("wayback %s to IPFS failed: %v", i.URL.String(), err)
 		return fmt.Sprint(err)
 	}
 	return dst
@@ -123,20 +123,23 @@ func (i PH) Wayback() string {
 
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
-		logger.Error("%s to archive.today failed: %v", i.URL.String(), err)
+		logger.Error("wayback %s to telegra.ph failed: %v", i.URL.String(), err)
 		return fmt.Sprint(err)
 	}
 	return dst
 }
 
 func (i PH) parseShot() (shot screenshot.Screenshots) {
-	return screenshot.Screenshots{
-		URL:   i.bundle.URL,
-		Title: i.bundle.Title,
-		Image: i.bundle.Image,
-		HTML:  i.bundle.HTML,
-		PDF:   i.bundle.PDF,
+	if i.bundle != nil {
+		shot = screenshot.Screenshots{
+			URL:   i.bundle.URL,
+			Title: i.bundle.Title,
+			Image: i.bundle.Image,
+			HTML:  i.bundle.HTML,
+			PDF:   i.bundle.PDF,
+		}
 	}
+	return
 }
 
 func wayback(w Waybacker) string {
