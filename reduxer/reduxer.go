@@ -363,6 +363,7 @@ func media(ctx context.Context, dir, in string) string {
 			MultiThread:  true,
 			ThreadNumber: 10,
 			ChunkSizeMB:  10,
+			Silent:       true,
 		})
 		sortedStreams := sortStreams(dt.Streams)
 		if len(sortedStreams) == 0 {
