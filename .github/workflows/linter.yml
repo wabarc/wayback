@@ -9,6 +9,8 @@ on:
       - '**'
     types: [ opened, synchronize, reopened ]
 
+permissions: write-all
+
 jobs:
   lint:
     runs-on: ubuntu-latest

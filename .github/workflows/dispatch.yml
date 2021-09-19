@@ -4,6 +4,8 @@ on:
   release:
     types: [published]
 
+permissions: {}
+
 jobs:
   release-brew:
     if: github.repository == 'wabarc/wayback'

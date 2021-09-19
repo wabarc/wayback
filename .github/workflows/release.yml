@@ -8,6 +8,8 @@ on:
 env:
   PRODUCT: wayback
 
+permissions: write-all
+
 jobs:
   build:
     name: Build

@@ -19,6 +19,8 @@ on:
       - 'snapcraft.yaml'
   workflow_dispatch:
 
+permissions: write-all
+
 jobs:
   publish:
     if: github.repository == 'wabarc/wayback'
