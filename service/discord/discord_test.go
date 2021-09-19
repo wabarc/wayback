@@ -133,7 +133,7 @@ func handle(mux *http.ServeMux, gateway string) {
 			fmt.Fprintln(w, string(gatewayJson))
 		case uri == discord.EndpointChannelMessages(channelID) && r.Method == http.MethodPost:
 			// https://discord.com/api/v8/channels/fake-discord-channel-id/messages
-			if !strings.Contains(content, "Queue...") {
+			if content == "" {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
