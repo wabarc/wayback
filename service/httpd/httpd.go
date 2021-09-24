@@ -279,10 +279,10 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 
 		if data, err := json.Marshal(collector); err != nil {
 			logger.Error("encode for response failed, %v", err)
-			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
+			metrics.IncrementPlayback(metrics.ServiceWeb, metrics.StatusFailure)
 		} else {
 			if len(urls) > 0 {
-				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
+				metrics.IncrementPlayback(metrics.ServiceWeb, metrics.StatusSuccess)
 			}
 			w.Write(data)
 		}
@@ -291,11 +291,11 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 
 		if html, ok := web.template.Render("layout", collector); ok {
 			if len(urls) > 0 {
-				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
+				metrics.IncrementPlayback(metrics.ServiceWeb, metrics.StatusSuccess)
 			}
 			w.Write(html)
 		} else {
-			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
+			metrics.IncrementPlayback(metrics.ServiceWeb, metrics.StatusFailure)
 			logger.Error("render template for response failed")
 		}
 	}
