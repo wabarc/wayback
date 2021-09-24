@@ -61,15 +61,27 @@ func (p Pool) Roll(service func()) {
 		}
 
 		r, err := p.pull()
-		defer p.push(r)
 		if err != nil {
 			logger.Error("pull resources failed: %v", err)
 			return
 		}
-		logger.Debug("roll service on #%d", r.id)
 
-		logger.Debug("roll service func: %#v", fn)
-		fn()
+		ch := make(chan bool, 1)
+		go func() {
+			logger.Debug("roll service func: %#v", fn)
+			fn()
+			ch <- true
+		}()
+
+		select {
+		case <-ch:
+			logger.Info("roll service completed")
+		case <-time.After(maxTime):
+			logger.Warn("roll service timeout")
+		}
+
+		p.push(r)
+		logger.Debug("roll service completed on #%d", r.id)
 	}
 
 	// Inserts a new value service at the front of queue q.
@@ -88,7 +100,7 @@ func (p Pool) pull() (r *resource, err error) {
 	case r := <-p:
 		return r, nil
 	case <-time.After(maxTime):
-		return new(resource), ErrTimeout
+		return nil, ErrTimeout
 	}
 }
 
