@@ -24,6 +24,11 @@ import (
 	"github.com/wabarc/wayback/template/render"
 )
 
+var callbackKey = "playback"
+
+// ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
+var ErrServiceClosed = errors.New("slack: Service closed")
+
 // Slack handles a slack service.
 //
 // Steps to create a bot:
@@ -58,8 +63,6 @@ type Slack struct {
 type event struct {
 	User, Text, Channel, TimeStamp, ThreadTimeStamp string
 }
-
-var callbackKey = "playback"
 
 // New Slack struct.
 func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Slack {
@@ -127,21 +130,23 @@ func (s *Slack) Serve() (err error) {
 				s.handleButton(evt)
 			case socketmode.EventTypeSlashCommand:
 				s.handleCommand(evt)
+			case socketmode.EventTypeHello, socketmode.EventTypeDisconnect, socketmode.EventTypeIncomingError:
 			default:
 				logger.Warn("unexpected event type received: %s", evt.Type)
 			}
 		}
 	}()
 
-	go func() {
-		<-s.ctx.Done()
-		logger.Info("slack service stopped")
-	}()
-
 	logger.Info("starting slack service...")
+	// Block until context done
 	s.client.RunContext(s.ctx)
 
-	return errors.New("done")
+	return ErrServiceClosed
+}
+
+// Shutdown shuts down the Slack service, it always retuan a nil error.
+func (s *Slack) Shutdown() error {
+	return nil
 }
 
 func (s *Slack) handleRequest(evt socketmode.Event) {
