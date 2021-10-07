@@ -61,6 +61,7 @@ const (
 	defMatrixPassword   = ""
 
 	defTorPrivateKey = ""
+	defListenAddr    = "127.0.0.1:8964"
 	defTorLocalPort  = 8964
 	defTorrcFile     = "/etc/tor/torrc"
 
@@ -96,6 +97,7 @@ type Options struct {
 	irc      *irc
 	tor      *tor
 
+	listenAddr          string
 	chromeRemoteAddr    string
 	enabledChromeRemote bool
 	boltPathname        string
@@ -180,6 +182,7 @@ func NewOptions() *Options {
 		logLevel:            defLogLevel,
 		overTor:             defOverTor,
 		metrics:             defMetrics,
+		listenAddr:          defListenAddr,
 		chromeRemoteAddr:    defChromeRemoteAddr,
 		enabledChromeRemote: defEnabledChromeRemote,
 		boltPathname:        defBoltPathname,
@@ -561,6 +564,11 @@ func (o *Options) TorRemotePorts() []int {
 // TorrcFile returns path of the torrc file to set on start Tor Hidden Service.
 func (o *Options) TorrcFile() string {
 	return o.tor.torrcFile
+}
+
+// ListenAddr returns the listen address for the HTTP server.
+func (o *Options) ListenAddr() string {
+	return o.listenAddr
 }
 
 // EnabledChromeRemote returns whether enable Chrome/Chromium remote debugging

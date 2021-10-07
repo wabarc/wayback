@@ -60,10 +60,48 @@ func (t *Tor) Serve() error {
 	// Start tor with some defaults + elevated verbosity
 	logger.Info("starting and registering onion service, please wait a bit...")
 
-	if _, err := exec.LookPath("tor"); err != nil {
-		logger.Fatal("%v", err)
+	handler := newWeb().handle(t.pool)
+	server := &http.Server{
+		ReadTimeout:  5 * time.Minute,
+		WriteTimeout: 5 * time.Minute,
+		IdleTimeout:  5 * time.Minute,
+		Handler:      handler,
 	}
 
+	switch {
+	case torExist():
+		logger.Info("start a tor hidden server")
+		t.startTorServer(server)
+	default:
+		logger.Info("start a clear web server")
+		server.Addr = config.Opts.ListenAddr()
+		startHTTPServer(server)
+	}
+
+	<-t.ctx.Done()
+	logger.Info("stopping tor hidden service...")
+	if err := server.Shutdown(t.ctx); err != nil {
+		logger.Error("shutdown tor hidden service failed: %v", err)
+		return err
+	}
+
+	return errors.New("done")
+}
+
+func (t *Tor) torrc() string {
+	if config.Opts.TorrcFile() == "" {
+		return ""
+	}
+	if torPortBusy() {
+		return ""
+	}
+	if _, err := os.Open(config.Opts.TorrcFile()); err != nil {
+		return ""
+	}
+	return config.Opts.TorrcFile()
+}
+
+func (t *Tor) startTorServer(server *http.Server) {
 	var pvk ed25519.PrivateKey
 	if config.Opts.TorPrivKey() == "" {
 		if keypair, err := ed25519.GenerateKey(rand.Reader); err != nil {
@@ -92,7 +130,6 @@ func (t *Tor) Serve() error {
 	if err != nil {
 		logger.Fatal("failed to start tor: %v", err)
 	}
-	defer e.Close()
 	e.DeleteDataDirOnClose = true
 	e.StopProcessOnClose = false
 
@@ -102,40 +139,31 @@ func (t *Tor) Serve() error {
 	if err != nil {
 		logger.Fatal("failed to create onion service: %v", err)
 	}
-	defer onion.Close()
 	onion.CloseLocalListenerOnClose = false
 
 	logger.Info(`listening on "%s" without TLS`, color.BlueString(onion.LocalListener.Addr().String()))
 	logger.Info("please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
 
-	server := http.Server{Handler: newWeb().handle(t.pool)}
 	go func() {
 		if err := server.Serve(onion); err != nil {
-			logger.Error("serve tor hidden service failed: %v", err)
+			logger.Fatal("serve tor hidden service failed: %v", err)
 		}
+
+		// Close onion service.
+		// TODO
+		<-t.ctx.Done()
+		e.Close()
+		onion.Close()
 	}()
-
-	<-t.ctx.Done()
-	logger.Info("stopping tor hidden service...")
-	if err := server.Shutdown(t.ctx); err != nil {
-		logger.Error("shutdown tor hidden service failed: %v", err)
-		return err
-	}
-
-	return errors.New("done")
 }
 
-func (t *Tor) torrc() string {
-	if config.Opts.TorrcFile() == "" {
-		return ""
-	}
-	if torPortBusy() {
-		return ""
-	}
-	if _, err := os.Open(config.Opts.TorrcFile()); err != nil {
-		return ""
-	}
-	return config.Opts.TorrcFile()
+func startHTTPServer(server *http.Server) {
+	go func() {
+		logger.Info(`Listening on "%s" without TLS`, color.BlueString(server.Addr))
+		if err := server.ListenAndServe(); err != http.ErrServerClosed {
+			logger.Fatal("Server failed to start: %v", err)
+		}
+	}()
 }
 
 func torPortBusy() bool {
@@ -152,4 +180,11 @@ func torPortBusy() bool {
 	}
 
 	return false
+}
+
+func torExist() bool {
+	if _, err := exec.LookPath("tor"); err != nil {
+		return false
+	}
+	return true
 }

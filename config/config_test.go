@@ -396,7 +396,7 @@ func TestTorLocalPort(t *testing.T) {
 	got := opts.TorLocalPort()
 
 	if got != expected {
-		t.Fatalf(`Unexpected Tor private key, got %v instead of %q`, got, expected)
+		t.Fatalf(`Unexpected Tor local port, got %v instead of %q`, got, expected)
 	}
 }
 
@@ -413,7 +413,7 @@ func TestDefaultTorLocalPortValue(t *testing.T) {
 	got := opts.TorLocalPort()
 
 	if got != expected {
-		t.Fatalf(`Unexpected Tor private key, got %v instead of %q`, got, expected)
+		t.Fatalf(`Unexpected Tor local port, got %v instead of %q`, got, expected)
 	}
 }
 
@@ -431,7 +431,43 @@ func TestTorRemotePorts(t *testing.T) {
 	got := opts.TorRemotePorts()
 
 	if got == nil || len(got) != 3 {
-		t.Fatalf(`Unexpected Tor private key, got %v instead of %v`, got, expected)
+		t.Fatalf(`Unexpected Tor remote port, got %v instead of %v`, got, expected)
+	}
+}
+
+func TestListenAddr(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		address  string
+		expected string
+	}{
+		{
+			address:  "",
+			expected: defListenAddr,
+		},
+		{
+			address:  defListenAddr,
+			expected: defListenAddr,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.address, func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("HTTP_LISTEN_ADDR", test.address)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing failure: %v`, err)
+			}
+
+			result := opts.ListenAddr()
+			if result != test.expected {
+				t.Fatalf(`Unexpected LISTEN_ADDR value, got %q instead of %q`, result, test.expected)
+			}
+		})
 	}
 }
 
@@ -448,7 +484,7 @@ func TestDefaultTorRemotePortsValue(t *testing.T) {
 	got := opts.TorRemotePorts()
 
 	if got == nil || len(got) != 1 {
-		t.Fatalf(`Unexpected Tor private key, got %v instead of %v`, got, expected)
+		t.Fatalf(`Unexpected Tor remote port, got %v instead of %v`, got, expected)
 	}
 }
 

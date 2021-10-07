@@ -95,7 +95,7 @@ func (srv *service) run(ctx context.Context, store *storage.Storage, pool poolin
 			go func(errCh chan error) {
 				errCh <- matrix.Serve()
 			}(srv.errCh)
-		case "web":
+		case "web", "httpd":
 			tor := httpd.New(ctx, store, pool)
 			go func(errCh chan error) {
 				errCh <- tor.Serve()

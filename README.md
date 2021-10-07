@@ -204,6 +204,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `LOG_TIME`                        | `true`                  | Display the date and time in log messages                    |
 | -                   | `LOG_LEVEL`                       | `info`                  | Log level, supported level are `debug`, `info`, `warn`, `error`, `fatal`, defaults to `info` |
 | -                   | `ENABLE_METRICS`                  | `false`                 | Enable metrics collector                                     |
+| -                   | `HTTP_LISTEN_ADDR`                | `127.0.0.1:8964`        | The listen address for the HTTP server                       |
 | -                   | `CHROME_REMOTE_ADDR`              | -                       | Chrome/Chromium remote debugging address, for screenshot     |
 | -                   | `WAYBACK_POOLING_SIZE`            | `3`                     | Number of worker pool for wayback at once                    |
 | -                   | `WAYBACK_BOLT_PATH`               | `./wayback.db`          | File path of bolt database                                   |
