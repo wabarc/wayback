@@ -4,8 +4,8 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/wabarc/logger"
@@ -22,8 +22,13 @@ import (
 	"github.com/wabarc/wayback/storage"
 )
 
+type target struct {
+	call func()
+	name string
+}
+
 type service struct {
-	errCh chan error
+	targets []target
 }
 
 func serve(_ *cobra.Command, _ []string) {
@@ -38,71 +43,110 @@ func serve(_ *cobra.Command, _ []string) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	srv := &service{}
-	ran := srv.run(ctx, store, pool)
+	_ = srv.run(ctx, store, pool)
 
 	go srv.stop(cancel)
-	defer close(srv.errCh)
 
-	select {
-	case err := <-ran.err():
-		if err != nil {
-			logger.Error("%v", err.Error())
-		} else {
-			logger.Error("unknown error")
-		}
-	case <-ctx.Done():
-		logger.Info("wayback service stopping...")
-		time.Sleep(100 * time.Millisecond)
-	}
+	<-ctx.Done()
+	logger.Info("wayback service stopped.")
 }
 
+// nolint:gocyclo
 func (srv *service) run(ctx context.Context, store *storage.Storage, pool pooling.Pool) *service {
-	srv.errCh = make(chan error, len(daemon))
+	size := len(daemon)
+	srv.targets = make([]target, 0, size)
 	for _, s := range daemon {
 		switch s {
 		case "irc":
 			irc := relaychat.New(ctx, store, pool)
-			go func(errCh chan error) {
-				errCh <- irc.Serve()
-			}(srv.errCh)
+			go func() {
+				if err := irc.Serve(); err != relaychat.ErrServiceClosed {
+					logger.Error("%v", err)
+				}
+			}()
+			srv.targets = append(srv.targets, target{
+				call: func() { irc.Shutdown() },
+				name: s,
+			})
 		case "slack":
-			slack := slack.New(ctx, store, pool)
-			go func(errCh chan error) {
-				errCh <- slack.Serve()
-			}(srv.errCh)
+			sl := slack.New(ctx, store, pool)
+			go func() {
+				if err := sl.Serve(); err != slack.ErrServiceClosed {
+					logger.Error("%v", err)
+				}
+			}()
+			srv.targets = append(srv.targets, target{
+				call: func() { sl.Shutdown() },
+				name: s,
+			})
 		case "discord":
-			discord := discord.New(ctx, store, pool)
-			go func(errCh chan error) {
-				errCh <- discord.Serve()
-			}(srv.errCh)
+			d := discord.New(ctx, store, pool)
+			go func() {
+				if err := d.Serve(); err != discord.ErrServiceClosed {
+					logger.Error("%v", err)
+				}
+			}()
+			srv.targets = append(srv.targets, target{
+				call: func() { d.Shutdown() },
+				name: s,
+			})
 		case "mastodon", "mstdn":
-			mastodon := mastodon.New(ctx, store, pool)
-			go func(errCh chan error) {
-				errCh <- mastodon.Serve()
-			}(srv.errCh)
+			m := mastodon.New(ctx, store, pool)
+			go func() {
+				if err := m.Serve(); err != mastodon.ErrServiceClosed {
+					logger.Error("%v", err)
+				}
+			}()
+			srv.targets = append(srv.targets, target{
+				call: func() { m.Shutdown() },
+				name: s,
+			})
 		case "telegram":
-			telegram := telegram.New(ctx, store, pool)
-			go func(errCh chan error) {
-				errCh <- telegram.Serve()
-			}(srv.errCh)
+			t := telegram.New(ctx, store, pool)
+			go func() {
+				if err := t.Serve(); err != telegram.ErrServiceClosed {
+					logger.Error("%v", err)
+				}
+			}()
+			srv.targets = append(srv.targets, target{
+				call: func() { t.Shutdown() },
+				name: s,
+			})
 		case "twitter":
-			twitter := twitter.New(ctx, store, pool)
-			go func(errCh chan error) {
-				errCh <- twitter.Serve()
-			}(srv.errCh)
+			t := twitter.New(ctx, store, pool)
+			go func() {
+				if err := t.Serve(); err != twitter.ErrServiceClosed {
+					logger.Error("%v", err)
+				}
+			}()
+			srv.targets = append(srv.targets, target{
+				call: func() { t.Shutdown() },
+				name: s,
+			})
 		case "matrix":
-			matrix := matrix.New(ctx, store, pool)
-			go func(errCh chan error) {
-				errCh <- matrix.Serve()
-			}(srv.errCh)
+			m := matrix.New(ctx, store, pool)
+			go func() {
+				if err := m.Serve(); err != matrix.ErrServiceClosed {
+					logger.Error("%v", err)
+				}
+			}()
+			srv.targets = append(srv.targets, target{
+				call: func() { m.Shutdown() },
+				name: s,
+			})
 		case "web", "httpd":
-			tor := httpd.New(ctx, store, pool)
-			go func(errCh chan error) {
-				errCh <- tor.Serve()
-			}(srv.errCh)
+			h := httpd.New(ctx, store, pool)
+			go func() {
+				if err := h.Serve(); err != httpd.ErrServiceClosed {
+					logger.Error("%v", err)
+				}
+			}()
+			srv.targets = append(srv.targets, target{
+				call: func() { h.Shutdown() },
+				name: s,
+			})
 		default:
 			logger.Error("unrecognize %s in `--daemon`", s)
-			srv.errCh <- ctx.Err()
 		}
 	}
 
@@ -121,14 +165,21 @@ func (srv *service) stop(cancel context.CancelFunc) {
 		os.Interrupt,
 	)
 
+	var once sync.Once
 	for {
 		sig := <-signalChan
 		if sig == os.Interrupt {
 			logger.Info("Signal SIGINT is received, probably due to `Ctrl-C`, exiting...")
+			once.Do(func() { srv.shutdown() })
 			cancel()
 			return
 		}
 	}
 }
 
-func (srv *service) err() <-chan error { return srv.errCh }
+func (srv *service) shutdown() {
+	for _, target := range srv.targets {
+		logger.Info("stopping %s service...", target.name)
+		target.call()
+	}
+}

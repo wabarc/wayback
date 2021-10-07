@@ -10,6 +10,7 @@ import (
 	"fmt"
 	// "io"
 	"net/http"
+	"net/url"
 	"os"
 	// "strings"
 	"log"
@@ -32,9 +33,17 @@ var (
 	appToken     = "xapp-1-A028RLDJKDHU-123407010000001-adsfjcjdkxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 	botToken     = "xoxp-230644354353357-22343241312434-2286583762287-dasfdklxjcvkjlsadasdfasdfasd2341"
 	channel      = "CH0AU7DJ"
+	authTestJSON = `{
+    "ok": true,
+    "url": "https://waybackarchiver.slack.com/",
+    "team": "Wayback Archiver Workspace",
+    "user": "wabarcbot",
+    "team_id": "T12345678",
+    "user_id": "W12345678"
+}`
 	connOpenJSON = `{
     "ok": true,
-    "url": "http://%s/"
+    "url": "%s"
 }`
 	eventHello = `{
   "type": "hello",
@@ -62,12 +71,13 @@ func handle(mux *http.ServeMux, updatesJSON string) {
 		// 	return
 		// }
 
-		connOpenJSON = fmt.Sprintf(connOpenJSON, r.URL.Host)
 		switch r.URL.Path {
 		case "/auth.test":
-			fmt.Fprintln(w, connOpenJSON)
+			fmt.Fprintln(w, authTestJSON)
 		case "/apps.connections.open":
-			fmt.Fprintln(w, connOpenJSON)
+			fmt.Fprintln(w, updatesJSON)
+		case "/ws":
+			wsHandler(w, r)
 		default:
 			fmt.Println(r.URL.Path, r)
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -123,19 +133,18 @@ func TestServe(t *testing.T) {
 	}
 
 	s := slacktest.NewTestServer()
-	t.Log(s.GetAPIURL())
-	go s.Start()
-
 	_, mux, server := helper.MockServer()
 	defer server.Close()
-	handle(mux, `{"ok":true, "result":[]}`)
-	// s.Handle("/apps.connections.open", slacktest.Websocket(func(conn *websocket.Conn) {
-	// 	s.SendToWebsocket("dafd")
-	// 	// if err := slacktest.RTMServerSendGoodbye(conn); err != nil {
-	// 	// 	log.Println("failed to send goodbye", err)
-	// 	// }
-	// }))
-	s.Handle("/apps.connections.open", wsHandler)
+
+	uri, err := url.Parse(server.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.ServerAddr = uri.Host
+	go s.Start()
+	defer s.Stop()
+
+	handle(mux, fmt.Sprintf(connOpenJSON, s.GetWSURL()))
 
 	bot := slack.New(
 		config.Opts.SlackBotToken(),
@@ -156,17 +165,18 @@ func TestServe(t *testing.T) {
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	time.AfterFunc(3*time.Second, func() {
-		cancel()
-	})
 
 	pool := pooling.New(config.Opts.PoolingSize())
 	defer pool.Close()
 
 	sl := &Slack{ctx: ctx, bot: bot, pool: pool, client: client}
+	time.AfterFunc(3*time.Second, func() {
+		sl.Shutdown()
+		cancel()
+	})
 	got := sl.Serve()
-	expected := "done"
-	if got.Error() != expected {
+	expected := ErrServiceClosed
+	if got != expected {
 		t.Errorf("Unexpected serve slack got %v instead of %v", got, expected)
 	}
 	time.Sleep(time.Second)

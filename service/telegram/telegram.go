@@ -30,6 +30,9 @@ import (
 	telegram "gopkg.in/tucnak/telebot.v2"
 )
 
+// ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
+var ErrServiceClosed = errors.New("telegram: Service closed")
+
 // Telegram represents a Telegram service in the application.
 type Telegram struct {
 	ctx context.Context
@@ -90,12 +93,6 @@ func (t *Telegram) Serve() (err error) {
 		logger.Info("channel title: %s, channel id: %s", color.BlueString(channel.Title), color.BlueString(id))
 	}
 
-	go func() {
-		<-t.ctx.Done()
-		logger.Info("stopping receive updates...")
-		t.bot.Stop()
-	}()
-
 	// Set bot commands
 	t.setCommands()
 
@@ -149,10 +146,24 @@ func (t *Telegram) Serve() (err error) {
 		return true
 	})
 
-	logger.Info("starting receive updates...")
-	t.bot.Start()
+	go func() {
+		logger.Info("starting receive updates...")
+		t.bot.Start()
+	}()
 
-	return errors.New("done")
+	// Block until context done
+	<-t.ctx.Done()
+
+	return ErrServiceClosed
+}
+
+// Shutdown shuts down the Telegram service, it always retuan a nil error.
+func (t *Telegram) Shutdown() error {
+	if t.bot != nil {
+		t.bot.Stop()
+	}
+
+	return nil
 }
 
 // nolint:gocyclo

@@ -25,6 +25,9 @@ import (
 	"maunium.net/go/mautrix/id"
 )
 
+// ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
+var ErrServiceClosed = errors.New("matrix: Service closed")
+
 // Matrix represents a Matrix service in the application
 type Matrix struct {
 	sync.RWMutex
@@ -128,12 +131,21 @@ func (m *Matrix) Serve() error {
 		}
 	}()
 
+	// Block until context done
 	<-m.ctx.Done()
-	logger.Info("stopping sync and logout all sessions")
-	m.client.StopSync()
-	m.client.LogoutAll()
 
-	return errors.New("done")
+	return ErrServiceClosed
+}
+
+// Shutdown shuts down the Matrix service, it always retuan a nil error.
+func (m *Matrix) Shutdown() error {
+	if m.client != nil {
+		// Stopping sync and logout all sessions
+		m.client.StopSync()
+		m.client.LogoutAll()
+	}
+
+	return nil
 }
 
 func (m *Matrix) process(ev *event.Event) error {

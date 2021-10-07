@@ -151,17 +151,17 @@ func handle(mux *http.ServeMux, updatesJSON string) {
 				fmt.Fprintln(w, `{"ok":true, "result":[]}`)
 			}
 		case "sendMessage":
-			if text == "Queue..." {
+			if text == "Queue..." || strings.Contains(text, config.SlotName("ia")) {
 				fmt.Fprintln(w, replyJSON)
-				return
+			} else {
+				fmt.Fprintln(w, sendMessageJSON)
 			}
-			fmt.Fprintln(w, sendMessageJSON)
 		case "editMessageText":
-			if !strings.Contains(text, config.SlotName("ia")) && !strings.Contains(text, "Archiving...") {
+			if strings.Contains(text, config.SlotName("ia")) || strings.Contains(text, "Archiving...") {
+				fmt.Fprintln(w, replyJSON)
+			} else {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-				return
 			}
-			fmt.Fprintln(w, replyJSON)
 		case "sendChatAction", "sendMediaGroup":
 			fmt.Fprintln(w, `{"ok":true, "result":null}`)
 		default:
@@ -229,25 +229,21 @@ func TestServe(t *testing.T) {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
+
+	pool := pooling.New(config.Opts.PoolingSize())
+	defer pool.Close()
+
+	tg := &Telegram{ctx: ctx, bot: bot, pool: pool}
 	time.AfterFunc(3*time.Second, func() {
+		tg.Shutdown()
 		cancel()
 	})
 
-	pool := pooling.New(config.Opts.PoolingSize())
-	go func() {
-		select {
-		case <-ctx.Done():
-			pool.Close()
-		}
-	}()
-
-	tg := &Telegram{ctx: ctx, bot: bot, pool: pool}
 	got := tg.Serve()
-	expected := "done"
-	if got.Error() != expected {
+	expected := ErrServiceClosed
+	if got != expected {
 		t.Errorf("Unexpected serve telegram got %v instead of %v", got, expected)
 	}
-	time.Sleep(time.Second)
 }
 
 func TestProcess(t *testing.T) {
@@ -280,20 +276,6 @@ func TestProcess(t *testing.T) {
 	}
 	defer tg.store.Close()
 
-	go func() {
-		for {
-			select {
-			case <-done:
-				time.Sleep(10 * time.Second)
-				tg.bot.Stop()
-				cancel()
-				return
-			case <-time.After(120 * time.Second):
-				done <- true
-			}
-		}
-	}()
-
 	tg.bot.Poller = telegram.NewMiddlewarePoller(tg.bot.Poller, func(update *telegram.Update) bool {
 		switch {
 		// case update.Callback != nil:
@@ -309,8 +291,21 @@ func TestProcess(t *testing.T) {
 		return true
 	})
 
-	tg.bot.Start()
-	time.Sleep(time.Second)
+	go func() {
+		tg.bot.Start()
+	}()
+
+	for {
+		select {
+		case <-done:
+			tg.Shutdown()
+			time.Sleep(time.Second)
+			cancel()
+			return
+		case <-time.After(120 * time.Second):
+			done <- true
+		}
+	}
 }
 
 func TestProcessPlayback(t *testing.T) {
@@ -372,20 +367,6 @@ func TestProcessPlayback(t *testing.T) {
 	}
 	defer tg.store.Close()
 
-	go func() {
-		for {
-			select {
-			case <-done:
-				time.Sleep(10 * time.Second)
-				tg.bot.Stop()
-				cancel()
-				return
-			case <-time.After(120 * time.Second):
-				done <- true
-			}
-		}
-	}()
-
 	tg.bot.Poller = telegram.NewMiddlewarePoller(tg.bot.Poller, func(update *telegram.Update) bool {
 		switch {
 		// case update.Callback != nil:
@@ -401,6 +382,19 @@ func TestProcessPlayback(t *testing.T) {
 		return true
 	})
 
-	tg.bot.Start()
-	time.Sleep(time.Second)
+	go func() {
+		tg.bot.Start()
+	}()
+
+	for {
+		select {
+		case <-done:
+			tg.Shutdown()
+			time.Sleep(time.Second)
+			cancel()
+			return
+		case <-time.After(120 * time.Second):
+			done <- true
+		}
+	}
 }

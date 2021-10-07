@@ -25,11 +25,17 @@ import (
 	"github.com/wabarc/wayback/storage"
 )
 
+// ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
+var ErrServiceClosed = errors.New("httpd: Service closed")
+
 // Tor represents a Tor service in the application.
 type Tor struct {
 	ctx   context.Context
 	pool  pooling.Pool
 	store *storage.Storage
+
+	tor    *tor.Tor
+	server *http.Server
 }
 
 // New tor struct.
@@ -76,16 +82,30 @@ func (t *Tor) Serve() error {
 		logger.Info("start a clear web server")
 		server.Addr = config.Opts.ListenAddr()
 		startHTTPServer(server)
+		t.server = server
 	}
 
+	// Block until context done
 	<-t.ctx.Done()
-	logger.Info("stopping tor hidden service...")
-	if err := server.Shutdown(t.ctx); err != nil {
-		logger.Error("shutdown tor hidden service failed: %v", err)
-		return err
-	}
 
-	return errors.New("done")
+	return ErrServiceClosed
+}
+
+// Shutdown shuts down the Tor server
+func (t *Tor) Shutdown() error {
+	// Close onion service.
+	if t.tor != nil {
+		if err := t.tor.Close(); err != nil {
+			return err
+		}
+	}
+	// Shutdown http server
+	if t.server != nil {
+		if err := t.server.Shutdown(t.ctx); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (t *Tor) torrc() string {
@@ -133,13 +153,16 @@ func (t *Tor) startTorServer(server *http.Server) {
 	e.DeleteDataDirOnClose = true
 	e.StopProcessOnClose = false
 
+	// Assign e to Tor.tor
+	t.tor = e
+
 	// Create an onion service to listen on any port but show as local port,
 	// specify the local port using the `WAYBACK_TOR_LOCAL_PORT` environment variable.
 	onion, err := e.Listen(t.ctx, &tor.ListenConf{LocalPort: config.Opts.TorLocalPort(), RemotePorts: config.Opts.TorRemotePorts(), Version3: true, Key: pvk})
 	if err != nil {
 		logger.Fatal("failed to create onion service: %v", err)
 	}
-	onion.CloseLocalListenerOnClose = false
+	onion.CloseLocalListenerOnClose = true
 
 	logger.Info(`listening on "%s" without TLS`, color.BlueString(onion.LocalListener.Addr().String()))
 	logger.Info("please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
@@ -148,12 +171,6 @@ func (t *Tor) startTorServer(server *http.Server) {
 		if err := server.Serve(onion); err != nil {
 			logger.Fatal("serve tor hidden service failed: %v", err)
 		}
-
-		// Close onion service.
-		// TODO
-		<-t.ctx.Done()
-		e.Close()
-		onion.Close()
 	}()
 }
 
@@ -175,7 +192,7 @@ func torPortBusy() bool {
 	}
 	if conn != nil {
 		conn.Close()
-		logger.Warn("defaults tor port is busy")
+		logger.Debug("defaults tor port is busy")
 		return true
 	}
 
