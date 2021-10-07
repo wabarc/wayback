@@ -27,6 +27,9 @@ import (
 	discord "github.com/bwmarrin/discordgo"
 )
 
+// ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
+var ErrServiceClosed = errors.New("discord: Service closed")
+
 // Discord represents a discord service in the application.
 type Discord struct {
 	ctx context.Context
@@ -138,10 +141,17 @@ func (d *Discord) Serve() (err error) {
 	d.setCommands("")
 
 	<-d.ctx.Done()
-	logger.Info("stopping receive updates...")
-	d.bot.Close()
 
-	return errors.New("done")
+	return ErrServiceClosed
+}
+
+// Shutdown shuts down the Discord service.
+func (d *Discord) Shutdown() error {
+	if d.bot != nil {
+		return d.bot.Close()
+	}
+
+	return nil
 }
 
 func (d *Discord) commandHandlers() map[string]func(*discord.Session, *discord.InteractionCreate) {

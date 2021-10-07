@@ -177,17 +177,18 @@ func TestServe(t *testing.T) {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	time.AfterFunc(3*time.Second, func() {
-		cancel()
-	})
 
 	pool := pooling.New(config.Opts.PoolingSize())
 	defer pool.Close()
 
 	d := &Discord{ctx: ctx, bot: bot, pool: pool}
+	time.AfterFunc(3*time.Second, func() {
+		d.Shutdown()
+		cancel()
+	})
 	got := d.Serve()
-	expected := "done"
-	if got.Error() != expected {
+	expected := ErrServiceClosed
+	if got != expected {
 		t.Errorf("Unexpected serve telegram got %v instead of %v", got, expected)
 	}
 }

@@ -24,6 +24,9 @@ import (
 	"github.com/wabarc/wayback/template/render"
 )
 
+// ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
+var ErrServiceClosed = errors.New("twitter: Service closed")
+
 // Twitter represents a Twitter service in the application
 type Twitter struct {
 	sync.RWMutex
@@ -34,6 +37,8 @@ type Twitter struct {
 	store  *storage.Storage
 
 	archiving map[string]bool
+
+	fetchTick *time.Ticker
 }
 
 // New returns Twitter struct.
@@ -77,14 +82,12 @@ func (t *Twitter) Serve() error {
 	}
 	logger.Info("authorized on account %s", user.ScreenName)
 
+	t.fetchTick = time.NewTicker(time.Minute) // Fetch Direct Message event
 	go func() {
-		fetchTick := time.NewTicker(time.Minute) // Fetch Direct Message event
-
 		t.archiving = make(map[string]bool)
-		var once sync.Once
 		for {
 			select {
-			case <-fetchTick.C:
+			case <-t.fetchTick.C:
 				messages, resp, err := t.client.DirectMessages.EventsList(
 					&twitter.DirectMessageEventsListParams{Count: 3},
 				)
@@ -114,19 +117,20 @@ func (t *Twitter) Serve() error {
 					t.archiving[event.ID] = true
 					t.Unlock()
 				}
-			case <-t.ctx.Done():
-				once.Do(func() {
-					logger.Info("stopping ticker...")
-					fetchTick.Stop()
-				})
 			}
 		}
 	}()
 
+	// Block until context done
 	<-t.ctx.Done()
-	logger.Info("stopping service...")
 
-	return errors.New("done")
+	return ErrServiceClosed
+}
+
+// Shutdown shuts down the Twitter service, it always retuan a nil error.
+func (t *Twitter) Shutdown() error {
+	t.fetchTick.Stop()
+	return nil
 }
 
 func (t *Twitter) process(event twitter.DirectMessageEvent) error {

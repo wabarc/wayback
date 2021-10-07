@@ -26,6 +26,9 @@ import (
 	"golang.org/x/net/html"
 )
 
+// ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
+var ErrServiceClosed = errors.New("mastodon: Service closed")
+
 // Mastodon represents a Mastodon service in the application
 type Mastodon struct {
 	sync.RWMutex
@@ -36,6 +39,9 @@ type Mastodon struct {
 	store  *storage.Storage
 
 	archiving map[mastodon.ID]bool
+
+	clearTick *time.Ticker
+	fetchTick *time.Ticker
 }
 
 // New mastodon struct.
@@ -92,18 +98,17 @@ func (m *Mastodon) Serve() error {
 	// 	}
 	// }
 
-	go func() {
-		clearTick := time.NewTicker(10 * time.Minute) // Clear notifications
-		fetchTick := time.NewTicker(5 * time.Second)  // Fetch conversations
+	// Clear notifications, Fetch conversations
+	m.clearTick, m.fetchTick = time.NewTicker(10*time.Minute), time.NewTicker(5*time.Second)
 
+	go func() {
 		m.archiving = make(map[mastodon.ID]bool)
-		var once sync.Once
 		for {
 			select {
-			case <-clearTick.C:
+			case <-m.clearTick.C:
 				logger.Debug("clear notifications...")
 				m.client.ClearNotifications(m.ctx)
-			case <-fetchTick.C:
+			case <-m.fetchTick.C:
 				noti, err := m.client.GetNotifications(m.ctx, nil)
 				if err != nil {
 					logger.Error("get notifications failed: %v", err)
@@ -135,20 +140,21 @@ func (m *Mastodon) Serve() error {
 					m.archiving[n.Status.ID] = true
 					m.Unlock()
 				}
-			case <-m.ctx.Done():
-				once.Do(func() {
-					logger.Info("stopping ticker...")
-					clearTick.Stop()
-					fetchTick.Stop()
-				})
 			}
 		}
 	}()
 
+	// Block until context done
 	<-m.ctx.Done()
-	logger.Info("stopping service...")
 
-	return errors.New("done")
+	return ErrServiceClosed
+}
+
+// Shutdown shuts down the Mastodon service, it always retuan a nil error.
+func (m *Mastodon) Shutdown() error {
+	m.clearTick.Stop()
+	m.fetchTick.Stop()
+	return nil
 }
 
 func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) {

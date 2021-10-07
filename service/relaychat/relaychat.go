@@ -23,6 +23,9 @@ import (
 	"github.com/wabarc/wayback/template/render"
 )
 
+// ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
+var ErrServiceClosed = errors.New("irc: Service closed")
+
 // IRC represents an IRC service in the application.
 type IRC struct {
 	sync.RWMutex
@@ -95,11 +98,21 @@ func (i *IRC) Serve() error {
 	}
 
 	go func() {
-		<-i.ctx.Done()
-		i.conn.Quit()
+		i.conn.Loop()
 	}()
 
-	i.conn.Loop()
+	// Block until context cone
+	<-i.ctx.Done()
+
+	return ErrServiceClosed
+}
+
+// Shutdown shuts down the IRC service, it always retuan a nil error.
+func (i *IRC) Shutdown() error {
+	if i.conn != nil {
+		i.conn.Quit()
+	}
+
 	return nil
 }
 
