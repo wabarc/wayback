@@ -88,6 +88,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.logLevel = parseString(val, defLogLevel)
 		case "ENABLE_METRICS":
 			p.opts.metrics = parseBool(val, defMetrics)
+		case "HTTP_LISTEN_ADDR":
+			p.opts.listenAddr = parseString(val, defListenAddr)
 		case "CHROME_REMOTE_ADDR":
 			p.opts.enabledChromeRemote = hasValue(val, defEnabledChromeRemote)
 			p.opts.chromeRemoteAddr = parseString(val, defChromeRemoteAddr)
