@@ -120,7 +120,10 @@ func TestPlayback(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	m := New(context.Background(), &storage.Storage{}, pooling.New(config.Opts.PoolingSize()))
+	pool := pooling.New(config.Opts.PoolingSize())
+	defer pool.Close()
+
+	m := New(context.Background(), &storage.Storage{}, pool)
 	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)

@@ -85,6 +85,8 @@ func TestProcess(t *testing.T) {
 	})
 
 	pool := pooling.New(config.Opts.PoolingSize())
+	defer pool.Close()
+
 	// Receive privmsg from sender
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
@@ -178,6 +180,8 @@ func TestToIRCChannel(t *testing.T) {
 	})
 
 	pool := pooling.New(config.Opts.PoolingSize())
+	defer pool.Close()
+
 	// Receive privmsg from sender
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {

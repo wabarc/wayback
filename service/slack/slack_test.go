@@ -161,8 +161,10 @@ func TestServe(t *testing.T) {
 	})
 
 	pool := pooling.New(config.Opts.PoolingSize())
-	tg := &Slack{ctx: ctx, bot: bot, pool: pool, client: client}
-	got := tg.Serve()
+	defer pool.Close()
+
+	sl := &Slack{ctx: ctx, bot: bot, pool: pool, client: client}
+	got := sl.Serve()
 	expected := "done"
 	if got.Error() != expected {
 		t.Errorf("Unexpected serve slack got %v instead of %v", got, expected)

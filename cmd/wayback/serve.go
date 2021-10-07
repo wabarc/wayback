@@ -34,6 +34,7 @@ func serve(_ *cobra.Command, _ []string) {
 	defer store.Close()
 
 	pool := pooling.New(config.Opts.PoolingSize())
+	defer pool.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	srv := &service{}

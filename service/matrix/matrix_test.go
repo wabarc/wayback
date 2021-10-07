@@ -92,6 +92,8 @@ func senderClient(t *testing.T) *Matrix {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	pool := pooling.New(config.Opts.PoolingSize())
+	defer pool.Close()
+
 	return New(context.Background(), &storage.Storage{}, pool)
 }
 
@@ -103,6 +105,8 @@ func recverClient(t *testing.T) *Matrix {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	pool := pooling.New(config.Opts.PoolingSize())
+	defer pool.Close()
+
 	return New(context.Background(), &storage.Storage{}, pool)
 }
 

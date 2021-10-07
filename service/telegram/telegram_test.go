@@ -188,6 +188,13 @@ func newTelegram(client *http.Client, endpoint string) (tg *Telegram, cancel con
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	pool := pooling.New(config.Opts.PoolingSize())
+	go func() {
+		select {
+		case <-ctx.Done():
+			pool.Close()
+		}
+	}()
+
 	tg = &Telegram{ctx: ctx, bot: bot, pool: pool, store: store}
 
 	return tg, cancel, nil
@@ -227,6 +234,13 @@ func TestServe(t *testing.T) {
 	})
 
 	pool := pooling.New(config.Opts.PoolingSize())
+	go func() {
+		select {
+		case <-ctx.Done():
+			pool.Close()
+		}
+	}()
+
 	tg := &Telegram{ctx: ctx, bot: bot, pool: pool}
 	got := tg.Serve()
 	expected := "done"

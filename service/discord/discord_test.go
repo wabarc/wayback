@@ -182,8 +182,10 @@ func TestServe(t *testing.T) {
 	})
 
 	pool := pooling.New(config.Opts.PoolingSize())
-	tg := &Discord{ctx: ctx, bot: bot, pool: pool}
-	got := tg.Serve()
+	defer pool.Close()
+
+	d := &Discord{ctx: ctx, bot: bot, pool: pool}
+	got := d.Serve()
 	expected := "done"
 	if got.Error() != expected {
 		t.Errorf("Unexpected serve telegram got %v instead of %v", got, expected)
@@ -221,6 +223,7 @@ func TestProcess(t *testing.T) {
 	defer store.Close()
 
 	pool := pooling.New(config.Opts.PoolingSize())
+	defer pool.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()

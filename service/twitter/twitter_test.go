@@ -89,6 +89,8 @@ func TestProcess(t *testing.T) {
 
 	ctx := context.Background()
 	pool := pooling.New(config.Opts.PoolingSize())
+	defer pool.Close()
+
 	client := twitter.NewClient(httpClient)
 	tw := &Twitter{ctx: ctx, pool: pool, client: client}
 	if err := tw.process(testDMEvent); err != nil {

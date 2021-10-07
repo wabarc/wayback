@@ -111,3 +111,10 @@ func (p Pool) push(r *resource) error {
 	p <- r
 	return nil
 }
+
+// Close closes worker pool
+func (p Pool) Close() {
+	if p != nil {
+		close(p)
+	}
+}
