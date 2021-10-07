@@ -372,9 +372,9 @@ jobs:
 
     - name: Import GPG key
       id: gpg
-      uses: crazy-max/ghaction-import-gpg@v3
+      uses: crazy-max/ghaction-import-gpg@v4
       with:
-        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+        gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
 
     - name: GPG user IDs
       run: |

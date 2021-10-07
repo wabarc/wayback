@@ -86,7 +86,7 @@ func (t *Telegram) Serve() (err error) {
 	logger.Info("authorized on account %s", color.BlueString(t.bot.Me.Username))
 
 	if channel, err := t.bot.ChatByID(config.Opts.TelegramChannel()); err == nil {
-		id := strings.TrimPrefix(config.Opts.TelegramChannel(), "@")
+		id := strconv.FormatInt(channel.ID, 10)
 		logger.Info("channel title: %s, channel id: %s", color.BlueString(channel.Title), color.BlueString(id))
 	}
 

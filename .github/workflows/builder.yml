@@ -153,6 +153,7 @@ jobs:
           - os: linux
             arch: arm64
             arm: 8
+      fail-fast: false
     runs-on: ubuntu-latest
     continue-on-error: true
     env:
@@ -264,6 +265,7 @@ jobs:
         platform:
           - i386
           - amd64
+      fail-fast: false
     steps:
     - name: Check out code base
       if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
