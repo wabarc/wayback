@@ -3,7 +3,7 @@ Description=Wayback webpage
 After=network.target
 
 [Service]
-Type=simple
+Type=notify
 User=wayback
 ExecStart=/usr/bin/wayback
 Restart=always
