@@ -218,24 +218,21 @@ func TestServe(t *testing.T) {
 	defer server.Close()
 	handle(mux, `{"ok":true, "result":[]}`)
 
-	bot, err := telegram.NewBot(telegram.Settings{
-		URL:    server.URL,
-		Token:  token,
-		Client: httpClient,
-		Poller: &telegram.LongPoller{Timeout: time.Second},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-
 	pool := pooling.New(config.Opts.PoolingSize())
 	defer pool.Close()
 
-	tg := &Telegram{ctx: ctx, bot: bot, pool: pool}
-	time.AfterFunc(3*time.Second, func() {
+	tg, cancel, err := newTelegram(httpClient, server.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tg.store == nil {
+		t.Fatalf("Open storage failed: %v", err)
+	}
+	defer tg.store.Close()
+
+	time.AfterFunc(pollTick, func() {
 		tg.Shutdown()
+		time.Sleep(time.Second)
 		cancel()
 	})
 
@@ -261,8 +258,6 @@ func TestProcess(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	done := make(chan bool, 1)
-
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	handle(mux, getUpdatesJSON)
@@ -276,6 +271,7 @@ func TestProcess(t *testing.T) {
 	}
 	defer tg.store.Close()
 
+	done := make(chan bool, 1)
 	tg.bot.Poller = telegram.NewMiddlewarePoller(tg.bot.Poller, func(update *telegram.Update) bool {
 		switch {
 		// case update.Callback != nil:
@@ -323,8 +319,6 @@ func TestProcessPlayback(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	done := make(chan bool, 1)
-
 	getUpdatesJSON = `{
   "ok": true,
   "result": [
@@ -367,6 +361,7 @@ func TestProcessPlayback(t *testing.T) {
 	}
 	defer tg.store.Close()
 
+	done := make(chan bool, 1)
 	tg.bot.Poller = telegram.NewMiddlewarePoller(tg.bot.Poller, func(update *telegram.Update) bool {
 		switch {
 		// case update.Callback != nil:
