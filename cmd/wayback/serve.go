@@ -20,6 +20,7 @@ import (
 	"github.com/wabarc/wayback/service/telegram"
 	"github.com/wabarc/wayback/service/twitter"
 	"github.com/wabarc/wayback/storage"
+	"github.com/wabarc/wayback/systemd"
 )
 
 type target struct {
@@ -45,9 +46,17 @@ func serve(_ *cobra.Command, _ []string) {
 	srv := &service{}
 	_ = srv.run(ctx, store, pool)
 
-	go srv.stop(cancel)
+	if systemd.HasNotifySocket() {
+		logger.Info("sending readiness notification to Systemd")
 
+		if err := systemd.SdNotify(systemd.SdNotifyReady); err != nil {
+			logger.Error("unable to send readiness notification to systemd: %v", err)
+		}
+	}
+
+	go srv.stop(cancel)
 	<-ctx.Done()
+
 	logger.Info("wayback service stopped.")
 }
 
@@ -170,8 +179,10 @@ func (srv *service) stop(cancel context.CancelFunc) {
 		sig := <-signalChan
 		if sig == os.Interrupt {
 			logger.Info("Signal SIGINT is received, probably due to `Ctrl-C`, exiting...")
-			once.Do(func() { srv.shutdown() })
-			cancel()
+			once.Do(func() {
+				srv.shutdown()
+				cancel()
+			})
 			return
 		}
 	}

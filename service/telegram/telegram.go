@@ -33,6 +33,8 @@ import (
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
 var ErrServiceClosed = errors.New("telegram: Service closed")
 
+var pollTick = 3 * time.Second
+
 // Telegram represents a Telegram service in the application.
 type Telegram struct {
 	ctx context.Context
@@ -57,7 +59,7 @@ func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Telegr
 		Token: config.Opts.TelegramToken(),
 		// Verbose:   config.Opts.HasDebugMode(),
 		ParseMode: telegram.ModeHTML,
-		Poller:    &telegram.LongPoller{Timeout: 3 * time.Second},
+		Poller:    &telegram.LongPoller{Timeout: pollTick},
 		Reporter: func(err error) {
 			if err != nil {
 				logger.Warn(err.Error())

@@ -184,6 +184,7 @@ func TestServe(t *testing.T) {
 	d := &Discord{ctx: ctx, bot: bot, pool: pool}
 	time.AfterFunc(3*time.Second, func() {
 		d.Shutdown()
+		time.Sleep(3)
 		cancel()
 	})
 	got := d.Serve()
