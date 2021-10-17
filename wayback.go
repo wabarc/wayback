@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"net/url"
 	"sync"
-	"time"
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/playback"
@@ -150,13 +149,13 @@ func wayback(w Waybacker) string {
 func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (cols []Collect, err error) {
 	logger.Debug("start...")
 
+	ctx, cancel := context.WithTimeout(ctx, config.Opts.WaybackTimeout())
+	defer cancel()
+
 	*bundles, err = reduxer.Do(ctx, urls...)
 	if err != nil {
 		logger.Warn("cannot to start reduxer: %v", err)
 	}
-
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
-	defer cancel()
 
 	mu := sync.Mutex{}
 	g, ctx := errgroup.WithContext(ctx)
@@ -213,6 +212,9 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 // Playback returns URLs archived from the time capsules.
 func Playback(ctx context.Context, urls ...string) (cols []Collect, err error) {
 	logger.Debug("start...")
+
+	ctx, cancel := context.WithTimeout(ctx, config.Opts.WaybackTimeout())
+	defer cancel()
 
 	mu := sync.Mutex{}
 	g, ctx := errgroup.WithContext(ctx)

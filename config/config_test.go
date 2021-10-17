@@ -12,6 +12,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/wabarc/logger"
 )
@@ -1206,6 +1207,42 @@ func TestMaxMediaSize(t *testing.T) {
 			got := opts.MaxMediaSize()
 			if got != test.expected {
 				t.Fatalf(`Unexpected set max media size got %d instead of %d`, got, test.expected)
+			}
+		})
+	}
+}
+
+func TestWaybackTimeout(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		timeout  int
+		expected time.Duration
+	}{
+		{
+			timeout:  0,
+			expected: 0 * time.Second,
+		},
+		{
+			timeout:  1,
+			expected: time.Second,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_TIMEOUT", strconv.Itoa(test.timeout))
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.WaybackTimeout()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set wayback timeout got %d instead of %d`, got, test.expected)
 			}
 		})
 	}

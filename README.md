@@ -210,6 +210,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_BOLT_PATH`               | `./wayback.db`          | File path of bolt database                                   |
 | -                   | `WAYBACK_STORAGE_DIR`             | -                       | Directory to store binary file, e.g. PDF, html file          |
 | -                   | `WAYBACK_MAX_MEDIA_SIZE`          | `512MB`                 | Max size to limit download stream media                      |
+| -                   | `WAYBACK_TIMEOUT`                 | `300`                   | Timeout for single wayback request, defaults to 300 second   |
 | `-d`, `--daemon`    | -                                 | -                       | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter`, `discord` |
 | `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                  | Wayback webpages to **Internet Archive**                     |
 | `--is`              | `WAYBACK_ENABLE_IS`               | `true`                  | Wayback webpages to **Archive Today**                        |

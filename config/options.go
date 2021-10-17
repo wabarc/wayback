@@ -7,6 +7,7 @@ package config // import "github.com/wabarc/wayback/config"
 import (
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/dustin/go-humanize"
 	"github.com/wabarc/logger"
@@ -71,6 +72,7 @@ const (
 	defPoolingSize         = 3
 	defStorageDir          = ""
 	defMaxMediaSize        = "512MB"
+	defWaybackTimeout      = 300
 )
 
 var (
@@ -104,6 +106,7 @@ type Options struct {
 	poolingSize         int
 	storageDir          string
 	maxMediaSize        string
+	waybackTimeout      int
 }
 
 type ipfs struct {
@@ -189,6 +192,7 @@ func NewOptions() *Options {
 		poolingSize:         defPoolingSize,
 		storageDir:          defStorageDir,
 		maxMediaSize:        defMaxMediaSize,
+		waybackTimeout:      defWaybackTimeout,
 		ipfs: &ipfs{
 			host: defIPFSHost,
 			port: defIPFSPort,
@@ -620,4 +624,9 @@ func (o *Options) MaxAttachSize(scope string) int64 {
 		"slack":    5000000000, // 5GB
 	}
 	return scopes[scope]
+}
+
+// WaybackTimeout returns timeout for a wayback request.
+func (o *Options) WaybackTimeout() time.Duration {
+	return time.Duration(o.waybackTimeout) * time.Second
 }
