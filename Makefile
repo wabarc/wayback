@@ -71,28 +71,19 @@ WINDOWS_ARCH_LIST = \
 .SECONDEXPANSION:
 %: ## Build binary, format: linux-amd64, darwin-arm64, full list: https://golang.org/doc/install/source#environment
 	$(eval OS := $(shell echo $@ | cut -d'-' -f1))
-	$(eval ARCH := $(shell echo $@ | cut -d'-' -f2))
+	$(eval ARM := $(shell echo $@ | cut -d'-' -f2 | grep arm | sed -e 's/.*armv//' | sed -e 's/arm64//'))
+	$(eval ARCH := $(shell echo $@ | cut -d'-' -f2 | sed -e 's/armv.*/arm/'))
 	$(eval MIPS := $(shell echo $@ | cut -d'-' -f3))
 	$(if $(strip $(OS)),,$(error missing OS))
 	$(if $(strip $(ARCH)),,$(error missing ARCH))
-	GOOS="$(OS)" GOARCH="$(ARCH)" GOMIPS="$(MIPS)" $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+	GOOS="$(OS)" GOARCH="$(ARCH)" GOMIPS="$(MIPS)" GOARM="$(ARM)" $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 .PHONY: build
 build: ## Build binary for current OS
 	$(GOBUILD) -o $(BINDIR)/$(NAME) $(GOFILES)
 
-linux-armv5:
-	GOOS=linux GOARCH=arm GOARM=5 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-armv6:
-	GOOS=linux GOARCH=arm GOARM=6 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-armv7:
-	GOOS=linux GOARCH=arm GOARM=7 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
+.PHONY: linux-armv8
 linux-armv8: linux-arm64
-linux-arm64:
-	GOOS=linux GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 ifeq ($(TARGET),)
 tar_releases := $(addsuffix .gz, $(PLATFORM_LIST))
