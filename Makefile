@@ -18,6 +18,12 @@ DOCKER ?= $(shell which docker || which podman)
 DOCKER_IMAGE := wabarc/wayback
 DEB_IMG_ARCH := amd64
 
+.DEFAULT_GOAL := help
+
+.PHONY: help
+help: ## show help message
+	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make <taraget>\n\nTargets: \033[36m\033[0m\n"} /^[$$()% 0-9a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+
 PLATFORM_LIST = \
 	darwin-amd64 \
 	darwin-arm64 \
@@ -50,34 +56,6 @@ WINDOWS_ARCH_LIST = \
 	windows-arm
 
 .PHONY: \
-	darwin-386 \
-	darwin-amd64 \
-	darwin-arm64 \
-	linux-386 \
-	linux-amd64 \
-	linux-armv5 \
-	linux-armv6 \
-	linux-armv7 \
-	linux-arm64 \
-	linux-mips-softfloat \
-	linux-mips-hardfloat \
-	linux-mipsle-softfloat \
-	linux-mipsle-hardfloat \
-	linux-mips64 \
-	linux-mips64le \
-	linux-ppc64 \
-	linux-ppc64le \
-	linux-s390x \
-	freebsd-386 \
-	freebsd-amd64 \
-	freebsd-arm64 \
-	openbsd-386 \
-	openbsd-amd64 \
-	windows-386 \
-	windows-amd64 \
-	windows-arm \
-	android-arm64 \
-	js-wasm \
 	all-arch \
 	tar_releases \
 	zip_releases \
@@ -90,24 +68,18 @@ WINDOWS_ARCH_LIST = \
 	debian-packages \
 	docker-image
 
+.SECONDEXPANSION:
+%: ## Build binary, format: linux-amd64, darwin-arm64, full list: https://golang.org/doc/install/source#environment
+	$(eval OS := $(shell echo $@ | cut -d'-' -f1))
+	$(eval ARCH := $(shell echo $@ | cut -d'-' -f2))
+	$(eval MIPS := $(shell echo $@ | cut -d'-' -f3))
+	$(if $(strip $(OS)),,$(error missing OS))
+	$(if $(strip $(ARCH)),,$(error missing ARCH))
+	GOOS="$(OS)" GOARCH="$(ARCH)" GOMIPS="$(MIPS)" $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
+
 .PHONY: build
-build:
+build: ## Build binary for current OS
 	$(GOBUILD) -o $(BINDIR)/$(NAME) $(GOFILES)
-
-darwin-386:
-	GOOS=darwin GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-darwin-amd64:
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-darwin-arm64:
-	GOOS=darwin GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-386:
-	GOOS=linux GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-amd64:
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 linux-armv5:
 	GOOS=linux GOARCH=arm GOARM=5 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
@@ -121,66 +93,6 @@ linux-armv7:
 linux-armv8: linux-arm64
 linux-arm64:
 	GOOS=linux GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-mips-softfloat:
-	GOOS=linux GOARCH=mips GOMIPS=softfloat $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-mips-hardfloat:
-	GOOS=linux GOARCH=mips GOMIPS=hardfloat $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-mipsle-softfloat:
-	GOOS=linux GOARCH=mipsle GOMIPS=softfloat $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-mipsle-hardfloat:
-	GOOS=linux GOARCH=mipsle GOMIPS=hardfloat $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-mips64:
-	GOOS=linux GOARCH=mips64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-mips64le:
-	GOOS=linux GOARCH=mips64le $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-ppc64:
-	GOOS=linux GOARCH=ppc64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-ppc64le:
-	GOOS=linux GOARCH=ppc64le $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-linux-s390x:
-	GOOS=linux GOARCH=s390x $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-freebsd-386:
-	GOOS=freebsd GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-freebsd-amd64:
-	GOOS=freebsd GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-freebsd-arm64:
-	GOOS=freebsd GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-openbsd-386:
-	GOOS=openbsd GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-openbsd-amd64:
-	GOOS=openbsd GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-windows-386:
-	GOOS=windows GOARCH=386 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe $(GOFILES)
-
-windows-amd64:
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe $(GOFILES)
-
-windows-arm:
-	GOOS=windows GOARCH=arm $(GOBUILD) -o $(BINDIR)/$(NAME)-$@.exe $(GOFILES)
-
-dragonfly-amd64:
-	GOOS=dragonfly GOARCH=amd64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-android-arm64:
-	GOOS=android GOARCH=arm64 $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
-
-js-wasm:
-	GOOS=js GOARCH=wasm $(GOBUILD) -o $(BINDIR)/$(NAME)-$@ $(GOFILES)
 
 ifeq ($(TARGET),)
 tar_releases := $(addsuffix .gz, $(PLATFORM_LIST))
@@ -200,11 +112,11 @@ $(tar_releases): %.gz : %
 $(zip_releases): %.zip : %
 	zip -m -j $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).zip $(BINDIR)/$(NAME)-$(basename $@).exe LICENSE CHANGELOG.md README.md
 
-all-arch: $(PLATFORM_LIST) $(WINDOWS_ARCH_LIST)
+all-arch: $(PLATFORM_LIST) $(WINDOWS_ARCH_LIST) ## Build binary for all architecture
 
-releases: $(tar_releases) $(zip_releases)
+releases: $(tar_releases) $(zip_releases) ## Packaging all binaries
 
-clean:
+clean: ## Clean workspace
 	rm -f $(BINDIR)/*
 	rm -f $(PACKDIR)/*
 	rm -rf data-dir*
@@ -212,42 +124,42 @@ clean:
 	rm -rf *.out
 	rm -rf wayback.db
 
-fmt:
+fmt: ## Format codebase
 	@echo "-> Running go fmt"
 	@go fmt $(PACKAGES)
 
-vet:
+vet: ## Vet codebase
 	@echo "-> Running go vet"
 	@go vet $(PACKAGES)
 
-test:
+test: ## Run testing
 	@echo "-> Running go test"
 	@go clean -testcache
 	@CGO_ENABLED=1 go test -v -race -cover -coverprofile=coverage.out -covermode=atomic -parallel=1 ./...
 
-test-integration:
+test-integration: ## Run integration testing
 	@echo 'mode: atomic' > coverage.out
 	@go list ./... | xargs -n1 -I{} sh -c 'CGO_ENABLED=1 go test -race -tags=integration -covermode=atomic -coverprofile=coverage.tmp -coverpkg $(go list ./... | tr "\n" ",") {} && tail -n +2 coverage.tmp >> coverage.out || exit 255'
 	@rm coverage.tmp
 
-test-cover:
+test-cover: ## Collect code coverage
 	@echo "-> Running go tool cover"
 	@go tool cover -func=coverage.out
 	@go tool cover -html=coverage.out -o coverage.html
 
-bench:
+bench: ## Benchmark test
 	@echo "-> Running benchmark"
 	@go test -v -bench .
 
-profile:
+profile: ## Test and profile
 	@echo "-> Running profile"
 	@go test -cpuprofile cpu.prof -memprofile mem.prof -v -bench .
 
-docker-image:
+docker-image: ## Build Docker image
 	@echo "-> Building docker image..."
 	@$(DOCKER) build -t $(DOCKER_IMAGE):$(VERSION) -f ./Dockerfile .
 
-rpm:
+rpm: ## Build RPM package
 	@echo "-> Building rpm package..."
 	@$(DOCKER) build \
 		-t wayback-rpm-builder \
@@ -256,7 +168,7 @@ rpm:
 		-v ${PWD}/build/package:/root/rpmbuild/RPMS/x86_64 wayback-rpm-builder \
 		rpmbuild -bb --define "_wayback_version $(VERSION)" /root/rpmbuild/SPECS/wayback.spec
 
-debian:
+debian: ## Build Debian packages
 	@echo "-> Building deb package..."
 	@$(DOCKER) build \
 		--build-arg IMAGE_ARCH=$(DEB_IMG_ARCH) \
@@ -270,15 +182,15 @@ debian:
 	@echo "-> DEB package below:"
 	@ls -h ${PWD}/build/package/*.deb
 
-debian-packages:
+debian-packages: ## Build Debian packages, including amd64, arm32v7, arm64v8
 	$(MAKE) debian DEB_IMG_ARCH=amd64
 	$(MAKE) debian DEB_IMG_ARCH=arm32v7 PKG_ARCH=armv7
 	$(MAKE) debian DEB_IMG_ARCH=arm64v8 PKG_ARCH=arm64
 
-submodule:
+submodule: ## Update Git submodule
 	@echo "-> Updating Git submodule..."
 	@git submodule update --init --recursive --remote
 
-scan:
+scan: ## Scan vulnerabilities
 	@echo "-> Scanning vulnerabilities..."
 	@go list -json -m all | $(DOCKER) run --rm -i sonatypecommunity/nancy sleuth --skip-update-check
