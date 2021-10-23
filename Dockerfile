@@ -14,6 +14,7 @@ RUN --mount=type=bind,target=/src,rw \
     --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
     sh ./build/binary.sh $TARGETPLATFORM \
+    && rm -rf .build/binary/wayback-* \
     && mv ./build/binary/wayback-* /wayback
 
 # Application layer
@@ -51,15 +52,16 @@ RUN set -o pipefail; \
     apk add --no-cache -U ca-certificates libressl wget tor; \
     rm -rf /var/cache/apk/*; \
     \
-    mv /etc/tor/torrc.sample /etc/tor/torrc; \
+    cp /etc/tor/torrc.sample /etc/tor/torrc; \
     #echo "ExcludeNodes ${TOR_EXCLUDE_NODE}" >> /etc/tor/torrc; \
     #echo "ExcludeExitNodes ${TOR_EXCLUDE_EXIT_NODE}" >> /etc/tor/torrc; \
     #echo 'StrictNodes 1' >> /etc/tor/torrc; \
-    echo 'SocksPort 0' >> /etc/tor/torrc; \
+    echo 'SocksPort 9050' >> /etc/tor/torrc; \
     echo 'ExitRelay 0' >> /etc/tor/torrc; \
     echo 'LongLivedPorts 8964' >> /etc/tor/torrc; \
-    #echo 'User tor' >> /etc/tor/torrc; \
-    chmod a+w /var/log/tor
+    echo 'User tor' >> /etc/tor/torrc; \
+    chown tor:nogroup /var/lib/tor/ /var/log/tor/; \
+    chmod 700 /var/lib/tor
 
 EXPOSE 8964
 
