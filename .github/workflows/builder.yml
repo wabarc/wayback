@@ -66,6 +66,8 @@ jobs:
             arch: s390x
           - os: windows
             arch: arm
+          - os: windows
+            arch: arm64
           - os: android
             arch: arm64
           - os: darwin
