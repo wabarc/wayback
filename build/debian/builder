@@ -1,11 +1,11 @@
 #!/bin/sh
 #
-set -eux pipefail
+set -eu pipefail
 
 WORKSPACE="/src"
-PKG_ARCH=$(echo "${PKG_ARCH}" || dpkg --print-architecture)
+PKG_ARCH="${PKG_ARCH:-$(dpkg --print-architecture)}"
 PKG_DATE=$(date -R)
-PKG_VERSION=$(echo "${PKG_VERSION}" || 0.0.1)
+PKG_VERSION="${PKG_VERSION:-0.0.1}"
 
 echo "WORKSPACE=${WORKSPACE}"
 echo "PKG_VERSION=${PKG_VERSION}"
