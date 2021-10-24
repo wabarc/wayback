@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.16.1] - 2021-10-24
+
+### Fixed
+- Fix releasing binaries for windows are missing
+
 ## [0.16.0] - 2021-10-24
 
 ### Added

@@ -102,6 +102,7 @@ $(tar_releases): %.gz : %
 	tar -czf $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).tar.gz --transform "s/.*\///g" $(BINDIR)/$(NAME)-$(basename $@) LICENSE CHANGELOG.md README.md
 
 $(zip_releases): %.zip : %
+	@mv $(BINDIR)/$(NAME)-$(basename $@) $(BINDIR)/$(NAME)-$(basename $@).exe
 	zip -m -j $(PACKDIR)/$(NAME)-$(basename $@)-$(VERSION).zip $(BINDIR)/$(NAME)-$(basename $@).exe LICENSE CHANGELOG.md README.md
 
 all-arch: $(PLATFORM_LIST) $(WINDOWS_ARCH_LIST) ## Build binary for all architecture
