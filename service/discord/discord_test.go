@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -28,6 +29,7 @@ import (
 
 const (
 	token     = "discord-token"
+	uid       = "@me"
 	channelID = "81324113413441431"
 	messageID = "100000001"
 )
@@ -114,23 +116,27 @@ func handle(mux *http.ServeMux, gateway string) {
 			return
 		}
 		var dat map[string]interface{}
-		if err := json.Unmarshal(b, &dat); err != nil {
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			return
+		var content string
+		var once sync.Once
+		if err := json.Unmarshal(b, &dat); err == nil {
+			content, _ = dat["content"].(string)
 		}
-		content := dat["content"].(string)
 		uri := strings.Replace(r.URL.String(), "http:", "https:", 1)
 		switch {
 		case r.URL.Path == "/":
 			echo(w, r)
-		case r.URL.Path == "/api/v8/users/@me/channels":
+		case uri == discord.EndpointUserChannels(uid):
 			channelJson, _ := json.Marshal(channel)
 			fmt.Fprintln(w, string(channelJson))
-		case r.URL.Path == "/api/v8/gateway":
+		case uri == discord.EndpointGateway:
 			gatewayJson, _ := json.Marshal(struct {
 				URL string `json:"url"`
 			}{URL: gateway})
 			fmt.Fprintln(w, string(gatewayJson))
+		case r.URL.Path == "/api/v8/channels/messages":
+			once.Do(func() {
+				fmt.Fprintln(w, string(messageJson))
+			})
 		case uri == discord.EndpointChannelMessages(channelID) && r.Method == http.MethodPost:
 			// https://discord.com/api/v8/channels/fake-discord-channel-id/messages
 			if content == "" {
@@ -150,7 +156,7 @@ func handle(mux *http.ServeMux, gateway string) {
 			}
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		default:
-			fmt.Println(r.Method, r.URL.Path, content)
+			fmt.Println(uri, r.Method, r.URL.Path, content)
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		}
 	})
@@ -161,9 +167,7 @@ func TestServe(t *testing.T) {
 		t.Skip("Skip test in short mode.")
 	}
 
-	if os.Getenv("WAYBACK_DISCORD_BOT_TOKEN") == "" {
-		t.Skip("Not set WAYBACK_DISCORD_BOT_TOKEN, skipped.")
-	}
+	os.Setenv("WAYBACK_DISCORD_BOT_TOKEN", token)
 
 	var err error
 	parser := config.NewParser()
@@ -176,15 +180,20 @@ func TestServe(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	httpClient, mux, server := helper.MockServer()
+	defer server.Close()
+	handle(mux, strings.Replace(server.URL, "http", "ws", 1))
+	bot.Client = httpClient
 
+	ctx, cancel := context.WithCancel(context.Background())
 	pool := pooling.New(config.Opts.PoolingSize())
 	defer pool.Close()
 
 	d := &Discord{ctx: ctx, bot: bot, pool: pool}
 	time.AfterFunc(3*time.Second, func() {
-		d.Shutdown()
-		time.Sleep(3)
+		// TODO: find a better way to avoid deadlock
+		go d.Shutdown()
+		time.Sleep(time.Second)
 		cancel()
 	})
 	got := d.Serve()

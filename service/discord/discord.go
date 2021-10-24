@@ -131,15 +131,20 @@ func (d *Discord) Serve() (err error) {
 		// d.setCommands(g.Guild.ID)
 	})
 
-	logger.Info("starting receive updates...")
-	if err := d.bot.Open(); err != nil {
-		logger.Error(`open connection failed: %v`, err)
-		return err
-	}
+	d.bot.AddHandler(func(s *discord.Session, _ *discord.Ready) {
+		logger.Debug("set global commands")
+		// Set global bot commands
+		d.setCommands("")
+	})
 
-	// Set global bot commands
-	d.setCommands("")
+	go func() {
+		logger.Info("starting receive updates...")
+		if err := d.bot.Open(); err != nil {
+			logger.Error(`open connection failed: %v`, err)
+		}
+	}()
 
+	// Block until context done
 	<-d.ctx.Done()
 
 	return ErrServiceClosed
