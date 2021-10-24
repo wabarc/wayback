@@ -73,7 +73,7 @@ WINDOWS_ARCH_LIST = \
 %: ## Build binary, format: linux-amd64, darwin-arm64, full list: https://golang.org/doc/install/source#environment
 	$(eval OS := $(shell echo $@ | cut -d'-' -f1))
 	$(eval ARM := $(shell echo $@ | cut -d'-' -f2 | grep arm | sed -e 's/arm64//' | tr -dc '[0-9]'))
-	$(eval ARCH := $(shell echo $@ | cut -d'-' -f2 | sed -e 's/armv.*/arm/'))
+	$(eval ARCH := $(shell echo $@ | cut -d'-' -f2 | sed -e 's/armv.*/arm/' | grep -v $(OS)))
 	$(eval MIPS := $(shell echo $@ | cut -d'-' -f3))
 	$(if $(strip $(OS)),,$(error missing OS))
 	$(if $(strip $(ARCH)),,$(error missing ARCH))
