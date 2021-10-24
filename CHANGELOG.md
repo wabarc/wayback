@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.16.0] - 2021-10-24
+
+### Added
+- Add support for export HAR file
+- Add specific permissions to workflows under .github/workflows
+- Supports to close worker pool
+- Starts http service as clear web if missing tor
+- Gracefully shuts down services
+- Add support for systemd (#110)
+
+### Changed
+- Releasing defaults to pre-release
+- Refine testing workflow
+- Improvements for golint
+- Upgrade Go version to 1.17
+- Minor improvement for worker pool
+- Makes silent for downloading media via Annie
+- Makes wayback timeout configurable
+- Update Tor socks port default to 9050
+- Refine makefile (#111)
+
+### Fixed
+- Fix nil pointer dereference if `WAYBACK_STORAGE_DIR` not set
+- Check received content for testing
+- Fix httpd service's playback gauge record to wayback
+- Fix worker pool
+- Fix data race for discord testing
+
 ## [0.15.1] - 2021-08-13
 
 ### Changed
