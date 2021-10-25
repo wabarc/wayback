@@ -464,3 +464,11 @@ jobs:
         event-type: publish
         token: ${{ secrets.PAT_WORKFLOW }}
         client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
+
+    - name: Dispatch repository in wabarc/homebrew-wayback
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        repository: wabarc/homebrew-wayback
+        event-type: publish
+        token: ${{ secrets.PAT_WORKFLOW }}
+        client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
