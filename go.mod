@@ -39,22 +39,22 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/tdewolff/parse/v2 v2.5.19 // indirect
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
-	github.com/tidwall/pretty v1.2.0 // indirect
+	github.com/tidwall/gjson v1.10.2 // indirect
 	github.com/wabarc/archive.is v1.3.0
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/go-anonfile v0.1.0
 	github.com/wabarc/go-catbox v0.1.0
-	github.com/wabarc/helper v0.0.0-20210924170055-1ee4c89c6f8a
+	github.com/wabarc/helper v0.0.0-20211023155939-38bbde082b96
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
 	github.com/wabarc/playback v0.0.0-20210718054702-cab6c6004933
 	github.com/wabarc/screenshot v1.3.2-0.20210824153650-d47a1474a43e
 	github.com/wabarc/telegra.ph v0.0.0-20210822083402-82f95ce60a37
-	github.com/wabarc/warcraft v0.1.1-0.20210711171056-a5eec617b86c
+	github.com/wabarc/warcraft v0.2.0
 	github.com/wabarc/wbipfs v0.2.0
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/net v0.0.0-20211006190231-62292e806868
+	golang.org/x/net v0.0.0-20211029224645-99673261e6eb
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
 	gopkg.in/tucnak/telebot.v2 v2.4.0

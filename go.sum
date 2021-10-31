@@ -571,10 +571,12 @@ github.com/tdewolff/test v1.0.6/go.mod h1:6DAvZliBAAnD7rhVgwaM7DE5/d9NMOAJ09SqYq
 github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb h1:EavwSqheIJl3nb91HhkL73DwnT2Fk8W3yM7T7TuLZvA=
 github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb/go.mod h1:I0ZT9x8wStY6VOxtNOrLpnDURFs7HS0z1e1vhuKUEVc=
 github.com/tidwall/gjson v1.6.8/go.mod h1:zeFuBCIqD4sN/gmqBzZ4j7Jd6UcA2Fc56x7QFsv+8fI=
-github.com/tidwall/gjson v1.8.1 h1:8j5EE9Hrh3l9Od1OIEDAb7IpezNA20UdRngNAj5N0WU=
 github.com/tidwall/gjson v1.8.1/go.mod h1:5/xDoumyyDNerp2U36lyolv46b3uF/9Bu6OfyQ9GImk=
-github.com/tidwall/match v1.0.3 h1:FQUVvBImDutD8wJLN6c5eMzWtjgONK9MwIBCOrUJKeE=
+github.com/tidwall/gjson v1.10.2 h1:APbLGOM0rrEkd8WBw9C24nllro4ajFuJu0Sc9hRz8Bo=
+github.com/tidwall/gjson v1.10.2/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
 github.com/tidwall/match v1.0.3/go.mod h1:eRSPERbgtNPcGhD8UCthc6PmLEQXEWd3PRB5JTxsfmM=
+github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=
+github.com/tidwall/match v1.1.1/go.mod h1:eRSPERbgtNPcGhD8UCthc6PmLEQXEWd3PRB5JTxsfmM=
 github.com/tidwall/pretty v1.0.2/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
 github.com/tidwall/pretty v1.1.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhVysOjyk=
 github.com/tidwall/pretty v1.2.0 h1:RWIZEg2iJ8/g6fDDYzMpobmaoGh5OLl4AXtGUGPcqCs=
@@ -601,8 +603,8 @@ github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe/go.mod h1:TuTZtoiOu9
 github.com/wabarc/helper v0.0.0-20210614160629-1a5ba5e551eb/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/helper v0.0.0-20210701193643-e0fe0a807cb9/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/helper v0.0.0-20210718171053-59c70d0b20c2/go.mod h1:uS6mimKlWkGvEZXkJ6JoW7LYnnB2JP6dLU9q7pgDaWQ=
-github.com/wabarc/helper v0.0.0-20210924170055-1ee4c89c6f8a h1:OWdgcGhCiKd7/bmufVZsDankfBHNtbsBZdyZ8qpZ7Qs=
-github.com/wabarc/helper v0.0.0-20210924170055-1ee4c89c6f8a/go.mod h1:uS6mimKlWkGvEZXkJ6JoW7LYnnB2JP6dLU9q7pgDaWQ=
+github.com/wabarc/helper v0.0.0-20211023155939-38bbde082b96 h1:M1eEMnVJAE+vHLjidLVOEpGjqM9FW9NeqB3t9FBPbxY=
+github.com/wabarc/helper v0.0.0-20211023155939-38bbde082b96/go.mod h1:uS6mimKlWkGvEZXkJ6JoW7LYnnB2JP6dLU9q7pgDaWQ=
 github.com/wabarc/imgbb v1.0.0 h1:vNud9qY4dRGp1nikb+GHIrc/sE3WOdNq5gfT/vhWEUQ=
 github.com/wabarc/imgbb v1.0.0/go.mod h1:piz6QXkVfFpQbaQHx70/rPDwaICkW5Ew3lShTzbnVt0=
 github.com/wabarc/ipfs-pinner v1.0.1 h1:PaWBDn1X556IyiOVd143XO9PVRjbohppA+JMJQwNBHI=
@@ -621,8 +623,8 @@ github.com/wabarc/screenshot v1.3.2-0.20210824153650-d47a1474a43e h1:T8gDPsE6STy
 github.com/wabarc/screenshot v1.3.2-0.20210824153650-d47a1474a43e/go.mod h1:ei8rqXW5mdztkqcsb81YUVwBZFROgyjAQJrEKEiMWfY=
 github.com/wabarc/telegra.ph v0.0.0-20210822083402-82f95ce60a37 h1:lqVzAnARDEJO+bTtQiCRu2lg55QxboohtP/RZN9Y9mU=
 github.com/wabarc/telegra.ph v0.0.0-20210822083402-82f95ce60a37/go.mod h1:532VM0F+WU2TSVvolJN3U5xihKLBt8ubLqyfWExM7As=
-github.com/wabarc/warcraft v0.1.1-0.20210711171056-a5eec617b86c h1:HPTqoafOgXbqEMD54v3cTTJKKK3fd79UqG1ILR9S640=
-github.com/wabarc/warcraft v0.1.1-0.20210711171056-a5eec617b86c/go.mod h1:/BbCwReBjlqHRaw8Yh+7sfAicOesiMYNhiFpuL1x8Rc=
+github.com/wabarc/warcraft v0.2.0 h1:BCNO8J0EhxbHH7qbHEw98N+YeO0AmBgMZictv8KczpE=
+github.com/wabarc/warcraft v0.2.0/go.mod h1:/BbCwReBjlqHRaw8Yh+7sfAicOesiMYNhiFpuL1x8Rc=
 github.com/wabarc/wbipfs v0.2.0 h1:TksxONxL/LrBGZ6TTcWD4p+FAzuQPfLQyCL7K64isW8=
 github.com/wabarc/wbipfs v0.2.0/go.mod h1:wh76ZvNbhSrDNxStkKORKcnfwjozfoTtq8XyzU7GKDw=
 github.com/whyrusleeping/tar-utils v0.0.0-20180509141711-8c6c8ba81d5c/go.mod h1:xxcJeBb7SIUl/Wzkz1eVKJE/CB34YNrqX2TQI6jY9zs=
@@ -766,8 +768,8 @@ golang.org/x/net v0.0.0-20210525063256-abc453219eb5/go.mod h1:9nx3DQGgdP8bBQD5qx
 golang.org/x/net v0.0.0-20210614182718-04defd469f4e/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20210716203947-853a461950ff/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
-golang.org/x/net v0.0.0-20211006190231-62292e806868 h1:KlOXYy8wQWTUJYFgkUI40Lzr06ofg5IRXUK5C7qZt1k=
-golang.org/x/net v0.0.0-20211006190231-62292e806868/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
+golang.org/x/net v0.0.0-20211029224645-99673261e6eb h1:pirldcYWx7rx7kE5r+9WsOXPXK0+WH5+uZ7uPmJ44uM=
+golang.org/x/net v0.0.0-20211029224645-99673261e6eb/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
