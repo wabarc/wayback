@@ -49,7 +49,7 @@ require (
 	github.com/wabarc/playback v0.0.0-20210718054702-cab6c6004933
 	github.com/wabarc/screenshot v1.3.2-0.20210824153650-d47a1474a43e
 	github.com/wabarc/telegra.ph v0.0.0-20210822083402-82f95ce60a37
-	github.com/wabarc/warcraft v0.2.1-0.20211102141012-01f41a747dd5
+	github.com/wabarc/warcraft v0.2.2-0.20211103143327-c0ee44286eef
 	github.com/wabarc/wbipfs v0.2.0
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.etcd.io/bbolt v1.3.6
