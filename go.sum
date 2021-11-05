@@ -623,8 +623,8 @@ github.com/wabarc/screenshot v1.3.2-0.20210824153650-d47a1474a43e h1:T8gDPsE6STy
 github.com/wabarc/screenshot v1.3.2-0.20210824153650-d47a1474a43e/go.mod h1:ei8rqXW5mdztkqcsb81YUVwBZFROgyjAQJrEKEiMWfY=
 github.com/wabarc/telegra.ph v0.0.0-20210822083402-82f95ce60a37 h1:lqVzAnARDEJO+bTtQiCRu2lg55QxboohtP/RZN9Y9mU=
 github.com/wabarc/telegra.ph v0.0.0-20210822083402-82f95ce60a37/go.mod h1:532VM0F+WU2TSVvolJN3U5xihKLBt8ubLqyfWExM7As=
-github.com/wabarc/warcraft v0.2.2-0.20211103143327-c0ee44286eef h1:yBpjtVNA0B5ubtSGnLYnZ1TUVlRrMXlUEaFN4eBKDgY=
-github.com/wabarc/warcraft v0.2.2-0.20211103143327-c0ee44286eef/go.mod h1:/BbCwReBjlqHRaw8Yh+7sfAicOesiMYNhiFpuL1x8Rc=
+github.com/wabarc/warcraft v0.2.2-0.20211105153848-dd8568b7b6e4 h1:DX/QdyiKfq9NNmRWMcgIYoIXJnEwpIzaYfM4hVgrHhM=
+github.com/wabarc/warcraft v0.2.2-0.20211105153848-dd8568b7b6e4/go.mod h1:/BbCwReBjlqHRaw8Yh+7sfAicOesiMYNhiFpuL1x8Rc=
 github.com/wabarc/wbipfs v0.2.0 h1:TksxONxL/LrBGZ6TTcWD4p+FAzuQPfLQyCL7K64isW8=
 github.com/wabarc/wbipfs v0.2.0/go.mod h1:wh76ZvNbhSrDNxStkKORKcnfwjozfoTtq8XyzU7GKDw=
 github.com/whyrusleeping/tar-utils v0.0.0-20180509141711-8c6c8ba81d5c/go.mod h1:xxcJeBb7SIUl/Wzkz1eVKJE/CB34YNrqX2TQI6jY9zs=
@@ -768,8 +768,8 @@ golang.org/x/net v0.0.0-20210525063256-abc453219eb5/go.mod h1:9nx3DQGgdP8bBQD5qx
 golang.org/x/net v0.0.0-20210614182718-04defd469f4e/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20210716203947-853a461950ff/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
-golang.org/x/net v0.0.0-20211101193420-4a448f8816b3 h1:VrJZAjbekhoRn7n5FBujY31gboH+iB3pdLxn3gE9FjU=
-golang.org/x/net v0.0.0-20211101193420-4a448f8816b3/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
+golang.org/x/net v0.0.0-20211104170005-ce137452f963 h1:8gJUadZl+kWvZBqG/LautX0X6qe5qTC2VI/3V3NBRAY=
+golang.org/x/net v0.0.0-20211104170005-ce137452f963/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=

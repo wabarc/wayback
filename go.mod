@@ -49,12 +49,12 @@ require (
 	github.com/wabarc/playback v0.0.0-20210718054702-cab6c6004933
 	github.com/wabarc/screenshot v1.3.2-0.20210824153650-d47a1474a43e
 	github.com/wabarc/telegra.ph v0.0.0-20210822083402-82f95ce60a37
-	github.com/wabarc/warcraft v0.2.2-0.20211103143327-c0ee44286eef
+	github.com/wabarc/warcraft v0.2.2-0.20211105153848-dd8568b7b6e4
 	github.com/wabarc/wbipfs v0.2.0
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/net v0.0.0-20211101193420-4a448f8816b3
+	golang.org/x/net v0.0.0-20211104170005-ce137452f963
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
 	gopkg.in/tucnak/telebot.v2 v2.4.0
