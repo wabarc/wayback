@@ -200,6 +200,7 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 
 			var shot screenshot.Screenshots
 			if remote := remoteHeadless(config.Opts.ChromeRemoteAddr()); remote != nil {
+				logger.Debug("reduxer using remote browser")
 				addr := remote.(*net.TCPAddr)
 				headless, er := screenshot.NewChromeRemoteScreenshoter(addr.String())
 				if er != nil {
@@ -208,6 +209,7 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 				}
 				shot, err = headless.Screenshot(ctx, input, opts...)
 			} else {
+				logger.Debug("reduxer using local browser")
 				shot, err = screenshot.Screenshot(ctx, input, opts...)
 			}
 			if err != nil {
@@ -215,7 +217,7 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 					logger.Error("screenshot deadline: %v", err)
 					return
 				}
-				logger.Debug("screenshot error: %v", err)
+				logger.Error("screenshot error: %v", err)
 				return
 			}
 			mu.Lock()
@@ -248,16 +250,13 @@ func (b *Bundle) Asset() (paths []Asset) {
 func remoteHeadless(addr string) net.Addr {
 	conn, err := net.DialTimeout("tcp", addr, time.Second)
 	if err != nil {
-		logger.Warn("try to connect headless browser failed: %v", err)
 		return nil
 	}
 
 	if conn != nil {
 		conn.Close()
-		logger.Warn("connected: %v", conn.RemoteAddr().String())
 		return conn.RemoteAddr()
 	}
-	logger.Warn("headless chrome don't exists")
 	return nil
 }
 
@@ -314,17 +313,26 @@ func media(ctx context.Context, dir, in string) string {
 			return ""
 		}
 		logger.Debug("download media via youtube-dl")
+
 		args := []string{
-			"--http-chunk-size=10M", "--prefer-free-formats",
-			"--no-color", "--no-cache-dir", "--no-warnings",
-			"--no-progress", "--no-check-certificate",
-			"--format=best[ext=mp4]/best",
-			"--quiet", "--output=" + fp + ".mp4", in,
+			"--http-chunk-size=10M", "--prefer-free-formats", "--restrict-filenames",
+			"--no-color", "--rm-cache-dir", "--no-warnings", "--no-check-certificate",
+			"--no-progress", "--no-part", "--no-mtime", "--embed-subs", "--quiet",
+			"--format=bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+			"--output=" + fp, in,
 		}
+		if config.Opts.HasDebugMode() {
+			args = append(args, "--verbose", "--print-traffic")
+		}
+
 		cmd := exec.CommandContext(ctx, ytdl, args...)
-		if err := cmd.Run(); err != nil {
+		logger.Debug("youtube-dl args: %s", cmd.String())
+		out, err := cmd.CombinedOutput()
+		if err != nil {
 			logger.Warn("start youtube-dl failed: %v", err)
 		}
+		logger.Debug("youtube-dl output: %s", out)
+
 		return match(fp + "*")
 	}
 
@@ -338,6 +346,7 @@ func media(ctx context.Context, dir, in string) string {
 			"--output-filename=" + fp, in,
 		}
 		cmd := exec.CommandContext(ctx, youget, args...)
+		logger.Debug("youget args: %s", cmd.String())
 		if err := cmd.Run(); err != nil {
 			logger.Warn("run you-get failed: %v", err)
 		}
