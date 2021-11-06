@@ -318,8 +318,8 @@ func media(ctx context.Context, dir, in string) string {
 			"--http-chunk-size=10M", "--prefer-free-formats", "--restrict-filenames",
 			"--no-color", "--rm-cache-dir", "--no-warnings", "--no-check-certificate",
 			"--no-progress", "--no-part", "--no-mtime", "--embed-subs", "--quiet",
-			"--format=bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
-			"--output=" + fp, in,
+			"--ignore-errors", "--format=best[ext=mp4]/best", "--merge-output-format=mp4",
+			"--output=" + fp + ".%(ext)s", in,
 		}
 		if config.Opts.HasDebugMode() {
 			args = append(args, "--verbose", "--print-traffic")
@@ -372,7 +372,7 @@ func media(ctx context.Context, dir, in string) string {
 			MultiThread:  true,
 			ThreadNumber: 10,
 			ChunkSizeMB:  10,
-			Silent:       true,
+			Silent:       !config.Opts.HasDebugMode(),
 		})
 		sortedStreams := sortStreams(dt.Streams)
 		if len(sortedStreams) == 0 {
