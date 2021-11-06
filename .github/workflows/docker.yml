@@ -8,6 +8,7 @@ on:
       - 'v*'
     branches:
       - 'main'
+      - 'develop'
     paths-ignore:
       - '**.md'
       - 'snapcraft.yaml'
