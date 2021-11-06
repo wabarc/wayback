@@ -10,6 +10,7 @@ import (
 
 	"github.com/phf/go-queue/queue"
 	"github.com/wabarc/logger"
+	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 )
 
@@ -46,6 +47,8 @@ func New(size int) Pool {
 		}(i)
 	}
 	wg.Wait()
+
+	maxTime = config.Opts.WaybackTimeout() + 3*time.Second
 
 	return p
 }
