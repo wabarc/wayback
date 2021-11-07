@@ -88,7 +88,7 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 
 	var wg sync.WaitGroup
 	var mu sync.Mutex
-	var warc = &warcraft.Warcraft{BasePath: dir}
+	var warc = &warcraft.Warcraft{BasePath: dir, UserAgent: config.Opts.WaybackUserAgent()}
 	var craft = func(in string) string {
 		u, err := url.Parse(in)
 		if err != nil {
