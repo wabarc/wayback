@@ -1247,3 +1247,39 @@ func TestWaybackTimeout(t *testing.T) {
 		})
 	}
 }
+
+func TestWaybackUserAgent(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		userAgent string
+		expected  string
+	}{
+		{
+			userAgent: "",
+			expected:  defWaybackUserAgent,
+		},
+		{
+			userAgent: "foo bar",
+			expected:  "foo bar",
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_USERAGENT", test.userAgent)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.WaybackUserAgent()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set wayback user agent got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}

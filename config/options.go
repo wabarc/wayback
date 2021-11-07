@@ -73,6 +73,7 @@ const (
 	defStorageDir          = ""
 	defMaxMediaSize        = "512MB"
 	defWaybackTimeout      = 300
+	defWaybackUserAgent    = "WaybackArchiver/1.0"
 )
 
 var (
@@ -107,6 +108,7 @@ type Options struct {
 	storageDir          string
 	maxMediaSize        string
 	waybackTimeout      int
+	waybackUserAgent    string
 }
 
 type ipfs struct {
@@ -193,6 +195,7 @@ func NewOptions() *Options {
 		storageDir:          defStorageDir,
 		maxMediaSize:        defMaxMediaSize,
 		waybackTimeout:      defWaybackTimeout,
+		waybackUserAgent:    defWaybackUserAgent,
 		ipfs: &ipfs{
 			host: defIPFSHost,
 			port: defIPFSPort,
@@ -629,4 +632,9 @@ func (o *Options) MaxAttachSize(scope string) int64 {
 // WaybackTimeout returns timeout for a wayback request.
 func (o *Options) WaybackTimeout() time.Duration {
 	return time.Duration(o.waybackTimeout) * time.Second
+}
+
+// WaybackUserAgent returns User-Agent for a wayback request.
+func (o *Options) WaybackUserAgent() string {
+	return o.waybackUserAgent
 }
