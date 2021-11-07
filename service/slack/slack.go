@@ -11,7 +11,6 @@ import (
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 	"github.com/slack-go/slack/socketmode"
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -20,6 +19,7 @@ import (
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
 )
@@ -256,7 +256,7 @@ func (s *Slack) process(ev *event) (err error) {
 	content := ev.Text
 	logger.Debug("content: %s", content)
 
-	urls := helper.MatchURLFallback(content)
+	urls := service.MatchURL(content)
 
 	metrics.IncrementWayback(metrics.ServiceSlack, metrics.StatusRequest)
 	if len(urls) == 0 {
@@ -320,7 +320,7 @@ func (s *Slack) playback(channel, text, triggerID string) error {
 	logger.Debug("channel %s, playback text %s, trigger id: %s", channel, text, triggerID)
 	metrics.IncrementPlayback(metrics.ServiceSlack, metrics.StatusRequest)
 
-	urls := helper.MatchURL(text)
+	urls := service.MatchURL(text)
 	if len(urls) == 0 {
 		// Only the inputs in input blocks will be included in view_submission’s view.state.values: https://slack.dev/java-slack-sdk/guides/modals
 		playbackNameText := slack.NewTextBlockObject(slack.PlainTextType, "URLs", false, false)

@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -21,6 +20,7 @@ import (
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
 
@@ -235,7 +235,7 @@ func (d *Discord) process(m *discord.MessageCreate) (err error) {
 	content := m.Content
 	logger.Debug("content: %s", content)
 
-	urls := helper.MatchURLFallback(content)
+	urls := service.MatchURL(content)
 
 	switch {
 	case m.GuildID != "" && !d.isMention(content):
@@ -318,7 +318,7 @@ func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) err
 	metrics.IncrementPlayback(metrics.ServiceDiscord, metrics.StatusRequest)
 
 	text := i.ApplicationCommandData().Options[0].StringValue()
-	urls := helper.MatchURL(text)
+	urls := service.MatchURL(text)
 	if len(urls) == 0 {
 		return d.bot.InteractionRespond(i.Interaction, &discord.InteractionResponse{
 			Type: discord.InteractionResponseChannelMessageWithSource,

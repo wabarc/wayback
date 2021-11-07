@@ -74,6 +74,7 @@ const (
 	defMaxMediaSize        = "512MB"
 	defWaybackTimeout      = 300
 	defWaybackUserAgent    = "WaybackArchiver/1.0"
+	defWaybackFallback     = false
 )
 
 var (
@@ -109,6 +110,7 @@ type Options struct {
 	maxMediaSize        string
 	waybackTimeout      int
 	waybackUserAgent    string
+	waybackFallback     bool
 }
 
 type ipfs struct {
@@ -196,6 +198,7 @@ func NewOptions() *Options {
 		maxMediaSize:        defMaxMediaSize,
 		waybackTimeout:      defWaybackTimeout,
 		waybackUserAgent:    defWaybackUserAgent,
+		waybackFallback:     defWaybackFallback,
 		ipfs: &ipfs{
 			host: defIPFSHost,
 			port: defIPFSPort,
@@ -637,4 +640,10 @@ func (o *Options) WaybackTimeout() time.Duration {
 // WaybackUserAgent returns User-Agent for a wayback request.
 func (o *Options) WaybackUserAgent() string {
 	return o.waybackUserAgent
+}
+
+// WaybackFallback returns whether fallback to Google cache is enabled if
+// the original webpage is unavailable.
+func (o *Options) WaybackFallback() bool {
+	return o.waybackFallback
 }

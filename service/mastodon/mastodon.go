@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/mattn/go-mastodon"
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -21,6 +20,7 @@ import (
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
 	"golang.org/x/net/html"
@@ -188,7 +188,7 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 		return m.playback(status)
 	}
 
-	urls := helper.MatchURLFallback(text)
+	urls := service.MatchURL(text)
 	pub := publish.NewMastodon(m.client)
 	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
@@ -214,7 +214,7 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 
 func (m *Mastodon) playback(status *mastodon.Status) error {
 	text := textContent(status.Content)
-	urls := helper.MatchURL(text)
+	urls := service.MatchURL(text)
 	if len(urls) == 0 {
 		logger.Warn("playback failure, URL no found.")
 		return errors.New("Mastodon: URL no found")

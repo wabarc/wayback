@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	irc "github.com/thoj/go-ircevent"
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -19,6 +18,7 @@ import (
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
 )
@@ -125,7 +125,7 @@ func (i *IRC) process(ev *irc.Event) error {
 	text := ev.MessageWithoutFormat()
 	logger.Debug("from: %s message: %s", ev.Nick, text)
 
-	urls := helper.MatchURLFallback(text)
+	urls := service.MatchURL(text)
 	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
 		return errors.New("IRC: URL no found")

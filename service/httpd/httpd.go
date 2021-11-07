@@ -14,7 +14,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -22,6 +21,7 @@ import (
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/template"
 	"github.com/wabarc/wayback/version"
 )
@@ -208,7 +208,7 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Debug("text: %s", text)
 
-	urls := helper.MatchURLFallback(text)
+	urls := service.MatchURL(text)
 	if len(urls) == 0 {
 		logger.Warn("url no found.")
 	}
@@ -267,7 +267,7 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Debug("text: %s", text)
 
-	urls := helper.MatchURL(text)
+	urls := service.MatchURL(text)
 	if len(urls) == 0 {
 		logger.Warn("url no found.")
 	}

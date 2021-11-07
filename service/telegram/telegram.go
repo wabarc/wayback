@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -24,6 +23,7 @@ import (
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
 
@@ -183,7 +183,7 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 	if message.IsForwarded() && content == "" {
 		return nil
 	}
-	urls := helper.MatchURLFallback(content)
+	urls := service.MatchURL(content)
 
 	// Set command as playback if receive a playback command without URLs, and
 	// required user reply a message with URLs.
@@ -287,7 +287,7 @@ func (t *Telegram) playback(message *telegram.Message) error {
 		return err
 	}
 
-	urls := helper.MatchURL(message.Text)
+	urls := service.MatchURL(message.Text)
 	if len(urls) == 0 {
 		opts := &telegram.SendOptions{
 			ReplyTo:               message,

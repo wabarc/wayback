@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -18,6 +17,7 @@ import (
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
 	matrix "maunium.net/go/mautrix"
@@ -167,7 +167,7 @@ func (m *Matrix) process(ev *event.Event) error {
 		return m.playback(ev)
 	}
 
-	urls := helper.MatchURLFallback(text)
+	urls := service.MatchURL(text)
 	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
 		// Redact message
@@ -213,7 +213,7 @@ func (m *Matrix) process(ev *event.Event) error {
 
 func (m *Matrix) playback(ev *event.Event) error {
 	text := ev.Content.AsMessage().Body
-	urls := helper.MatchURL(text)
+	urls := service.MatchURL(text)
 	// Redact message
 	defer m.redact(ev, "URL no found. Original message: "+text)
 	if len(urls) == 0 {

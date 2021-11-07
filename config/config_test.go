@@ -1283,3 +1283,51 @@ func TestWaybackUserAgent(t *testing.T) {
 		})
 	}
 }
+
+func TestWaybackFallback(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		fallback string
+		expected bool
+	}{
+		{
+			fallback: "",
+			expected: defWaybackFallback,
+		},
+		{
+			fallback: "unexpected",
+			expected: defWaybackFallback,
+		},
+		{
+			fallback: "on",
+			expected: true,
+		},
+		{
+			fallback: "true",
+			expected: true,
+		},
+		{
+			fallback: "0",
+			expected: false,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_FALLBACK", test.fallback)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.WaybackFallback()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set wayback fallback got %t instead of %t`, got, test.expected)
+			}
+		})
+	}
+}

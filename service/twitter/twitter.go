@@ -20,6 +20,7 @@ import (
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
 )
@@ -158,7 +159,7 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 		t.Unlock()
 	}()
 
-	urls := helper.MatchURLFallback(text)
+	urls := service.MatchURL(text)
 	var realURLs []string
 	for _, url := range urls {
 		realURLs = append(realURLs, helper.RealURI(url))

@@ -187,6 +187,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.waybackTimeout = parseInt(val, defWaybackTimeout)
 		case "WAYBACK_USERAGENT":
 			p.opts.waybackUserAgent = parseString(val, defWaybackUserAgent)
+		case "WAYBACK_FALLBACK":
+			p.opts.waybackFallback = parseBool(val, defWaybackFallback)
 		default:
 			if os.Getenv(key) == "" && val != "" {
 				os.Setenv(key, val)
