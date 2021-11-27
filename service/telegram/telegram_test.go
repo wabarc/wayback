@@ -263,6 +263,7 @@ func TestProcess(t *testing.T) {
 	handle(mux, getUpdatesJSON)
 
 	tg, cancel, err := newTelegram(httpClient, server.URL)
+	defer cancel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -271,7 +272,6 @@ func TestProcess(t *testing.T) {
 	}
 	defer tg.store.Close()
 
-	done := make(chan bool, 1)
 	tg.bot.Poller = telegram.NewMiddlewarePoller(tg.bot.Poller, func(update *telegram.Update) bool {
 		switch {
 		// case update.Callback != nil:
@@ -279,7 +279,9 @@ func TestProcess(t *testing.T) {
 			if err := tg.process(update.Message); err != nil {
 				t.Fatalf("process telegram message failed: %v", err)
 			} else {
-				done <- true
+				// Waiting for publish
+				time.Sleep(time.Second)
+				tg.Shutdown()
 			}
 		default:
 			t.Log("Unhandle")
@@ -287,21 +289,10 @@ func TestProcess(t *testing.T) {
 		return true
 	})
 
-	go func() {
-		tg.bot.Start()
-	}()
+	time.AfterFunc(2*time.Minute, func() { tg.Shutdown() })
 
-	for {
-		select {
-		case <-done:
-			tg.Shutdown()
-			time.Sleep(time.Second)
-			cancel()
-			return
-		case <-time.After(120 * time.Second):
-			done <- true
-		}
-	}
+	// Block until service closed
+	tg.bot.Start()
 }
 
 func TestProcessPlayback(t *testing.T) {
@@ -353,6 +344,7 @@ func TestProcessPlayback(t *testing.T) {
 	handle(mux, getUpdatesJSON)
 
 	tg, cancel, err := newTelegram(httpClient, server.URL)
+	defer cancel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -361,7 +353,6 @@ func TestProcessPlayback(t *testing.T) {
 	}
 	defer tg.store.Close()
 
-	done := make(chan bool, 1)
 	tg.bot.Poller = telegram.NewMiddlewarePoller(tg.bot.Poller, func(update *telegram.Update) bool {
 		switch {
 		// case update.Callback != nil:
@@ -369,7 +360,7 @@ func TestProcessPlayback(t *testing.T) {
 			if err := tg.process(update.Message); err != nil {
 				t.Fatalf("process telegram message failed: %v", err)
 			} else {
-				done <- true
+				tg.Shutdown()
 			}
 		default:
 			t.Log("Unhandle")
@@ -377,19 +368,9 @@ func TestProcessPlayback(t *testing.T) {
 		return true
 	})
 
-	go func() {
-		tg.bot.Start()
-	}()
+	time.AfterFunc(2*time.Minute, func() { tg.Shutdown() })
 
-	for {
-		select {
-		case <-done:
-			tg.Shutdown()
-			time.Sleep(time.Second)
-			cancel()
-			return
-		case <-time.After(120 * time.Second):
-			done <- true
-		}
-	}
+	tg.bot.Start()
+
+	time.Sleep(time.Second)
 }
