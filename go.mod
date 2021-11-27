@@ -18,7 +18,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.3.2-0.20210818094218-3b6e27b78bcf
 	github.com/go-shiori/go-readability v0.0.0-20210627123243-82cc33435520
 	github.com/go-shiori/obelisk v0.0.0-20201115143556-8de0d40b0a9b // indirect
-	github.com/google/go-github/v38 v38.1.0
+	github.com/google/go-github/v40 v40.0.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/iawia002/annie v0.11.1-0.20210830024824-5391d8269d1d
@@ -35,7 +35,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
 	github.com/prometheus/common v0.31.1
-	github.com/slack-go/slack v0.9.5
+	github.com/slack-go/slack v0.10.0
 	github.com/spf13/cobra v1.2.1
 	github.com/tdewolff/parse/v2 v2.5.19 // indirect
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
@@ -52,11 +52,12 @@ require (
 	github.com/wabarc/wbipfs v0.2.0
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.etcd.io/bbolt v1.3.6
-	golang.org/x/net v0.0.0-20211105192438-b53810dc28af
+	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
+	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
-	gopkg.in/tucnak/telebot.v2 v2.4.0
-	maunium.net/go/mautrix v0.10.1
+	gopkg.in/tucnak/telebot.v2 v2.4.1
+	maunium.net/go/mautrix v0.10.4
 )
 
 replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78
