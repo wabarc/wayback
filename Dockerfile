@@ -18,7 +18,7 @@ RUN --mount=type=bind,target=/src,rw \
     && mv ./build/binary/wayback-* /wayback
 
 # Application layer
-FROM alpine:3.13
+FROM alpine:3.15
 
 LABEL org.wabarc.homepage="http://github.com/wabarc" \
       org.wabarc.repository="http://github.com/wabarc/wayback" \
@@ -69,17 +69,17 @@ EXPOSE 8964
 # add flag `--format=docker` if using podman.
 # Ref: https://wiki.alpinelinux.org/wiki/Fonts
 ONBUILD RUN set -o pipefail; \
-    echo @edge https://dl-cdn.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories; \
-    echo @edge https://dl-cdn.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories; \
+    echo @v3.15 https://dl-cdn.alpinelinux.org/alpine/v3.15/community >> /etc/apk/repositories; \
+    echo @v3.15 https://dl-cdn.alpinelinux.org/alpine/v3.15/main >> /etc/apk/repositories; \
     apk add --no-cache -U \
-    chromium@edge \
+    chromium@v3.15 \
     dbus \
     dumb-init \
-    ffmpeg@edge \
-    freetype@edge \
+    ffmpeg@v3.15 \
+    freetype@v3.15 \
     libstdc++ \
-    harfbuzz@edge \
-    nss@edge \
+    harfbuzz@v3.15 \
+    nss@v3.15 \
     you-get \
     rtmpdump \
     youtube-dl \
