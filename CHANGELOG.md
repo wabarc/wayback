@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.16.2] - 2021-12-04
+
+### Added
+- Add wayback user agent
+- Add header parameters for warcraft
+- Add an option to enable URL fallback
+
+### Changed
+- Make wayback to IPFS as default
+- Build docker image for develop branch
+- Enhancements for youtube-dl media downloads
+- Dispatch repository in wabarc/homebrew-wayback
+- Change the URL fallback defaults to disabled and enable it with the `WAYBACK_FALLBACK` environment variable.
+- Increase the worker pool timeout to more than 3 seconds
+- Set the user agent for the download of the warc file
+- Download media with specific format
+- Minor improvement for render assets url
+- Minor improvements in testing
+- Upgrade dependencies
+
+### Fixed
+- Improvement for create warc file
+- Fix wget warc parse error
+
 ## [0.16.1] - 2021-10-24
 
 ### Fixed
