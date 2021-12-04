@@ -77,6 +77,12 @@ func funcMap() template.FuncMap {
 		"not": func(text, s string) bool {
 			return !strings.Contains(text, s)
 		},
+		"url": func(s string) string {
+			if helper.IsURL(s) {
+				return s
+			}
+			return ""
+		},
 	}
 }
 

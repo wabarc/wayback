@@ -66,14 +66,14 @@ func (gh *GitHub) ForPublish() *Render {
 }
 
 func (gh *GitHub) renderAssets(assets reduxer.Assets, tmplBytes *bytes.Buffer) {
-	tmpl := `**[AnonFiles](https://anonfiles.com/)** - [ [IMG]({{ .Img.Remote.Anonfile -}}
-) ¦ [PDF]({{ .PDF.Remote.Anonfile }}) ¦ [RAW]({{ .Raw.Remote.Anonfile -}}
-) ¦ [TXT]({{ .Txt.Remote.Anonfile }}) ¦ [HAR]({{ .HAR.Remote.Anonfile -}}
-) ¦ [WARC]({{ .WARC.Remote.Anonfile }}) ¦ [MEDIA]({{ .Media.Remote.Anonfile }}) ]
-**[Catbox](https://catbox.moe/)** - [ [IMG]({{ .Img.Remote.Catbox -}}
-) ¦ [PDF]({{ .PDF.Remote.Catbox }}) ¦ [RAW]({{ .Raw.Remote.Catbox -}}
-) ¦ [TXT]({{ .Txt.Remote.Catbox }}) ¦ [HAR]({{ .HAR.Remote.Catbox -}}
-) ¦ [WARC]({{ .WARC.Remote.Catbox }}) ¦ [MEDIA]({{ .Media.Remote.Catbox }}) ]`
+	tmpl := `**[AnonFiles](https://anonfiles.com/)** - [ [IMG]({{ .Img.Remote.Anonfile | url -}}
+) ¦ [PDF]({{ .PDF.Remote.Anonfile | url }}) ¦ [RAW]({{ .Raw.Remote.Anonfile | url -}}
+) ¦ [TXT]({{ .Txt.Remote.Anonfile | url }}) ¦ [HAR]({{ .HAR.Remote.Anonfile | url -}}
+) ¦ [WARC]({{ .WARC.Remote.Anonfile | url }}) ¦ [MEDIA]({{ .Media.Remote.Anonfile | url }}) ]
+**[Catbox](https://catbox.moe/)** - [ [IMG]({{ .Img.Remote.Catbox | url -}}
+) ¦ [PDF]({{ .PDF.Remote.Catbox | url }}) ¦ [RAW]({{ .Raw.Remote.Catbox | url -}}
+) ¦ [TXT]({{ .Txt.Remote.Catbox | url }}) ¦ [HAR]({{ .HAR.Remote.Catbox | url -}}
+) ¦ [WARC]({{ .WARC.Remote.Catbox | url }}) ¦ [MEDIA]({{ .Media.Remote.Catbox | url }}) ]`
 
 	tpl, err := template.New("assets").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
