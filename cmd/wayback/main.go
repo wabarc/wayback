@@ -42,7 +42,7 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:   "wayback",
-		Short: "A CLI tool for wayback webpages.",
+		Short: "A command-line tool and daemon service for archiving webpages.",
 		Example: `  wayback https://www.wikipedia.org
   wayback https://www.fsf.org https://www.eff.org
   wayback --ia https://www.fsf.org
@@ -64,23 +64,23 @@ func main() {
 }
 
 func init() {
-	rootCmd.Flags().BoolVarP(&ia, "ia", "", false, "Wayback webpages to Internet Archive.")
-	rootCmd.Flags().BoolVarP(&is, "is", "", false, "Wayback webpages to Archive Today.")
-	rootCmd.Flags().BoolVarP(&ip, "ip", "", false, "Wayback webpages to IPFS. (default false)")
-	rootCmd.Flags().BoolVarP(&ph, "ph", "", false, "Wayback webpages to Telegraph. (default false)")
+	rootCmd.Flags().BoolVarP(&ia, "ia", "", false, "Wayback webpages to Internet Archive")
+	rootCmd.Flags().BoolVarP(&is, "is", "", false, "Wayback webpages to Archive Today")
+	rootCmd.Flags().BoolVarP(&ip, "ip", "", false, "Wayback webpages to IPFS")
+	rootCmd.Flags().BoolVarP(&ph, "ph", "", false, "Wayback webpages to Telegraph")
 	rootCmd.Flags().StringSliceVarP(&daemon, "daemon", "d", []string{}, "Run as daemon service, supported services are telegram, web, mastodon, twitter, discord, slack, irc")
-	rootCmd.Flags().StringVarP(&host, "ipfs-host", "", "127.0.0.1", "IPFS daemon host, do not require, unless enable ipfs.")
-	rootCmd.Flags().UintVarP(&port, "ipfs-port", "p", 5001, "IPFS daemon port.")
-	rootCmd.Flags().StringVarP(&mode, "ipfs-mode", "m", "pinner", "IPFS mode.")
-	rootCmd.Flags().BoolVarP(&tor, "tor", "", false, "Snapshot webpage via Tor anonymity network.")
+	rootCmd.Flags().StringVarP(&host, "ipfs-host", "", "127.0.0.1", "IPFS daemon host, do not require, unless enable ipfs")
+	rootCmd.Flags().UintVarP(&port, "ipfs-port", "p", 5001, "IPFS daemon port")
+	rootCmd.Flags().StringVarP(&mode, "ipfs-mode", "m", "pinner", "IPFS mode")
+	rootCmd.Flags().BoolVarP(&tor, "tor", "", false, "Snapshot webpage via Tor anonymity network")
 
-	rootCmd.Flags().StringVarP(&token, "token", "t", "", "Telegram Bot API Token.")
-	rootCmd.Flags().StringVarP(&chatid, "chatid", "", "", "Telegram channel id.")
-	rootCmd.Flags().StringVarP(&torKey, "tor-key", "", "", "The private key for Tor Hidden Service.")
+	rootCmd.Flags().StringVarP(&token, "token", "t", "", "Telegram Bot API Token")
+	rootCmd.Flags().StringVarP(&chatid, "chatid", "", "", "Telegram channel id")
+	rootCmd.Flags().StringVarP(&torKey, "tor-key", "", "", "The private key for Tor Hidden Service")
 	rootCmd.Flags().StringVarP(&configFile, "config", "c", "", "Configuration file path, defaults: ./wayback.conf, ~/wayback.conf, /etc/wayback.conf")
-	rootCmd.Flags().BoolVarP(&debug, "debug", "", false, "Enable debug mode. (default false)")
-	rootCmd.Flags().BoolVarP(&info, "info", "", false, "Show application information.")
-	rootCmd.Flags().BoolVarP(&print, "print", "", false, "Show application configurations.")
+	rootCmd.Flags().BoolVarP(&debug, "debug", "", false, "Enable debug mode (default mode is false)")
+	rootCmd.Flags().BoolVarP(&info, "info", "", false, "Show application information")
+	rootCmd.Flags().BoolVarP(&print, "print", "", false, "Show application configurations")
 }
 
 func checkRequiredFlags(cmd *cobra.Command) error {
@@ -149,9 +149,10 @@ func setToEnv(cmd *cobra.Command) {
 // nolint:gocyclo
 func handle(cmd *cobra.Command, args []string) {
 	if !ia && !is && !ip && !ph {
-		ia, is = true, true
+		ia, is, ip = true, true, true
 		os.Setenv("WAYBACK_ENABLE_IA", "true")
 		os.Setenv("WAYBACK_ENABLE_IS", "true")
+		os.Setenv("WAYBACK_ENABLE_IP", "true")
 	}
 
 	setToEnv(cmd)

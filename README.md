@@ -88,7 +88,7 @@ brew install wayback
 ```sh
 $ wayback -h
 
-A CLI tool for wayback webpages.
+A command-line tool and daemon service for archiving webpages.
 
 Usage:
   wayback [flags]
@@ -102,23 +102,23 @@ Examples:
     WAYBACK_SECRET=YOUR-PINATA-SECRET wayback --ip https://www.fsf.org
 
 Flags:
-      --chatid string      Telegram channel id.
+      --chatid string      Telegram channel id
   -c, --config string      Configuration file path, defaults: ./wayback.conf, ~/wayback.conf, /etc/wayback.conf
   -d, --daemon strings     Run as daemon service, supported services are telegram, web, mastodon, twitter, discord, slack, irc
-      --debug              Enable debug mode. (default false)
+      --debug              Enable debug mode (default mode is false)
   -h, --help               help for wayback
-      --ia                 Wayback webpages to Internet Archive.
-      --info               Show application information.
-      --ip                 Wayback webpages to IPFS. (default false)
-      --ipfs-host string   IPFS daemon host, do not require, unless enable ipfs. (default "127.0.0.1")
-  -m, --ipfs-mode string   IPFS mode. (default "pinner")
-  -p, --ipfs-port uint     IPFS daemon port. (default 5001)
-      --is                 Wayback webpages to Archive Today.
-      --ph                 Wayback webpages to Telegraph. (default false)
-      --print              Show application configurations.
-  -t, --token string       Telegram Bot API Token.
-      --tor                Snapshot webpage via Tor anonymity network.
-      --tor-key string     The private key for Tor Hidden Service.
+      --ia                 Wayback webpages to Internet Archive
+      --info               Show application information
+      --ip                 Wayback webpages to IPFS
+      --ipfs-host string   IPFS daemon host, do not require, unless enable ipfs (default "127.0.0.1")
+  -m, --ipfs-mode string   IPFS mode (default "pinner")
+  -p, --ipfs-port uint     IPFS daemon port (default 5001)
+      --is                 Wayback webpages to Archive Today
+      --ph                 Wayback webpages to Telegraph
+      --print              Show application configurations
+  -t, --token string       Telegram Bot API Token
+      --tor                Snapshot webpage via Tor anonymity network
+      --tor-key string     The private key for Tor Hidden Service
   -v, --version            version for wayback
 ```
 
