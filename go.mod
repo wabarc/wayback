@@ -56,7 +56,7 @@ require (
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
-	gopkg.in/tucnak/telebot.v2 v2.4.1
+	gopkg.in/tucnak/telebot.v2 v2.5.0
 	maunium.net/go/mautrix v0.10.4
 )
 
