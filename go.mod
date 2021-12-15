@@ -27,7 +27,6 @@ require (
 	github.com/kr/pretty v0.3.0 // indirect
 	// github.com/ipsn/go-libtor v1.0.329
 	github.com/libp2p/go-libp2p-core v0.8.6 // indirect
-	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
 	github.com/multiformats/go-multiaddr v0.3.3 // indirect
 	github.com/multiformats/go-multihash v0.0.15 // indirect
@@ -36,7 +35,7 @@ require (
 	github.com/prometheus/client_golang v1.11.0
 	github.com/prometheus/common v0.31.1
 	github.com/slack-go/slack v0.10.0
-	github.com/spf13/cobra v1.2.1
+	github.com/spf13/cobra v1.3.0
 	github.com/tdewolff/parse/v2 v2.5.19 // indirect
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
 	github.com/wabarc/archive.is v1.3.0
@@ -55,7 +54,6 @@ require (
 	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
 	gopkg.in/tucnak/telebot.v2 v2.4.1
 	maunium.net/go/mautrix v0.10.4
 )
