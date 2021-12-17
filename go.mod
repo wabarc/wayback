@@ -57,7 +57,7 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
 	gopkg.in/tucnak/telebot.v2 v2.4.1
-	maunium.net/go/mautrix v0.10.4
+	maunium.net/go/mautrix v0.10.7
 )
 
 replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78
