@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -121,7 +122,7 @@ var (
 )
 
 func handle(mux *http.ServeMux, updatesJSON string) {
-	times := 0
+	var count int32
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -144,11 +145,11 @@ func handle(mux *http.ServeMux, updatesJSON string) {
 		case "setMyCommands":
 			fmt.Fprintln(w, `{"ok":true, "result":true}`)
 		case "getUpdates":
-			if times == 0 {
+			if count == 0 {
+				atomic.AddInt32(&count, 1)
 				fmt.Fprintln(w, updatesJSON)
-				times++
 			} else {
-				fmt.Fprintln(w, `{"ok":true, "result":[]}`)
+				fmt.Fprintln(w, `{"ok":true, "result":null}`)
 			}
 		case "sendMessage":
 			if text == "Queue..." || strings.Contains(text, config.SlotName("ia")) {
@@ -272,6 +273,7 @@ func TestProcess(t *testing.T) {
 	}
 	defer tg.store.Close()
 
+	done := make(chan bool, 1)
 	tg.bot.Poller = telegram.NewMiddlewarePoller(tg.bot.Poller, func(update *telegram.Update) bool {
 		switch {
 		// case update.Callback != nil:
@@ -281,7 +283,7 @@ func TestProcess(t *testing.T) {
 			} else {
 				// Waiting for publish
 				time.Sleep(time.Second)
-				tg.Shutdown()
+				done <- true
 			}
 		default:
 			t.Log("Unhandle")
@@ -289,10 +291,20 @@ func TestProcess(t *testing.T) {
 		return true
 	})
 
-	time.AfterFunc(2*time.Minute, func() { tg.Shutdown() })
+	go func() {
+		tg.bot.Start()
+	}()
 
-	// Block until service closed
-	tg.bot.Start()
+	for {
+		select {
+		case <-done:
+			tg.Shutdown()
+			time.Sleep(3 * time.Second)
+			return
+		case <-time.After(time.Minute):
+			done <- true
+		}
+	}
 }
 
 func TestProcessPlayback(t *testing.T) {
