@@ -142,11 +142,11 @@ test-cover: ## Collect code coverage
 
 bench: ## Benchmark test
 	@echo "-> Running benchmark"
-	@go test -v -bench .
+	@go test -v -bench ./...
 
 profile: ## Test and profile
 	@echo "-> Running profile"
-	@go test -cpuprofile cpu.prof -memprofile mem.prof -v -bench .
+	@go test -cpuprofile cpu.prof -memprofile mem.prof -v -bench ./...
 
 docker-image: ## Build Docker image
 	@echo "-> Building docker image..."
