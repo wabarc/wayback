@@ -52,6 +52,10 @@ linters-settings:
     # minimal code complexity to report, 30 by default
     min-complexity: 15
   gosec:
+    # To specify a set of rules to explicitly exclude.
+    # Available rules: https://github.com/securego/gosec#available-rules
+    excludes:
+      - G108
     # To specify the configuration of rules.
     # The configuration of rules is not fully documented by gosec:
     # https://github.com/securego/gosec#configuration

@@ -177,6 +177,7 @@ func handle(cmd *cobra.Command, args []string) {
 
 	logger.SetLogLevel(config.Opts.LogLevel())
 	if debug || config.Opts.HasDebugMode() {
+		profiling()
 		logger.EnableDebug()
 	}
 

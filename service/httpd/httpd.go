@@ -59,16 +59,23 @@ func (web *web) handle(pool pooling.Pool) http.Handler {
 			web.process(w, r)
 		})
 	}).Methods(http.MethodPost)
+
 	web.router.HandleFunc("/playback", web.playback).Methods(http.MethodPost)
 
 	web.router.HandleFunc("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ok"))
 	}).Name("healthcheck")
+
 	web.router.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(version.Version))
 	}).Name("version")
+
 	if config.Opts.EnabledMetrics() {
 		web.router.Handle("/metrics", promhttp.Handler()).Methods(http.MethodGet)
+	}
+
+	if config.Opts.HasDebugMode() {
+		web.router.PathPrefix("/debug/").Handler(http.DefaultServeMux)
 	}
 
 	web.router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
