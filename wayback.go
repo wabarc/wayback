@@ -49,7 +49,8 @@ type IS struct {
 
 // IP represents the IPFS slot.
 type IP struct {
-	ctx context.Context
+	ctx    context.Context
+	bundle *reduxer.Bundle
 
 	URL *url.URL
 }
@@ -102,6 +103,12 @@ func (i IP) Wayback() string {
 		IPFSPort: config.Opts.IPFSPort(),
 		IPFSMode: config.Opts.IPFSMode(),
 		UseTor:   config.Opts.UseTor(),
+	}
+
+	// If there is bundled HTML, it is utilized as the basis for IPFS
+	// archiving and is sent to obelisk to crawl the rest of the page.
+	if i.bundle != nil {
+		i.ctx = arc.ContextWithInput(i.ctx, i.bundle.HTML)
 	}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
@@ -182,7 +189,7 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 				case config.SLOT_IS:
 					col.Dst = wayback(IS{URL: input, ctx: ctx})
 				case config.SLOT_IP:
-					col.Dst = wayback(IP{URL: input, ctx: ctx})
+					col.Dst = wayback(IP{URL: input, ctx: ctx, bundle: bundle})
 				case config.SLOT_PH:
 					col.Dst = wayback(PH{URL: input, ctx: ctx, bundle: bundle})
 				}
