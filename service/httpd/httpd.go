@@ -14,6 +14,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -63,11 +64,11 @@ func (web *web) handle(pool pooling.Pool) http.Handler {
 	web.router.HandleFunc("/playback", web.playback).Methods(http.MethodPost)
 
 	web.router.HandleFunc("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ok"))
+		w.Write(helper.String2Byte("ok"))
 	}).Name("healthcheck")
 
 	web.router.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(version.Version))
+		w.Write(helper.String2Byte(version.Version))
 	}).Name("version")
 
 	if config.Opts.EnabledMetrics() {
@@ -80,7 +81,7 @@ func (web *web) handle(pool pooling.Pool) http.Handler {
 
 	web.router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("User-agent: *\nDisallow: /"))
+		w.Write(helper.String2Byte("User-agent: *\nDisallow: /"))
 	})
 
 	return web.router

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -222,7 +223,7 @@ func (d *Discord) buttonHandlers() map[string]func(*discord.Session, *discord.In
 
 			s.ChannelTyping(i.Message.ChannelID)
 
-			i.Message.Content = string(data)
+			i.Message.Content = helper.Byte2String(data)
 			d.process(&discord.MessageCreate{Message: i.Message})
 			s.InteractionResponseDelete(s.State.User.ID, i.Interaction)
 			return
@@ -340,7 +341,7 @@ func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) err
 
 	// Due to Discord restricted custom_id up to 100 characters, it requires to store
 	// playback URLs to database.
-	pb := &entity.Playback{Source: base64.StdEncoding.EncodeToString([]byte(text))}
+	pb := &entity.Playback{Source: base64.StdEncoding.EncodeToString(helper.String2Byte(text))}
 	if err := d.store.CreatePlayback(pb); err != nil {
 		logger.Error("store collections failed: %v", err)
 		return err

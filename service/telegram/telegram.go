@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -126,7 +127,7 @@ func (t *Telegram) Serve() (err error) {
 				return false
 			}
 
-			callback.Message.Text = string(data)
+			callback.Message.Text = helper.Byte2String(data)
 			go t.process(callback.Message)
 		case update.Message != nil && update.Message.FromGroup():
 			logger.Debug("message: %#v", update.Message)
@@ -311,7 +312,7 @@ func (t *Telegram) playback(message *telegram.Message) error {
 
 	// Due to Telegram restricted callback data to 1-64 bytes, it requires to store
 	// playback URLs to database.
-	data := []byte(strings.ReplaceAll(callbackPrefix()+message.Text, "/playback", ""))
+	data := helper.String2Byte(strings.ReplaceAll(callbackPrefix()+message.Text, "/playback", ""))
 	pb := &entity.Playback{Source: base64.StdEncoding.EncodeToString(data)}
 	if err := t.store.CreatePlayback(pb); err != nil {
 		logger.Error("store collections failed: %v", err)

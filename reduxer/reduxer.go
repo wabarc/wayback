@@ -156,7 +156,7 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 			}
 			fn := strings.TrimRight(helper.FileName(shot.URL, ""), "html") + "txt"
 			fp := filepath.Join(dir, fn)
-			if err := os.WriteFile(fp, []byte(article.TextContent), 0o600); err == nil && article.TextContent != "" {
+			if err := os.WriteFile(fp, helper.String2Byte(article.TextContent), 0o600); err == nil && article.TextContent != "" {
 				if err := helper.SetField(&assets.Txt, "Local", fp); err != nil {
 					logger.Error("assign field Txt to assets struct failed: %v", err)
 				}
