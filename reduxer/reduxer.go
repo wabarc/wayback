@@ -21,9 +21,9 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/go-shiori/go-readability"
-	"github.com/iawia002/annie/downloader"
-	"github.com/iawia002/annie/extractors"
-	"github.com/iawia002/annie/extractors/types"
+	"github.com/iawia002/lux/downloader"
+	"github.com/iawia002/lux/extractors"
+	"github.com/iawia002/lux/extractors/types"
 	"github.com/wabarc/go-anonfile"
 	"github.com/wabarc/go-catbox"
 	"github.com/wabarc/helper"
@@ -353,13 +353,13 @@ func media(ctx context.Context, dir, in string) string {
 		return match(fp + "*")
 	}
 
-	var viaAnnie = func() string {
+	var viaLux = func() string {
 		if !existFFmpeg {
 			logger.Warn("missing FFmpeg, skipped")
 			return ""
 		}
-		// Download media via Annie
-		logger.Debug("download media via annie")
+		// Download media via Lux
+		logger.Debug("download media via lux")
 		data, err := extractors.Extract(in, types.Options{})
 		if err != nil || len(data) == 0 {
 			logger.Warn("data empty or error %v", err)
@@ -403,7 +403,7 @@ func media(ctx context.Context, dir, in string) string {
 		v = viaYouGet()
 	}
 	if v == "" {
-		v = viaAnnie()
+		v = viaLux()
 	}
 	if !helper.Exists(v) {
 		logger.Warn("file %s not exists", fp)

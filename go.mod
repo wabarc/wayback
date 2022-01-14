@@ -20,7 +20,7 @@ require (
 	github.com/google/go-github/v40 v40.0.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/iawia002/annie v0.11.1-0.20210830024824-5391d8269d1d
+	github.com/iawia002/lux v0.12.0
 	github.com/kkdai/youtube/v2 v2.7.4 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
