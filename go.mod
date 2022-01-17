@@ -52,12 +52,11 @@ require (
 	github.com/wabarc/wbipfs v0.2.0
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	go.etcd.io/bbolt v1.3.6
-	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
-	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9
+	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
 	gopkg.in/tucnak/telebot.v2 v2.4.1
-	maunium.net/go/mautrix v0.10.4
+	maunium.net/go/mautrix v0.10.10
 )
 
 replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20210420023708-aac2bcc00a78
