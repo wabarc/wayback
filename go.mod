@@ -33,8 +33,8 @@ require (
 	github.com/multiformats/go-multihash v0.0.15 // indirect
 	github.com/phf/go-queue v0.0.0-20170504031614-9abe38d0371d
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.11.0
-	github.com/prometheus/common v0.31.1
+	github.com/prometheus/client_golang v1.12.0
+	github.com/prometheus/common v0.32.1
 	github.com/slack-go/slack v0.10.0
 	github.com/spf13/cobra v1.2.1
 	github.com/tdewolff/parse/v2 v2.5.19 // indirect
@@ -55,7 +55,6 @@ require (
 	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
 	gopkg.in/tucnak/telebot.v2 v2.4.1
 	maunium.net/go/mautrix v0.10.4
 )
