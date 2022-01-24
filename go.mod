@@ -31,14 +31,15 @@ require (
 	github.com/wabarc/go-anonfile v0.1.0
 	github.com/wabarc/go-catbox v0.1.0
 	github.com/wabarc/helper v0.0.0-20211225065210-3d35291efe54
+	github.com/wabarc/ipfs-pinner v1.1.1-0.20220126131044-16299c0dd43d
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
 	github.com/wabarc/playback v0.0.0-20210718054702-cab6c6004933
+	github.com/wabarc/rivet v0.0.0-20220207154318-37fc56bcf4e1
 	github.com/wabarc/screenshot v1.4.1-0.20211226132820-f5eed318376e
 	github.com/wabarc/telegra.ph v0.0.0-20210822083402-82f95ce60a37
 	github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5
-	github.com/wabarc/wbipfs v0.2.1-0.20211227135743-a73874e5a19d
 	go.etcd.io/bbolt v1.3.6
-	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f
+	golang.org/x/net v0.0.0-20220121210141-e204ce36a2ba
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/tucnak/telebot.v2 v2.4.1
 	maunium.net/go/mautrix v0.10.4
@@ -54,6 +55,7 @@ require (
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
+	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.8 // indirect
 	github.com/chromedp/cdproto v0.0.0-20211223002613-767fe3af85ce // indirect
@@ -74,10 +76,11 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/ipfs/go-cid v0.1.0 // indirect
 	github.com/ipfs/go-ipfs-api v0.3.0 // indirect
-	github.com/ipfs/go-ipfs-files v0.0.9 // indirect
+	github.com/ipfs/go-ipfs-files v0.1.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/kallydev/telegraph-go v1.0.0 // indirect
+	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/kkdai/youtube/v2 v2.7.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
@@ -112,17 +115,17 @@ require (
 	github.com/spacemonkeygo/spacelog v0.0.0-20180420211403-2296661a0572 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/tdewolff/parse/v2 v2.5.26 // indirect
+	github.com/tdewolff/parse/v2 v2.5.27 // indirect
 	github.com/tidwall/gjson v1.10.2 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
 	github.com/wabarc/imgbb v1.0.0 // indirect
-	github.com/wabarc/ipfs-pinner v1.0.3 // indirect
 	github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae // indirect
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
+	github.com/ybbus/httpretry v1.0.1 // indirect
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -130,4 +133,4 @@ require (
 	mvdan.cc/xurls/v2 v2.3.0 // indirect
 )
 
-replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20211226093042-fd2277022bc8
+replace github.com/go-shiori/obelisk => github.com/wabarc/obelisk v0.0.0-20220211133542-cf6b1b2fa65d

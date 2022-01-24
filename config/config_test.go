@@ -194,7 +194,7 @@ func TestIPFSPort(t *testing.T) {
 		t.Fatalf(`Parsing environment variables failed: %v`, err)
 	}
 
-	expected := uint(1234)
+	expected := 1234
 	got := opts.IPFSPort()
 
 	if got != expected {
@@ -217,6 +217,60 @@ func TestIPFSMode(t *testing.T) {
 
 	if got != expected {
 		t.Fatalf(`Unexpected IPFS mode, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestIPFSTarget(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_IPFS_TARGET", "target")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "target"
+	got := opts.IPFSTarget()
+
+	if got != expected {
+		t.Fatalf(`Unexpected IPFS target, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestIPFSApikey(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_IPFS_APIKEY", "apikey")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "apikey"
+	got := opts.IPFSApikey()
+
+	if got != expected {
+		t.Fatalf(`Unexpected IPFS apikey, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestIPFSSecret(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_IPFS_SECRET", "secret")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "secret"
+	got := opts.IPFSSecret()
+
+	if got != expected {
+		t.Fatalf(`Unexpected IPFS secret, got %v instead of %s`, got, expected)
 	}
 }
 

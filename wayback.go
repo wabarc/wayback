@@ -12,6 +12,7 @@ import (
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/playback"
+	"github.com/wabarc/rivet/ipfs"
 	"github.com/wabarc/screenshot"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
@@ -20,8 +21,10 @@ import (
 
 	is "github.com/wabarc/archive.is"
 	ia "github.com/wabarc/archive.org"
+	ip "github.com/wabarc/rivet"
 	ph "github.com/wabarc/telegra.ph"
-	ip "github.com/wabarc/wbipfs"
+
+	pinner "github.com/wabarc/ipfs-pinner"
 )
 
 // Collect results that archived, Arc is name of the archive service,
@@ -98,18 +101,33 @@ func (i IS) Wayback() string {
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the IP and returns archived URL as a string.
 func (i IP) Wayback() string {
-	arc := &ip.Archiver{
-		IPFSHost: config.Opts.IPFSHost(),
-		IPFSPort: config.Opts.IPFSPort(),
-		IPFSMode: config.Opts.IPFSMode(),
-		UseTor:   config.Opts.UseTor(),
+	opts := []ipfs.PinningOption{
+		ipfs.Mode(ipfs.Remote),
 	}
+	if config.Opts.IPFSMode() == "daemon" {
+		opts = []ipfs.PinningOption{
+			ipfs.Mode(ipfs.Local),
+			ipfs.Host(config.Opts.IPFSHost()),
+			ipfs.Port(config.Opts.IPFSPort()),
+		}
+	}
+
+	target := config.Opts.IPFSTarget()
+	switch target {
+	case pinner.Infura, pinner.Pinata, pinner.NFTStorage, pinner.Web3Storage:
+		apikey := config.Opts.IPFSApikey()
+		secret := config.Opts.IPFSSecret()
+		opts = append(opts, ipfs.Uses(target), ipfs.Apikey(apikey), ipfs.Secret(secret))
+	}
+
+	arc := &ip.Shaft{Hold: ipfs.Options(opts...)}
 
 	// If there is bundled HTML, it is utilized as the basis for IPFS
 	// archiving and is sent to obelisk to crawl the rest of the page.
 	if i.bundle != nil {
-		i.ctx = arc.ContextWithInput(i.ctx, i.bundle.HTML)
+		i.ctx = arc.WithInput(i.ctx, i.bundle.HTML)
 	}
+
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
 		logger.Error("wayback %s to IPFS failed: %v", i.URL.String(), err)

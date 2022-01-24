@@ -221,6 +221,9 @@ You can also specify configuration options either via command flags or via envir
 | `--ipfs-host`       | `WAYBACK_IPFS_HOST`               | `127.0.0.1`             | IPFS daemon service host                                     |
 | `-p`, `--ipfs-port` | `WAYBACK_IPFS_PORT`               | `5001`                  | IPFS daemon service port                                     |
 | `-m`, `--ipfs-mode` | `WAYBACK_IPFS_MODE`               | `pinner`                | IPFS mode for preserve webpage, e.g. `daemon`, `pinner`      |
+| -                   | `WAYBACK_IPFS_TARGET`             | `infura`                | The IPFS pinning service is used to store files, supported pinners: infura, pinata, nftstorage, web3storage. |
+| -                   | `WAYBACK_IPFS_APIKEY`             | -                       | Apikey of the IPFS pinning service                           |
+| -                   | `WAYBACK_IPFS_SECRET`             | -                       | Secret of the IPFS pinning service                           |
 | -                   | `WAYBACK_GITHUB_TOKEN`            | -                       | GitHub Personal Access Token, required the `repo` scope      |
 | -                   | `WAYBACK_GITHUB_OWNER`            | -                       | GitHub account name                                          |
 | -                   | `WAYBACK_GITHUB_REPO`             | -                       | GitHub repository to publish results                         |

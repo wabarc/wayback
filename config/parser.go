@@ -96,9 +96,15 @@ func (p *Parser) parseLines(lines []string) (err error) {
 		case "WAYBACK_IPFS_HOST":
 			p.opts.ipfs.host = parseString(val, defIPFSHost)
 		case "WAYBACK_IPFS_PORT":
-			p.opts.ipfs.port = uint(parseInt(val, defIPFSPort))
+			p.opts.ipfs.port = parseInt(val, defIPFSPort)
 		case "WAYBACK_IPFS_MODE":
 			p.opts.ipfs.mode = parseString(val, defIPFSMode)
+		case "WAYBACK_IPFS_TARGET":
+			p.opts.ipfs.target = parseString(val, defIPFSTarget)
+		case "WAYBACK_IPFS_APIKEY":
+			p.opts.ipfs.apikey = parseString(val, defIPFSApikey)
+		case "WAYBACK_IPFS_SECRET":
+			p.opts.ipfs.secret = parseString(val, defIPFSSecret)
 		case "WAYBACK_USE_TOR":
 			p.opts.overTor = parseBool(val, defOverTor)
 		case "WAYBACK_ENABLE_IA":

@@ -19,9 +19,13 @@ const (
 	defLogLevel = "info"
 	defMetrics  = false
 	defOverTor  = false
-	defIPFSHost = "127.0.0.1"
-	defIPFSPort = 4001
-	defIPFSMode = "pinner"
+
+	defIPFSHost   = "127.0.0.1"
+	defIPFSPort   = 4001
+	defIPFSMode   = "pinner"
+	defIPFSTarget = "infura"
+	defIPFSApikey = ""
+	defIPFSSecret = ""
 
 	defEnabledIA = false
 	defEnabledIS = false
@@ -115,8 +119,12 @@ type Options struct {
 
 type ipfs struct {
 	host string
-	port uint
+	port int
 	mode string
+
+	target string
+	apikey string
+	secret string
 }
 
 type telegram struct {
@@ -200,9 +208,12 @@ func NewOptions() *Options {
 		waybackUserAgent:    defWaybackUserAgent,
 		waybackFallback:     defWaybackFallback,
 		ipfs: &ipfs{
-			host: defIPFSHost,
-			port: defIPFSPort,
-			mode: defIPFSMode,
+			host:   defIPFSHost,
+			port:   defIPFSPort,
+			mode:   defIPFSMode,
+			target: defIPFSTarget,
+			apikey: defIPFSApikey,
+			secret: defIPFSSecret,
 		},
 		slots: map[string]bool{
 			SLOT_IA: defEnabledIA,
@@ -306,13 +317,28 @@ func (o *Options) IPFSHost() string {
 }
 
 // IPFSPort returns the port of IPFS daemon service.
-func (o *Options) IPFSPort() uint {
+func (o *Options) IPFSPort() int {
 	return o.ipfs.port
 }
 
 // IPFSMode returns the mode to using IPFS.
 func (o *Options) IPFSMode() string {
 	return o.ipfs.mode
+}
+
+// IPFSTarget returns which IPFS pinning service to use.
+func (o *Options) IPFSTarget() string {
+	return o.ipfs.target
+}
+
+// IPFSApiKey returns the apikey of the IPFS pinning service.
+func (o *Options) IPFSApikey() string {
+	return o.ipfs.apikey
+}
+
+// IPFSSecret returns the secret of the IPFS pinning service.
+func (o *Options) IPFSSecret() string {
+	return o.ipfs.secret
 }
 
 // UseTor returns whether to use the Tor proxy when snapshot webpage.
