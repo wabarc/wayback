@@ -34,7 +34,10 @@ import (
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
 var ErrServiceClosed = errors.New("telegram: Service closed")
 
-var pollTick = 3 * time.Second
+var (
+	pollTick = 3 * time.Second
+	space    = ` `
+)
 
 // Telegram represents a Telegram service in the application.
 type Telegram struct {
@@ -130,6 +133,7 @@ func (t *Telegram) Serve() (err error) {
 			callback.Message.Text = helper.Byte2String(data)
 			go t.process(callback.Message)
 		case update.Message != nil && update.Message.FromGroup():
+			transform(update.Message)
 			logger.Debug("message: %#v", update.Message)
 			// Reply message and mention bot on the group
 			if update.Message.ReplyTo != nil {
@@ -140,6 +144,7 @@ func (t *Telegram) Serve() (err error) {
 			}
 			go t.process(update.Message)
 		case update.Message != nil:
+			transform(update.Message)
 			logger.Debug("message: %#v", update.Message)
 			go t.process(update.Message)
 		default:
@@ -174,9 +179,6 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 	content := message.Text
 	logger.Debug("content: %s", content)
 
-	if message.Caption != "" {
-		content = fmt.Sprintf("Text: \n%s\nCaption: \n%s", content, message.Caption)
-	}
 	// If the message is forwarded and contains multiple entities,
 	// the update will be split into multiple parts.
 	// Don't process parts of the forwarded message without text.
@@ -451,4 +453,30 @@ func command(message string) string {
 	default:
 		return matchCmd(message)
 	}
+}
+
+func transform(m *telegram.Message) {
+	entities := func(e telegram.Entities) (uri []string) {
+		for _, entity := range e {
+			if entity.URL != "" {
+				uri = append(uri, entity.URL)
+			}
+		}
+		return
+	}
+
+	// At lease one embed link is included in the message.
+	if len(m.Entities) > 0 {
+		uri := entities(m.Entities)
+		m.Text = fmt.Sprintf("%s and URI in message entity: %s", m.Text, strings.Join(uri, space))
+	}
+	// The message body is an attachment with a caption.
+	if m.Caption != "" {
+		m.Text = fmt.Sprintf("%s and caption: %s", m.Text, m.Caption)
+	}
+	if len(m.CaptionEntities) > 0 {
+		uri := entities(m.CaptionEntities)
+		m.Text = fmt.Sprintf("%s and URI in caption entity: %s", m.Text, strings.Join(uri, space))
+	}
+	return
 }
