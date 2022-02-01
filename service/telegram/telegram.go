@@ -28,7 +28,7 @@ import (
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
 
-	telegram "gopkg.in/tucnak/telebot.v2"
+	telegram "gopkg.in/telebot.v3"
 )
 
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
@@ -61,7 +61,7 @@ func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Telegr
 		// Verbose:   config.Opts.HasDebugMode(),
 		ParseMode: telegram.ModeHTML,
 		Poller:    &telegram.LongPoller{Timeout: pollTick},
-		Reporter: func(err error) {
+		OnError: func(err error, _ telegram.Context) {
 			if err != nil {
 				logger.Warn(err.Error())
 			}
@@ -91,7 +91,7 @@ func (t *Telegram) Serve() (err error) {
 	}
 	logger.Info("authorized on account %s", color.BlueString(t.bot.Me.Username))
 
-	if channel, err := t.bot.ChatByID(config.Opts.TelegramChannel()); err == nil {
+	if channel, err := t.bot.ChatByUsername(config.Opts.TelegramChannel()); err == nil {
 		id := strconv.FormatInt(channel.ID, 10)
 		logger.Info("channel title: %s, channel id: %s", color.BlueString(channel.Title), color.BlueString(id))
 	}
@@ -265,13 +265,18 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
 	go publish.To(ctx, cols, publish.FlagTelegram.String())
 
-	var album telegram.Album
+	var albums telegram.Album
 	for _, bundle := range bundles {
-		album = append(album, publish.UploadToTelegram(bundle)...)
+		albums = append(albums, publish.UploadToTelegram(bundle)...)
 	}
+	if len(albums) == 0 {
+		logger.Debug("no albums to send")
+		return nil
+	}
+
 	// Send album attach files, and reply to wayback result message
 	opts = &telegram.SendOptions{ReplyTo: stage, DisableNotification: true}
-	if _, err := t.bot.SendAlbum(stage.Chat, album, opts); err != nil {
+	if _, err := t.bot.SendAlbum(stage.Chat, albums, opts); err != nil {
 		logger.Error("reply failed: %v", err)
 	}
 
@@ -281,7 +286,7 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 func (t *Telegram) playback(message *telegram.Message) error {
 	metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusRequest)
 
-	recipient, err := t.bot.ChatByID(fmt.Sprint(message.Chat.ID))
+	recipient, err := t.bot.ChatByID(message.Chat.ID)
 	if err != nil {
 		metrics.IncrementPlayback(metrics.ServiceTelegram, metrics.StatusFailure)
 		logger.Error("playback failed: %v", err)
@@ -368,7 +373,7 @@ func (t *Telegram) commandFallback() string {
 }
 
 func (t *Telegram) getCommands() []telegram.Command {
-	commands, err := t.bot.GetCommands()
+	commands, err := t.bot.Commands()
 	if err != nil {
 		logger.Error("got my commands failed: %v", err)
 	}

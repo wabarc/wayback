@@ -14,7 +14,7 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/template/render"
-	telegram "gopkg.in/tucnak/telebot.v2"
+	telegram "gopkg.in/telebot.v3"
 )
 
 type telegramBot struct {
@@ -81,7 +81,7 @@ func (t *telegramBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
 		}
 	}
 
-	chat, err := t.bot.ChatByID(config.Opts.TelegramChannel())
+	chat, err := t.bot.ChatByUsername(config.Opts.TelegramChannel())
 	if err != nil {
 		logger.Error("open a chat failed: %v", err)
 		return ok

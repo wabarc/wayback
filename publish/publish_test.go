@@ -19,7 +19,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/reduxer"
-	telegram "gopkg.in/tucnak/telebot.v2"
+	telegram "gopkg.in/telebot.v3"
 )
 
 var collects = []wayback.Collect{

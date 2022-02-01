@@ -26,7 +26,7 @@ import (
 	mstdn "github.com/mattn/go-mastodon"
 	slack "github.com/slack-go/slack"
 	irc "github.com/thoj/go-ircevent"
-	telegram "gopkg.in/tucnak/telebot.v2"
+	telegram "gopkg.in/telebot.v3"
 	matrix "maunium.net/go/mautrix"
 )
 
