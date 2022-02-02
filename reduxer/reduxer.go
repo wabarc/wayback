@@ -70,7 +70,7 @@ var ytdl, existYoutubeDL = exists("youtube-dl")
 // Do executes secreenshot, print PDF and export html of given URLs
 // Returns a set of bundle containing screenshot data and file path
 // nolint:gocyclo
-func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
+func Do(ctx context.Context, urls ...*url.URL) (bundles Bundles, err error) {
 	bundles = make(Bundles)
 	if !config.Opts.EnabledReduxer() {
 		return bundles, errors.New("Specify directory to environment `WAYBACK_STORAGE_DIR` to enable reduxer")
@@ -177,7 +177,7 @@ func Do(ctx context.Context, urls ...string) (bundles Bundles, err error) {
 }
 
 // Capture returns screenshot.Screenshots of given URLs
-func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshots, err error) {
+func Capture(ctx context.Context, urls ...*url.URL) (shots []screenshot.Screenshots, err error) {
 	opts := []screenshot.ScreenshotOption{
 		screenshot.ScaleFactor(1),
 		screenshot.PrintPDF(true), // print pdf
@@ -188,15 +188,10 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 	shots = make([]screenshot.Screenshots, 0, len(urls))
-	for _, uri := range urls {
+	for _, input := range urls {
 		wg.Add(1)
-		go func(uri string) {
+		go func(input *url.URL) {
 			defer wg.Done()
-			input, err := url.Parse(uri)
-			if err != nil {
-				logger.Error("parse url failed: %v", err)
-				return
-			}
 
 			var shot screenshot.Screenshots
 			if remote := remoteHeadless(config.Opts.ChromeRemoteAddr()); remote != nil {
@@ -223,7 +218,7 @@ func Capture(ctx context.Context, urls ...string) (shots []screenshot.Screenshot
 			mu.Lock()
 			shots = append(shots, shot)
 			mu.Unlock()
-		}(uri)
+		}(input)
 	}
 	wg.Wait()
 

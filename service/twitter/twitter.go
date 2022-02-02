@@ -6,6 +6,7 @@ package twitter // import "github.com/wabarc/wayback/service/twitter"
 
 import (
 	"context"
+	"net/url"
 	"sync"
 	"time"
 
@@ -160,9 +161,13 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	}()
 
 	urls := service.MatchURL(text)
-	var realURLs []string
-	for _, url := range urls {
-		realURLs = append(realURLs, helper.RealURI(url))
+	var realURLs []*url.URL
+	for _, uri := range urls {
+		u, err := url.Parse(helper.RealURI(uri.String()))
+		if err != nil {
+			continue
+		}
+		realURLs = append(realURLs, u)
 	}
 	logger.Debug("real urls: %v", realURLs)
 
@@ -172,7 +177,7 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	}
 
 	var bundles reduxer.Bundles
-	cols, err := wayback.Wayback(context.TODO(), &bundles, urls...)
+	cols, err := wayback.Wayback(context.TODO(), &bundles, realURLs...)
 	if err != nil {
 		logger.Error("archives failure, ", err)
 		return err

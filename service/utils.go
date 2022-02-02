@@ -5,14 +5,41 @@
 package service // import "github.com/wabarc/wayback/service"
 
 import (
+	"net/url"
+	"strings"
+
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 )
 
 // MatchURL returns a slice string contains URLs extracted from the given string.
-func MatchURL(s string) []string {
+func MatchURL(s string) (urls []*url.URL) {
+	var matches []string
 	if config.Opts.WaybackFallback() {
-		return helper.MatchURLFallback(s)
+		matches = helper.MatchURLFallback(s)
 	}
-	return helper.MatchURL(s)
+	matches = helper.MatchURL(s)
+
+	for i := range matches {
+		u, _ := url.Parse(matches[i])
+		urls = append(urls, u)
+	}
+
+	return removeDuplicates(urls)
+}
+
+func removeDuplicates(elements []*url.URL) (urls []*url.URL) {
+	encountered := map[string]bool{}
+	slash := "/"
+	for _, u := range elements {
+		key := u.User.String() + u.Host + u.Path + u.RawQuery + u.Fragment
+		if u.Path == "" && !strings.HasSuffix(key, slash) {
+			key += slash
+		}
+		if !encountered[key] {
+			encountered[key] = true
+			urls = append(urls, u)
+		}
+	}
+	return
 }

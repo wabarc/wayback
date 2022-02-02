@@ -6,6 +6,7 @@ package slack // import "github.com/wabarc/wayback/service/slack"
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/fatih/color"
 	"github.com/slack-go/slack"
@@ -280,7 +281,7 @@ func (s *Slack) process(ev *event) (err error) {
 	return nil
 }
 
-func (s *Slack) wayback(ctx context.Context, ev *event, urls []string) error {
+func (s *Slack) wayback(ctx context.Context, ev *event, urls []*url.URL) error {
 	tstamp, err := s.edit(ev.Channel, ev.ThreadTimeStamp, "Archiving...")
 	if err != nil {
 		logger.Error("send archiving message failed: %v", err)

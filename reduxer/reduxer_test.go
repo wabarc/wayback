@@ -6,6 +6,7 @@ package reduxer // import "github.com/wabarc/wayback/reduxer"
 
 import (
 	"context"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -35,8 +36,11 @@ func TestDo(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	urls := []string{"https://example.com/"}
-	res, err := Do(context.Background(), urls...)
+	inp, err := url.Parse("https://example.com/")
+	if err != nil {
+		t.Fatalf("Unexpected parse url: %v", err)
+	}
+	res, err := Do(context.Background(), inp)
 	if err != nil {
 		t.Fatalf("Unexpected execute do: %v", err)
 	}

@@ -7,6 +7,7 @@ package discord // import "github.com/wabarc/wayback/service/discord"
 import (
 	"context"
 	"encoding/base64"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -265,7 +266,7 @@ func (d *Discord) process(m *discord.MessageCreate) (err error) {
 	return nil
 }
 
-func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []string) error {
+func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []*url.URL) error {
 	stage, err := d.edit(m, "Archiving...")
 	if err != nil {
 		logger.Error("send archiving message failed: %v", err)

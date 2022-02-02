@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -30,7 +31,13 @@ func handle(cmd *cobra.Command, args []string) {
 		os.Exit(0)
 	}
 
-	collects, _ := wayback.Playback(context.TODO(), args...)
+	urls, err := unmarshalArgs(args)
+	if err != nil {
+		cmd.Println(err)
+		os.Exit(1)
+	}
+
+	collects, _ := wayback.Playback(context.TODO(), urls...)
 	for _, collect := range collects {
 		fmt.Printf("[%s]\n", collect.Arc)
 		for orig, dest := range collect.Dst {
@@ -38,4 +45,16 @@ func handle(cmd *cobra.Command, args []string) {
 		}
 		fmt.Printf("\n")
 	}
+}
+
+func unmarshalArgs(args []string) (urls []*url.URL, err error) {
+	for _, s := range args {
+		uri, er := url.Parse(s)
+		if er != nil {
+			err = fmt.Errorf("%w: unexpect url: %s", err, s)
+			continue
+		}
+		urls = append(urls, uri)
+	}
+	return
 }

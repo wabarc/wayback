@@ -171,7 +171,7 @@ func wayback(w Waybacker) string {
 }
 
 // Wayback returns URLs archived to the time capsules of given URLs.
-func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (cols []Collect, err error) {
+func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...*url.URL) (cols []Collect, err error) {
 	logger.Debug("start...")
 
 	ctx, cancel := context.WithTimeout(ctx, config.Opts.WaybackTimeout())
@@ -184,21 +184,17 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 
 	mu := sync.Mutex{}
 	g, ctx := errgroup.WithContext(ctx)
-	for _, uri := range urls {
+	for _, input := range urls {
 		for slot, arc := range config.Opts.Slots() {
 			if !arc {
 				logger.Warn("skipped %s", config.SlotName(slot))
 				continue
 			}
-			slot, uri := slot, uri
+			slot, input := slot, input
 			g.Go(func() error {
 				logger.Debug("archiving slot: %s", slot)
-				input, err := url.Parse(uri)
-				if err != nil {
-					logger.Error("parse uri failed: %v", err)
-					return err
-				}
 
+				uri := input.String()
 				bundle := (*bundles)[uri]
 				var col Collect
 				switch slot {
@@ -235,7 +231,7 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...string) (col
 }
 
 // Playback returns URLs archived from the time capsules.
-func Playback(ctx context.Context, urls ...string) (cols []Collect, err error) {
+func Playback(ctx context.Context, urls ...*url.URL) (cols []Collect, err error) {
 	logger.Debug("start...")
 
 	ctx, cancel := context.WithTimeout(ctx, config.Opts.WaybackTimeout())
@@ -244,16 +240,11 @@ func Playback(ctx context.Context, urls ...string) (cols []Collect, err error) {
 	mu := sync.Mutex{}
 	g, ctx := errgroup.WithContext(ctx)
 	var slots = []string{config.SLOT_IA, config.SLOT_IS, config.SLOT_IP, config.SLOT_PH, config.SLOT_TT, config.SLOT_GC}
-	for _, uri := range urls {
+	for _, input := range urls {
 		for _, slot := range slots {
-			slot, uri := slot, uri
+			slot, input := slot, input
 			g.Go(func() error {
 				logger.Debug("searching slot: %s", slot)
-				input, err := url.Parse(uri)
-				if err != nil {
-					logger.Error("parse uri failed: %v", err)
-					return err
-				}
 				var col Collect
 				switch slot {
 				case config.SLOT_IA:
@@ -269,7 +260,7 @@ func Playback(ctx context.Context, urls ...string) (cols []Collect, err error) {
 				case config.SLOT_GC:
 					col.Dst = playback.Playback(ctx, playback.GC{URL: input})
 				}
-				col.Src = uri
+				col.Src = input.String()
 				col.Arc = slot
 				col.Ext = slot
 				mu.Lock()

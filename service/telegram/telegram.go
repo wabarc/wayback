@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -238,7 +239,7 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 	return nil
 }
 
-func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls []string) error {
+func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls []*url.URL) error {
 	stage, err := t.bot.Edit(message, "Archiving...")
 	if err != nil {
 		logger.Error("send archiving message failed: %v", err)
