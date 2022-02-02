@@ -73,7 +73,8 @@ func (t *twitterBot) ToTwitter(ctx context.Context, bundle *reduxer.Bundle, text
 		logger.Error("create tweet failed: %v", err)
 		return false
 	}
-	logger.Debug("created tweet: %v, resp: %v, err: %v", tweet, resp, err)
+	defer resp.Body.Close()
+	logger.Debug("created tweet: %v", tweet)
 
 	return true
 }
