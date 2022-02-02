@@ -114,9 +114,6 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			if rev, ok := ctx.Value(FlagTelegram).(*telegram.Bot); ok {
 				bot = rev
 			}
-			if bot == nil {
-				return
-			}
 			pub := NewTelegram(bot)
 			process(ctx, pub, cols, args...)
 		}
