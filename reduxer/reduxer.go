@@ -7,6 +7,7 @@ package reduxer // import "github.com/wabarc/wayback/reduxer"
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -63,9 +64,11 @@ type Remote struct {
 // Bundles represents a set of the Bundle in a map, and its key is a URL string.
 type Bundles map[string]*Bundle
 
-var _, existFFmpeg = exists("ffmpeg")
-var youget, existYouGet = exists("you-get")
-var ytdl, existYoutubeDL = exists("youtube-dl")
+var (
+	_, existFFmpeg       = exists("ffmpeg")
+	youget, existYouGet  = exists("you-get")
+	ytdl, existYoutubeDL = exists("youtube-dl")
+)
 
 // Do executes secreenshot, print PDF and export html of given URLs
 // Returns a set of bundle containing screenshot data and file path
@@ -163,7 +166,7 @@ func Do(ctx context.Context, urls ...*url.URL) (bundles Bundles, err error) {
 			}
 			// Upload files to third-party server
 			if err := remotely(ctx, &assets); err != nil {
-				logger.Error("upload files to third-party failed: %v", err)
+				logger.Error("upload files to remote server failed: %v", err)
 			}
 			bundle := &Bundle{shot, assets, article}
 			mu.Lock()
@@ -425,7 +428,7 @@ func sortStreams(streams map[string]*types.Stream) []*types.Stream {
 	return sortedStreams
 }
 
-func remotely(ctx context.Context, assets *Assets) (err error) {
+func remotely(ctx context.Context, assets *Assets) error {
 	v := []*Asset{
 		&assets.Img,
 		&assets.PDF,
@@ -440,30 +443,36 @@ func remotely(ctx context.Context, assets *Assets) (err error) {
 	cat := catbox.New(c)
 	anon := anonfile.NewAnonfile(c)
 	g, _ := errgroup.WithContext(ctx)
+	var mu sync.Mutex
 	for _, asset := range v {
-		if !helper.Exists(asset.Local) {
-			continue
-		}
 		asset := asset
 		g.Go(func() error {
+			mu.Lock()
+			defer mu.Unlock()
+			var err error
+
+			if !helper.Exists(asset.Local) {
+				logger.Debug("local asset: %s not exists", asset.Local)
+				return nil
+			}
 			r, e := anon.Upload(asset.Local)
 			if e != nil {
-				err = errors.Wrap(err, e.Error())
-				return e
+				err = errors.Wrap(err, fmt.Sprintf("upload %s to anonfiles failed: %s", asset.Local, e.Error()))
+			} else {
+				asset.Remote.Anonfile = r.Short()
 			}
-			asset.Remote.Anonfile = r.Short()
 			c, e := cat.Upload(asset.Local)
 			if e != nil {
-				err = errors.Wrap(err, e.Error())
-				return e
+				err = errors.Wrap(err, fmt.Sprintf("upload %s to catbox failed: %s", asset.Local, e.Error()))
+			} else {
+				asset.Remote.Catbox = c
 			}
-			asset.Remote.Catbox = c
-			return nil
+			return err
 		})
 	}
 	if err := g.Wait(); err != nil {
 		return err
 	}
 
-	return err
+	return nil
 }
