@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -305,6 +306,27 @@ func media(ctx context.Context, dir, in string) string {
 		return paths[0]
 	}
 
+	// Runs a command
+	var run = func(cmd *exec.Cmd) error {
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			return err
+		}
+		cmd.Stderr = cmd.Stdout
+		if err := cmd.Start(); err != nil {
+			return err
+		}
+		if config.Opts.HasDebugMode() {
+			readOutput(stdout)
+		}
+
+		// Wait for the process to be finished.
+		// Don't care about this error in any scenario.
+		_ = cmd.Wait()
+
+		return nil
+	}
+
 	// Download media via youtube-dl
 	var viaYoutubeDL = func() string {
 		if !existYoutubeDL {
@@ -325,11 +347,10 @@ func media(ctx context.Context, dir, in string) string {
 
 		cmd := exec.CommandContext(ctx, ytdl, args...)
 		logger.Debug("youtube-dl args: %s", cmd.String())
-		out, err := cmd.CombinedOutput()
-		if err != nil {
+
+		if err := run(cmd); err != nil {
 			logger.Warn("start youtube-dl failed: %v", err)
 		}
-		logger.Debug("youtube-dl output: %s", out)
 
 		return match(fp + "*")
 	}
@@ -345,9 +366,11 @@ func media(ctx context.Context, dir, in string) string {
 		}
 		cmd := exec.CommandContext(ctx, youget, args...)
 		logger.Debug("youget args: %s", cmd.String())
-		if err := cmd.Run(); err != nil {
+
+		if err := run(cmd); err != nil {
 			logger.Warn("run you-get failed: %v", err)
 		}
+
 		return match(fp + "*")
 	}
 
@@ -475,4 +498,15 @@ func remotely(ctx context.Context, assets *Assets) error {
 	}
 
 	return nil
+}
+
+func readOutput(rc io.ReadCloser) {
+	for {
+		out := make([]byte, 1024)
+		_, err := rc.Read(out)
+		fmt.Print(string(out))
+		if err != nil {
+			break
+		}
+	}
 }
