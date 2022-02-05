@@ -17,6 +17,8 @@ jobs:
         uses: actions/stale@v4
         with:
           repo-token: ${{ github.token }}
+          exempt-issue-labels: "enhancement,question,help wanted,bug"
+          exempt-pr-labels: "need-help,WIP"
           stale-issue-message: "This issue is stale because it has been open 120 days with no activity. Remove stale label or comment or this will be closed in 5 days"
           stale-pr-message: 'It has been open 120 days with no activity. Remove stale label or comment or this will be closed in 5 days'
           days-before-stale: 120
