@@ -195,7 +195,7 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...*url.URL) (c
 				logger.Debug("archiving slot: %s", slot)
 
 				uri := input.String()
-				bundle := (*bundles)[uri]
+				bundle := bundles.Get(uri)
 				var col Collect
 				switch slot {
 				case config.SLOT_IA:

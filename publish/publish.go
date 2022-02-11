@@ -243,7 +243,7 @@ func bundle(ctx context.Context, cols []wayback.Collect) (b *reduxer.Bundle) {
 
 	var uri = cols[0].Src
 	if bundles, ok := ctx.Value(PubBundle).(reduxer.Bundles); ok {
-		b = bundles[uri]
+		b = bundles.Get(uri)
 	}
 
 	return b

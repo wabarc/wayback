@@ -37,6 +37,12 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+var (
+	_, existFFmpeg       = exists("ffmpeg")
+	youget, existYouGet  = exists("you-get")
+	ytdl, existYoutubeDL = exists("youtube-dl")
+)
+
 // Bundle represents a bundle data of a webpage.
 type Bundle struct {
 	screenshot.Screenshots
@@ -65,29 +71,27 @@ type Remote struct {
 // Bundles represents a set of the Bundle in a map, and its key is a URL string.
 type Bundles map[string]*Bundle
 
-var (
-	_, existFFmpeg       = exists("ffmpeg")
-	youget, existYouGet  = exists("you-get")
-	ytdl, existYoutubeDL = exists("youtube-dl")
-)
+// Get returns a Bundle by given name.
+func (b Bundles) Get(name string) *Bundle {
+	return b[name]
+}
 
 // Do executes secreenshot, print PDF and export html of given URLs
 // Returns a set of bundle containing screenshot data and file path
 // nolint:gocyclo
-func Do(ctx context.Context, urls ...*url.URL) (bundles Bundles, err error) {
-	bundles = make(Bundles)
+func Do(ctx context.Context, urls ...*url.URL) (Bundles, error) {
 	if !config.Opts.EnabledReduxer() {
-		return bundles, errors.New("Specify directory to environment `WAYBACK_STORAGE_DIR` to enable reduxer")
+		return nil, errors.New("Specify directory to environment `WAYBACK_STORAGE_DIR` to enable reduxer")
 	}
 
-	shots, err := Capture(ctx, urls...)
+	shots, err := capture(ctx, urls...)
 	if err != nil {
-		return bundles, err
+		return nil, err
 	}
 
 	dir, err := createDir(config.Opts.StorageDir())
 	if err != nil {
-		return bundles, err
+		return nil, err
 	}
 
 	var wg sync.WaitGroup
@@ -112,6 +116,7 @@ func Do(ctx context.Context, urls ...*url.URL) (bundles Bundles, err error) {
 		buf []byte
 	}
 
+	bundles := make(Bundles)
 	for _, shot := range shots {
 		wg.Add(1)
 		go func(shot screenshot.Screenshots) {
@@ -180,8 +185,8 @@ func Do(ctx context.Context, urls ...*url.URL) (bundles Bundles, err error) {
 	return bundles, nil
 }
 
-// Capture returns screenshot.Screenshots of given URLs
-func Capture(ctx context.Context, urls ...*url.URL) (shots []screenshot.Screenshots, err error) {
+// capture returns screenshot.Screenshots of given URLs
+func capture(ctx context.Context, urls ...*url.URL) (shots []screenshot.Screenshots, err error) {
 	opts := []screenshot.ScreenshotOption{
 		screenshot.ScaleFactor(1),
 		screenshot.PrintPDF(true), // print pdf
