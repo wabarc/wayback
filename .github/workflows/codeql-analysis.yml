@@ -14,7 +14,9 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - develop
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ main ]
@@ -107,4 +109,26 @@ jobs:
     - name: Perform Nancy
       uses: sonatype-nexus-community/nancy-github-action@main
       continue-on-error: true
+
+  fossa:
+    name: FOSSA
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code base
+      if: github.event_name == 'push' || github.event_name == 'schedule'
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Check out code base
+      if: github.event_name == 'pull_request'
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Run FOSSA Scan
+      uses: fossas/fossa-action@v1
+      with:
+        api-key: ${{ secrets.FOSSA_APIKEY }}
 
