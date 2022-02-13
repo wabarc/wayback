@@ -61,7 +61,7 @@ func serve(_ *cobra.Command, _ []string) {
 }
 
 // nolint:gocyclo
-func (srv *service) run(ctx context.Context, store *storage.Storage, pool pooling.Pool) *service {
+func (srv *service) run(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *service {
 	size := len(daemon)
 	srv.targets = make([]target, 0, size)
 	for _, s := range daemon {

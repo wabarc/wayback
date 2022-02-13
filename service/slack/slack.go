@@ -58,7 +58,7 @@ type Slack struct {
 	bot    *slack.Client
 	client *socketmode.Client
 	store  *storage.Storage
-	pool   pooling.Pool
+	pool   *pooling.Pool
 }
 
 type event struct {
@@ -66,7 +66,7 @@ type event struct {
 }
 
 // New Slack struct.
-func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Slack {
+func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Slack {
 	if config.Opts.SlackBotToken() == "" {
 		logger.Fatal("missing required environment variable")
 	}

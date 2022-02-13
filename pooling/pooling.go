@@ -14,8 +14,6 @@ import (
 	"github.com/wabarc/wayback/errors"
 )
 
-var maxTime = 5 * time.Minute
-
 var (
 	ErrPoolNotExist = errors.New("pool not exist")  // ErrPoolNotExist pool not exist
 	ErrTimeout      = errors.New("process timeout") // ErrTimeout process timeout
@@ -28,7 +26,10 @@ type resource struct {
 }
 
 // Pool handles a pool of services.
-type Pool chan *resource
+type Pool struct {
+	resource chan *resource
+	timeout  time.Duration
+}
 
 func newResource(id int) *resource {
 	return &resource{id: id}
@@ -36,25 +37,26 @@ func newResource(id int) *resource {
 
 // New a resource pool of the specified size
 // Resources are created concurrently to save resource initialization time
-func New(size int) Pool {
-	p := make(Pool, size)
+func New(size int) *Pool {
+	p := new(Pool)
+	p.resource = make(chan *resource, size)
 	wg := new(sync.WaitGroup)
 	wg.Add(size)
 	for i := 0; i < size; i++ {
 		go func(resId int) {
-			p <- newResource(resId)
+			p.resource <- newResource(resId)
 			wg.Done()
 		}(i)
 	}
 	wg.Wait()
 
-	maxTime = config.Opts.WaybackTimeout() + 3*time.Second
+	p.timeout = config.Opts.WaybackTimeout() + 3*time.Second
 
 	return p
 }
 
 // Roll wrapper service as function to the resource pool.
-func (p Pool) Roll(service func()) {
+func (p *Pool) Roll(service func()) {
 	do := func(wg *sync.WaitGroup) {
 		defer wg.Done()
 		fn, ok := q.PopBack().(func())
@@ -79,7 +81,7 @@ func (p Pool) Roll(service func()) {
 		select {
 		case <-ch:
 			logger.Info("roll service completed")
-		case <-time.After(maxTime):
+		case <-time.After(p.timeout):
 			logger.Warn("roll service timeout")
 		}
 
@@ -98,26 +100,26 @@ func (p Pool) Roll(service func()) {
 	wg.Wait()
 }
 
-func (p Pool) pull() (r *resource, err error) {
+func (p *Pool) pull() (r *resource, err error) {
 	select {
-	case r := <-p:
+	case r := <-p.resource:
 		return r, nil
-	case <-time.After(maxTime):
+	case <-time.After(p.timeout):
 		return nil, ErrTimeout
 	}
 }
 
-func (p Pool) push(r *resource) error {
+func (p *Pool) push(r *resource) error {
 	if p == nil {
 		return ErrPoolNotExist
 	}
-	p <- r
+	p.resource <- r
 	return nil
 }
 
 // Close closes worker pool
-func (p Pool) Close() {
-	if p != nil {
-		close(p)
+func (p *Pool) Close() {
+	if p.resource != nil {
+		close(p.resource)
 	}
 }

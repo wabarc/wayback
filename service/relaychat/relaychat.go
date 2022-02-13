@@ -31,13 +31,13 @@ type IRC struct {
 	sync.RWMutex
 
 	ctx   context.Context
-	pool  pooling.Pool
+	pool  *pooling.Pool
 	conn  *irc.Connection
 	store *storage.Storage
 }
 
 // New IRC struct.
-func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *IRC {
+func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *IRC {
 	if config.Opts.IRCNick() == "" {
 		logger.Fatal("missing required environment variable")
 	}

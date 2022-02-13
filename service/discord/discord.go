@@ -38,11 +38,11 @@ type Discord struct {
 
 	bot   *discord.Session
 	store *storage.Storage
-	pool  pooling.Pool
+	pool  *pooling.Pool
 }
 
 // New returns a Discord struct.
-func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Discord {
+func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Discord {
 	if config.Opts.DiscordBotToken() == "" {
 		logger.Fatal("missing required environment variable")
 	}

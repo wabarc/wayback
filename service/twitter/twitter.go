@@ -34,7 +34,7 @@ type Twitter struct {
 	sync.RWMutex
 
 	ctx    context.Context
-	pool   pooling.Pool
+	pool   *pooling.Pool
 	client *twitter.Client
 	store  *storage.Storage
 
@@ -44,7 +44,7 @@ type Twitter struct {
 }
 
 // New returns Twitter struct.
-func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Twitter {
+func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Twitter {
 	if !config.Opts.PublishToTwitter() {
 		logger.Fatal("missing required environment variable")
 	}

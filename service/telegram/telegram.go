@@ -46,11 +46,11 @@ type Telegram struct {
 
 	bot   *telegram.Bot
 	store *storage.Storage
-	pool  pooling.Pool
+	pool  *pooling.Pool
 }
 
 // New Telegram struct.
-func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Telegram {
+func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Telegram {
 	if config.Opts.TelegramToken() == "" {
 		logger.Fatal("missing required environment variable")
 	}

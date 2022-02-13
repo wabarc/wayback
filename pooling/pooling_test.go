@@ -24,10 +24,9 @@ func TestTimeout(t *testing.T) {
 
 	logger.SetLogLevel(logger.LevelFatal)
 
-	maxTime = time.Microsecond
-
 	c := 2
 	p := New(c)
+	p.timeout = time.Microsecond
 
 	var i int32
 	var wg sync.WaitGroup
@@ -42,15 +41,24 @@ func TestTimeout(t *testing.T) {
 	}
 	wg.Wait()
 
-	if len(p) != c {
-		t.Fatalf("The length of pool got %d instead of %d", len(p), c)
+	if l := len(p.resource); l != c {
+		t.Fatalf("The length of pool got %d instead of %d", l, c)
 	}
 
 	p.Roll(func() {
 		time.Sleep(time.Millisecond)
 	})
 
-	if len(p) != c {
-		t.Fatalf("The length of pool got %d instead of %d", len(p), c)
+	if l := len(p.resource); l != c {
+		t.Fatalf("The length of pool got %d instead of %d", l, c)
+	}
+}
+
+func BenchmarkRoll(b *testing.B) {
+	p := New(1)
+	for n := 0; n < b.N; n++ {
+		p.Roll(func() {
+			time.Sleep(time.Millisecond)
+		})
 	}
 }

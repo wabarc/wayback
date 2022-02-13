@@ -34,7 +34,7 @@ type Mastodon struct {
 	sync.RWMutex
 
 	ctx    context.Context
-	pool   pooling.Pool
+	pool   *pooling.Pool
 	client *mastodon.Client
 	store  *storage.Storage
 
@@ -45,7 +45,7 @@ type Mastodon struct {
 }
 
 // New mastodon struct.
-func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Mastodon {
+func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Mastodon {
 	if !config.Opts.PublishToMastodon() {
 		logger.Fatal("missing required environment variable")
 	}

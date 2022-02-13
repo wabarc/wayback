@@ -47,7 +47,7 @@ func newWeb() *web {
 	return web
 }
 
-func (web *web) handle(pool pooling.Pool) http.Handler {
+func (web *web) handle(pool *pooling.Pool) http.Handler {
 	web.router.HandleFunc("/", web.home)
 	web.router.HandleFunc("/{name}.js", web.showJavascript).Name("javascript").Methods(http.MethodGet)
 	web.router.HandleFunc("/favicon.ico", web.showFavicon).Name("favicon").Methods(http.MethodGet)

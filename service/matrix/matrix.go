@@ -33,13 +33,13 @@ type Matrix struct {
 	sync.RWMutex
 
 	ctx    context.Context
-	pool   pooling.Pool
+	pool   *pooling.Pool
 	client *matrix.Client
 	store  *storage.Storage
 }
 
 // New Matrix struct.
-func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Matrix {
+func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Matrix {
 	if config.Opts.MatrixUserID() == "" || config.Opts.MatrixPassword() == "" || config.Opts.MatrixHomeserver() == "" {
 		logger.Fatal("missing required environment variable")
 	}

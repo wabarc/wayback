@@ -31,7 +31,7 @@ var ErrServiceClosed = errors.New("httpd: Service closed")
 // Tor represents a Tor service in the application.
 type Tor struct {
 	ctx   context.Context
-	pool  pooling.Pool
+	pool  *pooling.Pool
 	store *storage.Storage
 
 	tor    *tor.Tor
@@ -39,7 +39,7 @@ type Tor struct {
 }
 
 // New tor struct.
-func New(ctx context.Context, store *storage.Storage, pool pooling.Pool) *Tor {
+func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Tor {
 	if store == nil {
 		logger.Fatal("must initialize storage")
 	}
