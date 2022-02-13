@@ -193,6 +193,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.storageDir = parseString(val, defStorageDir)
 		case "WAYBACK_MAX_MEDIA_SIZE":
 			p.opts.maxMediaSize = parseString(val, defMaxMediaSize)
+		case "WAYBACK_MAX_TAG_SIZE":
+			p.opts.maxTagSize = parseInt(val, defMaxTagSize)
 		case "WAYBACK_TIMEOUT":
 			p.opts.waybackTimeout = parseInt(val, defWaybackTimeout)
 		case "WAYBACK_MAX_RETRIES":

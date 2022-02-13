@@ -56,7 +56,7 @@ func (m *Mastodon) ForPublish() *Render {
 		logger.Error("[masatodon] execute Mastodon template failed, %v", err)
 		return new(Render)
 	}
-	tmplBytes.WriteString("#wayback #存档")
+	tmplBytes.WriteString("#wayback" + createTags(m.Cols, m.Data))
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
 
 	return &Render{buf: tmplBytes}

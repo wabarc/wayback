@@ -32,7 +32,7 @@ IPFS:
 Telegraph:
 • http://telegra.ph/title-01-01
 
-#wayback #存档`
+#wayback`
 
 	got := ForPublish(&Mastodon{Cols: collects, Data: bundleExample}).String()
 	if !strings.Contains(got, source) {

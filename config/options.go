@@ -78,6 +78,7 @@ const (
 	defPoolingSize         = 3
 	defStorageDir          = ""
 	defMaxMediaSize        = "512MB"
+	defMaxTagSize          = 3
 	defWaybackTimeout      = 300
 	defWaybackMaxRetries   = 2
 	defWaybackUserAgent    = "WaybackArchiver/1.0"
@@ -120,6 +121,7 @@ type Options struct {
 	poolingSize         int
 	storageDir          string
 	maxMediaSize        string
+	maxTagSize          int
 	waybackTimeout      int
 	waybackMaxRetries   int
 	waybackUserAgent    string
@@ -222,6 +224,7 @@ func NewOptions() *Options {
 		poolingSize:          defPoolingSize,
 		storageDir:           defStorageDir,
 		maxMediaSize:         defMaxMediaSize,
+		maxTagSize:           defMaxTagSize,
 		waybackTimeout:       defWaybackTimeout,
 		waybackMaxRetries:    defWaybackMaxRetries,
 		waybackUserAgent:     defWaybackUserAgent,
@@ -738,4 +741,12 @@ func (o *Options) WaybackMeiliApikey() string {
 // EnabledMeilisearch returns whether enable meilisearch server.
 func (o *Options) EnabledMeilisearch() bool {
 	return o.WaybackMeiliEndpoint() != ""
+}
+
+// MaxTagSize returns the maximum number of tags can be extracted from a webpage.
+func (o *Options) MaxTagSize() int {
+	if o.maxTagSize < 0 {
+		return 0
+	}
+	return o.maxTagSize
 }

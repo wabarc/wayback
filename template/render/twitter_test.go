@@ -10,7 +10,7 @@ import (
 )
 
 func TestRenderTwitter(t *testing.T) {
-	const tweet = `‹ Example ›
+	const tweet = `‹ Example Domain ›
 
 source:
 • https://example.com/
@@ -26,7 +26,7 @@ archive.today:
 IPFS:
 • https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
 
-#wayback #存档`
+#wayback #information #more #asking`
 
 	got := ForPublish(&Twitter{Cols: collects, Data: bundleExample}).String()
 	if got != tweet {
@@ -44,7 +44,7 @@ archive.today:
 • http://archive.today/abcdE
 • http://archive.today/abc
 
-#wayback #存档`
+#wayback #information #more #asking`
 
 	got := ForReply(&Twitter{Cols: multi, Data: bundleExample}).String()
 	if !strings.Contains(got, source) {

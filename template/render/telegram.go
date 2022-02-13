@@ -52,7 +52,7 @@ func (t *Telegram) ForReply() (r *Render) {
 		t.parseArtifact(art, &tmplBytes)
 	})
 
-	tmplBytes.WriteString("\n#wayback #存档")
+	tmplBytes.WriteString("\n#wayback" + createTags(t.Cols, t.Data))
 
 	return &Render{buf: tmplBytes}
 }
@@ -94,7 +94,7 @@ func (t *Telegram) ForPublish() (r *Render) {
 	})
 
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
-	tmplBytes.WriteString("\n\n#wayback #存档")
+	tmplBytes.WriteString("\n\n#wayback" + createTags(t.Cols, t.Data))
 
 	return &Render{buf: tmplBytes}
 }

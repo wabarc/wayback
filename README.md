@@ -215,7 +215,8 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_POOLING_SIZE`            | `3`                     | Number of worker pool for wayback at once                    |
 | -                   | `WAYBACK_BOLT_PATH`               | `./wayback.db`          | File path of bolt database                                   |
 | -                   | `WAYBACK_STORAGE_DIR`             | -                       | Directory to store binary file, e.g. PDF, html file          |
-| -                   | `WAYBACK_MAX_MEDIA_SIZE`          | `512MB`                 | Max size to limit download stream media                      |
+| -                   | `WAYBACK_MAX_MEDIA_SIZE`          | `512MB`                 | Maximum size to limit download stream media                  |
+| -                   | `WAYBACK_MAX_TAG_SIZE`            | `3`                     | Maximum size of tags can be extracted from a webpage         |
 | -                   | `WAYBACK_TIMEOUT`                 | `300`                   | Timeout for single wayback request, defaults to 300 second   |
 | -                   | `WAYBACK_MAX_RETRIES`             | `2`                     | Max retries for single wayback request, defaults to 2        |
 | -                   | `WAYBACK_USERAGENT`               | `WaybackArchiver/1.0`   | User-Agent for a wayback request                             |

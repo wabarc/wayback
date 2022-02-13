@@ -86,7 +86,6 @@ func TestRenderGitHubFlawed(t *testing.T) {
 
 func TestRenderGitHubWithArtifact(t *testing.T) {
 	const expected = `This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
-
 More information...
 
 **[Internet Archive](https://web.archive.org/)**:

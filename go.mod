@@ -44,6 +44,7 @@ require (
 	github.com/wabarc/screenshot v1.5.1-0.20220318140348-632a135d50db
 	github.com/wabarc/telegra.ph v0.0.0-20220501011455-b0b8c35c6d09
 	github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5
+	github.com/zoomio/tagify v0.53.0
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/net v0.0.0-20220708220712-1185a9018129
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
@@ -54,6 +55,7 @@ require (
 require (
 	github.com/MercuryEngineering/CookieMonster v0.0.0-20180304172713-1584578b3403 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
+	github.com/abadojack/whatlanggo v1.0.1 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
@@ -86,6 +88,7 @@ require (
 	github.com/ipfs/go-ipfs-files v0.1.1 // indirect
 	github.com/itchyny/gojq v0.12.7 // indirect
 	github.com/itchyny/timefmt-go v0.1.3 // indirect
+	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kallydev/telegraph-go v1.0.0 // indirect
@@ -128,8 +131,10 @@ require (
 	github.com/tdewolff/parse/v2 v2.5.29 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
 	github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae // indirect
-	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
+	github.com/whyrusleeping/tar-utils v0.0.0-20180509141711-8c6c8ba81d5c // indirect
 	github.com/ybbus/httpretry v1.0.1 // indirect
+	github.com/zoomio/inout v0.11.0 // indirect
+	github.com/zoomio/stopwords v0.10.0 // indirect
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect
@@ -140,3 +145,5 @@ require (
 	lukechampine.com/blake3 v1.1.7 // indirect
 	mvdan.cc/xurls/v2 v2.4.0 // indirect
 )
+
+replace github.com/zoomio/tagify => github.com/zoomio/tagify v0.55.1-0.20220624022425-774559dc8483

@@ -19,37 +19,44 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/reduxer"
+
 	telegram "gopkg.in/telebot.v3"
 )
 
-var collects = []wayback.Collect{
-	{
-		Arc: config.SLOT_IA,
-		Dst: "https://web.archive.org/web/20211000000001/https://example.com/",
-		Src: "https://example.com/",
-		Ext: config.SLOT_IA,
-	},
-	{
-		Arc: config.SLOT_IS,
-		Dst: "http://archive.today/abcdE",
-		Src: "https://example.com/",
-		Ext: config.SLOT_IS,
-	},
-	{
-		Arc: config.SLOT_IP,
-		Dst: "https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr",
-		Src: "https://example.com/",
-		Ext: config.SLOT_IP,
-	},
-	{
-		Arc: config.SLOT_PH,
-		Dst: "http://telegra.ph/title-01-01",
-		Src: "https://example.com/",
-		Ext: config.SLOT_PH,
-	},
-}
+var (
+	src      = "https://example.com/"
+	collects = []wayback.Collect{
+		{
+			Arc: config.SLOT_IA,
+			Dst: "https://web.archive.org/web/20211000000001/https://example.com/",
+			Src: src,
+			Ext: config.SLOT_IA,
+		},
+		{
+			Arc: config.SLOT_IS,
+			Dst: "http://archive.today/abcdE",
+			Src: src,
+			Ext: config.SLOT_IS,
+		},
+		{
+			Arc: config.SLOT_IP,
+			Dst: "https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr",
+			Src: src,
+			Ext: config.SLOT_IP,
+		},
+		{
+			Arc: config.SLOT_PH,
+			Dst: "http://telegra.ph/title-01-01",
+			Src: src,
+			Ext: config.SLOT_PH,
+		},
+	}
+	textContent = `Example Domain
+This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
 
-var bundleExample = reduxer.BundleExample()
+More information...`
+	bundleExample = reduxer.BundleExample()
+)
 
 func unsetAllEnv() {
 	lines := os.Environ()

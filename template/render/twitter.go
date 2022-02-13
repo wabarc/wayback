@@ -50,7 +50,7 @@ func (t *Twitter) ForReply() *Render {
 		return new(Render)
 	}
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
-	tmplBytes.WriteString("\n\n#wayback #存档")
+	tmplBytes.WriteString("\n\n#wayback" + createTags(t.Cols, t.Data))
 
 	return &Render{buf: tmplBytes}
 }
@@ -87,7 +87,7 @@ func (t *Twitter) ForPublish() *Render {
 		return new(Render)
 	}
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
-	tmplBytes.WriteString("\n\n#wayback #存档")
+	tmplBytes.WriteString("\n\n#wayback" + createTags(t.Cols, t.Data))
 
 	return &Render{buf: tmplBytes}
 }

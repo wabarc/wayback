@@ -8,10 +8,9 @@ import (
 	"testing"
 )
 
-var message = `<b>Example</b>
+var message = `<b>Example Domain</b>
 
 This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
-
 More information...
 
 
@@ -33,7 +32,7 @@ func TestRenderTelegram(t *testing.T) {
 <b><a href="https://anonfiles.com/">AnonFiles</a></b> - [ <a href="https://anonfiles.com/FbZfSa9eu4">IMG</a> ¦ <a href="https://anonfiles.com/r4G8Sb90ud">PDF</a> ¦ <a href="https://anonfiles.com/pbG4Se94ua">RAW</a> ¦ <a href="https://anonfiles.com/naG6S09bu1">TXT</a> ¦ <a href="https://anonfiles.com/n1paZfB3ub">HAR</a> ¦ <a href="https://anonfiles.com/v4G4S09abc">HTM</a> ¦ <a href="https://anonfiles.com/v4G4S09auc">WARC</a> ¦ <a href="">MEDIA</a> ]
 <b><a href="https://catbox.moe/">Catbox</a></b> - [ <a href="https://files.catbox.moe/9u6yvu.png">IMG</a> ¦ <a href="https://files.catbox.moe/q73uqh.pdf">PDF</a> ¦ <a href="https://files.catbox.moe/bph1g6.htm">RAW</a> ¦ <a href="https://files.catbox.moe/wwrby6.txt">TXT</a> ¦ <a href="https://files.catbox.moe/3agtva.har">HAR</a> ¦ <a href="">HTM</a> ¦ <a href="">WARC</a> ¦ <a href="">MEDIA</a> ]
 
-#wayback #存档`
+#wayback #information #more #asking`
 
 	got := ForPublish(&Telegram{Cols: collects, Data: bundleExample}).String()
 	if got != message {
@@ -46,7 +45,7 @@ func TestRenderTelegramForPublishWithArtifact(t *testing.T) {
 <b><a href="https://anonfiles.com/">AnonFiles</a></b> - [ <a href="https://anonfiles.com/FbZfSa9eu4">IMG</a> ¦ <a href="https://anonfiles.com/r4G8Sb90ud">PDF</a> ¦ <a href="https://anonfiles.com/pbG4Se94ua">RAW</a> ¦ <a href="https://anonfiles.com/naG6S09bu1">TXT</a> ¦ <a href="https://anonfiles.com/n1paZfB3ub">HAR</a> ¦ <a href="https://anonfiles.com/v4G4S09abc">HTM</a> ¦ <a href="https://anonfiles.com/v4G4S09auc">WARC</a> ¦ <a href="">MEDIA</a> ]
 <b><a href="https://catbox.moe/">Catbox</a></b> - [ <a href="https://files.catbox.moe/9u6yvu.png">IMG</a> ¦ <a href="https://files.catbox.moe/q73uqh.pdf">PDF</a> ¦ <a href="https://files.catbox.moe/bph1g6.htm">RAW</a> ¦ <a href="https://files.catbox.moe/wwrby6.txt">TXT</a> ¦ <a href="https://files.catbox.moe/3agtva.har">HAR</a> ¦ <a href="">HTM</a> ¦ <a href="">WARC</a> ¦ <a href="">MEDIA</a> ]
 
-#wayback #存档`
+#wayback #information #more #asking`
 
 	got := ForPublish(&Telegram{Cols: collects, Data: bundleExample}).String()
 	if got != message {
@@ -67,7 +66,7 @@ func TestRenderTelegramFlawed(t *testing.T) {
 <b><a href="https://telegra.ph/">Telegraph</a></b>:
 • <a href="https://example.com/">source</a> - <a href="https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/">https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/</a>
 
-#wayback #存档`
+#wayback`
 
 	got := ForPublish(&Telegram{Cols: flawed, Data: emptyBundle}).String()
 	if got != message {
@@ -87,7 +86,7 @@ func TestRenderTelegramForReply(t *testing.T) {
 <b><a href="https://anonfiles.com/">AnonFiles</a></b> - [ <a href="https://anonfiles.com/FbZfSa9eu4">IMG</a> ¦ <a href="https://anonfiles.com/r4G8Sb90ud">PDF</a> ¦ <a href="https://anonfiles.com/pbG4Se94ua">RAW</a> ¦ <a href="https://anonfiles.com/naG6S09bu1">TXT</a> ¦ <a href="https://anonfiles.com/n1paZfB3ub">HAR</a> ¦ <a href="https://anonfiles.com/v4G4S09abc">HTM</a> ¦ <a href="https://anonfiles.com/v4G4S09auc">WARC</a> ¦ <a href="">MEDIA</a> ]
 <b><a href="https://catbox.moe/">Catbox</a></b> - [ <a href="https://files.catbox.moe/9u6yvu.png">IMG</a> ¦ <a href="https://files.catbox.moe/q73uqh.pdf">PDF</a> ¦ <a href="https://files.catbox.moe/bph1g6.htm">RAW</a> ¦ <a href="https://files.catbox.moe/wwrby6.txt">TXT</a> ¦ <a href="https://files.catbox.moe/3agtva.har">HAR</a> ¦ <a href="">HTM</a> ¦ <a href="">WARC</a> ¦ <a href="">MEDIA</a> ]
 
-#wayback #存档`
+#wayback #information #more #asking`
 
 	got := ForReply(&Telegram{Cols: multi, Data: bundleExample}).String()
 	if got != message {

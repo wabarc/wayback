@@ -7,6 +7,7 @@ package reduxer // import "github.com/wabarc/wayback/reduxer"
 import (
 	"github.com/go-shiori/go-readability"
 	"github.com/wabarc/screenshot"
+	"github.com/wabarc/wayback/tagging"
 )
 
 func BundleExample() Reduxer {
@@ -71,7 +72,7 @@ func BundleExample() Reduxer {
 			},
 		},
 		shots: &screenshot.Screenshots{
-			Title: "Example",
+			Title: "Example Domain",
 		},
 		article: readability.Article{
 			Content: `<!doctype html>
@@ -90,9 +91,9 @@ func BundleExample() Reduxer {
 </body>
 </html>`,
 			TextContent: `This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
-
 More information...`,
 		},
+		tags: tagging.Annotation{"information", "more", "asking"},
 	}
 
 	rdx.Store(Src("https://example.com/"), bnd)

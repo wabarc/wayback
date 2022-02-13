@@ -9,10 +9,9 @@ import (
 )
 
 func TestRenderDiscord(t *testing.T) {
-	message := `**Example**
+	message := `**Example Domain**
 
 This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
-
 More information...
 
 Internet Archive:
@@ -34,10 +33,9 @@ Telegraph:
 }
 
 func TestRenderDiscordFlawed(t *testing.T) {
-	message := `**Example**
+	message := `**Example Domain**
 
 This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
-
 More information...
 
 Internet Archive:

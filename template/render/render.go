@@ -169,6 +169,7 @@ func Digest(cols []wayback.Collect, rdx reduxer.Reduxer) (dgst string) {
 				default:
 					dgst += string(t)
 				}
+				dgst = strings.Trim(dgst, "\n")
 			}
 		}
 	}
@@ -189,4 +190,17 @@ func writeArtifact(cols []wayback.Collect, rdx reduxer.Reduxer, fn func(art redu
 	}
 
 	return
+}
+
+func createTags(cols []wayback.Collect, rdx reduxer.Reduxer) (tags string) {
+	if rdx != nil {
+		for uri := range deDepURI(cols) {
+			if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
+				tags += bundle.Tags().String()
+			}
+		}
+	}
+	logger.Debug("created tags: %s", tags)
+
+	return tags
 }
