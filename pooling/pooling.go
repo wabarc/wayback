@@ -29,6 +29,7 @@ type resource struct {
 type Pool struct {
 	resource chan *resource
 	timeout  time.Duration
+	mutex    sync.Mutex
 }
 
 func newResource(id int) *resource {
@@ -113,13 +114,17 @@ func (p *Pool) push(r *resource) error {
 	if p == nil {
 		return ErrPoolNotExist
 	}
+	p.mutex.Lock()
 	p.resource <- r
+	p.mutex.Unlock()
 	return nil
 }
 
 // Close closes worker pool
 func (p *Pool) Close() {
 	if p.resource != nil {
+		p.mutex.Lock()
 		close(p.resource)
+		p.mutex.Unlock()
 	}
 }
