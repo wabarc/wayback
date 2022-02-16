@@ -72,40 +72,53 @@ type Remote struct {
 type Bundles map[string]*Bundle
 
 // Get returns a Bundle by given name.
-func (b Bundles) Get(name string) *Bundle {
-	return b[name]
+func (bs Bundles) Get(name string) (bundle *Bundle) {
+	if b := bs[name]; b != nil {
+		bundle = b
+	}
+	return
+}
+
+// Shot returns a screenshot.Screenshots from Bundle.
+func (b *Bundle) Shot() (s screenshot.Screenshots) {
+	if b != nil {
+		return screenshot.Screenshots{
+			URL:   b.URL,
+			Title: b.Title,
+			Image: b.Image,
+			HTML:  b.HTML,
+			PDF:   b.PDF,
+		}
+	}
+	return
 }
 
 // Do executes secreenshot, print PDF and export html of given URLs
 // Returns a set of bundle containing screenshot data and file path
 // nolint:gocyclo
 func Do(ctx context.Context, urls ...*url.URL) (Bundles, error) {
+	bundles := make(Bundles, len(urls))
 	if !config.Opts.EnabledReduxer() {
-		return nil, errors.New("Specify directory to environment `WAYBACK_STORAGE_DIR` to enable reduxer")
+		return bundles, errors.New("Specify directory to environment `WAYBACK_STORAGE_DIR` to enable reduxer")
 	}
 
 	shots, err := capture(ctx, urls...)
 	if err != nil {
-		return nil, err
+		return bundles, err
 	}
 
 	dir, err := createDir(config.Opts.StorageDir())
 	if err != nil {
-		return nil, err
+		return bundles, err
 	}
 
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	var warc = &warcraft.Warcraft{BasePath: dir, UserAgent: config.Opts.WaybackUserAgent()}
-	var craft = func(in string) string {
-		u, err := url.Parse(in)
+	var craft = func(in *url.URL) string {
+		path, err := warc.Download(ctx, in)
 		if err != nil {
-			logger.Debug("create warc for %s failed", u.String())
-			return ""
-		}
-		path, err := warc.Download(ctx, u)
-		if err != nil {
-			logger.Debug("create warc for %s failed: %v", u.String(), err)
+			logger.Debug("create warc for %s failed: %v", in.String(), err)
 			return ""
 		}
 		return path
@@ -116,7 +129,6 @@ func Do(ctx context.Context, urls ...*url.URL) (Bundles, error) {
 		buf []byte
 	}
 
-	bundles := make(Bundles)
 	for _, shot := range shots {
 		wg.Add(1)
 		go func(shot screenshot.Screenshots) {
@@ -129,6 +141,7 @@ func Do(ctx context.Context, urls ...*url.URL) (Bundles, error) {
 				{key: &assets.Raw, buf: shot.HTML},
 				{key: &assets.HAR, buf: shot.HAR},
 			}
+			u, _ := url.Parse(shot.URL)
 			for _, slug := range slugs {
 				if slug.buf == nil {
 					logger.Warn("file empty, skipped")
@@ -152,13 +165,12 @@ func Do(ctx context.Context, urls ...*url.URL) (Bundles, error) {
 				}
 			}
 			// Set path of WARC file directly to avoid read file as buffer
-			if err := helper.SetField(&assets.WARC, "Local", craft(shot.URL)); err != nil {
+			if err := helper.SetField(&assets.WARC, "Local", craft(u)); err != nil {
 				logger.Error("assign field WARC to path struct failed: %v", err)
 			}
 			if err := helper.SetField(&assets.Media, "Local", media(ctx, dir, shot.URL)); err != nil {
 				logger.Error("assign field Media to path struct failed: %v", err)
 			}
-			u, _ := url.Parse(shot.URL)
 			article, err := readability.FromReader(bytes.NewReader(shot.HTML), u)
 			if err != nil {
 				logger.Error("parse html failed: %v", err)

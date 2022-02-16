@@ -36,7 +36,7 @@ require (
 	github.com/wabarc/playback v0.0.0-20210718054702-cab6c6004933
 	github.com/wabarc/rivet v0.0.0-20220207154318-37fc56bcf4e1
 	github.com/wabarc/screenshot v1.4.1-0.20211226132820-f5eed318376e
-	github.com/wabarc/telegra.ph v0.0.0-20210822083402-82f95ce60a37
+	github.com/wabarc/telegra.ph v0.0.0-20220216145835-479d23542bfc
 	github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/net v0.0.0-20220121210141-e204ce36a2ba
