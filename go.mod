@@ -16,7 +16,7 @@ require (
 	github.com/go-shiori/go-readability v0.0.0-20210627123243-82cc33435520
 	github.com/google/go-github/v40 v40.0.0
 	github.com/gorilla/mux v1.8.0
-	github.com/gorilla/websocket v1.4.2
+	github.com/gorilla/websocket v1.5.0
 	github.com/iawia002/lux v0.12.1-0.20220214022309-79ede7f7e4dc
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
 	github.com/phf/go-queue v0.0.0-20170504031614-9abe38d0371d
