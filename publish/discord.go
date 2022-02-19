@@ -6,16 +6,13 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"context"
-	"os"
-	"path"
 
-	"github.com/dustin/go-humanize"
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/template/render"
 
 	discord "github.com/bwmarrin/discordgo"
@@ -86,7 +83,7 @@ func (d *discordBot) toChannel(_ context.Context, bundle *reduxer.Bundle, text s
 	}
 
 	// Send files as reference
-	files := UploadToDiscord(bundle)
+	files := service.UploadToDiscord(bundle)
 	if len(files) == 0 {
 		logger.Debug("without files, complete.")
 		return true
@@ -97,34 +94,4 @@ func (d *discordBot) toChannel(_ context.Context, bundle *reduxer.Bundle, text s
 	}
 
 	return true
-}
-
-// UploadToDiscord composes files that share with Discord by a given bundle.
-func UploadToDiscord(bundle *reduxer.Bundle) (files []*discord.File) {
-	if bundle != nil {
-		var fsize int64
-		upper := config.Opts.MaxAttachSize("discord")
-		for _, asset := range bundle.Asset() {
-			if asset.Local == "" {
-				continue
-			}
-			if !helper.Exists(asset.Local) {
-				logger.Warn("invalid file %s", asset.Local)
-				continue
-			}
-			fsize += helper.FileSize(asset.Local)
-			if fsize > upper {
-				logger.Warn("total file size large than %s, skipped", humanize.Bytes(uint64(upper)))
-				continue
-			}
-			logger.Debug("open file: %s", asset.Local)
-			rd, err := os.Open(asset.Local)
-			if err != nil {
-				logger.Error("open file failed: %v", err)
-				continue
-			}
-			files = append(files, &discord.File{Name: path.Base(asset.Local), Reader: rd})
-		}
-	}
-	return
 }

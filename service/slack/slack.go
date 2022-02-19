@@ -309,7 +309,7 @@ func (s *Slack) wayback(ctx context.Context, ev *event, urls []*url.URL) error {
 	go publish.To(ctx, cols, publish.FlagSlack.String())
 
 	for _, bundle := range bundles {
-		if err := publish.UploadToSlack(s.bot, bundle, ev.Channel, ev.TimeStamp); err != nil {
+		if err := service.UploadToSlack(s.bot, bundle, ev.Channel, ev.TimeStamp); err != nil {
 			logger.Error("upload files to slack failed: %v", err)
 		}
 	}

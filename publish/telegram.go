@@ -7,13 +7,14 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"context"
 
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/template/render"
+
 	telegram "gopkg.in/telebot.v3"
 )
 
@@ -98,7 +99,7 @@ func (t *telegramBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
 		return true
 	}
 
-	album := UploadToTelegram(bundle)
+	album := service.UploadToTelegram(bundle)
 	if len(album) == 0 {
 		return true
 	}
@@ -109,32 +110,4 @@ func (t *telegramBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
 	}
 
 	return true
-}
-
-// UploadToTelegram composes files into an album by the given bundle.
-func UploadToTelegram(bundle *reduxer.Bundle) telegram.Album {
-	// Attach image and pdf files
-	var album telegram.Album
-	var fsize int64
-	for _, asset := range bundle.Asset() {
-		if asset.Local == "" {
-			continue
-		}
-		if !helper.Exists(asset.Local) {
-			logger.Warn("invalid file %s", asset.Local)
-			continue
-		}
-		fsize += helper.FileSize(asset.Local)
-		if fsize > config.Opts.MaxAttachSize("telegram") {
-			logger.Warn("total file size large than 50MB, skipped")
-			continue
-		}
-		logger.Debug("append document: %s", asset.Local)
-		album = append(album, &telegram.Document{
-			File:     telegram.FromDisk(asset.Local),
-			Caption:  bundle.Title,
-			FileName: asset.Local,
-		})
-	}
-	return album
 }

@@ -270,7 +270,7 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 
 	var albums telegram.Album
 	for _, bundle := range bundles {
-		albums = append(albums, publish.UploadToTelegram(bundle)...)
+		albums = append(albums, service.UploadToTelegram(bundle)...)
 	}
 	if len(albums) == 0 {
 		logger.Debug("no albums to send")

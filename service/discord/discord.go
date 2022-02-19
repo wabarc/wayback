@@ -300,7 +300,7 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 	msg := &discord.MessageSend{Content: replyText, Reference: stage.Message.Reference()}
 	var files []*discord.File
 	for _, bundle := range bundles {
-		files = append(files, publish.UploadToDiscord(bundle)...)
+		files = append(files, service.UploadToDiscord(bundle)...)
 	}
 	if len(files) == 0 {
 		logger.Warn("files empty")

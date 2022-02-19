@@ -6,15 +6,13 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"context"
-	"os"
 
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/reduxer"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/template/render"
 
 	slack "github.com/slack-go/slack"
@@ -84,57 +82,9 @@ func (s *slackBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
 		logger.Error("post message failed: %v", err)
 		return false
 	}
-	if err := UploadToSlack(s.bot, bundle, config.Opts.SlackChannel(), tstamp); err != nil {
+	if err := service.UploadToSlack(s.bot, bundle, config.Opts.SlackChannel(), tstamp); err != nil {
 		logger.Error("upload files to slack failed: %v", err)
 	}
 
 	return true
-}
-
-// UploadToSlack upload files to channel and attach as a reply by the given bundle
-func UploadToSlack(client *slack.Client, bundle *reduxer.Bundle, channel, timestamp string) (err error) {
-	if client == nil {
-		return errors.New("client invalid")
-	}
-
-	var fsize int64
-	for _, asset := range bundle.Asset() {
-		if asset.Local == "" {
-			continue
-		}
-		if !helper.Exists(asset.Local) {
-			err = errors.Wrap(err, "invalid file "+asset.Local)
-			continue
-		}
-		fsize += helper.FileSize(asset.Local)
-		if fsize > config.Opts.MaxAttachSize("slack") {
-			err = errors.Wrap(err, "total file size large than 5GB, skipped")
-			continue
-		}
-		reader, e := os.Open(asset.Local)
-		if e != nil {
-			err = errors.Wrap(err, e.Error())
-			continue
-		}
-		params := slack.FileUploadParameters{
-			Filename:        asset.Local,
-			Reader:          reader,
-			Title:           bundle.Title,
-			Channels:        []string{channel},
-			ThreadTimestamp: timestamp,
-		}
-		file, e := client.UploadFile(params)
-		if e != nil {
-			err = errors.Wrap(err, e.Error())
-			continue
-		}
-		file, _, _, e = client.ShareFilePublicURL(file.ID)
-		if e != nil {
-			err = errors.Wrap(err, e.Error())
-			continue
-		}
-		logger.Info("slack external file permalink: %s", file.PermalinkPublic)
-	}
-
-	return nil
 }
