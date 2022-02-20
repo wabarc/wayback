@@ -6,13 +6,10 @@ package twitter // import "github.com/wabarc/wayback/service/twitter"
 
 import (
 	"context"
-	"net/url"
 	"sync"
 	"time"
 
-	twitter "github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -24,6 +21,8 @@ import (
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
+
+	twitter "github.com/dghubble/go-twitter/twitter"
 )
 
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
@@ -161,23 +160,13 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	}()
 
 	urls := service.MatchURL(text)
-	var realURLs []*url.URL
-	for _, uri := range urls {
-		u, err := url.Parse(helper.RealURI(uri.String()))
-		if err != nil {
-			continue
-		}
-		realURLs = append(realURLs, u)
-	}
-	logger.Debug("real urls: %v", realURLs)
-
-	if len(realURLs) == 0 {
+	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
 		return errors.New("Twitter: URL no found")
 	}
 
 	var bundles reduxer.Bundles
-	cols, err := wayback.Wayback(context.TODO(), &bundles, realURLs...)
+	cols, err := wayback.Wayback(t.ctx, &bundles, urls...)
 	if err != nil {
 		logger.Error("archives failure, ", err)
 		return err

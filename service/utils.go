@@ -31,7 +31,7 @@ func MatchURL(s string) (urls []*url.URL) {
 
 	for i := range matches {
 		u, _ := url.Parse(matches[i])
-		urls = append(urls, u)
+		urls = append(urls, helper.RealURI(u))
 	}
 
 	return removeDuplicates(urls)
