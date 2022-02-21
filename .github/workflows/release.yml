@@ -203,10 +203,6 @@ jobs:
   snapcraft:
     name: Build Snap
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        platform:
-          - amd64
     steps:
     - name: Check out code base
       uses: actions/checkout@v2
@@ -223,10 +219,9 @@ jobs:
         sed -i "s/version: 'git'/version: '${version}'/g" snapcraft.yaml
 
     - id: build
-      name: Build snap
-      uses: diddlesnaps/snapcraft-multiarch-action@v1
+      name: Build Snap
+      uses: snapcore/action-publish@v1
       with:
-        architecture: ${{ matrix.platform }}
         snapcraft-channel: stable
 
     - name: Upload artifact
