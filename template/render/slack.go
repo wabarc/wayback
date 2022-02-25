@@ -18,7 +18,7 @@ var _ Renderer = (*Slack)(nil)
 // Slack represents a Slack template data for render.
 type Slack struct {
 	Cols []wayback.Collect
-	Data interface{}
+	Data reduxer.Reduxer
 }
 
 // ForReply implements the standard Renderer interface:
@@ -41,27 +41,27 @@ func (s *Slack) ForReply() (r *Render) {
 		logger.Error("execute Slack template failed, %v", err)
 		return r
 	}
-	for _, bundle := range bundles(s.Data) {
-		s.renderAssets(bundle.Assets, &tmplBytes)
-	}
+	writeArtifact(s.Cols, s.Data, func(art reduxer.Artifact) {
+		s.parseArtifact(art, &tmplBytes)
+	})
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
 
 	return &Render{buf: tmplBytes}
 }
 
 // ForPublish implements the standard Renderer interface:
-// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// it reads `[]wayback.Collect` and `reduxer.Reduxer` from
 // the Slack and returns a *Render.
 func (s *Slack) ForPublish() (r *Render) {
 	var tmplBytes bytes.Buffer
 
-	bundle := bundle(s.Data)
-	if head := Title(bundle); head != "" {
+	if title := Title(s.Cols, s.Data); title != "" {
 		tmplBytes.WriteString(`‹ `)
-		tmplBytes.WriteString(head)
+		tmplBytes.WriteString(title)
 		tmplBytes.WriteString(" ›\n\n")
 	}
-	if dgst := Digest(bundle); dgst != "" {
+
+	if dgst := Digest(s.Cols, s.Data); dgst != "" {
 		tmplBytes.WriteString(dgst)
 		tmplBytes.WriteString("\n\n")
 	}
@@ -81,15 +81,15 @@ func (s *Slack) ForPublish() (r *Render) {
 		logger.Error("execute Slack template failed, %v", err)
 		return r
 	}
-	if bundle != nil {
-		s.renderAssets(bundle.Assets, &tmplBytes)
-	}
+	writeArtifact(s.Cols, s.Data, func(art reduxer.Artifact) {
+		s.parseArtifact(art, &tmplBytes)
+	})
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
 
 	return &Render{buf: tmplBytes}
 }
 
-func (s *Slack) renderAssets(assets reduxer.Assets, tmplBytes *bytes.Buffer) {
+func (s *Slack) parseArtifact(assets reduxer.Artifact, tmplBytes *bytes.Buffer) {
 	tmpl := `<https://anonfiles.com/|AnonFiles> - [ <{{ .Img.Remote.Anonfile | url -}}
 |IMG> ¦ <{{ .PDF.Remote.Anonfile | url }}|PDF> ¦ <{{ .Raw.Remote.Anonfile | url -}}
 |RAW> ¦ <{{ .Txt.Remote.Anonfile | url }}|TXT> ¦ <{{ .HAR.Remote.Anonfile | url -}}

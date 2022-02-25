@@ -7,7 +7,6 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"context"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/google/go-github/v40/github"
@@ -15,7 +14,6 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/metrics"
-	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/template/render"
 )
 
@@ -45,7 +43,7 @@ func NewGitHub(httpClient *http.Client) *gitHub {
 }
 
 // Publish publish markdown text to the GitHub issues of given cols and args.
-// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
 func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusRequest)
 
@@ -54,9 +52,18 @@ func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...s
 		return
 	}
 
-	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.GitHub{Cols: cols, Data: bnd}).String()
-	if gh.toIssues(ctx, bnd, txt) {
+	rdx, _, err := extract(ctx, cols)
+	if err != nil {
+		logger.Warn("extract data failed: %v", err)
+	}
+
+	var head = render.Title(cols, rdx)
+	var body = render.ForPublish(&render.GitHub{Cols: cols, Data: rdx}).String()
+	if head == "" {
+		head = "Published at " + time.Now().Format("2006-01-02T15:04:05")
+	}
+
+	if gh.toIssues(ctx, head, body) {
 		metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusSuccess)
 		return
 	}
@@ -64,13 +71,13 @@ func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...s
 	return
 }
 
-func (gh *gitHub) toIssues(ctx context.Context, bundle *reduxer.Bundle, text string) bool {
+func (gh *gitHub) toIssues(ctx context.Context, head, body string) bool {
 	if gh.client == nil {
 		logger.Error("create GitHub Issues abort")
 		return false
 	}
-	if text == "" {
-		logger.Warn("github validation failed: Text can't be blank")
+	if body == "" {
+		logger.Warn("github validation failed: body can't be blank")
 		return false
 	}
 
@@ -79,13 +86,8 @@ func (gh *gitHub) toIssues(ctx context.Context, bundle *reduxer.Bundle, text str
 		logger.Debug("authorized GitHub user: %v", user)
 	}
 
-	t := strings.TrimSpace(render.Title(bundle))
-	if t == "" {
-		t = "Published at " + time.Now().Format("2006-01-02T15:04:05")
-	}
-
 	// Create an issue to GitHub
-	ir := &github.IssueRequest{Title: github.String(t), Body: github.String(text)}
+	ir := &github.IssueRequest{Title: github.String(head), Body: github.String(body)}
 	issue, _, err := gh.client.Issues.Create(ctx, config.Opts.GitHubOwner(), config.Opts.GitHubRepo(), ir)
 	if err != nil {
 		logger.Error("create issue failed: %v", err)

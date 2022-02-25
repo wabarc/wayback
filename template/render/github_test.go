@@ -53,12 +53,9 @@ func TestRenderGitHub(t *testing.T) {
 
 **[Telegraph](https://telegra.ph/)**:
 > source: [https://example.com/?q=中文](https://example.com/?q=%E4%B8%AD%E6%96%87)
-> archived: [http://telegra.ph/title-01-01](http://telegra.ph/title-01-01)
+> archived: [http://telegra.ph/title-01-01](http://telegra.ph/title-01-01)`
 
-**[AnonFiles](https://anonfiles.com/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [HAR]() ¦ [WARC]() ¦ [MEDIA]() ]
-**[Catbox](https://catbox.moe/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [HAR]() ¦ [WARC]() ¦ [MEDIA]() ]`
-
-	got := ForPublish(&GitHub{Cols: collects}).String()
+	got := ForPublish(&GitHub{Cols: collects, Data: bundleExample}).String()
 	if got != expected {
 		t.Errorf("Unexpected render template for GitHub Issues, got \n%s\ninstead of \n%s", got, expected)
 	}
@@ -66,7 +63,7 @@ func TestRenderGitHub(t *testing.T) {
 
 func TestRenderGitHubFlawed(t *testing.T) {
 	expected := `**[Internet Archive](https://web.archive.org/)**:
-> source: [https://example.com/?q=中文](https://example.com/?q=%E4%B8%AD%E6%96%87)
+> source: [https://example.com/](https://example.com/)
 > archived: Get "https://web.archive.org/save/https://example.com": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
 
 **[archive.today](https://archive.today/)**:
@@ -78,19 +75,16 @@ func TestRenderGitHubFlawed(t *testing.T) {
 > archived: Archive failed.
 
 **[Telegraph](https://telegra.ph/)**:
-> source: [https://example.com/404](https://example.com/404)
-> archived: [https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404](https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404)
+> source: [https://example.com/](https://example.com/)
+> archived: [https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/](https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/)`
 
-**[AnonFiles](https://anonfiles.com/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [HAR]() ¦ [WARC]() ¦ [MEDIA]() ]
-**[Catbox](https://catbox.moe/)** - [ [IMG]() ¦ [PDF]() ¦ [RAW]() ¦ [TXT]() ¦ [HAR]() ¦ [WARC]() ¦ [MEDIA]() ]`
-
-	got := ForPublish(&GitHub{Cols: flawed}).String()
+	got := ForPublish(&GitHub{Cols: flawed, Data: emptyBundle}).String()
 	if got != expected {
 		t.Errorf("Unexpected render template for GitHub Issues, got \n%s\ninstead of \n%s", got, expected)
 	}
 }
 
-func TestRenderGitHubWithAssets(t *testing.T) {
+func TestRenderGitHubWithArtifact(t *testing.T) {
 	const expected = `**[Internet Archive](https://web.archive.org/)**:
 > source: [https://example.com/](https://example.com/)
 > archived: [https://web.archive.org/web/20211000000001/https://example.com/](https://web.archive.org/web/20211000000001/https://example.com/)

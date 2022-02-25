@@ -47,8 +47,8 @@ func TestToIssues(t *testing.T) {
 	})
 
 	gh := NewGitHub(httpClient)
-	txt := render.ForPublish(&render.GitHub{Cols: collects}).String()
-	got := gh.toIssues(context.Background(), nil, txt)
+	txt := render.ForPublish(&render.GitHub{Cols: collects, Data: bundleExample}).String()
+	got := gh.toIssues(context.Background(), "", txt)
 	if !got {
 		t.Errorf("Unexpected create GitHub Issues got %t instead of %t", got, true)
 	}

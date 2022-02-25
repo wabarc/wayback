@@ -43,7 +43,7 @@ func NewSlack(bot *slack.Client) *slackBot {
 }
 
 // Publish publish text to the Slack channel of given cols and args.
-// A context should contains a `reduxer.Bundle` via `publish.PubBundle` constant.
+// A context should contains a `reduxer.Reduxer` via `publish.PubBundle` constant.
 func (s *slackBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishSlack, metrics.StatusRequest)
 
@@ -52,9 +52,14 @@ func (s *slackBot) Publish(ctx context.Context, cols []wayback.Collect, args ...
 		return
 	}
 
-	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Slack{Cols: cols, Data: bnd}).String()
-	if s.toChannel(bnd, txt) {
+	rdx, art, err := extract(ctx, cols)
+	if err != nil {
+		logger.Warn("extract data failed: %v", err)
+	}
+
+	var head = render.Title(cols, rdx)
+	var body = render.ForPublish(&render.Slack{Cols: cols, Data: rdx}).String()
+	if s.toChannel(art, head, body) {
 		metrics.IncrementPublish(metrics.PublishSlack, metrics.StatusSuccess)
 		return
 	}
@@ -64,9 +69,9 @@ func (s *slackBot) Publish(ctx context.Context, cols []wayback.Collect, args ...
 
 // toChannel for publish to message to Slack channel,
 // returns boolean as result.
-func (s *slackBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
-	if text == "" {
-		logger.Warn("post to message to channel failed, text empty")
+func (s *slackBot) toChannel(art reduxer.Artifact, head, body string) (ok bool) {
+	if body == "" {
+		logger.Warn("post to message to channel failed, body empty")
 		return ok
 	}
 	if s.bot == nil {
@@ -74,7 +79,7 @@ func (s *slackBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
 	}
 
 	msgOpts := []slack.MsgOption{
-		slack.MsgOptionText(text, false),
+		slack.MsgOptionText(body, false),
 		slack.MsgOptionDisableMarkdown(),
 	}
 	_, tstamp, err := s.bot.PostMessage(config.Opts.SlackChannel(), msgOpts...)
@@ -82,7 +87,7 @@ func (s *slackBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
 		logger.Error("post message failed: %v", err)
 		return false
 	}
-	if err := service.UploadToSlack(s.bot, bundle, config.Opts.SlackChannel(), tstamp); err != nil {
+	if err := service.UploadToSlack(s.bot, art, config.Opts.SlackChannel(), tstamp, head); err != nil {
 		logger.Error("upload files to slack failed: %v", err)
 	}
 

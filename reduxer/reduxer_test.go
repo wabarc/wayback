@@ -45,14 +45,13 @@ func TestDo(t *testing.T) {
 		t.Fatalf("Unexpected execute do: %v", err)
 	}
 
-	if len(res) == 0 {
-		t.Errorf("Unexpected got res as 0")
+	bundle, ok := res.Load(Src(inp.String()))
+	if !ok {
+		t.Fatal("Unexpected bundles")
 	}
-
-	for _, r := range res {
-		if r.Assets.Img.Local == "" || r.Assets.PDF.Local == "" || r.Assets.Raw.Local == "" {
-			t.Fatal("Unexpected file path")
-		}
+	art := bundle.Artifact()
+	if art.Img.Local == "" || art.PDF.Local == "" || art.Raw.Local == "" {
+		t.Fatal("Unexpected file path")
 	}
 }
 

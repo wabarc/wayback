@@ -50,7 +50,7 @@ func NewMatrix(client *matrix.Client) *matrixBot {
 }
 
 // Publish publish text to the Matrix room of given cols and args.
-// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
 func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusRequest)
 
@@ -59,9 +59,13 @@ func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ..
 		return
 	}
 
-	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Matrix{Cols: cols, Data: bnd}).String()
-	if m.toRoom(txt) {
+	rdx, _, err := extract(ctx, cols)
+	if err != nil {
+		logger.Warn("extract data failed: %v", err)
+	}
+
+	var body = render.ForPublish(&render.Matrix{Cols: cols, Data: rdx}).String()
+	if m.toRoom(body) {
 		metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusSuccess)
 		return
 	}
@@ -69,23 +73,23 @@ func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ..
 	return
 }
 
-func (m *matrixBot) toRoom(text string) bool {
+func (m *matrixBot) toRoom(body string) bool {
 	if !config.Opts.PublishToMatrixRoom() || m.client == nil {
 		logger.Warn("publish to Matrix room abort.")
 		return false
 	}
-	if text == "" {
-		logger.Warn("matrix validation failed: Text can't be blank")
+	if body == "" {
+		logger.Warn("matrix validation failed: body can't be blank")
 		return false
 	}
 
 	content := &event.MessageEventContent{
-		FormattedBody: text,
+		FormattedBody: body,
 		Format:        event.FormatHTML,
-		Body:          text,
+		Body:          body,
 		MsgType:       event.MsgText,
 	}
-	logger.Debug("send to Matrix room, text:\n%s", text)
+	logger.Debug("send to Matrix room, body:\n%s", body)
 	if _, err := m.client.SendMessageEvent(id.RoomID(config.Opts.MatrixRoomID()), event.EventMessage, content); err != nil {
 		logger.Error("send to Matrix room failure: %v", err)
 		return false

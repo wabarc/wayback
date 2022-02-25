@@ -18,7 +18,7 @@ var _ Renderer = (*Matrix)(nil)
 // Matrix represents a Matrix template data for render.
 type Matrix struct {
 	Cols []wayback.Collect
-	Data interface{}
+	Data reduxer.Reduxer
 }
 
 // ForReply implements the standard Renderer interface:
@@ -41,30 +41,32 @@ func (m *Matrix) ForReply() *Render {
 		logger.Error("execute Mastodon template failed, %v", err)
 		return new(Render)
 	}
+
+	writeArtifact(m.Cols, m.Data, func(art reduxer.Artifact) {
+		m.parseArtifact(art, &tmplBytes)
+	})
+
 	b := bytes.TrimSpace(tmplBytes.Bytes())
 	b = bytes.TrimRight(b, `<br>`)
 	b = bytes.TrimRight(b, "\n")
 	tmplBytes = *bytes.NewBuffer(b)
-	for _, bundle := range bundles(m.Data) {
-		m.renderAssets(bundle.Assets, &tmplBytes)
-	}
 
 	return &Render{buf: tmplBytes}
 }
 
 // ForPublish implements the standard Renderer interface:
-// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// it reads `[]wayback.Collect` and `reduxer.Reduxer` from
 // the Matrix and returns a *Render.
 func (m *Matrix) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
 
-	bundle := bundle(m.Data)
-	if head := Title(bundle); head != "" {
+	if title := Title(m.Cols, m.Data); title != "" {
 		tmplBytes.WriteString(`‹ <b>`)
-		tmplBytes.WriteString(head)
+		tmplBytes.WriteString(title)
 		tmplBytes.WriteString(`</b> ›<br><br>`)
 	}
-	if dgst := Digest(bundle); dgst != "" {
+
+	if dgst := Digest(m.Cols, m.Data); dgst != "" {
 		tmplBytes.WriteString(dgst)
 		tmplBytes.WriteString(`<br><br>`)
 	}
@@ -84,9 +86,11 @@ func (m *Matrix) ForPublish() *Render {
 		logger.Error("execute Mastodon template failed, %v", err)
 		return new(Render)
 	}
-	if bundle != nil {
-		m.renderAssets(bundle.Assets, &tmplBytes)
-	}
+
+	writeArtifact(m.Cols, m.Data, func(art reduxer.Artifact) {
+		m.parseArtifact(art, &tmplBytes)
+	})
+
 	b := bytes.TrimSpace(tmplBytes.Bytes())
 	b = bytes.TrimRight(b, `<br>`)
 	b = bytes.TrimRight(b, "\n")
@@ -95,7 +99,7 @@ func (m *Matrix) ForPublish() *Render {
 	return &Render{buf: tmplBytes}
 }
 
-func (m *Matrix) renderAssets(assets reduxer.Assets, tmplBytes *bytes.Buffer) {
+func (m *Matrix) parseArtifact(assets reduxer.Artifact, tmplBytes *bytes.Buffer) {
 	tmpl := `<b><a href="https://anonfiles.com/">AnonFiles</a></b> - [ <a href="{{ .Img.Remote.Anonfile | url -}}
 ">IMG</a> ¦ <a href="{{ .PDF.Remote.Anonfile | url }}">PDF</a> ¦ <a href="{{ .Raw.Remote.Anonfile | url -}}
 ">RAW</a> ¦ <a href="{{ .Txt.Remote.Anonfile | url }}">TXT</a> ¦ <a href="{{ .HAR.Remote.Anonfile | url -}}

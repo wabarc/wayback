@@ -59,7 +59,7 @@ func TestToMastodon(t *testing.T) {
 
 	mstdn := NewMastodon(nil)
 	txt := render.ForPublish(&render.Telegram{Cols: collects}).String()
-	got := mstdn.ToMastodon(context.Background(), nil, txt, "")
+	got := mstdn.ToMastodon(context.Background(), txt, "")
 	if !got {
 		t.Errorf("Unexpected publish toot got %t instead of %t", got, true)
 	}

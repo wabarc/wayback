@@ -1,6 +1,6 @@
 module github.com/wabarc/wayback
 
-// +heroku goVersion go1.16
+// +heroku goVersion go1.17
 
 go 1.17
 
@@ -35,8 +35,8 @@ require (
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
 	github.com/wabarc/playback v0.0.0-20210718054702-cab6c6004933
 	github.com/wabarc/rivet v0.0.0-20220207154318-37fc56bcf4e1
-	github.com/wabarc/screenshot v1.4.1-0.20211226132820-f5eed318376e
-	github.com/wabarc/telegra.ph v0.0.0-20220216145835-479d23542bfc
+	github.com/wabarc/screenshot v1.4.1-0.20220304125241-bd18edec744e
+	github.com/wabarc/telegra.ph v0.0.0-20220304132636-fce723bd6eae
 	github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/net v0.0.0-20220121210141-e204ce36a2ba
@@ -58,8 +58,8 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.8 // indirect
-	github.com/chromedp/cdproto v0.0.0-20211223002613-767fe3af85ce // indirect
-	github.com/chromedp/chromedp v0.7.6 // indirect
+	github.com/chromedp/cdproto v0.0.0-20220217222649-d8c14a5c6edf // indirect
+	github.com/chromedp/chromedp v0.7.8 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
 	github.com/dghubble/sling v1.3.0 // indirect
@@ -126,7 +126,7 @@ require (
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	github.com/ybbus/httpretry v1.0.1 // indirect
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
-	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
+	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect

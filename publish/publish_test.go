@@ -49,52 +49,7 @@ var collects = []wayback.Collect{
 	},
 }
 
-var bundleExample = &reduxer.Bundle{
-	Assets: reduxer.Assets{
-		Img: reduxer.Asset{
-			Local: "/path/to/image",
-			Remote: reduxer.Remote{
-				Anonfile: "https://anonfiles.com/FbZfSa9eu4",
-				Catbox:   "https://files.catbox.moe/9u6yvu.png",
-			},
-		},
-		PDF: reduxer.Asset{
-			Local: "/path/to/pdf",
-			Remote: reduxer.Remote{
-				Anonfile: "https://anonfiles.com/r4G8Sb90ud",
-				Catbox:   "https://files.catbox.moe/q73uqh.pdf",
-			},
-		},
-		Raw: reduxer.Asset{
-			Local: "/path/to/htm",
-			Remote: reduxer.Remote{
-				Anonfile: "https://anonfiles.com/pbG4Se94ua",
-				Catbox:   "https://files.catbox.moe/bph1g6.htm",
-			},
-		},
-		Txt: reduxer.Asset{
-			Local: "/path/to/txt",
-			Remote: reduxer.Remote{
-				Anonfile: "https://anonfiles.com/naG6S09bu1",
-				Catbox:   "https://files.catbox.moe/wwrby6.txt",
-			},
-		},
-		WARC: reduxer.Asset{
-			Local: "/path/to/warc",
-			Remote: reduxer.Remote{
-				Anonfile: "https://anonfiles.com/v4G4S09auc",
-				Catbox:   "https://files.catbox.moe/kkai0w.warc",
-			},
-		},
-		Media: reduxer.Asset{
-			Local: "",
-			Remote: reduxer.Remote{
-				Anonfile: "",
-				Catbox:   "",
-			},
-		},
-	},
-}
+var bundleExample = reduxer.BundleExample()
 
 func unsetAllEnv() {
 	lines := os.Environ()

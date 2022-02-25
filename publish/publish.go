@@ -19,6 +19,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/reduxer"
 	"golang.org/x/sync/errgroup"
 
@@ -236,15 +237,17 @@ func funcMap() template.FuncMap {
 	}
 }
 
-func bundle(ctx context.Context, cols []wayback.Collect) (b *reduxer.Bundle) {
+func extract(ctx context.Context, cols []wayback.Collect) (rdx reduxer.Reduxer, art reduxer.Artifact, err error) {
 	if len(cols) == 0 {
-		return b
+		return rdx, art, errors.New("no collect")
 	}
 
 	var uri = cols[0].Src
-	if bundles, ok := ctx.Value(PubBundle).(reduxer.Bundles); ok {
-		b = bundles.Get(uri)
+	if rdx, ok := ctx.Value(PubBundle).(reduxer.Reduxer); ok {
+		if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
+			return rdx, bundle.Artifact(), nil
+		}
+		return rdx, art, errors.New("reduxer data not found")
 	}
-
-	return b
+	return rdx, art, errors.New("invalid reduxer")
 }

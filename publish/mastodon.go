@@ -12,7 +12,6 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/metrics"
-	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/template/render"
 )
 
@@ -40,7 +39,7 @@ func NewMastodon(client *mstdn.Client) *mastodon {
 }
 
 // Publish publish toot to the Mastodon of given cols and args.
-// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
 func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	var id string
 	if len(args) > 1 {
@@ -53,9 +52,13 @@ func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...
 		return
 	}
 
-	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Mastodon{Cols: cols, Data: bnd}).String()
-	if m.ToMastodon(ctx, bnd, txt, id) {
+	rdx, _, err := extract(ctx, cols)
+	if err != nil {
+		logger.Warn("extract data failed: %v", err)
+	}
+
+	var txt = render.ForPublish(&render.Mastodon{Cols: cols, Data: rdx}).String()
+	if m.ToMastodon(ctx, txt, id) {
 		metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusSuccess)
 		return
 	}
@@ -63,7 +66,7 @@ func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...
 	return
 }
 
-func (m *mastodon) ToMastodon(ctx context.Context, bundle *reduxer.Bundle, text, id string) bool {
+func (m *mastodon) ToMastodon(ctx context.Context, text, id string) bool {
 	if !config.Opts.PublishToMastodon() || m.client == nil {
 		logger.Warn("Do not publish to Mastodon.")
 		return false

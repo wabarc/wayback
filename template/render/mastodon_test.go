@@ -34,7 +34,7 @@ Telegraph:
 
 #wayback #存档`
 
-	got := ForPublish(&Mastodon{Cols: collects}).String()
+	got := ForPublish(&Mastodon{Cols: collects, Data: bundleExample}).String()
 	if !strings.Contains(got, source) {
 		t.Fatalf("Unexpected render template for Mastodon, got \n%s\ninstead of \n%s", got, source)
 	}

@@ -17,7 +17,6 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
-	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
@@ -165,13 +164,12 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 		return errors.New("Twitter: URL no found")
 	}
 
-	var bundles reduxer.Bundles
-	cols, err := wayback.Wayback(t.ctx, &bundles, urls...)
+	cols, rdx, err := wayback.Wayback(t.ctx, urls...)
 	if err != nil {
-		logger.Error("archives failure, ", err)
-		return err
+		return errors.Wrap(err, "twitter: wayback failed")
 	}
-	logger.Debug("bundles: %#v", bundles)
+	logger.Debug("reduxer: %#v", rdx)
+	defer rdx.Flush()
 
 	replyText := render.ForReply(&render.Twitter{Cols: cols}).String()
 	logger.Debug("reply text, %s", replyText)
@@ -206,8 +204,8 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	}()
 
 	ctx := context.WithValue(t.ctx, publish.FlagTwitter, t.client)
-	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	go publish.To(ctx, cols, publish.FlagTwitter.String())
+	ctx = context.WithValue(ctx, publish.PubBundle, rdx)
+	publish.To(ctx, cols, publish.FlagTwitter.String())
 
 	return nil
 }

@@ -50,7 +50,7 @@ func TestToTwitter(t *testing.T) {
 
 	twitt := NewTwitter(twitter.NewClient(httpClient))
 	txt := render.ForPublish(&render.Twitter{Cols: collects}).String()
-	got := twitt.ToTwitter(context.Background(), nil, txt)
+	got := twitt.ToTwitter(context.Background(), txt)
 	if !got {
 		t.Errorf("Unexpected create GitHub Issues got %t instead of %t", got, true)
 	}

@@ -20,7 +20,8 @@ IPFS:
 
 Telegraph:
 • http://telegra.ph/title-01-01`
-	got := ForPublish(&Discord{Cols: collects}).String()
+
+	got := ForPublish(&Discord{Cols: collects, Data: bundleExample}).String()
 	if got != message {
 		t.Errorf("Unexpected render template for Discord got \n%s\ninstead of \n%s", got, message)
 	}
@@ -37,8 +38,9 @@ IPFS:
 • Archive failed.
 
 Telegraph:
-• https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/404`
-	got := ForPublish(&Discord{Cols: flawed}).String()
+• https://web.archive.org/*/https://webcache.googleusercontent.com/search?q=cache:https://example.com/`
+
+	got := ForPublish(&Discord{Cols: flawed, Data: bundleExample}).String()
 	if got != message {
 		t.Errorf("Unexpected render template for Discord, got \n%s\ninstead of \n%s", got, message)
 	}
@@ -56,7 +58,8 @@ Internet Archive:
 
 archive.today:
 • http://archive.today/abc`
-	got := ForReply(&Discord{Cols: multi}).String()
+
+	got := ForReply(&Discord{Cols: multi, Data: bundleExample}).String()
 	if got != message {
 		t.Errorf("Unexpected render template for Discord, got \n%s\ninstead of \n%s", got, message)
 	}

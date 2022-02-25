@@ -93,7 +93,7 @@ func funcMap() template.FuncMap {
 type Collect struct {
 	Arc, Ext, Src string
 
-	Dst []map[string]string
+	Dst []map[string]string // wayback results
 }
 
 // Collects represents a set of Collect in a map, and its key is a URL string.
@@ -116,54 +116,77 @@ func groupBySlot(cols []wayback.Collect) *Collects {
 	return &c
 }
 
-func bundle(data interface{}) *reduxer.Bundle {
-	if bundle, ok := data.(*reduxer.Bundle); ok {
-		return bundle
+func deDepURI(cols []wayback.Collect) map[string]bool {
+	uris := make(map[string]bool)
+	for _, col := range cols {
+		uris[col.Src] = true
 	}
-	return new(reduxer.Bundle)
+	return uris
 }
 
-func bundles(data interface{}) reduxer.Bundles {
-	if bundles, ok := data.(reduxer.Bundles); ok {
-		return bundles
+// Title returns the title of the webpage. Its maximum length is defined by `maxTitleLen`.
+func Title(cols []wayback.Collect, rdx reduxer.Reduxer) (title string) {
+	if rdx == nil {
+		return
 	}
-	return make(reduxer.Bundles)
+
+	for uri := range deDepURI(cols) {
+		if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
+			if shots := bundle.Shots(); shots != nil {
+				text := shots.Title
+				logger.Debug("extract title from reduxer bundle title: %s", text)
+				t := []rune(text)
+				l := len(t)
+				if l > maxTitleLen {
+					t = t[:maxTitleLen]
+				}
+				title += strings.TrimSpace(string(t))
+			}
+		}
+	}
+
+	return
 }
 
-// Title returns the title of the webpage of given `reduxer.Bundle`.
-// Its maximum length is defined by `maxTitleLen`.
-func Title(bundle *reduxer.Bundle) string {
-	if bundle == nil {
-		return ""
-	}
-	logger.Debug("extract title from reduxer bundle title: %s", bundle.Title)
-
-	t := []rune(bundle.Title)
-	l := len(t)
-	if l > maxTitleLen {
-		t = t[:maxTitleLen]
+// Digest returns digest of the webpage content. Its maximum length is defined by `maxDigestLen`.
+func Digest(cols []wayback.Collect, rdx reduxer.Reduxer) (dgst string) {
+	if rdx == nil {
+		return
 	}
 
-	return strings.TrimSpace(string(t))
+	for uri := range deDepURI(cols) {
+		if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
+			if text := bundle.Article().TextContent; text != "" {
+				logger.Debug("generate digest from article content: %s", text)
+				t := []rune(text)
+				l := len(t)
+				switch {
+				case l == 0:
+					continue
+				case l > maxDigestLen:
+					t = t[:maxDigestLen]
+					dgst += string(t) + ` ...`
+				default:
+					dgst += string(t)
+				}
+			}
+		}
+	}
+
+	return
 }
 
-// Digest returns digest of the webpage content of given `reduxer.Bundle`.
-// Its maximum length is defined by `maxDigestLen`.
-func Digest(bundle *reduxer.Bundle) string {
-	if bundle == nil {
-		return ""
+// writeArtifact writes archived artifact of the webpage.
+func writeArtifact(cols []wayback.Collect, rdx reduxer.Reduxer, fn func(art reduxer.Artifact)) {
+	if rdx == nil {
+		return
 	}
-	logger.Debug("generate digest from article content: %s", bundle.Article.TextContent)
 
-	txt := []rune(bundle.Article.TextContent)
-	l := len(txt)
-	switch {
-	case l == 0:
-		return ""
-	case l > maxDigestLen:
-		txt = txt[:maxDigestLen]
-		return string(txt) + ` ...`
-	default:
-		return string(txt)
+	for uri := range deDepURI(cols) {
+		if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
+			fn(bundle.Artifact())
+		}
 	}
+
+	return
 }

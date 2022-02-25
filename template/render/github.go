@@ -18,7 +18,7 @@ var _ Renderer = (*GitHub)(nil)
 // GitHub represents a GitHub template data for render.
 type GitHub struct {
 	Cols []wayback.Collect
-	Data interface{}
+	Data reduxer.Reduxer
 }
 
 // ForReply implements the standard Renderer interface:
@@ -28,13 +28,12 @@ func (gh *GitHub) ForReply() *Render {
 }
 
 // ForPublish implements the standard Renderer interface:
-// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// it reads `[]wayback.Collect` and `reduxer.Reduxer` from
 // the GitHub and returns a *Render.
 func (gh *GitHub) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
 
-	bundle := bundle(gh.Data)
-	if dgst := Digest(bundle); dgst != "" {
+	if dgst := Digest(gh.Cols, gh.Data); dgst != "" {
 		tmplBytes.WriteString(dgst)
 		tmplBytes.WriteString("\n\n")
 	}
@@ -57,15 +56,16 @@ func (gh *GitHub) ForPublish() *Render {
 		return new(Render)
 	}
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
-	if bundle != nil {
+
+	writeArtifact(gh.Cols, gh.Data, func(art reduxer.Artifact) {
 		tmplBytes.WriteString("\n")
-		gh.renderAssets(bundle.Assets, &tmplBytes)
-	}
+		gh.parseArtifact(art, &tmplBytes)
+	})
 
 	return &Render{buf: tmplBytes}
 }
 
-func (gh *GitHub) renderAssets(assets reduxer.Assets, tmplBytes *bytes.Buffer) {
+func (gh *GitHub) parseArtifact(assets reduxer.Artifact, tmplBytes *bytes.Buffer) {
 	tmpl := `**[AnonFiles](https://anonfiles.com/)** - [ [IMG]({{ .Img.Remote.Anonfile | url -}}
 ) ¦ [PDF]({{ .PDF.Remote.Anonfile | url }}) ¦ [RAW]({{ .Raw.Remote.Anonfile | url -}}
 ) ¦ [TXT]({{ .Txt.Remote.Anonfile | url }}) ¦ [HAR]({{ .HAR.Remote.Anonfile | url -}}

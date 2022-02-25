@@ -13,7 +13,6 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/metrics"
-	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/template/render"
 )
 
@@ -39,7 +38,7 @@ func NewTwitter(client *twitter.Client) *twitterBot {
 }
 
 // Publish publish tweet to Twitter of given cols and args.
-// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
 func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusRequest)
 
@@ -48,9 +47,13 @@ func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 		return
 	}
 
-	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Twitter{Cols: cols, Data: bnd}).String()
-	if t.ToTwitter(ctx, bnd, txt) {
+	rdx, _, err := extract(ctx, cols)
+	if err != nil {
+		logger.Warn("extract data failed: %v", err)
+	}
+
+	var body = render.ForPublish(&render.Twitter{Cols: cols, Data: rdx}).String()
+	if t.ToTwitter(ctx, body) {
 		metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusSuccess)
 		return
 	}
@@ -58,17 +61,17 @@ func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 	return
 }
 
-func (t *twitterBot) ToTwitter(ctx context.Context, bundle *reduxer.Bundle, text string) bool {
+func (t *twitterBot) ToTwitter(ctx context.Context, body string) bool {
 	if !config.Opts.PublishToTwitter() || t.client == nil {
 		logger.Warn("Do not publish to Twitter.")
 		return false
 	}
-	if text == "" {
-		logger.Warn("twitter validation failed: Text can't be blank")
+	if body == "" {
+		logger.Warn("twitter validation failed: body can't be blank")
 		return false
 	}
 
-	tweet, resp, err := t.client.Statuses.Update(text, nil)
+	tweet, resp, err := t.client.Statuses.Update(body, nil)
 	if err != nil {
 		logger.Error("create tweet failed: %v", err)
 		return false

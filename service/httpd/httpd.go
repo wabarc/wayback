@@ -21,7 +21,6 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
-	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/template"
 	"github.com/wabarc/wayback/version"
@@ -221,12 +220,16 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 		logger.Warn("url no found.")
 	}
 
-	var bundles reduxer.Bundles
-	col, _ := wayback.Wayback(context.TODO(), &bundles, urls...)
-	logger.Debug("bundles: %#v", bundles)
+	cols, rdx, err := wayback.Wayback(context.Background(), urls...)
+	if err != nil {
+		logger.Error("web: wayback failed: %v", err)
+		return
+	}
+	logger.Debug("reduxer: %#v", rdx)
+	defer rdx.Flush()
 
-	collector := transform(col)
-	ctx := context.WithValue(context.Background(), publish.PubBundle, bundles)
+	collector := transform(cols)
+	ctx := context.WithValue(context.Background(), publish.PubBundle, rdx)
 	switch r.PostFormValue("data-type") {
 	case "json":
 		w.Header().Set("Content-Type", "application/json")
@@ -237,7 +240,7 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 		} else {
 			if len(urls) > 0 {
 				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-				go publish.To(ctx, col, "web")
+				go publish.To(ctx, cols, "web")
 			}
 			w.Write(data)
 		}
@@ -247,7 +250,7 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 		if html, ok := web.template.Render("layout", collector); ok {
 			if len(urls) > 0 {
 				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-				go publish.To(ctx, col, "web")
+				go publish.To(ctx, cols, "web")
 			}
 			w.Write(html)
 		} else {
@@ -279,7 +282,11 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 	if len(urls) == 0 {
 		logger.Warn("url no found.")
 	}
-	col, _ := wayback.Playback(context.TODO(), urls...)
+	col, err := wayback.Playback(context.Background(), urls...)
+	if err != nil {
+		logger.Error("web: playback failed: %v", err)
+		return
+	}
 	collector := transform(col)
 	switch r.PostFormValue("data-type") {
 	case "json":

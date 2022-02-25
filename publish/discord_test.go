@@ -171,7 +171,14 @@ func TestToDiscordChannel(t *testing.T) {
 	bot.Client = httpClient
 	d := NewDiscord(bot)
 	txt := render.ForPublish(&render.Discord{Cols: collects, Data: bundleExample}).String()
-	got := d.toChannel(context.Background(), bundleExample, txt)
+	ctx := context.WithValue(context.Background(), PubBundle, bundleExample)
+
+	_, art, err := extract(ctx, collects)
+	if err != nil {
+		t.Fatalf("extract data failed: %#v", err)
+	}
+
+	got := d.toChannel(art, txt)
 	if !got {
 		t.Errorf("Unexpected publish to discord channel got %t instead of %t", got, true)
 	}

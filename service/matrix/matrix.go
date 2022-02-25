@@ -16,7 +16,6 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
-	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
@@ -175,13 +174,12 @@ func (m *Matrix) process(ev *event.Event) error {
 		return errors.New("Matrix: URL no found")
 	}
 
-	var bundles reduxer.Bundles
-	cols, err := wayback.Wayback(context.TODO(), &bundles, urls...)
+	cols, rdx, err := wayback.Wayback(m.ctx, urls...)
 	if err != nil {
-		logger.Error("archives failure, %v", err)
-		return err
+		return errors.Wrap(err, "matrix: wayback failed")
 	}
-	logger.Debug("bundles: %#v", bundles)
+	logger.Debug("reduxer: %#v", rdx)
+	defer rdx.Flush()
 
 	body := render.ForReply(&render.Matrix{Cols: cols}).String()
 	content := &event.MessageEventContent{
@@ -197,7 +195,7 @@ func (m *Matrix) process(ev *event.Event) error {
 		return err
 	}
 	// Redact message
-	m.redact(ev, "Wayback completed. Original message: "+text)
+	m.redact(ev, "wayback completed. original message: "+text)
 
 	// Mark message as receipt
 	if err := m.client.MarkRead(ev.RoomID, ev.ID); err != nil {
@@ -205,7 +203,7 @@ func (m *Matrix) process(ev *event.Event) error {
 	}
 
 	ctx := context.WithValue(m.ctx, publish.FlagMatrix, m.client)
-	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
+	ctx = context.WithValue(ctx, publish.PubBundle, rdx)
 	publish.To(ctx, cols, publish.FlagMatrix.String())
 
 	return nil
@@ -223,8 +221,7 @@ func (m *Matrix) playback(ev *event.Event) error {
 
 	cols, err := wayback.Playback(m.ctx, urls...)
 	if err != nil {
-		logger.Error("playback failure, %v", err)
-		return err
+		return errors.Wrap(err, "matrix: playback failed")
 	}
 
 	body := render.ForReply(&render.Matrix{Cols: cols}).String()

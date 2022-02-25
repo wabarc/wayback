@@ -15,7 +15,9 @@ import (
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/template/render"
+
 	telegram "gopkg.in/telebot.v3"
 )
 
@@ -93,7 +95,7 @@ func TestToChannel(t *testing.T) {
 
 	tel := &telegramBot{bot: bot}
 	txt := render.ForPublish(&render.Telegram{Cols: collects}).String()
-	got := tel.toChannel(nil, txt)
+	got := tel.toChannel(reduxer.Artifact{}, "", txt)
 	if !got {
 		t.Errorf("Unexpected publish Telegram Channel message got %t instead of %t", got, true)
 	}

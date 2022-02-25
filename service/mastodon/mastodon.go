@@ -19,7 +19,6 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
-	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
@@ -192,22 +191,21 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 	pub := publish.NewMastodon(m.client)
 	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
-		pub.ToMastodon(m.ctx, nil, "URL no found", string(status.ID))
+		pub.ToMastodon(nil, "URL no found", string(status.ID))
 		return errors.New("Mastodon: URL no found")
 	}
 
-	var bundles reduxer.Bundles
-	col, err := wayback.Wayback(context.TODO(), &bundles, urls...)
+	cols, rdx, err := wayback.Wayback(m.ctx, urls...)
 	if err != nil {
-		logger.Error("archives failed: %v", err)
-		return err
+		return errors.Wrap(err, "mastodon: wayback failed")
 	}
-	logger.Debug("bundles: %#v", bundles)
+	logger.Debug("reduxer: %#v", rdx)
+	defer rdx.Flush()
 
 	// Reply and publish toot as public
 	ctx := context.WithValue(m.ctx, publish.FlagMastodon, m.client)
-	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	publish.To(ctx, col, publish.FlagMastodon.String(), string(status.ID))
+	ctx = context.WithValue(ctx, publish.PubBundle, rdx)
+	publish.To(ctx, cols, publish.FlagMastodon.String(), string(status.ID))
 
 	return nil
 }
@@ -222,14 +220,13 @@ func (m *Mastodon) playback(status *mastodon.Status) error {
 
 	cols, err := wayback.Playback(m.ctx, urls...)
 	if err != nil {
-		logger.Error("playback failed: %v", err)
-		return err
+		return errors.Wrap(err, "mastodon: playback failed")
 	}
 
 	// Reply toot as public
 	pub := publish.NewMastodon(m.client)
 	txt := render.ForReply(&render.Mastodon{Cols: cols}).String()
-	pub.ToMastodon(m.ctx, nil, txt, string(status.ID))
+	pub.ToMastodon(m.ctx, txt, string(status.ID))
 
 	return nil
 }

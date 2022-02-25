@@ -41,7 +41,7 @@ func NewDiscord(bot *discord.Session) *discordBot {
 }
 
 // Publish publish text to the Discord channel of given cols and args.
-// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
 func (d *discordBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishDiscord, metrics.StatusRequest)
 
@@ -50,9 +50,13 @@ func (d *discordBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 		return
 	}
 
-	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Discord{Cols: cols, Data: bnd}).String()
-	if d.toChannel(ctx, bnd, txt) {
+	rdx, art, err := extract(ctx, cols)
+	if err != nil {
+		logger.Warn("extract data failed: %v", err)
+	}
+
+	var body = render.ForPublish(&render.Discord{Cols: cols, Data: rdx}).String()
+	if d.toChannel(art, body) {
 		metrics.IncrementPublish(metrics.PublishDiscord, metrics.StatusSuccess)
 		return
 	}
@@ -62,9 +66,9 @@ func (d *discordBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 
 // toChannel for publish to message to Discord channel,
 // returns boolean as result.
-func (d *discordBot) toChannel(_ context.Context, bundle *reduxer.Bundle, text string) (ok bool) {
-	if text == "" {
-		logger.Warn("post to message to channel failed, text empty")
+func (d *discordBot) toChannel(art reduxer.Artifact, body string) (ok bool) {
+	if body == "" {
+		logger.Warn("post to message to channel failed, body empty")
 		return ok
 	}
 	if d.bot == nil {
@@ -76,14 +80,14 @@ func (d *discordBot) toChannel(_ context.Context, bundle *reduxer.Bundle, text s
 		}
 	}
 
-	msg, err := d.bot.ChannelMessageSendComplex(config.Opts.DiscordChannel(), &discord.MessageSend{Content: text})
+	msg, err := d.bot.ChannelMessageSendComplex(config.Opts.DiscordChannel(), &discord.MessageSend{Content: body})
 	if err != nil {
 		logger.Error("post message to channel failed, %v", err)
 		return ok
 	}
 
 	// Send files as reference
-	files := service.UploadToDiscord(bundle)
+	files := service.UploadToDiscord(art)
 	if len(files) == 0 {
 		logger.Debug("without files, complete.")
 		return true

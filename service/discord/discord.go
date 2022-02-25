@@ -274,13 +274,12 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 	}
 	logger.Debug("send archiving message result: %#v", stage)
 
-	var bundles reduxer.Bundles
-	cols, err := wayback.Wayback(ctx, &bundles, urls...)
+	cols, rdx, err := wayback.Wayback(ctx, urls...)
 	if err != nil {
-		logger.Error("archives failed: %v", err)
-		return err
+		return errors.Wrap(err, "discord: wayback failed")
 	}
-	logger.Debug("bundles: %#v", bundles)
+	logger.Debug("reduxer: %#v", rdx)
+	defer rdx.Flush()
 
 	replyText := render.ForReply(&render.Discord{Cols: cols}).String()
 	logger.Debug("reply text, %s", replyText)
@@ -293,14 +292,16 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 	// Avoid publish repeat
 	if m.ChannelID != config.Opts.DiscordChannel() {
 		ctx = context.WithValue(ctx, publish.FlagDiscord, d.bot)
-		ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-		go publish.To(ctx, cols, publish.FlagDiscord.String())
+		ctx = context.WithValue(ctx, publish.PubBundle, rdx)
+		publish.To(ctx, cols, publish.FlagDiscord.String())
 	}
 
 	msg := &discord.MessageSend{Content: replyText, Reference: stage.Message.Reference()}
 	var files []*discord.File
-	for _, bundle := range bundles {
-		files = append(files, service.UploadToDiscord(bundle)...)
+	for _, u := range urls {
+		if bundle, ok := rdx.Load(reduxer.Src(u.String())); ok {
+			files = append(files, service.UploadToDiscord(bundle.Artifact())...)
+		}
 	}
 	if len(files) == 0 {
 		logger.Warn("files empty")
@@ -337,7 +338,10 @@ func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) err
 		},
 	})
 
-	cols, _ := wayback.Playback(d.ctx, urls...)
+	cols, err := wayback.Playback(d.ctx, urls...)
+	if err != nil {
+		return errors.Wrap(err, "discord: playback failed")
+	}
 	logger.Debug("playback collections: %#v", cols)
 
 	// Due to Discord restricted custom_id up to 100 characters, it requires to store
@@ -349,7 +353,7 @@ func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) err
 	}
 
 	replyText := render.ForReply(&render.Discord{Cols: cols}).String()
-	err := s.InteractionResponseEdit(s.State.User.ID, i.Interaction, &discord.WebhookEdit{
+	err = s.InteractionResponseEdit(s.State.User.ID, i.Interaction, &discord.WebhookEdit{
 		Content: replyText,
 		Components: []discord.MessageComponent{
 			discord.ActionsRow{

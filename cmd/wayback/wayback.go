@@ -20,24 +20,35 @@ func output(tit string, args map[string]string) {
 	}
 }
 
+func assets(art reduxer.Artifact) []reduxer.Asset {
+	return []reduxer.Asset{
+		art.Img,
+		art.PDF,
+		art.Raw,
+		art.Txt,
+		art.HAR,
+		art.WARC,
+		art.Media,
+	}
+}
+
 func archive(cmd *cobra.Command, args []string) {
-	var bundles reduxer.Bundles
 	archiving := func(ctx context.Context, urls []*url.URL) error {
 		g, ctx := errgroup.WithContext(ctx)
-		cols, err := wayback.Wayback(ctx, &bundles, urls...)
+		cols, rdx, err := wayback.Wayback(ctx, urls...)
 		if err != nil {
 			return err
 		}
 
 		for _, col := range cols {
 			cmd.Println(col.Src, "=>", col.Dst)
-		}
-		for src, bundle := range bundles {
-			for _, asset := range bundle.Asset() {
-				if asset.Local == "" {
-					continue
+			if bundle, ok := rdx.Load(reduxer.Src(col.Src)); ok {
+				for _, asset := range assets(bundle.Artifact()) {
+					if asset.Local == "" {
+						continue
+					}
+					cmd.Println(col.Src, "=>", asset.Local)
 				}
-				cmd.Println(src, "=>", asset.Local)
 			}
 		}
 

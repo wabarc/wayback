@@ -10,6 +10,7 @@ import (
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
+	"github.com/wabarc/wayback/reduxer"
 )
 
 var _ Renderer = (*Discord)(nil)
@@ -17,7 +18,7 @@ var _ Renderer = (*Discord)(nil)
 // Discord represents a Discord template data for render.
 type Discord struct {
 	Cols []wayback.Collect
-	Data interface{}
+	Data reduxer.Reduxer
 }
 
 // ForReply implements the standard Renderer interface:
@@ -46,18 +47,19 @@ func (d *Discord) ForReply() (r *Render) {
 }
 
 // ForPublish implements the standard Renderer interface:
-// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// it reads `[]wayback.Collect` and `reduxer.Reduxer` from
 // the Discord and returns a *Render.
 func (d *Discord) ForPublish() (r *Render) {
 	var tmplBytes bytes.Buffer
 
-	if head := Title(bundle(d.Data)); head != "" {
+	if title := Title(d.Cols, d.Data); title != "" {
 		tmplBytes.WriteString(`**`)
-		tmplBytes.WriteString(head)
+		tmplBytes.WriteString(title)
 		tmplBytes.WriteString(`**`)
 		tmplBytes.WriteString("\n\n")
 	}
-	if dgst := Digest(bundle(d.Data)); dgst != "" {
+
+	if dgst := Digest(d.Cols, d.Data); dgst != "" {
 		tmplBytes.WriteString(dgst)
 		tmplBytes.WriteString("\n\n")
 	}

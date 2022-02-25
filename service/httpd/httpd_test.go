@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 	"testing"
 
@@ -17,12 +18,12 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
-	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 )
 
 func TestTransform(t *testing.T) {
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
+	os.Setenv("WAYBACK_STORAGE_DIR", path.Join(os.TempDir(), "reduxer"))
 
 	var err error
 	parser := config.NewParser()
@@ -32,8 +33,7 @@ func TestTransform(t *testing.T) {
 
 	text := "some text https://example.com"
 	urls := service.MatchURL(text)
-	rbes := make(reduxer.Bundles)
-	col, _ := wayback.Wayback(context.TODO(), &rbes, urls...)
+	col, _, _ := wayback.Wayback(context.Background(), urls...)
 	collector := transform(col)
 
 	bytes, err := json.Marshal(collector)
@@ -91,6 +91,7 @@ func TestProcessRespStatus(t *testing.T) {
 
 func TestProcessContentType(t *testing.T) {
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
+	os.Setenv("WAYBACK_STORAGE_DIR", path.Join(os.TempDir(), "reduxer"))
 
 	var err error
 	parser := config.NewParser()

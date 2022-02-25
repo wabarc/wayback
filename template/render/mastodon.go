@@ -10,6 +10,7 @@ import (
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
+	"github.com/wabarc/wayback/reduxer"
 )
 
 var _ Renderer = (*Mastodon)(nil)
@@ -17,7 +18,7 @@ var _ Renderer = (*Mastodon)(nil)
 // Mastodon represents a Mastodon template data for render.
 type Mastodon struct {
 	Cols []wayback.Collect
-	Data interface{}
+	Data reduxer.Reduxer
 }
 
 // ForReply implements the standard Renderer interface:
@@ -27,14 +28,14 @@ func (m *Mastodon) ForReply() *Render {
 }
 
 // ForPublish implements the standard Renderer interface:
-// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// it reads `[]wayback.Collect` and `reduxer.Reduxer` from
 // the Mastodon and returns a *Render.
 func (m *Mastodon) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
 
-	if head := Title(bundle(m.Data)); head != "" {
+	if title := Title(m.Cols, m.Data); title != "" {
 		tmplBytes.WriteString(`‹ `)
-		tmplBytes.WriteString(head)
+		tmplBytes.WriteString(title)
 		tmplBytes.WriteString(" ›\n\n")
 	}
 

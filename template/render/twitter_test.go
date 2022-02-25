@@ -26,7 +26,7 @@ IPFS:
 
 #wayback #存档`
 
-	got := ForPublish(&Twitter{Cols: collects}).String()
+	got := ForPublish(&Twitter{Cols: collects, Data: bundleExample}).String()
 	if got != tweet {
 		t.Errorf("Unexpected render template for Twitter got \n%s\ninstead of \n%s", got, tweet)
 	}
@@ -43,7 +43,8 @@ archive.today:
 • http://archive.today/abc
 
 #wayback #存档`
-	got := ForReply(&Twitter{Cols: multi}).String()
+
+	got := ForReply(&Twitter{Cols: multi, Data: bundleExample}).String()
 	if !strings.Contains(got, source) {
 		t.Errorf("Unexpected render template for Twitter, got \n%s\ninstead of \n%s", got, source)
 	}

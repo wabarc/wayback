@@ -53,65 +53,70 @@ func removeDuplicates(elements []*url.URL) (urls []*url.URL) {
 	return
 }
 
-// UploadToDiscord composes files that share with Discord by a given bundle.
-func UploadToDiscord(bundle *reduxer.Bundle) (files []*discord.File) {
-	if bundle != nil {
-		var fsize int64
-		upper := config.Opts.MaxAttachSize("discord")
-		for _, asset := range bundle.Asset() {
-			if asset.Local == "" {
-				continue
-			}
-			if !helper.Exists(asset.Local) {
-				logger.Warn("invalid file %s", asset.Local)
-				continue
-			}
-			fsize += helper.FileSize(asset.Local)
-			if fsize > upper {
-				logger.Warn("total file size large than %s, skipped", humanize.Bytes(uint64(upper)))
-				continue
-			}
-			logger.Debug("open file: %s", asset.Local)
-			rd, err := os.Open(asset.Local)
-			if err != nil {
-				logger.Error("open file failed: %v", err)
-				continue
-			}
-			files = append(files, &discord.File{Name: path.Base(asset.Local), Reader: rd})
-		}
-	}
-	return
-}
-
-// UploadToSlack upload files to channel and attach as a reply by the given bundle
-func UploadToSlack(client *slack.Client, bundle *reduxer.Bundle, channel, timestamp string) (err error) {
-	if client == nil {
-		return errors.New("client invalid")
+func filterArtifact(art reduxer.Artifact, upper int64) (paths []string) {
+	assets := []reduxer.Asset{
+		art.Img,
+		art.PDF,
+		art.Raw,
+		art.Txt,
+		art.HAR,
+		art.WARC,
+		art.Media,
 	}
 
 	var fsize int64
-	for _, asset := range bundle.Asset() {
+	for _, asset := range assets {
 		if asset.Local == "" {
 			continue
 		}
 		if !helper.Exists(asset.Local) {
-			err = errors.Wrap(err, "invalid file "+asset.Local)
+			logger.Warn("invalid file %s", asset.Local)
 			continue
 		}
 		fsize += helper.FileSize(asset.Local)
-		if fsize > config.Opts.MaxAttachSize("slack") {
-			err = errors.Wrap(err, "total file size large than 5GB, skipped")
+		if fsize > upper {
+			logger.Warn("total file size large than %s, skipped", humanize.Bytes(uint64(upper)))
 			continue
 		}
-		reader, e := os.Open(asset.Local)
+		paths = append(paths, asset.Local)
+	}
+
+	return
+}
+
+// UploadToDiscord composes files that share with Discord by a given artifact.
+func UploadToDiscord(art reduxer.Artifact) (files []*discord.File) {
+	upper := config.Opts.MaxAttachSize("discord")
+	for _, fp := range filterArtifact(art, upper) {
+		logger.Debug("open file: %s", fp)
+		rd, err := os.Open(fp)
+		if err != nil {
+			logger.Error("open file failed: %v", err)
+			continue
+		}
+		files = append(files, &discord.File{Name: path.Base(fp), Reader: rd})
+	}
+
+	return
+}
+
+// UploadToSlack upload files to channel and attach as a reply by the given artifact
+func UploadToSlack(client *slack.Client, art reduxer.Artifact, channel, timestamp, caption string) (err error) {
+	if client == nil {
+		return errors.New("client invalid")
+	}
+
+	upper := config.Opts.MaxAttachSize("slack")
+	for _, fp := range filterArtifact(art, upper) {
+		rd, e := os.Open(fp)
 		if e != nil {
 			err = errors.Wrap(err, e.Error())
 			continue
 		}
 		params := slack.FileUploadParameters{
-			Filename:        asset.Local,
-			Reader:          reader,
-			Title:           bundle.Title,
+			Filename:        fp,
+			Reader:          rd,
+			Title:           caption,
 			Channels:        []string{channel},
 			ThreadTimestamp: timestamp,
 		}
@@ -131,29 +136,16 @@ func UploadToSlack(client *slack.Client, bundle *reduxer.Bundle, channel, timest
 	return nil
 }
 
-// UploadToTelegram composes files into an album by the given bundle.
-func UploadToTelegram(bundle *reduxer.Bundle) telegram.Album {
-	// Attach image and pdf files
+// UploadToTelegram composes files into an album by the given artifact.
+func UploadToTelegram(art reduxer.Artifact, caption string) telegram.Album {
+	upper := config.Opts.MaxAttachSize("telegram")
 	var album telegram.Album
-	var fsize int64
-	for _, asset := range bundle.Asset() {
-		if asset.Local == "" {
-			continue
-		}
-		if !helper.Exists(asset.Local) {
-			logger.Warn("invalid file %s", asset.Local)
-			continue
-		}
-		fsize += helper.FileSize(asset.Local)
-		if fsize > config.Opts.MaxAttachSize("telegram") {
-			logger.Warn("total file size large than 50MB, skipped")
-			continue
-		}
-		logger.Debug("append document: %s", asset.Local)
+	for _, fp := range filterArtifact(art, upper) {
+		logger.Debug("append document: %s", fp)
 		album = append(album, &telegram.Document{
-			File:     telegram.FromDisk(asset.Local),
-			Caption:  bundle.Title,
-			FileName: asset.Local,
+			File:     telegram.FromDisk(fp),
+			Caption:  caption,
+			FileName: fp,
 		})
 	}
 	return album

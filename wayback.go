@@ -38,30 +38,25 @@ type Collect struct {
 
 // IA represents the Internet Archive slot.
 type IA struct {
-	URL *url.URL
 	ctx context.Context
+	URL *url.URL
 }
 
 // IS represents the archive.today slot.
 type IS struct {
 	ctx context.Context
-
 	URL *url.URL
 }
 
 // IP represents the IPFS slot.
 type IP struct {
-	ctx    context.Context
-	bundle *reduxer.Bundle
-
+	ctx context.Context
 	URL *url.URL
 }
 
 // PH represents the Telegra.ph slot.
 type PH struct {
-	ctx    context.Context
-	bundle *reduxer.Bundle
-
+	ctx context.Context
 	URL *url.URL
 }
 
@@ -70,12 +65,12 @@ type PH struct {
 // Wayback wayback *url.URL from struct of the implementations to the Wayback Machine.
 // It returns the result of string from the upstream services.
 type Waybacker interface {
-	Wayback() string
+	Wayback(reduxer.Reduxer) string
 }
 
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the IA and returns archived URL as a string.
-func (i IA) Wayback() string {
+func (i IA) Wayback(_ reduxer.Reduxer) string {
 	arc := &ia.Archiver{}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
@@ -87,7 +82,7 @@ func (i IA) Wayback() string {
 
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the IS and returns archived URL as a string.
-func (i IS) Wayback() string {
+func (i IS) Wayback(_ reduxer.Reduxer) string {
 	arc := &is.Archiver{}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
@@ -99,7 +94,7 @@ func (i IS) Wayback() string {
 
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the IP and returns archived URL as a string.
-func (i IP) Wayback() string {
+func (i IP) Wayback(rdx reduxer.Reduxer) string {
 	opts := []ipfs.PinningOption{
 		ipfs.Mode(ipfs.Remote),
 	}
@@ -119,11 +114,15 @@ func (i IP) Wayback() string {
 		opts = append(opts, ipfs.Uses(target), ipfs.Apikey(apikey), ipfs.Secret(secret))
 	}
 	arc := &ip.Shaft{Hold: ipfs.Options(opts...)}
+	uri := i.URL.String()
 	ctx := i.ctx
 
 	// If there is bundled HTML, it is utilized as the basis for IPFS
 	// archiving and is sent to obelisk to crawl the rest of the page.
-	ctx = arc.WithInput(i.ctx, i.bundle.HTML)
+	if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
+		shot := bundle.Shots()
+		ctx = arc.WithInput(ctx, shot.HTML)
+	}
 
 	dst, err := arc.Wayback(ctx, i.URL)
 	if err != nil {
@@ -135,13 +134,18 @@ func (i IP) Wayback() string {
 
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the PH and returns archived URL as a string.
-func (i PH) Wayback() string {
+func (i PH) Wayback(rdx reduxer.Reduxer) string {
 	arc := &ph.Archiver{}
-	ctx := arc.WithShot(i.ctx, i.bundle.Shot())
+	uri := i.URL.String()
+	ctx := i.ctx
+
 	if config.Opts.EnabledChromeRemote() {
 		arc.ByRemote(config.Opts.ChromeRemoteAddr())
 	}
-	ctx = arc.WithArticle(ctx, i.bundle.Article)
+	if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
+		ctx = arc.WithShot(ctx, bundle.Shots())
+		ctx = arc.WithArticle(ctx, bundle.Article())
+	}
 
 	dst, err := arc.Wayback(ctx, i.URL)
 	if err != nil {
@@ -151,23 +155,24 @@ func (i PH) Wayback() string {
 	return dst
 }
 
-func wayback(w Waybacker) string {
-	return w.Wayback()
+func wayback(w Waybacker, r reduxer.Reduxer) string {
+	return w.Wayback(r)
 }
 
 // Wayback returns URLs archived to the time capsules of given URLs.
-func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...*url.URL) (cols []Collect, err error) {
+func Wayback(ctx context.Context, urls ...*url.URL) ([]Collect, reduxer.Reduxer, error) {
 	logger.Debug("start...")
 
 	ctx, cancel := context.WithTimeout(ctx, config.Opts.WaybackTimeout())
 	defer cancel()
 
-	*bundles, err = reduxer.Do(ctx, urls...)
+	rdx, err := reduxer.Do(ctx, urls...)
 	if err != nil {
-		logger.Warn("cannot to start reduxer: %v", err)
+		logger.Warn("reduxer error: %v", err)
 	}
 
 	mu := sync.Mutex{}
+	cols := []Collect{}
 	g, ctx := errgroup.WithContext(ctx)
 	for _, input := range urls {
 		for slot, arc := range config.Opts.Slots() {
@@ -180,17 +185,16 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...*url.URL) (c
 				logger.Debug("archiving slot: %s", slot)
 
 				uri := input.String()
-				bundle := bundles.Get(uri)
 				var col Collect
 				switch slot {
 				case config.SLOT_IA:
-					col.Dst = wayback(IA{URL: input, ctx: ctx})
+					col.Dst = wayback(IA{URL: input, ctx: ctx}, rdx)
 				case config.SLOT_IS:
-					col.Dst = wayback(IS{URL: input, ctx: ctx})
+					col.Dst = wayback(IS{URL: input, ctx: ctx}, rdx)
 				case config.SLOT_IP:
-					col.Dst = wayback(IP{URL: input, ctx: ctx, bundle: bundle})
+					col.Dst = wayback(IP{URL: input, ctx: ctx}, rdx)
 				case config.SLOT_PH:
-					col.Dst = wayback(PH{URL: input, ctx: ctx, bundle: bundle})
+					col.Dst = wayback(PH{URL: input, ctx: ctx}, rdx)
 				}
 				col.Src = uri
 				col.Arc = slot
@@ -203,16 +207,14 @@ func Wayback(ctx context.Context, bundles *reduxer.Bundles, urls ...*url.URL) (c
 		}
 	}
 	if err := g.Wait(); err != nil {
-		logger.Error("archives failed: %v", err)
-		return cols, err
+		return cols, rdx, errors.Wrap(err, "archiving failed")
 	}
 
 	if len(cols) == 0 {
-		logger.Error("archives failure")
-		return cols, errors.New("archives failure")
+		return cols, rdx, errors.New("archiving failed: no cols")
 	}
 
-	return cols, nil
+	return cols, rdx, nil
 }
 
 // Playback returns URLs archived from the time capsules.
@@ -256,8 +258,7 @@ func Playback(ctx context.Context, urls ...*url.URL) (cols []Collect, err error)
 		}
 	}
 	if err := g.Wait(); err != nil {
-		logger.Error("failed: %v", err)
-		return cols, err
+		return cols, errors.Wrap(err, "playback failed")
 	}
 
 	return cols, nil

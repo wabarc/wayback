@@ -12,6 +12,7 @@ import (
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
+	"github.com/wabarc/wayback/reduxer"
 )
 
 var _ Renderer = (*Twitter)(nil)
@@ -19,7 +20,7 @@ var _ Renderer = (*Twitter)(nil)
 // Twitter represents a Twitter template data for render.
 type Twitter struct {
 	Cols []wayback.Collect
-	Data interface{}
+	Data reduxer.Reduxer
 }
 
 // ForReply implements the standard Renderer interface:
@@ -41,7 +42,7 @@ func (t *Twitter) ForReply() *Render {
 	}
 
 	groups := groupBySlot(t.Cols)
-	logger.Debug("for reply telegram: %#v", groups)
+	logger.Debug("for reply twitter: %#v", groups)
 
 	tmplBytes.WriteString(original(groups))
 	if err := tpl.Execute(&tmplBytes, groups); err != nil {
@@ -55,7 +56,7 @@ func (t *Twitter) ForReply() *Render {
 }
 
 // ForPublish implements the standard Renderer interface:
-// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// it reads `[]wayback.Collect` and `reduxer.Reduxer` from
 // the Twitter and returns a *Render.
 //
 // ForPublish generate tweet of given wayback collects in Twitter struct.
@@ -63,9 +64,9 @@ func (t *Twitter) ForReply() *Render {
 func (t *Twitter) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
 
-	if head := Title(bundle(t.Data)); head != "" {
+	if title := Title(t.Cols, t.Data); title != "" {
 		tmplBytes.WriteString(`‹ `)
-		tmplBytes.WriteString(head)
+		tmplBytes.WriteString(title)
 		tmplBytes.WriteString(" ›\n\n")
 	}
 

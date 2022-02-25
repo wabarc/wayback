@@ -44,7 +44,7 @@ func NewTelegram(bot *telegram.Bot) *telegramBot {
 }
 
 // Publish publish text to the Telegram channel of given cols and args.
-// A context should contain a `reduxer.Bundle` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
 func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusRequest)
 
@@ -53,9 +53,14 @@ func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args 
 		return
 	}
 
-	var bnd = bundle(ctx, cols)
-	var txt = render.ForPublish(&render.Telegram{Cols: cols, Data: bnd}).String()
-	if t.toChannel(bnd, txt) {
+	rdx, art, err := extract(ctx, cols)
+	if err != nil {
+		logger.Warn("extract data failed: %v", err)
+	}
+
+	var head = render.Title(cols, rdx)
+	var body = render.ForPublish(&render.Telegram{Cols: cols, Data: rdx}).String()
+	if t.toChannel(art, head, body) {
 		metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusSuccess)
 		return
 	}
@@ -65,9 +70,9 @@ func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args 
 
 // toChannel for publish to message to Telegram channel,
 // returns boolean as result.
-func (t *telegramBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
-	if text == "" {
-		logger.Warn("post to message to channel failed, text empty")
+func (t *telegramBot) toChannel(art reduxer.Artifact, head, body string) (ok bool) {
+	if body == "" {
+		logger.Warn("post to message to channel failed, body empty")
 		return ok
 	}
 	if t.bot == nil {
@@ -88,18 +93,13 @@ func (t *telegramBot) toChannel(bundle *reduxer.Bundle, text string) (ok bool) {
 		return ok
 	}
 
-	stage, err := t.bot.Send(chat, text)
+	stage, err := t.bot.Send(chat, body)
 	if err != nil {
 		logger.Error("post message to channel failed, %v", err)
 		return ok
 	}
 
-	if bundle == nil {
-		logger.Warn("bundle empty")
-		return true
-	}
-
-	album := service.UploadToTelegram(bundle)
+	album := service.UploadToTelegram(art, head)
 	if len(album) == 0 {
 		return true
 	}

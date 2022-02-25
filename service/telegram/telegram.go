@@ -245,17 +245,16 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 		logger.Error("send archiving message failed: %v", err)
 		return err
 	}
-	logger.Debug("send archiving messagee result: %v", stage)
+	logger.Debug("send archiving message result: %v", stage)
 
-	var bundles reduxer.Bundles
-	cols, err := wayback.Wayback(ctx, &bundles, urls...)
+	cols, rdx, err := wayback.Wayback(ctx, urls...)
 	if err != nil {
-		logger.Error("archives failed: %v", err)
-		return err
+		return errors.Wrap(err, "telegram: wayback failed")
 	}
-	logger.Debug("bundles: %#v", bundles)
+	logger.Debug("reduxer: %#v", rdx)
+	defer rdx.Flush()
 
-	replyText := render.ForReply(&render.Telegram{Cols: cols, Data: bundles}).String()
+	replyText := render.ForReply(&render.Telegram{Cols: cols, Data: rdx}).String()
 	logger.Debug("reply text, %s", replyText)
 
 	opts := &telegram.SendOptions{DisableWebPagePreview: true}
@@ -265,12 +264,16 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 	}
 
 	ctx = context.WithValue(ctx, publish.FlagTelegram, t.bot)
-	ctx = context.WithValue(ctx, publish.PubBundle, bundles)
-	go publish.To(ctx, cols, publish.FlagTelegram.String())
+	ctx = context.WithValue(ctx, publish.PubBundle, rdx)
+	publish.To(ctx, cols, publish.FlagTelegram.String())
 
 	var albums telegram.Album
-	for _, bundle := range bundles {
-		albums = append(albums, service.UploadToTelegram(bundle)...)
+	var head = render.Title(cols, rdx)
+
+	for _, u := range urls {
+		if b, ok := rdx.Load(reduxer.Src(u.String())); ok {
+			albums = append(albums, service.UploadToTelegram(b.Artifact(), head)...)
+		}
 	}
 	if len(albums) == 0 {
 		logger.Debug("no albums to send")
@@ -315,7 +318,10 @@ func (t *Telegram) playback(message *telegram.Message) error {
 	if err = t.bot.Notify(message.Sender, telegram.Typing); err != nil {
 		logger.Error("send typing action failed: %v", err)
 	}
-	cols, _ := wayback.Playback(t.ctx, urls...)
+	cols, err := wayback.Playback(t.ctx, urls...)
+	if err != nil {
+		return errors.Wrap(err, "telegram: playback failed")
+	}
 	logger.Debug("playback collections: %#v", cols)
 
 	// Due to Telegram restricted callback data to 1-64 bytes, it requires to store

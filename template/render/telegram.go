@@ -18,7 +18,7 @@ var _ Renderer = (*Telegram)(nil)
 // Telegram represents a Telegram template data for render.
 type Telegram struct {
 	Cols []wayback.Collect
-	Data interface{}
+	Data reduxer.Reduxer
 }
 
 // ForReply implements the standard Renderer interface:
@@ -47,27 +47,29 @@ func (t *Telegram) ForReply() (r *Render) {
 	}
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
 	tmplBytes.WriteString("\n")
-	for _, bundle := range bundles(t.Data) {
-		t.renderAssets(bundle.Assets, &tmplBytes)
-	}
+
+	writeArtifact(t.Cols, t.Data, func(art reduxer.Artifact) {
+		t.parseArtifact(art, &tmplBytes)
+	})
+
 	tmplBytes.WriteString("\n#wayback #存档")
 
 	return &Render{buf: tmplBytes}
 }
 
 // ForPublish implements the standard Renderer interface:
-// it reads `[]wayback.Collect` and `reduxer.Bundle` from
+// it reads `[]wayback.Collect` and `reduxer.Reduxer` from
 // the Telegram and returns a *Render.
 func (t *Telegram) ForPublish() (r *Render) {
 	var tmplBytes bytes.Buffer
 
-	bundle := bundle(t.Data)
-	if head := Title(bundle); head != "" {
+	if title := Title(t.Cols, t.Data); title != "" {
 		tmplBytes.WriteString("<b>")
-		tmplBytes.WriteString(head)
+		tmplBytes.WriteString(title)
 		tmplBytes.WriteString("</b>\n\n")
 	}
-	if dgst := Digest(bundle); dgst != "" {
+
+	if dgst := Digest(t.Cols, t.Data); dgst != "" {
 		tmplBytes.WriteString(dgst)
 		tmplBytes.WriteString("\n\n")
 	}
@@ -86,9 +88,10 @@ func (t *Telegram) ForPublish() (r *Render) {
 		logger.Error("execute Telegram template failed, %v", err)
 		return r
 	}
-	if bundle != nil {
-		t.renderAssets(bundle.Assets, &tmplBytes)
-	}
+
+	writeArtifact(t.Cols, t.Data, func(art reduxer.Artifact) {
+		t.parseArtifact(art, &tmplBytes)
+	})
 
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
 	tmplBytes.WriteString("\n\n#wayback #存档")
@@ -96,7 +99,7 @@ func (t *Telegram) ForPublish() (r *Render) {
 	return &Render{buf: tmplBytes}
 }
 
-func (t *Telegram) renderAssets(assets reduxer.Assets, tmplBytes *bytes.Buffer) {
+func (t *Telegram) parseArtifact(assets reduxer.Artifact, tmplBytes *bytes.Buffer) {
 	tmpl := `<b><a href="https://anonfiles.com/">AnonFiles</a></b> - [ <a href="{{ .Img.Remote.Anonfile | url -}}
 ">IMG</a> ¦ <a href="{{ .PDF.Remote.Anonfile | url }}">PDF</a> ¦ <a href="{{ .Raw.Remote.Anonfile | url -}}
 ">RAW</a> ¦ <a href="{{ .Txt.Remote.Anonfile | url }}">TXT</a> ¦ <a href="{{ .HAR.Remote.Anonfile | url -}}
