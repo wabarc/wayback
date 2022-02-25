@@ -10,12 +10,16 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/template/render"
-	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
+
+	matrix "maunium.net/go/mautrix"
 )
+
+var _ Publisher = (*matrixBot)(nil)
 
 type matrixBot struct {
 	client *matrix.Client
@@ -51,12 +55,11 @@ func NewMatrix(client *matrix.Client) *matrixBot {
 
 // Publish publish text to the Matrix room of given cols and args.
 // A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
-func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) error {
 	metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("collects empty")
-		return
+		return errors.New("publish to matrix: collects empty")
 	}
 
 	rdx, _, err := extract(ctx, cols)
@@ -67,10 +70,10 @@ func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ..
 	var body = render.ForPublish(&render.Matrix{Cols: cols, Data: rdx}).String()
 	if m.toRoom(body) {
 		metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusSuccess)
-		return
+		return nil
 	}
 	metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusFailure)
-	return
+	return errors.New("publish to matrix failed")
 }
 
 func (m *matrixBot) toRoom(body string) bool {

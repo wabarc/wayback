@@ -13,9 +13,12 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/template/render"
 )
+
+var _ Publisher = (*gitHub)(nil)
 
 type gitHub struct {
 	client *github.Client
@@ -44,12 +47,11 @@ func NewGitHub(httpClient *http.Client) *gitHub {
 
 // Publish publish markdown text to the GitHub issues of given cols and args.
 // A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
-func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...string) error {
 	metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("collects empty")
-		return
+		return errors.New("publish to github: collects empty")
 	}
 
 	rdx, _, err := extract(ctx, cols)
@@ -65,10 +67,10 @@ func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...s
 
 	if gh.toIssues(ctx, head, body) {
 		metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusSuccess)
-		return
+		return nil
 	}
 	metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusFailure)
-	return
+	return errors.New("publish to github failed")
 }
 
 func (gh *gitHub) toIssues(ctx context.Context, head, body string) bool {

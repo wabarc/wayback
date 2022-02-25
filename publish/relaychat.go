@@ -8,13 +8,17 @@ import (
 	"context"
 	"crypto/tls"
 
-	irc "github.com/thoj/go-ircevent"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/template/render"
+
+	irc "github.com/thoj/go-ircevent"
 )
+
+var _ Publisher = (*ircBot)(nil)
 
 type ircBot struct {
 	conn *irc.Connection
@@ -41,21 +45,20 @@ func NewIRC(conn *irc.Connection) *ircBot {
 
 // Publish publish text to IRC channel of given cols and args.
 // A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
-func (i *ircBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+func (i *ircBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) error {
 	metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("collects empty")
-		return
+		return errors.New("publish to irc: collects empty")
 	}
 
 	var txt = render.ForPublish(&render.Relaychat{Cols: cols}).String()
 	if i.toChannel(ctx, txt) {
 		metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusSuccess)
-		return
+		return nil
 	}
 	metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusFailure)
-	return
+	return errors.New("publish to irc failed")
 }
 
 func (i *ircBot) toChannel(_ context.Context, text string) bool {

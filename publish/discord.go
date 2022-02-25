@@ -10,6 +10,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
@@ -17,6 +18,8 @@ import (
 
 	discord "github.com/bwmarrin/discordgo"
 )
+
+var _ Publisher = (*discordBot)(nil)
 
 type discordBot struct {
 	bot *discord.Session
@@ -42,12 +45,11 @@ func NewDiscord(bot *discord.Session) *discordBot {
 
 // Publish publish text to the Discord channel of given cols and args.
 // A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
-func (d *discordBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+func (d *discordBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) error {
 	metrics.IncrementPublish(metrics.PublishDiscord, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("collects empty")
-		return
+		return errors.New("publish to discord: collects empty")
 	}
 
 	rdx, art, err := extract(ctx, cols)
@@ -58,10 +60,10 @@ func (d *discordBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 	var body = render.ForPublish(&render.Discord{Cols: cols, Data: rdx}).String()
 	if d.toChannel(art, body) {
 		metrics.IncrementPublish(metrics.PublishDiscord, metrics.StatusSuccess)
-		return
+		return nil
 	}
 	metrics.IncrementPublish(metrics.PublishDiscord, metrics.StatusFailure)
-	return
+	return errors.New("publish to discord failed")
 }
 
 // toChannel for publish to message to Discord channel,
