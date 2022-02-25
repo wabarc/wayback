@@ -10,6 +10,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
@@ -17,6 +18,8 @@ import (
 
 	telegram "gopkg.in/telebot.v3"
 )
+
+var _ Publisher = (*telegramBot)(nil)
 
 type telegramBot struct {
 	bot *telegram.Bot
@@ -45,12 +48,11 @@ func NewTelegram(bot *telegram.Bot) *telegramBot {
 
 // Publish publish text to the Telegram channel of given cols and args.
 // A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
-func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) error {
 	metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("collects empty")
-		return
+		return errors.New("publish to telegram: collects empty")
 	}
 
 	rdx, art, err := extract(ctx, cols)
@@ -62,10 +64,10 @@ func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args 
 	var body = render.ForPublish(&render.Telegram{Cols: cols, Data: rdx}).String()
 	if t.toChannel(art, head, body) {
 		metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusSuccess)
-		return
+		return nil
 	}
 	metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusFailure)
-	return
+	return errors.New("publish to telegram failed")
 }
 
 // toChannel for publish to message to Telegram channel,

@@ -6,6 +6,7 @@ go 1.17
 
 require (
 	github.com/bwmarrin/discordgo v0.23.3-0.20210627161652-421e14965030
+	github.com/cenkalti/backoff/v4 v4.1.2
 	github.com/cretz/bine v0.2.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
@@ -55,7 +56,6 @@ require (
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/btcsuite/btcd v0.22.0-beta // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
-	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.8 // indirect
 	github.com/chromedp/cdproto v0.0.0-20220217222649-d8c14a5c6edf // indirect

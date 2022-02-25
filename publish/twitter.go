@@ -12,9 +12,12 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/template/render"
 )
+
+var _ Publisher = (*twitterBot)(nil)
 
 type twitterBot struct {
 	client *twitter.Client
@@ -39,12 +42,11 @@ func NewTwitter(client *twitter.Client) *twitterBot {
 
 // Publish publish tweet to Twitter of given cols and args.
 // A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
-func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) error {
 	metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("collects empty")
-		return
+		return errors.New("publish to twitter: collects empty")
 	}
 
 	rdx, _, err := extract(ctx, cols)
@@ -55,10 +57,10 @@ func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 	var body = render.ForPublish(&render.Twitter{Cols: cols, Data: rdx}).String()
 	if t.ToTwitter(ctx, body) {
 		metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusSuccess)
-		return
+		return nil
 	}
 	metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusFailure)
-	return
+	return errors.New("publish to twitter failed")
 }
 
 func (t *twitterBot) ToTwitter(ctx context.Context, body string) bool {

@@ -7,13 +7,17 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"context"
 
-	mstdn "github.com/mattn/go-mastodon"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/template/render"
+
+	mstdn "github.com/mattn/go-mastodon"
 )
+
+var _ Publisher = (*mastodon)(nil)
 
 type mastodon struct {
 	client *mstdn.Client
@@ -40,7 +44,7 @@ func NewMastodon(client *mstdn.Client) *mastodon {
 
 // Publish publish toot to the Mastodon of given cols and args.
 // A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
-func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...string) error {
 	var id string
 	if len(args) > 1 {
 		id = args[1]
@@ -48,8 +52,7 @@ func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...
 	metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("collects empty")
-		return
+		return errors.New("publish to mastodon: collects empty")
 	}
 
 	rdx, _, err := extract(ctx, cols)
@@ -60,10 +63,10 @@ func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...
 	var txt = render.ForPublish(&render.Mastodon{Cols: cols, Data: rdx}).String()
 	if m.ToMastodon(ctx, txt, id) {
 		metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusSuccess)
-		return
+		return nil
 	}
 	metrics.IncrementPublish(metrics.PublishMstdn, metrics.StatusFailure)
-	return
+	return errors.New("publish to mastodon failed")
 }
 
 func (m *mastodon) ToMastodon(ctx context.Context, text, id string) bool {

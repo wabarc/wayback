@@ -10,6 +10,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
@@ -17,6 +18,8 @@ import (
 
 	slack "github.com/slack-go/slack"
 )
+
+var _ Publisher = (*slackBot)(nil)
 
 type slackBot struct {
 	bot *slack.Client
@@ -44,12 +47,11 @@ func NewSlack(bot *slack.Client) *slackBot {
 
 // Publish publish text to the Slack channel of given cols and args.
 // A context should contains a `reduxer.Reduxer` via `publish.PubBundle` struct.
-func (s *slackBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
+func (s *slackBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) error {
 	metrics.IncrementPublish(metrics.PublishSlack, metrics.StatusRequest)
 
 	if len(cols) == 0 {
-		logger.Warn("collects empty")
-		return
+		return errors.New("publish to slack: collects empty")
 	}
 
 	rdx, art, err := extract(ctx, cols)
@@ -61,10 +63,10 @@ func (s *slackBot) Publish(ctx context.Context, cols []wayback.Collect, args ...
 	var body = render.ForPublish(&render.Slack{Cols: cols, Data: rdx}).String()
 	if s.toChannel(art, head, body) {
 		metrics.IncrementPublish(metrics.PublishSlack, metrics.StatusSuccess)
-		return
+		return nil
 	}
 	metrics.IncrementPublish(metrics.PublishSlack, metrics.StatusFailure)
-	return
+	return errors.New("publish to slack failed")
 }
 
 // toChannel for publish to message to Slack channel,
