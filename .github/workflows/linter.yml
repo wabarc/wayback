@@ -55,7 +55,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Golang linter
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3.1.0
 
   shellcheck:
     runs-on: ubuntu-latest
