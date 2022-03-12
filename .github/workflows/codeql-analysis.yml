@@ -50,13 +50,13 @@ jobs:
     steps:
     - name: Check out code base
       if: github.event_name == 'push' || github.event_name == 'schedule'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
     - name: Check out code base
       if: github.event_name == 'pull_request'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
         ref: ${{ github.event.pull_request.head.sha }}
@@ -97,13 +97,13 @@ jobs:
     steps:
     - name: Check out code base
       if: github.event_name == 'push' || github.event_name == 'schedule'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
     - name: Check out code base
       if: github.event_name == 'pull_request'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
         ref: ${{ github.event.pull_request.head.sha }}
@@ -127,13 +127,13 @@ jobs:
     steps:
     - name: Check out code base
       if: github.event_name == 'push' || github.event_name == 'schedule'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
     - name: Check out code base
       if: github.event_name == 'pull_request'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
         ref: ${{ github.event.pull_request.head.sha }}
