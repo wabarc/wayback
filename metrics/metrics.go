@@ -26,13 +26,13 @@ const (
 	ServiceTwitter  = "twitter"
 
 	PublishIRC     = "irc"      // IRC channel
-	PublishChannel = "channel"  // Telegram channel
-	PublishMstdn   = "mastodon" // Mastodon toot
 	PublishGithub  = "github"   // GitHub issues
-	PublishMatrix  = "room"
+	PublishChannel = "telegram" // Telegram channel
+	PublishMstdn   = "mastodon" // Mastodon toot
+	PublishDiscord = "discord"  // Discord channel
+	PublishTwitter = "twitter"
+	PublishMatrix  = "matrix"
 	PublishSlack   = "slack"
-	PublishDiscord = "discord" // Discord channel
-	PublishTwitter = "tweet"
 
 	StatusRequest = "request"
 	StatusSuccess = "success"
