@@ -32,6 +32,7 @@ header:
     - 'wayback.1'
     - 'wayback.conf'
     - 'docker-bake.hcl'
+    - 'install.sh'
     - 'Makefile'
     - 'Procfile'
 

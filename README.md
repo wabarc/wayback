@@ -39,10 +39,10 @@ From source:
 go get -u github.com/wabarc/wayback/cmd/wayback
 ```
 
-From [GoBinaries](https://gobinaries.com/):
+From GitHub Releases:
 
 ```sh
-curl -sf https://gobinaries.com/wabarc/wayback/cmd/wayback | sh
+sh <(wget https://github.com/wabarc/wayback/raw/main/install.sh -O-)
 ```
 
 Using [Snapcraft](https://snapcraft.io/wayback) (on GNU/Linux)
