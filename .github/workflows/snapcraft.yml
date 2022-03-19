@@ -32,7 +32,7 @@ jobs:
 
       - id: build
         name: Build Snap
-        uses: snapcore/action-publish@v1
+        uses: snapcore/action-build@v1
         with:
           snapcraft-channel: stable
 
