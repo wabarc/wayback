@@ -41,9 +41,6 @@ jobs:
       SENDER_PWD: ${{ secrets.MATRIX_SENDER_PWD }}
       RECVER_UID: ${{ secrets.MATRIX_RECVER_UID }}
       RECVER_PWD: ${{ secrets.MATRIX_RECVER_PWD }}
-      MATRIX_ROOMID: ${{ secrets.MATRIX_ROOMID }}
-      WAYBACK_DISCORD_BOT_TOKEN: ${{ secrets.WAYBACK_DISCORD_BOT_TOKEN }}
-      WAYBACK_DISCORD_CHANNEL: ${{ secrets.WAYBACK_DISCORD_CHANNEL }}
     steps:
     - name: Set up Go ${{ matrix.go }}.x
       uses: actions/setup-go@v2

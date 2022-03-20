@@ -25,7 +25,6 @@ import (
 	"github.com/go-shiori/go-readability"
 	"github.com/iawia002/lux/downloader"
 	"github.com/iawia002/lux/extractors"
-	"github.com/iawia002/lux/extractors/types"
 	"github.com/wabarc/go-anonfile"
 	"github.com/wabarc/go-catbox"
 	"github.com/wabarc/helper"
@@ -430,7 +429,7 @@ func media(ctx context.Context, dir, in string) string {
 		}
 		// Download media via Lux
 		logger.Debug("download media via lux")
-		data, err := extractors.Extract(in, types.Options{})
+		data, err := extractors.Extract(in, extractors.Options{})
 		if err != nil || len(data) == 0 {
 			logger.Warn("data empty or error %v", err)
 			return ""
@@ -487,8 +486,8 @@ func media(ctx context.Context, dir, in string) string {
 	return ""
 }
 
-func sortStreams(streams map[string]*types.Stream) []*types.Stream {
-	sortedStreams := make([]*types.Stream, 0, len(streams))
+func sortStreams(streams map[string]*extractors.Stream) []*extractors.Stream {
+	sortedStreams := make([]*extractors.Stream, 0, len(streams))
 	for _, data := range streams {
 		sortedStreams = append(sortedStreams, data)
 	}

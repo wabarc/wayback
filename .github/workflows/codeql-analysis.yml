@@ -139,6 +139,7 @@ jobs:
         ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Run FOSSA Scan
+      if: github.event_name != 'pull_request'
       uses: fossas/fossa-action@v1
       with:
         api-key: ${{ secrets.FOSSA_APIKEY }}
