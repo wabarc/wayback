@@ -124,7 +124,7 @@ jobs:
           docker image inspect ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: wayback
           path: ./dist/*

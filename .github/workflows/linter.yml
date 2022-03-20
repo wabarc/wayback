@@ -58,6 +58,11 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v3
+        with:
+          go-version: ^1.18
+
       - name: Golang linter
         uses: golangci/golangci-lint-action@v3
 

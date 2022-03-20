@@ -43,7 +43,7 @@ jobs:
       RECVER_PWD: ${{ secrets.MATRIX_RECVER_PWD }}
     steps:
     - name: Set up Go ${{ matrix.go }}.x
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: ${{ matrix.go }}
 
@@ -138,7 +138,7 @@ jobs:
       shell: bash
 
     - name: Upload coverage
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: coverage-${{ matrix.os }}
         path: coverage.*

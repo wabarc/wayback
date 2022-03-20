@@ -96,9 +96,9 @@ jobs:
       GOMIPSLE: ${{ matrix.mipsle }}
     steps:
     - name: Set up Go 1.x
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
-        go-version: ^1.17
+        go-version: ^1.18
 
     - name: Check out code base
       if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
@@ -141,7 +141,7 @@ jobs:
         echo "::set-output name=filename::${{ env.PRODUCT }}-${ARGS}"
 
     - name: Upload binary artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.builder.outputs.filename }}
         path: ./build/binary/${{ env.PRODUCT }}*
@@ -196,7 +196,7 @@ jobs:
         echo "::set-output name=filename::${{ env.PRODUCT }}-deb-${PKG_ARCH}"
 
     - name: Upload archived binary
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.builder.outputs.filename }}
         path: build/package/${{ env.PRODUCT }}*.deb
@@ -223,7 +223,7 @@ jobs:
       run: make rpm
 
     - name: Upload archived binary
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT }}-rpm
         path: build/package/${{ env.PRODUCT }}*.rpm
@@ -255,7 +255,7 @@ jobs:
         make volume
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT }}-aur
         path: |
@@ -291,7 +291,7 @@ jobs:
         snapcraft-channel: edge
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT }}-snap
         path: ${{ steps.build.outputs.snap }}
@@ -328,9 +328,9 @@ jobs:
         ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Set up Go 1.x
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
-        go-version: ^1.17
+        go-version: ^1.18
 
     - name: Setup Flatpak
       run: |
@@ -357,7 +357,7 @@ jobs:
         mv $GITHUB_WORKSPACE/org.wabarc.wayback_${VERSION}_x86_64.flatpak $GITHUB_WORKSPACE/org.wabarc.wayback-${VERSION}.x86_64.flatpak
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT }}-flatpak
         path: org.wabarc.wayback-*.x86_64.flatpak

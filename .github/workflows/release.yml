@@ -86,9 +86,9 @@ jobs:
         fetch-depth: 0
 
     - name: Set up Go 1.x
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
-        go-version: ^1.17
+        go-version: ^1.18
 
     - name: Build fat binary
       id: builder
@@ -110,7 +110,7 @@ jobs:
       run: make TARGET=${{ steps.builder.outputs.args }} releases
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT }}
         path: build/package/${{ env.PRODUCT }}*
@@ -155,7 +155,7 @@ jobs:
         make debian DEB_IMG_ARCH=${OS_ARCH} PKG_ARCH=${PKG_ARCH}
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT }}
         path: build/package/${{ env.PRODUCT }}*.deb
@@ -173,7 +173,7 @@ jobs:
       run: make rpm
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT }}
         path: build/package/${{ env.PRODUCT }}*.rpm
@@ -195,7 +195,7 @@ jobs:
         make volume
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT }}
         path: |
@@ -233,7 +233,7 @@ jobs:
         snapcraft-channel: stable
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT }}
         path: ${{ steps.build.outputs.snap }}
@@ -248,9 +248,9 @@ jobs:
         fetch-depth: 0
 
     - name: Set up Go 1.x
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
-        go-version: ^1.17
+        go-version: ^1.18
 
     - name: Setup Flatpak
       run: |
@@ -277,7 +277,7 @@ jobs:
         mv $GITHUB_WORKSPACE/org.wabarc.wayback_${VERSION}_x86_64.flatpak $GITHUB_WORKSPACE/org.wabarc.wayback-${VERSION}.x86_64.flatpak
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT }}
         path: org.wabarc.wayback-*.x86_64.flatpak
@@ -307,7 +307,7 @@ jobs:
         echo "${digest}" > "${{ env.PRODUCT }}-${version}-checksums.txt"
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PRODUCT }}
         path: ${{ env.PRODUCT }}-*-checksums.txt
@@ -344,7 +344,7 @@ jobs:
         ' >> gittaglogs.txt
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: release-note
         path: release-note.md
