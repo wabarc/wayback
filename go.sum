@@ -607,8 +607,9 @@ github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6L
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.5.2/go.mod h1:xXDCJY+GAPziupqXw64V24skbSoqbTEfhy4qGm1nDQc=
 github.com/rogpeppe/go-internal v1.6.1/go.mod h1:xXDCJY+GAPziupqXw64V24skbSoqbTEfhy4qGm1nDQc=
-github.com/rogpeppe/go-internal v1.8.0 h1:FCbCCtXNOY3UtUuHUYaghJg4y7Fd14rXifAYUAtL9R8=
 github.com/rogpeppe/go-internal v1.8.0/go.mod h1:WmiCO8CzOY8rg0OYDC4/i/2WRWAB6poM+XZ2dLUbcbE=
+github.com/rogpeppe/go-internal v1.8.1 h1:geMPLpDpQOgVyCg5z5GoRwLHepNdb71NXb67XFkP+Eg=
+github.com/rogpeppe/go-internal v1.8.1/go.mod h1:JeRgkft04UBgHMgCIwADu4Pn6Mtm5d4nPKWu0nJ5d+o=
 github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f/go.mod h1:sm1tb6uqfes/u+d4ooFouqFdy9/2g9QGwK3SQygK0Ts=
@@ -698,8 +699,8 @@ github.com/wabarc/helper v0.0.0-20210614160629-1a5ba5e551eb/go.mod h1:TuTZtoiOu9
 github.com/wabarc/helper v0.0.0-20210701193643-e0fe0a807cb9/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/helper v0.0.0-20210718171053-59c70d0b20c2/go.mod h1:uS6mimKlWkGvEZXkJ6JoW7LYnnB2JP6dLU9q7pgDaWQ=
 github.com/wabarc/helper v0.0.0-20211225065210-3d35291efe54/go.mod h1:uS6mimKlWkGvEZXkJ6JoW7LYnnB2JP6dLU9q7pgDaWQ=
-github.com/wabarc/helper v0.0.0-20220220012023-0697c095968c h1:9YU9X7efQJcZxpDqpe0oHWspIgzHNHtlBprRHNz8cBQ=
-github.com/wabarc/helper v0.0.0-20220220012023-0697c095968c/go.mod h1:uS6mimKlWkGvEZXkJ6JoW7LYnnB2JP6dLU9q7pgDaWQ=
+github.com/wabarc/helper v0.0.0-20220320101038-dbb2ea36249b h1:eBee82cXn3HoLWopCPBatja684Ff/Y/uH+U3Va8IY3M=
+github.com/wabarc/helper v0.0.0-20220320101038-dbb2ea36249b/go.mod h1:JGo6GZ+m/xGV63ZiNH0apOrWczV/f8w2JzjoTOg8u58=
 github.com/wabarc/imgbb v1.0.0 h1:vNud9qY4dRGp1nikb+GHIrc/sE3WOdNq5gfT/vhWEUQ=
 github.com/wabarc/imgbb v1.0.0/go.mod h1:piz6QXkVfFpQbaQHx70/rPDwaICkW5Ew3lShTzbnVt0=
 github.com/wabarc/ipfs-pinner v1.1.1-0.20220126131044-16299c0dd43d h1:rSjZNYtr/5ep62nmcAF31v8zUGb0scD3bov/vAzYUpc=
@@ -1261,8 +1262,9 @@ maunium.net/go/maulogger/v2 v2.3.2/go.mod h1:TYWy7wKwz/tIXTpsx8G3mZseIRiC5DoMxSZ
 maunium.net/go/mautrix v0.10.12 h1:GqmsksKyKrTqmLb2B6yGOawoFLPTJ3A3NtXrygAvKM8=
 maunium.net/go/mautrix v0.10.12/go.mod h1:xTq6+uMCAXtQwfqjUrYd8O10oIyymbzZm02CYOMt4ek=
 mvdan.cc/xurls/v2 v2.2.0/go.mod h1:EV1RMtya9D6G5DMYPGD8zTQzaHet6Jh8gFlRgGRJeO8=
-mvdan.cc/xurls/v2 v2.3.0 h1:59Olnbt67UKpxF1EwVBopJvkSUBmgtb468E4GVWIZ1I=
 mvdan.cc/xurls/v2 v2.3.0/go.mod h1:AjuTy7gEiUArFMjgBBDU4SMxlfUYsRokpJQgNWOt3e4=
+mvdan.cc/xurls/v2 v2.4.0 h1:tzxjVAj+wSBmDcF6zBB7/myTy3gX9xvi8Tyr28AuQgc=
+mvdan.cc/xurls/v2 v2.4.0/go.mod h1:+GEjq9uNjqs8LQfM9nVnM8rff0OQ5Iash5rzX+N1CSg=
 rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8=
 rsc.io/quote/v3 v3.1.0/go.mod h1:yEA65RcK8LyAZtP9Kv3t0HmxON59tX3rD+tICJqUlj0=
 rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9JXDnKaTXpA=

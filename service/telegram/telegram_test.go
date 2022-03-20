@@ -206,7 +206,7 @@ func TestServe(t *testing.T) {
 		t.Skip("Skip test in short mode.")
 	}
 
-	os.Clearenv()
+	helper.Unsetenv("WAYBACK_TELEGRAM_TOKEN", "WAYBACK_TELEGRAM_CHANNEL")
 	os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
 	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
 
@@ -250,7 +250,7 @@ func TestProcess(t *testing.T) {
 		t.Skip("Skip test in short mode.")
 	}
 
-	os.Clearenv()
+	helper.Unsetenv("WAYBACK_TELEGRAM_TOKEN", "WAYBACK_TELEGRAM_CHANNEL", "WAYBACK_ENABLE_IA")
 	os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
 	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
@@ -314,7 +314,7 @@ func TestProcessPlayback(t *testing.T) {
 		t.Skip("Skip test in short mode.")
 	}
 
-	os.Clearenv()
+	helper.Unsetenv("WAYBACK_TELEGRAM_TOKEN", "WAYBACK_TELEGRAM_CHANNEL", "WAYBACK_ENABLE_IA")
 	os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
 	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
 	os.Setenv("WAYBACK_ENABLE_IA", "true")

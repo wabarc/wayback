@@ -28,7 +28,7 @@ func TestDo(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	os.Clearenv()
+	helper.Unsetenv("WAYBACK_STORAGE_DIR")
 	os.Setenv("WAYBACK_STORAGE_DIR", dir)
 
 	parser := config.NewParser()
@@ -62,7 +62,7 @@ func TestCreateDir(t *testing.T) {
 	}
 	defer os.RemoveAll(dir)
 
-	os.Clearenv()
+	helper.Unsetenv("WAYBACK_STORAGE_DIR")
 	os.Setenv("WAYBACK_STORAGE_DIR", dir)
 
 	parser := config.NewParser()
