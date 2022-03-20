@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.17.0] - 2022-03-14
+
+### Added
+- Add exempt rules for stale workflow
+- Add FOSSA Action
+- Add license checker workflow
+- Add lock for pooling
+- Add install script
+- Supports profiling in debug mode
+- Transform telegram message entities
+
+### Changed
+- Upgrade base image to Alpine 3.15
+- Wayback to IPFS with bundled HTML
+- Converting byte slice and string without memory allocation
+- Rename package iawia002/annie to iawia002/lux
+- Upgrade go directive in go.mod to 1.17
+- Store resources to IPFS from a directory
+- Upgrade tucnak/telebot to v3
+- Remove duplicates url
+- Backward compatibility systemd with windows
+- Handle download media outputs
+- Refine permissions for codeql actions
+- Refine reduxer bundle
+- Change the pooling to a pointer
+- Minor improvement for reduxer
+- Move upload funcs to service utils
+- Request final URI before wayback
+- Refactoring of reduxer
+- Refine metrics constant
+- Build snapcraft using snapcore/action-build
+- Bump actions/checkout from 2 to 3
+- Bump actions/\* from v2 to v3
+- Upgrade dependencies
+- Use go 1.18 for testing
+
+### Fixed
+- Fix testing
+- Fixed cannot publish to telegram channel from other services
+- Closes response body to fix go lint
+- Fix data race in reduxer
+- Unset specified env to make actions green
+
 ## [0.16.2] - 2021-12-04
 
 ### Added
