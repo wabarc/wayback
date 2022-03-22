@@ -223,7 +223,7 @@ jobs:
     needs: [publish]
     steps:
     - name: Dispatch repository in wabarc/on-heroku (release)
-      uses: peter-evans/repository-dispatch@v1
+      uses: peter-evans/repository-dispatch@v2
       if: startsWith(github.ref, 'refs/tags/v')
       with:
         repository: wabarc/on-heroku
@@ -232,7 +232,7 @@ jobs:
         client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
 
     - name: Dispatch repository in wabarc/on-heroku (testing)
-      uses: peter-evans/repository-dispatch@v1
+      uses: peter-evans/repository-dispatch@v2
       if: ${{ github.event_name == 'push' }}
       with:
         repository: wabarc/on-heroku

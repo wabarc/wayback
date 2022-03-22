@@ -470,7 +470,7 @@ jobs:
     needs: [release]
     steps:
     - name: Dispatch repository in wabarc/aur
-      uses: peter-evans/repository-dispatch@v1
+      uses: peter-evans/repository-dispatch@v2
       with:
         repository: wabarc/aur
         event-type: publish
@@ -478,7 +478,7 @@ jobs:
         client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
 
     - name: Dispatch repository in wabarc/homebrew-wayback
-      uses: peter-evans/repository-dispatch@v1
+      uses: peter-evans/repository-dispatch@v2
       with:
         repository: wabarc/homebrew-wayback
         event-type: publish
