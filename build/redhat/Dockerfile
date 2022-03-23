@@ -2,7 +2,7 @@
 # Use of this source code is governed by the GNU GPL v3
 # license that can be found in the LICENSE file.
 #
-FROM golang:1.16-alpine AS builder
+FROM golang:1.18-alpine AS builder
 
 RUN apk update && apk add --no-cache build-base ca-certificates git
 # Required by statically linked binary with OpenSSL
@@ -12,7 +12,7 @@ WORKDIR /go/src/app
 COPY . .
 RUN make linux-amd64
 
-FROM fedora:34
+FROM fedora:37
 RUN dnf install -y rpm-build systemd
 RUN mkdir -p /root/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 RUN echo "%_topdir /root/rpmbuild" >> .rpmmacros
