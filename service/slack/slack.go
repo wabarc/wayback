@@ -304,7 +304,7 @@ func (s *Slack) wayback(ctx context.Context, ev *event, urls []*url.URL) error {
 	}
 
 	ctx = context.WithValue(ctx, publish.FlagSlack, s.bot)
-	ctx = context.WithValue(ctx, publish.PubBundle, rdx)
+	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
 	go publish.To(ctx, cols, publish.FlagSlack.String())
 
 	var head = render.Title(cols, rdx)

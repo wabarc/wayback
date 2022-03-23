@@ -292,7 +292,7 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 	// Avoid publish repeat
 	if m.ChannelID != config.Opts.DiscordChannel() {
 		ctx = context.WithValue(ctx, publish.FlagDiscord, d.bot)
-		ctx = context.WithValue(ctx, publish.PubBundle, rdx)
+		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
 		publish.To(ctx, cols, publish.FlagDiscord.String())
 	}
 

@@ -38,7 +38,7 @@ func NewTwitter(client *twitter.Client) *twitterBot {
 }
 
 // Publish publish tweet to Twitter of given cols and args.
-// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
 func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishTwitter, metrics.StatusRequest)
 

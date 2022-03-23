@@ -204,7 +204,7 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 
 	// Reply and publish toot as public
 	ctx := context.WithValue(m.ctx, publish.FlagMastodon, m.client)
-	ctx = context.WithValue(ctx, publish.PubBundle, rdx)
+	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
 	publish.To(ctx, cols, publish.FlagMastodon.String(), string(status.ID))
 
 	return nil

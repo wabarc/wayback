@@ -102,7 +102,7 @@ func TestPublishToChannelFromTelegram(t *testing.T) {
 	}
 
 	ctx := context.WithValue(context.Background(), FlagTelegram, bot)
-	ctx = context.WithValue(ctx, PubBundle, bundleExample)
+	ctx = context.WithValue(ctx, PubBundle{}, bundleExample)
 	To(ctx, collects, FlagTelegram.String())
 }
 

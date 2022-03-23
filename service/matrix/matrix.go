@@ -203,7 +203,7 @@ func (m *Matrix) process(ev *event.Event) error {
 	}
 
 	ctx := context.WithValue(m.ctx, publish.FlagMatrix, m.client)
-	ctx = context.WithValue(ctx, publish.PubBundle, rdx)
+	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
 	publish.To(ctx, cols, publish.FlagMatrix.String())
 
 	return nil

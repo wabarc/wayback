@@ -264,7 +264,7 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 	}
 
 	ctx = context.WithValue(ctx, publish.FlagTelegram, t.bot)
-	ctx = context.WithValue(ctx, publish.PubBundle, rdx)
+	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
 	publish.To(ctx, cols, publish.FlagTelegram.String())
 
 	var albums telegram.Album

@@ -43,11 +43,12 @@ const (
 	FlagMatrix               // FlagMatrix publish from matrix service
 	FlagSlack                // FlagSlack publish from slack service
 	FlagIRC                  // FlagIRC publish from relaychat service
-
-	PubBundle = "reduxer-bundle" // Publish bundle key in a context with value
 )
 
 var maxDelayTime = 10
+
+// PubBundle represents a context key with value of `reduxer.Reduxer`.
+type PubBundle struct{}
 
 // Publisher is the interface that wraps the basic Publish method.
 //
@@ -243,7 +244,7 @@ func extract(ctx context.Context, cols []wayback.Collect) (rdx reduxer.Reduxer, 
 	}
 
 	var uri = cols[0].Src
-	if rdx, ok := ctx.Value(PubBundle).(reduxer.Reduxer); ok {
+	if rdx, ok := ctx.Value(PubBundle{}).(reduxer.Reduxer); ok {
 		if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
 			return rdx, bundle.Artifact(), nil
 		}

@@ -171,7 +171,7 @@ func TestToDiscordChannel(t *testing.T) {
 	bot.Client = httpClient
 	d := NewDiscord(bot)
 	txt := render.ForPublish(&render.Discord{Cols: collects, Data: bundleExample}).String()
-	ctx := context.WithValue(context.Background(), PubBundle, bundleExample)
+	ctx := context.WithValue(context.Background(), PubBundle{}, bundleExample)
 
 	_, art, err := extract(ctx, collects)
 	if err != nil {

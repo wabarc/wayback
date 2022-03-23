@@ -204,7 +204,7 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 	}()
 
 	ctx := context.WithValue(t.ctx, publish.FlagTwitter, t.client)
-	ctx = context.WithValue(ctx, publish.PubBundle, rdx)
+	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
 	publish.To(ctx, cols, publish.FlagTwitter.String())
 
 	return nil

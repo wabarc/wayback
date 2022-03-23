@@ -229,7 +229,7 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 	defer rdx.Flush()
 
 	collector := transform(cols)
-	ctx := context.WithValue(context.Background(), publish.PubBundle, rdx)
+	ctx := context.WithValue(context.Background(), publish.PubBundle{}, rdx)
 	switch r.PostFormValue("data-type") {
 	case "json":
 		w.Header().Set("Content-Type", "application/json")

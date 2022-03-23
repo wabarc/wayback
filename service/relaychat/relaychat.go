@@ -144,7 +144,7 @@ func (i *IRC) process(ev *irc.Event) error {
 
 	// Reply and publish toot as public
 	ctx := context.WithValue(i.ctx, publish.FlagIRC, i.conn)
-	ctx = context.WithValue(ctx, publish.PubBundle, rdx)
+	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
 	publish.To(ctx, cols, publish.FlagIRC.String())
 
 	return nil

@@ -50,7 +50,7 @@ func NewMatrix(client *matrix.Client) *matrixBot {
 }
 
 // Publish publish text to the Matrix room of given cols and args.
-// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
 func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishMatrix, metrics.StatusRequest)
 

@@ -40,7 +40,7 @@ func NewIRC(conn *irc.Connection) *ircBot {
 }
 
 // Publish publish text to IRC channel of given cols and args.
-// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
 func (i *ircBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusRequest)
 

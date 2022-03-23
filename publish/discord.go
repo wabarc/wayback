@@ -41,7 +41,7 @@ func NewDiscord(bot *discord.Session) *discordBot {
 }
 
 // Publish publish text to the Discord channel of given cols and args.
-// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
 func (d *discordBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishDiscord, metrics.StatusRequest)
 

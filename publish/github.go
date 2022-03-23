@@ -43,7 +43,7 @@ func NewGitHub(httpClient *http.Client) *gitHub {
 }
 
 // Publish publish markdown text to the GitHub issues of given cols and args.
-// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
 func (gh *gitHub) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishGithub, metrics.StatusRequest)
 

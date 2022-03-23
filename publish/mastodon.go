@@ -39,7 +39,7 @@ func NewMastodon(client *mstdn.Client) *mastodon {
 }
 
 // Publish publish toot to the Mastodon of given cols and args.
-// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
 func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	var id string
 	if len(args) > 1 {

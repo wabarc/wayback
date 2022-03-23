@@ -44,7 +44,7 @@ func NewTelegram(bot *telegram.Bot) *telegramBot {
 }
 
 // Publish publish text to the Telegram channel of given cols and args.
-// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` constant.
+// A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
 func (t *telegramBot) Publish(ctx context.Context, cols []wayback.Collect, args ...string) {
 	metrics.IncrementPublish(metrics.PublishChannel, metrics.StatusRequest)
 
