@@ -5,6 +5,8 @@
 package service // import "github.com/wabarc/wayback/service"
 
 import (
+	"net/url"
+	"reflect"
 	"strconv"
 	"testing"
 
@@ -12,13 +14,13 @@ import (
 )
 
 func TestMatchURL(t *testing.T) {
+	t.Parallel()
+
 	parser := config.NewParser()
 	var err error
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
-
-	t.Parallel()
 
 	var (
 		u = "http://example.org"
@@ -58,6 +60,49 @@ func TestMatchURL(t *testing.T) {
 			got := len(MatchURL(test.text))
 			if got != test.leng {
 				t.Fatalf(`Unexpected extract URLs number from text got %d instead of %d`, got, test.leng)
+			}
+		})
+	}
+}
+
+func TestExcludeURL(t *testing.T) {
+	t.Parallel()
+
+	parser := config.NewParser()
+	var err error
+	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
+	}
+
+	var (
+		u, _ = url.Parse("http://example.org")
+		m, _ = url.Parse("http://t.me/s/foo")
+		host = "t.me"
+	)
+
+	var tests = []struct {
+		urls []*url.URL
+		want []*url.URL
+	}{
+		{
+			urls: []*url.URL{u},
+			want: []*url.URL{u},
+		},
+		{
+			urls: []*url.URL{u, m},
+			want: []*url.URL{u},
+		},
+		{
+			urls: []*url.URL{m},
+			want: []*url.URL{m},
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := ExcludeURL(test.urls, host)
+			if !reflect.DeepEqual(got, test.want) {
+				t.Fatalf(`Unexpected exclude URLs number, got %v instead of %v`, got, test.want)
 			}
 		})
 	}

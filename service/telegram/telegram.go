@@ -187,7 +187,7 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 	if message.IsForwarded() && content == "" {
 		return nil
 	}
-	urls := service.MatchURL(content)
+	urls := service.ExcludeURL(service.MatchURL(content), "t.me")
 
 	// Set command as playback if receive a playback command without URLs, and
 	// required user reply a message with URLs.

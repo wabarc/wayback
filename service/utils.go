@@ -37,6 +37,21 @@ func MatchURL(s string) (urls []*url.URL) {
 	return removeDuplicates(urls)
 }
 
+// ExcludeURL removes URLs based on hostname; it is only available for multiple URLs.
+// The URLs given should be de-duplicated advance.
+func ExcludeURL(urls []*url.URL, host string) (ex []*url.URL) {
+	if len(urls) < 2 {
+		return urls
+	}
+
+	for _, u := range urls {
+		if u.Hostname() != host {
+			ex = append(ex, u)
+		}
+	}
+	return ex
+}
+
 func removeDuplicates(elements []*url.URL) (urls []*url.URL) {
 	encountered := map[string]bool{}
 	slash := "/"
