@@ -82,6 +82,7 @@ const (
 	defWaybackMaxRetries   = 2
 	defWaybackUserAgent    = "WaybackArchiver/1.0"
 	defWaybackFallback     = false
+	defEnabledScheduler    = false
 
 	defWaybackMeiliEndpoint = ""
 	defWaybackMeiliIndexing = "capsules"
@@ -124,6 +125,7 @@ type Options struct {
 	waybackMaxRetries   int
 	waybackUserAgent    string
 	waybackFallback     bool
+	enabledScheduler    bool
 
 	waybackMeiliEndpoint string
 	waybackMeiliIndexing string
@@ -226,6 +228,7 @@ func NewOptions() *Options {
 		waybackMaxRetries:    defWaybackMaxRetries,
 		waybackUserAgent:     defWaybackUserAgent,
 		waybackFallback:      defWaybackFallback,
+		enabledScheduler:     defEnabledScheduler,
 		waybackMeiliEndpoint: defWaybackMeiliEndpoint,
 		waybackMeiliIndexing: defWaybackMeiliIndexing,
 		waybackMeiliApikey:   defWaybackMeiliApikey,
@@ -738,4 +741,9 @@ func (o *Options) WaybackMeiliApikey() string {
 // EnabledMeilisearch returns whether enable meilisearch server.
 func (o *Options) EnabledMeilisearch() bool {
 	return o.WaybackMeiliEndpoint() != ""
+}
+
+// EnabledScheduler returns whether the Wayback Scheduling service is enabled.
+func (o *Options) EnabledScheduler() bool {
+	return o.enabledScheduler
 }

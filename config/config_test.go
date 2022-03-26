@@ -1601,3 +1601,51 @@ func TestEnabledMeilisearch(t *testing.T) {
 		})
 	}
 }
+
+func TestEnabledScheduler(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		enabled  string
+		expected bool
+	}{
+		{
+			enabled:  "",
+			expected: defEnabledScheduler,
+		},
+		{
+			enabled:  "unexpected",
+			expected: defEnabledScheduler,
+		},
+		{
+			enabled:  "on",
+			expected: true,
+		},
+		{
+			enabled:  "true",
+			expected: true,
+		},
+		{
+			enabled:  "0",
+			expected: false,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("ENABLED_SCHEDULER", test.enabled)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.EnabledScheduler()
+			if got != test.expected {
+				t.Fatalf(`Unexpected enable scheduler service got %t instead of %t`, got, test.expected)
+			}
+		})
+	}
+}

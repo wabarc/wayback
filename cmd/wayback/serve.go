@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/planner"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/service/discord"
@@ -57,6 +58,12 @@ func serve(_ *cobra.Command, _ []string) {
 			logger.Error("setup meilisearch failed: %v", err)
 		}
 		logger.Debug("setup meilisearch success")
+	}
+
+	if config.Opts.EnabledScheduler() {
+		sched := planner.New()
+		defer sched.Stop()
+		sched.Start(ctx)
 	}
 
 	srv := &services{}

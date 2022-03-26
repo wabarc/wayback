@@ -207,6 +207,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.waybackMeiliIndexing = parseString(val, defWaybackMeiliIndexing)
 		case "WAYBACK_MEILI_APIKEY":
 			p.opts.waybackMeiliApikey = parseString(val, defWaybackMeiliApikey)
+		case "ENABLED_SCHEDULER":
+			p.opts.enabledScheduler = parseBool(val, defEnabledScheduler)
 		default:
 			if os.Getenv(key) == "" && val != "" {
 				os.Setenv(key, val)
