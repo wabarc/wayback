@@ -22,7 +22,7 @@ DEB_IMG_ARCH := amd64
 
 .PHONY: help
 help: ## show help message
-	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make <taraget>\n\nTargets: \033[36m\033[0m\n"} /^[$$()% 0-9a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make <target>\n\nTargets: \033[36m\033[0m\n"} /^[$$()% 0-9a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 PLATFORM_LIST = \
 	darwin-amd64 \
@@ -183,6 +183,11 @@ debian-packages: ## Build Debian packages, including amd64, arm32v7, arm64v8
 submodule: ## Update Git submodule
 	@echo "-> Updating Git submodule..."
 	@git submodule update --init --recursive --remote
+
+bina: ## Update bina.json
+	@echo "-> Updating bina.json"
+	$(eval LATEST_TAG := $(shell git describe --tags --abbrev=0 | sed 's/v//'))
+	sed "s#0.0.0#${LATEST_TAG}#g" bina.tpl.json > bina.json
 
 scan: ## Scan vulnerabilities
 	@echo "-> Scanning vulnerabilities..."

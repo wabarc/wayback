@@ -1,0 +1,108 @@
+{
+  "platforms": {
+    "android-arm64": {
+      "asset": "wayback-android-arm64-0.0.0.tar.gz",
+      "file": "wayback-android-arm64"
+    },
+    "darwin-amd64": {
+      "asset": "wayback-darwin-amd64-0.0.0.tar.gz",
+      "file": "wayback-darwin-amd64"
+    },
+    "darwin-arm64": {
+      "asset": "wayback-darwin-arm64-0.0.0.tar.gz",
+      "file": "wayback-darwin-arm64"
+    },
+    "dragonfly-amd64": {
+      "asset": "wayback-dragonfly-amd64-0.0.0.tar.gz",
+      "file": "wayback-dragonfly-amd64"
+    },
+    "freebsd-386": {
+      "asset": "wayback-freebsd-386-0.0.0.tar.gz",
+      "file": "wayback-freebsd-386"
+    },
+    "freebsd-amd64": {
+      "asset": "wayback-freebsd-amd64-0.0.0.tar.gz",
+      "file": "wayback-freebsd-amd64"
+    },
+    "freebsd-arm64": {
+      "asset": "wayback-freebsd-arm64-0.0.0.tar.gz",
+      "file": "wayback-freebsd-arm64"
+    },
+    "linux-386": {
+      "asset": "wayback-linux-386-0.0.0.tar.gz",
+      "file": "wayback-linux-386"
+    },
+    "linux-amd64": {
+      "asset": "wayback-linux-amd64-0.0.0.tar.gz",
+      "file": "wayback-linux-amd64"
+    },
+    "linux-arm64": {
+      "asset": "wayback-linux-arm64-0.0.0.tar.gz",
+      "file": "wayback-linux-arm64"
+    },
+    "linux-armv5": {
+      "asset": "wayback-linux-armv5-0.0.0.tar.gz",
+      "file": "wayback-linux-armv5"
+    },
+    "linux-armv6": {
+      "asset": "wayback-linux-armv6-0.0.0.tar.gz",
+      "file": "wayback-linux-armv6"
+    },
+    "linux-armv7": {
+      "asset": "wayback-linux-armv7-0.0.0.tar.gz",
+      "file": "wayback-linux-armv7"
+    },
+    "linux-mips": {
+      "asset": "wayback-linux-mips-softfloat-0.0.0.tar.gz",
+      "file": "wayback-linux-mips-hardfloat"
+    },
+    "linux-mips64": {
+      "asset": "wayback-linux-mips64-0.0.0.tar.gz",
+      "file": "wayback-linux-mips64"
+    },
+    "linux-mips64le": {
+      "asset": "wayback-linux-mips64le-0.0.0.tar.gz",
+      "file": "wayback-linux-mips64le"
+    },
+    "linux-mipsle": {
+      "asset": "wayback-linux-mipsle-softfloat-0.0.0.tar.gz",
+      "file": "wayback-linux-mipsle-hardfloat"
+    },
+    "linux-ppc64": {
+      "asset": "wayback-linux-ppc64-0.0.0.tar.gz",
+      "file": "wayback-linux-ppc64"
+    },
+    "linux-ppc64le": {
+      "asset": "wayback-linux-ppc64le-0.0.0.tar.gz",
+      "file": "wayback-linux-ppc64le"
+    },
+    "linux-s390x": {
+      "asset": "wayback-linux-s390x-0.0.0.tar.gz",
+      "file": "wayback-linux-s390x"
+    },
+    "openbsd-386": {
+      "asset": "wayback-openbsd-386-0.0.0.tar.gz",
+      "file": "wayback-openbsd-386"
+    },
+    "openbsd-amd64": {
+      "asset": "wayback-openbsd-amd64-0.0.0.tar.gz",
+      "file": "wayback-openbsd-amd64"
+    },
+    "windows-386": {
+      "asset": "wayback-windows-386-0.0.0.zip",
+      "file": "wayback-windows-386"
+    },
+    "windows-amd64": {
+      "asset": "wayback-windows-amd64-0.0.0.zip",
+      "file": "wayback-windows-amd64"
+    },
+    "windows-arm": {
+      "asset": "wayback-windows-arm-0.0.0.zip",
+      "file": "wayback-windows-arm"
+    },
+    "windows-arm64": {
+      "asset": "wayback-windows-arm64-0.0.0.zip",
+      "file": "wayback-windows-arm64"
+    }
+  }
+}

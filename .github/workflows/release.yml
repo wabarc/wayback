@@ -343,11 +343,17 @@ jobs:
         ```
         ' >> gittaglogs.txt
 
+    - name: Update bina.jon
+      run: |
+        make bina
+
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
         name: release-note
-        path: release-note.md
+        path: |
+          release-note.md
+          bina.json
 
     - name: Download math result from build and checksum jobs
       uses: actions/download-artifact@v2
@@ -362,7 +368,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
         body_path: gittaglogs.txt
-        files: ${{ env.PRODUCT }}/*${{ env.PRODUCT }}*
+        files: |
+          ${{ env.PRODUCT }}/*${{ env.PRODUCT }}*
+          bina.json
         prerelease: true
         draft: false
 

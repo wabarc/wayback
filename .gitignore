@@ -21,6 +21,7 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+/bina.json
 /build/binary
 /build/package
 /.flatpak-builder

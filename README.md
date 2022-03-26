@@ -42,7 +42,13 @@ go get -u github.com/wabarc/wayback/cmd/wayback
 From GitHub Releases:
 
 ```sh
-sh <(wget https://github.com/wabarc/wayback/raw/main/install.sh -O-)
+curl -fsSL https://github.com/wabarc/wayback/raw/main/install.sh | sh
+```
+
+or via [Bina](https://bina.egoist.sh/):
+
+```sh
+curl -fsSL https://bina.egoist.sh/wabarc/wayback | sh
 ```
 
 Using [Snapcraft](https://snapcraft.io/wayback) (on GNU/Linux)
