@@ -39,5 +39,7 @@ header:
     - 'Makefile'
     - 'Procfile'
     - 'cosign.pub'
+    - '.replit'
+    - 'replit.nix'
 
   comment: on-failure
