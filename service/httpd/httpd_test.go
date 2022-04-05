@@ -50,7 +50,7 @@ func TestProcessRespStatus(t *testing.T) {
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		newWeb().process(w, r)
+		newWeb().process(context.Background(), w, r)
 	})
 
 	var tests = []struct {
@@ -100,11 +100,16 @@ func TestProcessContentType(t *testing.T) {
 	}
 
 	web := newWeb()
-	web.handle(pooling.New(config.Opts.PoolingSize()))
+	ctx := context.Background()
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
+	defer pool.Close()
+
+	web.handle(pool)
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		web.process(w, r)
+		web.process(ctx, w, r)
 	})
 
 	var tests = []struct {

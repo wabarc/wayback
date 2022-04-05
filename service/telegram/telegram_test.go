@@ -188,13 +188,8 @@ func newTelegram(client *http.Client, endpoint string) (tg *Telegram, cancel con
 		return tg, nil, e
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	pool := pooling.New(config.Opts.PoolingSize())
-	go func() {
-		select {
-		case <-ctx.Done():
-			pool.Close()
-		}
-	}()
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
 
 	tg = &Telegram{ctx: ctx, bot: bot, pool: pool, store: store}
 
@@ -220,8 +215,9 @@ func TestServe(t *testing.T) {
 	defer server.Close()
 	handle(mux, `{"ok":true, "result":[]}`)
 
-	pool := pooling.New(config.Opts.PoolingSize())
-	defer pool.Close()
+	ctx := context.Background()
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
 
 	tg, cancel, err := newTelegram(httpClient, server.URL)
 	if err != nil {
@@ -235,6 +231,7 @@ func TestServe(t *testing.T) {
 	time.AfterFunc(pollTick, func() {
 		tg.Shutdown()
 		time.Sleep(time.Second)
+		pool.Close()
 		cancel()
 	})
 
@@ -245,7 +242,7 @@ func TestServe(t *testing.T) {
 	}
 }
 
-func TestProcess(t *testing.T) {
+func TestWayback(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skip test in short mode.")
 	}
@@ -266,7 +263,6 @@ func TestProcess(t *testing.T) {
 	handle(mux, getUpdatesJSON)
 
 	tg, cancel, err := newTelegram(httpClient, server.URL)
-	defer cancel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -274,6 +270,7 @@ func TestProcess(t *testing.T) {
 		t.Fatalf("Open storage failed: %v", err)
 	}
 	defer tg.store.Close()
+	defer cancel()
 
 	done := make(chan bool, 1)
 	tg.bot.Poller = telegram.NewMiddlewarePoller(tg.bot.Poller, func(update *telegram.Update) bool {
@@ -300,6 +297,7 @@ func TestProcess(t *testing.T) {
 	for {
 		select {
 		case <-done:
+			tg.pool.Close()
 			tg.Shutdown()
 			time.Sleep(3 * time.Second)
 			return
@@ -309,7 +307,7 @@ func TestProcess(t *testing.T) {
 	}
 }
 
-func TestProcessPlayback(t *testing.T) {
+func TestPlayback(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skip test in short mode.")
 	}
@@ -359,7 +357,6 @@ func TestProcessPlayback(t *testing.T) {
 	handle(mux, getUpdatesJSON)
 
 	tg, cancel, err := newTelegram(httpClient, server.URL)
-	defer cancel()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -367,6 +364,8 @@ func TestProcessPlayback(t *testing.T) {
 		t.Fatalf("Open storage failed: %v", err)
 	}
 	defer tg.store.Close()
+	defer tg.pool.Close()
+	defer cancel()
 
 	tg.bot.Poller = telegram.NewMiddlewarePoller(tg.bot.Poller, func(update *telegram.Update) bool {
 		switch {

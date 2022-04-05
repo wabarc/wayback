@@ -88,12 +88,13 @@ func TestProcess(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	pool := pooling.New(config.Opts.PoolingSize())
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
 	defer pool.Close()
 
 	client := twitter.NewClient(httpClient)
 	tw := &Twitter{ctx: ctx, pool: pool, client: client}
-	if err := tw.process(testDMEvent); err != nil {
+	if err := tw.process(ctx, testDMEvent); err != nil {
 		t.Fatalf("should not be fail: %v", err)
 	}
 }

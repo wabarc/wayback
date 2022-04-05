@@ -43,10 +43,10 @@ func serve(_ *cobra.Command, _ []string) {
 	}
 	defer store.Close()
 
-	pool := pooling.New(config.Opts.PoolingSize())
-	defer pool.Close()
-
 	ctx, cancel := context.WithCancel(context.Background())
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
+
 	srv := &service{}
 	_ = srv.run(ctx, store, pool)
 
@@ -58,7 +58,7 @@ func serve(_ *cobra.Command, _ []string) {
 		}
 	}
 
-	go srv.stop(cancel)
+	go srv.stop(pool, cancel)
 	<-ctx.Done()
 
 	logger.Info("wayback service stopped.")
@@ -166,7 +166,7 @@ func (srv *service) run(ctx context.Context, store *storage.Storage, pool *pooli
 	return srv
 }
 
-func (srv *service) stop(cancel context.CancelFunc) {
+func (srv *service) stop(pool *pooling.Pool, cancel context.CancelFunc) {
 	signalChan := make(chan os.Signal, 1)
 
 	signal.Notify(
@@ -185,6 +185,7 @@ func (srv *service) stop(cancel context.CancelFunc) {
 			logger.Info("Signal SIGINT is received, probably due to `Ctrl-C`, exiting...")
 			once.Do(func() {
 				srv.shutdown()
+				pool.Close() // Gracefully closes the worker pool
 				cancel()
 			})
 			return

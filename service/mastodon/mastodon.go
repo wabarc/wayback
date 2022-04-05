@@ -19,6 +19,7 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
@@ -115,29 +116,47 @@ func (m *Mastodon) Serve() error {
 				logger.Debug("notifications: %v", noti)
 
 				for _, n := range noti {
+					n := n
+					logger.Debug("type: %s, status: %#v", n.Type, n.Status)
 					if n.Type != "mention" {
 						continue
 					}
 					if n.Status == nil {
 						continue
 					}
-					if _, exist := m.archiving[n.Status.ID]; exist {
+					m.RLock()
+					_, exist := m.archiving[n.Status.ID]
+					m.RUnlock()
+					if exist {
 						continue
 					}
-					n := n
-					go m.pool.Roll(func() {
-						metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusRequest)
-						if err := m.process(n.ID, n.Status); err != nil {
-							logger.Error("process failure, notification: %#v, error: %v", n, err)
-							metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusFailure)
-						} else {
-							metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusSuccess)
-						}
-					})
 
-					m.Lock()
-					m.archiving[n.Status.ID] = true
-					m.Unlock()
+					go func() {
+						m.Lock()
+						m.archiving[n.Status.ID] = true
+						m.Unlock()
+						metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusRequest)
+						bucket := &pooling.Bucket{
+							Request: func(ctx context.Context) error {
+								if err := m.process(ctx, n.ID, n.Status); err != nil {
+									logger.Error("process failure, notification: %#v, error: %v", n, err)
+									return err
+								}
+								metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusSuccess)
+								return nil
+							},
+							Fallback: func(ctx context.Context) error {
+								pub := publish.NewMastodon(m.client)
+								pub.ToMastodon(ctx, service.MsgWaybackTimeout, string(n.Status.ID))
+								metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusFailure)
+								return nil
+							},
+						}
+						m.pool.Put(bucket)
+						m.Lock()
+						delete(m.archiving, n.ID)
+						m.Unlock()
+					}()
 				}
 			}
 		}
@@ -156,14 +175,14 @@ func (m *Mastodon) Shutdown() error {
 	return nil
 }
 
-func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) {
+func (m *Mastodon) process(ctx context.Context, id mastodon.ID, status *mastodon.Status) (err error) {
 	if status == nil || id == "" {
 		logger.Warn("no status or conversation")
 		return errors.New("Mastodon: no status or conversation")
 	}
 	if inReplyToID, ok := status.InReplyToID.(string); ok {
 		logger.Debug("inReplyToID %s", inReplyToID)
-		if status, err = m.client.GetStatus(m.ctx, mastodon.ID(inReplyToID)); err != nil {
+		if status, err = m.client.GetStatus(ctx, mastodon.ID(inReplyToID)); err != nil {
 			logger.Error("get status failed: %v", err)
 			return err
 		}
@@ -174,12 +193,9 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 	logger.Debug("conversation id: %s message: %s", id, text)
 	defer func() {
 		time.Sleep(time.Second)
-		if err := m.client.DismissNotification(m.ctx, id); err != nil {
+		if err := m.client.DismissNotification(ctx, id); err != nil {
 			logger.Warn("dismiss notification failed: %v", err)
 		}
-		m.Lock()
-		delete(m.archiving, id)
-		m.Unlock()
 	}()
 
 	// Process playback request if message has prefix `/playback`
@@ -191,23 +207,25 @@ func (m *Mastodon) process(id mastodon.ID, status *mastodon.Status) (err error) 
 	pub := publish.NewMastodon(m.client)
 	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
-		pub.ToMastodon(nil, "URL no found", string(status.ID))
+		pub.ToMastodon(ctx, "URL no found", string(status.ID))
 		return errors.New("Mastodon: URL no found")
 	}
 
-	cols, rdx, err := wayback.Wayback(m.ctx, urls...)
-	if err != nil {
-		return errors.Wrap(err, "mastodon: wayback failed")
+	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
+		cols, rdx, err := wayback.Wayback(ctx, urls...)
+		if err != nil {
+			return errors.Wrap(err, "mastodon: wayback failed")
+		}
+		logger.Debug("reduxer: %#v", rdx)
+
+		// Reply and publish toot as public
+		ctx = context.WithValue(ctx, publish.FlagMastodon, m.client)
+		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
+		publish.To(ctx, cols, publish.FlagMastodon.String(), string(status.ID))
+		return nil
 	}
-	logger.Debug("reduxer: %#v", rdx)
-	defer rdx.Flush()
 
-	// Reply and publish toot as public
-	ctx := context.WithValue(m.ctx, publish.FlagMastodon, m.client)
-	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-	publish.To(ctx, cols, publish.FlagMastodon.String(), string(status.ID))
-
-	return nil
+	return service.Wayback(ctx, urls, do)
 }
 
 func (m *Mastodon) playback(status *mastodon.Status) error {

@@ -18,9 +18,10 @@ import (
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/storage"
-	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
+
+	matrix "maunium.net/go/mautrix"
 )
 
 // testServer returns an http Client, ServeMux, and Server. The client proxies
@@ -91,10 +92,13 @@ func senderClient(t *testing.T) *Matrix {
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
-	pool := pooling.New(config.Opts.PoolingSize())
+
+	ctx := context.Background()
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
 	defer pool.Close()
 
-	return New(context.Background(), &storage.Storage{}, pool)
+	return New(ctx, &storage.Storage{}, pool)
 }
 
 func recverClient(t *testing.T) *Matrix {
@@ -104,10 +108,13 @@ func recverClient(t *testing.T) *Matrix {
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
-	pool := pooling.New(config.Opts.PoolingSize())
+
+	ctx := context.Background()
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
 	defer pool.Close()
 
-	return New(context.Background(), &storage.Storage{}, pool)
+	return New(ctx, &storage.Storage{}, pool)
 }
 
 // nolint:gocyclo
@@ -175,7 +182,8 @@ func TestProcess(t *testing.T) {
 		if ev.Sender == id.UserID(senderUID) {
 			t.Logf("Event id: %s, event type: %s, event content: %v", ev.ID, ev.Type.Type, ev.Content.AsMessage().Body)
 
-			if err := recver.process(ev); err != nil {
+			ctx := context.Background()
+			if err := recver.process(ctx, ev); err != nil {
 				t.Errorf("Process request failure, error: %v", err)
 			}
 			done <- true

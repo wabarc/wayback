@@ -5,12 +5,17 @@
 package service // import "github.com/wabarc/wayback/service"
 
 import (
+	"context"
 	"net/url"
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 
+	"github.com/wabarc/logger"
+	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/reduxer"
 )
 
 func TestMatchURL(t *testing.T) {
@@ -105,5 +110,27 @@ func TestExcludeURL(t *testing.T) {
 				t.Fatalf(`Unexpected exclude URLs number, got %v instead of %v`, got, test.want)
 			}
 		})
+	}
+}
+
+func TestWayback(t *testing.T) {
+	parser := config.NewParser()
+	var err error
+	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
+	}
+	logger.SetLogLevel(logger.LevelFatal)
+
+	u, _ := url.Parse("https://example.com/")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	urls := []*url.URL{u}
+	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
+		return nil
+	}
+	w := Wayback(ctx, urls, do)
+
+	if w.Error() != "context deadline exceeded" {
+		t.Fatal("Unexpected wayback exceeded")
 	}
 }

@@ -77,6 +77,7 @@ const (
 	defStorageDir          = ""
 	defMaxMediaSize        = "512MB"
 	defWaybackTimeout      = 300
+	defWaybackMaxRetries   = 2
 	defWaybackUserAgent    = "WaybackArchiver/1.0"
 	defWaybackFallback     = false
 )
@@ -113,6 +114,7 @@ type Options struct {
 	storageDir          string
 	maxMediaSize        string
 	waybackTimeout      int
+	waybackMaxRetries   int
 	waybackUserAgent    string
 	waybackFallback     bool
 }
@@ -205,6 +207,7 @@ func NewOptions() *Options {
 		storageDir:          defStorageDir,
 		maxMediaSize:        defMaxMediaSize,
 		waybackTimeout:      defWaybackTimeout,
+		waybackMaxRetries:   defWaybackMaxRetries,
 		waybackUserAgent:    defWaybackUserAgent,
 		waybackFallback:     defWaybackFallback,
 		ipfs: &ipfs{
@@ -661,6 +664,11 @@ func (o *Options) MaxAttachSize(scope string) int64 {
 // WaybackTimeout returns timeout for a wayback request.
 func (o *Options) WaybackTimeout() time.Duration {
 	return time.Duration(o.waybackTimeout) * time.Second
+}
+
+// WaybackMaxRetries returns max retries for a wayback request.
+func (o *Options) WaybackMaxRetries() uint64 {
+	return uint64(o.waybackMaxRetries)
 }
 
 // WaybackUserAgent returns User-Agent for a wayback request.

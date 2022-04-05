@@ -191,6 +191,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.maxMediaSize = parseString(val, defMaxMediaSize)
 		case "WAYBACK_TIMEOUT":
 			p.opts.waybackTimeout = parseInt(val, defWaybackTimeout)
+		case "WAYBACK_MAX_RETRIES":
+			p.opts.waybackMaxRetries = parseInt(val, defWaybackMaxRetries)
 		case "WAYBACK_USERAGENT":
 			p.opts.waybackUserAgent = parseString(val, defWaybackUserAgent)
 		case "WAYBACK_FALLBACK":

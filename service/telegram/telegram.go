@@ -227,14 +227,23 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 			logger.Error("reply queue failed: %v", err)
 			return
 		}
-		t.pool.Roll(func() {
-			if err := t.wayback(t.ctx, message, urls); err != nil {
-				logger.Error("archives failed: %v", err)
+		bucket := &pooling.Bucket{
+			Request: func(ctx context.Context) error {
+				if err := t.wayback(ctx, message, urls); err != nil {
+					t.bot.Edit(message, service.MsgWaybackRetrying)
+					logger.Error("archives failed: %v", err)
+					return err
+				}
+				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusSuccess)
+				return nil
+			},
+			Fallback: func(_ context.Context) error {
+				t.bot.Edit(message, service.MsgWaybackTimeout)
 				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
-				return
-			}
-			metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusSuccess)
-		})
+				return nil
+			},
+		}
+		t.pool.Put(bucket)
 	}
 	return nil
 }
@@ -242,51 +251,45 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls []*url.URL) error {
 	stage, err := t.bot.Edit(message, "Archiving...")
 	if err != nil {
-		logger.Error("send archiving message failed: %v", err)
-		return err
+		return errors.Wrap(err, "telegram: send archiving message failed")
 	}
 	logger.Debug("send archiving message result: %v", stage)
 
-	cols, rdx, err := wayback.Wayback(ctx, urls...)
-	if err != nil {
-		return errors.Wrap(err, "telegram: wayback failed")
-	}
-	logger.Debug("reduxer: %#v", rdx)
-	defer rdx.Flush()
+	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
+		opts := &telegram.SendOptions{DisableWebPagePreview: true}
+		replyText := render.ForReply(&render.Telegram{Cols: cols, Data: rdx}).String()
+		logger.Debug("reply text, %s", replyText)
 
-	replyText := render.ForReply(&render.Telegram{Cols: cols, Data: rdx}).String()
-	logger.Debug("reply text, %s", replyText)
-
-	opts := &telegram.SendOptions{DisableWebPagePreview: true}
-	if _, err := t.bot.Edit(stage, replyText, opts); err != nil {
-		logger.Error("update message failed: %v", err)
-		return err
-	}
-
-	ctx = context.WithValue(ctx, publish.FlagTelegram, t.bot)
-	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-	publish.To(ctx, cols, publish.FlagTelegram.String())
-
-	var albums telegram.Album
-	var head = render.Title(cols, rdx)
-
-	for _, u := range urls {
-		if b, ok := rdx.Load(reduxer.Src(u.String())); ok {
-			albums = append(albums, service.UploadToTelegram(b.Artifact(), head)...)
+		if _, err := t.bot.Edit(stage, replyText, opts); err != nil {
+			return errors.Wrap(err, "telegram: update message failed")
 		}
-	}
-	if len(albums) == 0 {
-		logger.Debug("no albums to send")
+
+		ctx = context.WithValue(ctx, publish.FlagTelegram, t.bot)
+		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
+		publish.To(ctx, cols, publish.FlagTelegram.String())
+
+		var albums telegram.Album
+		var head = render.Title(cols, rdx)
+
+		for _, u := range urls {
+			if b, ok := rdx.Load(reduxer.Src(u.String())); ok {
+				albums = append(albums, service.UploadToTelegram(b.Artifact(), head)...)
+			}
+		}
+		if len(albums) == 0 {
+			logger.Debug("no albums to send")
+			return nil
+		}
+
+		// Send album attach files, and reply to wayback result message
+		opts = &telegram.SendOptions{ReplyTo: stage, DisableNotification: true}
+		if _, err := t.bot.SendAlbum(stage.Chat, albums, opts); err != nil {
+			logger.Error("reply failed: %v", err)
+		}
 		return nil
 	}
 
-	// Send album attach files, and reply to wayback result message
-	opts = &telegram.SendOptions{ReplyTo: stage, DisableNotification: true}
-	if _, err := t.bot.SendAlbum(stage.Chat, albums, opts); err != nil {
-		logger.Error("reply failed: %v", err)
-	}
-
-	return nil
+	return service.Wayback(ctx, urls, do)
 }
 
 func (t *Telegram) playback(message *telegram.Message) error {

@@ -61,7 +61,11 @@ func TestProcess(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	m := New(context.Background(), &storage.Storage{}, pooling.New(config.Opts.PoolingSize()))
+	ctx := context.Background()
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
+
+	m := New(ctx, &storage.Storage{}, pool)
 	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)
@@ -71,10 +75,11 @@ func TestProcess(t *testing.T) {
 	}
 
 	for _, n := range noti {
-		if err = m.process(n.ID, n.Status); err != nil {
+		if err = m.process(ctx, n.ID, n.Status); err != nil {
 			t.Fatalf("should not be fail: %v", err)
 		}
 	}
+	pool.Close()
 }
 
 func TestPlayback(t *testing.T) {
@@ -120,10 +125,11 @@ func TestPlayback(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	pool := pooling.New(config.Opts.PoolingSize())
-	defer pool.Close()
+	ctx := context.Background()
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
 
-	m := New(context.Background(), &storage.Storage{}, pool)
+	m := New(ctx, &storage.Storage{}, pool)
 	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)
@@ -133,8 +139,9 @@ func TestPlayback(t *testing.T) {
 	}
 
 	for _, n := range noti {
-		if err = m.process(n.ID, n.Status); err != nil {
+		if err = m.process(ctx, n.ID, n.Status); err != nil {
 			t.Fatalf("should not be fail: %v", err)
 		}
 	}
+	pool.Close()
 }

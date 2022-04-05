@@ -1,5 +1,5 @@
 .\" Manpage for wayback.
-.TH "WAYBACK" "1" "July, 2021" "\ \&" "\ \&"
+.TH "WAYBACK" "5" "April, 2022" "\ \&" "\ \&"
 
 .SH NAME
 wayback \- easy and fast to wayback webpage.
@@ -164,6 +164,9 @@ Number of worker pool for wayback at once. default 3\&.
 .TP
 .B WAYBACK_TIMEOUT
 Timeout for single wayback request, default 300\&.
+.TP
+.B WAYBACK_MAX_RETRIES
+Max retries for single wayback request, default 2\&.
 .TP
 .B WAYBACK_USERAGENT
 User-Agent for a wayback request, default WaybackArchiver/1.0\&.
