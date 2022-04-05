@@ -9,7 +9,6 @@ import (
 	"math/rand"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -65,7 +64,26 @@ type Publisher interface {
 
 // String returns the flag as a string.
 func (f Flag) String() string {
-	return strconv.Itoa(int(f))
+	switch f {
+	case FlagWeb:
+		return "httpd"
+	case FlagTelegram:
+		return "telegram"
+	case FlagTwitter:
+		return "twiter"
+	case FlagMastodon:
+		return "mastodon"
+	case FlagDiscord:
+		return "discord"
+	case FlagMatrix:
+		return "matrix"
+	case FlagSlack:
+		return "slack"
+	case FlagIRC:
+		return "irc"
+	default:
+		return "unknown"
+	}
 }
 
 func process(ctx context.Context, pub Publisher, cols []wayback.Collect, args ...string) {
