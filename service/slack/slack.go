@@ -270,14 +270,25 @@ func (s *Slack) process(ev *event) (err error) {
 		logger.Error("reply queue failed: %v", err)
 		return
 	}
-	s.pool.Roll(func() {
-		if err := s.wayback(s.ctx, ev, urls); err != nil {
-			logger.Error("archives failed: %v", err)
+	bucket := &pooling.Bucket{
+		Request: func(ctx context.Context) error {
+			if err := s.wayback(ctx, ev, urls); err != nil {
+				logger.Error("archives failed: %v", err)
+				s.edit(ev.Channel, ev.ThreadTimeStamp, service.MsgWaybackRetrying)
+				return err
+			}
+			metrics.IncrementWayback(metrics.ServiceSlack, metrics.StatusSuccess)
+			return nil
+		},
+		Fallback: func(_ context.Context) error {
+			replyText := service.MsgWaybackTimeout
+			s.edit(ev.Channel, ev.ThreadTimeStamp, replyText)
 			metrics.IncrementWayback(metrics.ServiceSlack, metrics.StatusFailure)
-			return
-		}
-		metrics.IncrementWayback(metrics.ServiceSlack, metrics.StatusSuccess)
-	})
+			return nil
+		},
+	}
+	s.pool.Put(bucket)
+
 	return nil
 }
 
@@ -288,36 +299,38 @@ func (s *Slack) wayback(ctx context.Context, ev *event, urls []*url.URL) error {
 		return err
 	}
 
-	cols, rdx, err := wayback.Wayback(ctx, urls...)
-	if err != nil {
-		return errors.Wrap(err, "slack: wayback failed")
-	}
-	logger.Debug("reduxer: %#v", rdx)
-	defer rdx.Flush()
+	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
+		cols, rdx, err := wayback.Wayback(ctx, urls...)
+		if err != nil {
+			return errors.Wrap(err, "slack: wayback failed")
+		}
+		logger.Debug("reduxer: %#v", rdx)
 
-	replyText := render.ForReply(&render.Slack{Cols: cols, Data: rdx}).String()
-	logger.Debug("reply text, %s", replyText)
+		replyText := render.ForReply(&render.Slack{Cols: cols, Data: rdx}).String()
+		logger.Debug("reply text, %s", replyText)
 
-	if _, err := s.edit(ev.Channel, tstamp, replyText); err != nil {
-		logger.Error("update message failed: %v", err)
-		return err
-	}
+		if _, err := s.edit(ev.Channel, tstamp, replyText); err != nil {
+			logger.Error("update message failed: %v", err)
+			return err
+		}
 
-	ctx = context.WithValue(ctx, publish.FlagSlack, s.bot)
-	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-	go publish.To(ctx, cols, publish.FlagSlack.String())
+		ctx = context.WithValue(ctx, publish.FlagSlack, s.bot)
+		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
+		go publish.To(ctx, cols, publish.FlagSlack.String())
 
-	var head = render.Title(cols, rdx)
+		var head = render.Title(cols, rdx)
 
-	for _, u := range urls {
-		if b, ok := rdx.Load(reduxer.Src(u.String())); ok {
-			if err := service.UploadToSlack(s.bot, b.Artifact(), ev.Channel, ev.TimeStamp, head); err != nil {
-				logger.Error("upload files to slack failed: %v", err)
+		for _, u := range urls {
+			if b, ok := rdx.Load(reduxer.Src(u.String())); ok {
+				if err := service.UploadToSlack(s.bot, b.Artifact(), ev.Channel, ev.TimeStamp, head); err != nil {
+					logger.Error("upload files to slack failed: %v", err)
+				}
 			}
 		}
+		return nil
 	}
 
-	return nil
+	return service.Wayback(ctx, urls, do)
 }
 
 func (s *Slack) playback(channel, text, triggerID string) error {

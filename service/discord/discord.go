@@ -253,15 +253,24 @@ func (d *Discord) process(m *discord.MessageCreate) (err error) {
 			logger.Error("reply queue failed: %v", err)
 			return
 		}
-		d.pool.Roll(func() {
-			logger.Debug("content: %v", urls)
-			if err := d.wayback(d.ctx, m, urls); err != nil {
-				logger.Error("archives failed: %v", err)
+		bucket := &pooling.Bucket{
+			Request: func(ctx context.Context) error {
+				logger.Debug("content: %v", urls)
+				if err := d.wayback(ctx, m, urls); err != nil {
+					logger.Error("archives failed: %v", err)
+					d.reply(m, service.MsgWaybackRetrying)
+					return err
+				}
+				metrics.IncrementWayback(metrics.ServiceDiscord, metrics.StatusSuccess)
+				return nil
+			},
+			Fallback: func(_ context.Context) error {
+				d.reply(m, service.MsgWaybackTimeout)
 				metrics.IncrementWayback(metrics.ServiceDiscord, metrics.StatusFailure)
-				return
-			}
-			metrics.IncrementWayback(metrics.ServiceDiscord, metrics.StatusSuccess)
-		})
+				return nil
+			},
+		}
+		d.pool.Put(bucket)
 	}
 	return nil
 }
@@ -274,47 +283,42 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 	}
 	logger.Debug("send archiving message result: %#v", stage)
 
-	cols, rdx, err := wayback.Wayback(ctx, urls...)
-	if err != nil {
-		return errors.Wrap(err, "discord: wayback failed")
-	}
-	logger.Debug("reduxer: %#v", rdx)
-	defer rdx.Flush()
+	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
+		replyText := render.ForReply(&render.Discord{Cols: cols}).String()
+		logger.Debug("reply text, %s", replyText)
 
-	replyText := render.ForReply(&render.Discord{Cols: cols}).String()
-	logger.Debug("reply text, %s", replyText)
-
-	if _, err := d.edit(stage, replyText); err != nil {
-		logger.Error("update message failed: %v", err)
-		return err
-	}
-
-	// Avoid publish repeat
-	if m.ChannelID != config.Opts.DiscordChannel() {
-		ctx = context.WithValue(ctx, publish.FlagDiscord, d.bot)
-		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		publish.To(ctx, cols, publish.FlagDiscord.String())
-	}
-
-	msg := &discord.MessageSend{Content: replyText, Reference: stage.Message.Reference()}
-	var files []*discord.File
-	for _, u := range urls {
-		if bundle, ok := rdx.Load(reduxer.Src(u.String())); ok {
-			files = append(files, service.UploadToDiscord(bundle.Artifact())...)
+		if _, err := d.edit(stage, replyText); err != nil {
+			return errors.Wrap(err, "discord: update message failed")
 		}
-	}
-	if len(files) == 0 {
-		logger.Warn("files empty")
+
+		// Avoid republishing
+		if m.ChannelID != config.Opts.DiscordChannel() {
+			ctx = context.WithValue(ctx, publish.FlagDiscord, d.bot)
+			ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
+			publish.To(ctx, cols, publish.FlagDiscord.String())
+		}
+
+		msg := &discord.MessageSend{Content: replyText, Reference: stage.Message.Reference()}
+		var files []*discord.File
+		for _, u := range urls {
+			if bundle, ok := rdx.Load(reduxer.Src(u.String())); ok {
+				files = append(files, service.UploadToDiscord(bundle.Artifact())...)
+			}
+		}
+		if len(files) == 0 {
+			logger.Warn("files empty")
+			return nil
+		}
+		msg.Files = files
+
+		if _, err := d.bot.ChannelMessageSendComplex(m.ChannelID, msg); err != nil {
+			logger.Error("post message to channel failed, %v", err)
+			return err
+		}
 		return nil
 	}
-	msg.Files = files
 
-	if _, err := d.bot.ChannelMessageSendComplex(m.ChannelID, msg); err != nil {
-		logger.Error("post message to channel failed, %v", err)
-		return err
-	}
-
-	return nil
+	return service.Wayback(ctx, urls, do)
 }
 
 func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) error {

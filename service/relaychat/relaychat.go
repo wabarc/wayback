@@ -9,7 +9,6 @@ import (
 	"crypto/tls"
 	"sync"
 
-	irc "github.com/thoj/go-ircevent"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -17,9 +16,12 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
+
+	irc "github.com/thoj/go-ircevent"
 )
 
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
@@ -80,14 +82,22 @@ func (i *IRC) Serve() error {
 	i.conn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		go func(ev *irc.Event) {
 			metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusRequest)
-			go i.pool.Roll(func() {
-				if err := i.process(ev); err != nil {
-					logger.Error("process failure, message: %s, error: %v", ev.Message(), err)
-					metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusFailure)
-				} else {
+			bucket := &pooling.Bucket{
+				Request: func(ctx context.Context) error {
+					if err := i.process(ctx, ev); err != nil {
+						logger.Error("process failure, message: %s, error: %v", ev.Message(), err)
+						return err
+					}
 					metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusSuccess)
-				}
-			})
+					return nil
+				},
+				Fallback: func(_ context.Context) error {
+					i.conn.Privmsg(ev.Nick, service.MsgWaybackTimeout)
+					metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusFailure)
+					return nil
+				},
+			}
+			i.pool.Put(bucket)
 		}(ev)
 	})
 	err := i.conn.Connect(config.Opts.IRCServer())
@@ -115,7 +125,7 @@ func (i *IRC) Shutdown() error {
 	return nil
 }
 
-func (i *IRC) process(ev *irc.Event) error {
+func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 	if ev.Nick == "" || ev.Message() == "" {
 		logger.Warn("without nick or empty message")
 		return errors.New("IRC: without nick or enpty message")
@@ -130,22 +140,24 @@ func (i *IRC) process(ev *irc.Event) error {
 		return errors.New("IRC: URL no found")
 	}
 
-	cols, rdx, err := wayback.Wayback(i.ctx, urls...)
-	if err != nil {
-		return errors.Wrap(err, "irc: wayback failed")
+	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
+		cols, rdx, err := wayback.Wayback(ctx, urls...)
+		if err != nil {
+			return errors.Wrap(err, "irc: wayback failed")
+		}
+		logger.Debug("reduxer: %#v", rdx)
+
+		replyText := render.ForReply(&render.Relaychat{Cols: cols}).String()
+
+		// Reply result to sender
+		i.conn.Privmsg(ev.Nick, replyText)
+
+		// Reply and publish toot as public
+		ctx = context.WithValue(ctx, publish.FlagIRC, i.conn)
+		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
+		publish.To(ctx, cols, publish.FlagIRC.String())
+		return nil
 	}
-	logger.Debug("reduxer: %#v", rdx)
-	defer rdx.Flush()
 
-	replyText := render.ForReply(&render.Relaychat{Cols: cols}).String()
-
-	// Reply result to sender
-	i.conn.Privmsg(ev.Nick, replyText)
-
-	// Reply and publish toot as public
-	ctx := context.WithValue(i.ctx, publish.FlagIRC, i.conn)
-	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-	publish.To(ctx, cols, publish.FlagIRC.String())
-
-	return nil
+	return service.Wayback(ctx, urls, do)
 }

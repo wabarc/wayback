@@ -186,14 +186,15 @@ func TestServe(t *testing.T) {
 	bot.Client = httpClient
 
 	ctx, cancel := context.WithCancel(context.Background())
-	pool := pooling.New(config.Opts.PoolingSize())
-	defer pool.Close()
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
 
 	d := &Discord{ctx: ctx, bot: bot, pool: pool}
 	time.AfterFunc(3*time.Second, func() {
 		// TODO: find a better way to avoid deadlock
 		go d.Shutdown()
 		time.Sleep(time.Second)
+		pool.Close()
 		cancel()
 	})
 	got := d.Serve()
@@ -233,11 +234,11 @@ func TestProcess(t *testing.T) {
 	}
 	defer store.Close()
 
-	pool := pooling.New(config.Opts.PoolingSize())
-	defer pool.Close()
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
+
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
@@ -255,4 +256,5 @@ func TestProcess(t *testing.T) {
 		t.Fatal(err)
 	}
 	time.Sleep(time.Second)
+	pool.Close()
 }

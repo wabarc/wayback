@@ -17,6 +17,7 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
@@ -103,14 +104,22 @@ func (t *Twitter) Serve() error {
 					}
 					go func(event twitter.DirectMessageEvent) {
 						metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusRequest)
-						t.pool.Roll(func() {
-							if err := t.process(event); err != nil {
-								logger.Error("process failure, message: %#v, error: %v", event.Message, err)
-								metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusFailure)
-							} else {
+						bucket := &pooling.Bucket{
+							Request: func(ctx context.Context) error {
+								if err := t.process(ctx, event); err != nil {
+									logger.Error("process failure, message: %#v, error: %v", event.Message, err)
+									return err
+								}
 								metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusSuccess)
-							}
-						})
+								return nil
+							},
+							Fallback: func(_ context.Context) error {
+								t.reply(event, service.MsgWaybackTimeout)
+								metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusFailure)
+								return nil
+							},
+						}
+						t.pool.Put(bucket)
 					}(event)
 
 					t.Lock()
@@ -133,7 +142,7 @@ func (t *Twitter) Shutdown() error {
 	return nil
 }
 
-func (t *Twitter) process(event twitter.DirectMessageEvent) error {
+func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent) error {
 	msg := event.Message
 	if msg == nil || event.ID == "" {
 		logger.Warn("no direct message")
@@ -164,50 +173,57 @@ func (t *Twitter) process(event twitter.DirectMessageEvent) error {
 		return errors.New("Twitter: URL no found")
 	}
 
-	cols, rdx, err := wayback.Wayback(t.ctx, urls...)
-	if err != nil {
-		return errors.Wrap(err, "twitter: wayback failed")
+	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
+		cols, rdx, err := wayback.Wayback(ctx, urls...)
+		if err != nil {
+			return errors.Wrap(err, "twitter: wayback failed")
+		}
+		logger.Debug("reduxer: %#v", rdx)
+
+		replyText := render.ForReply(&render.Twitter{Cols: cols}).String()
+		logger.Debug("reply text, %s", replyText)
+
+		ev, err := t.reply(event, replyText)
+		logger.Debug("reply event: %v", ev)
+		if err != nil {
+			logger.Error("reply error: %v", ev, err)
+			return err
+		}
+
+		go func() {
+			// Destroy Direct Message
+			time.Sleep(time.Second)
+			resp, err := t.client.DirectMessages.EventsDestroy(ev.ID)
+			if err != nil {
+				return
+			}
+			resp.Body.Close()
+		}()
+
+		ctx = context.WithValue(ctx, publish.FlagTwitter, t.client)
+		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
+		publish.To(ctx, cols, publish.FlagTwitter.String())
+		return nil
 	}
-	logger.Debug("reduxer: %#v", rdx)
-	defer rdx.Flush()
 
-	replyText := render.ForReply(&render.Twitter{Cols: cols}).String()
-	logger.Debug("reply text, %s", replyText)
+	return service.Wayback(ctx, urls, do)
+}
 
+func (t *Twitter) reply(event twitter.DirectMessageEvent, body string) (*twitter.DirectMessageEvent, error) {
 	ev, _, err := t.client.DirectMessages.EventsNew(&twitter.DirectMessageEventsNewParams{
 		Event: &twitter.DirectMessageEvent{
 			Type: "message_create",
 			Message: &twitter.DirectMessageEventMessage{
 				Target: &twitter.DirectMessageTarget{
-					RecipientID: msg.SenderID,
+					RecipientID: event.Message.SenderID,
 				},
 				Data: &twitter.DirectMessageData{
-					Text: replyText,
+					Text: body,
 				},
 			},
 		},
 	})
-	logger.Debug("reply event: %v", ev)
-	if err != nil {
-		logger.Error("reply error: %v", ev, err)
-		return err
-	}
-
-	go func() {
-		// Destroy Direct Message
-		time.Sleep(time.Second)
-		resp, err := t.client.DirectMessages.EventsDestroy(ev.ID)
-		if err != nil {
-			return
-		}
-		resp.Body.Close()
-	}()
-
-	ctx := context.WithValue(t.ctx, publish.FlagTwitter, t.client)
-	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-	publish.To(ctx, cols, publish.FlagTwitter.String())
-
-	return nil
+	return ev, err
 }
 
 // doc: https://developer.twitter.com/en/docs/twitter-api/v1/rate-limits

@@ -1302,6 +1302,42 @@ func TestWaybackTimeout(t *testing.T) {
 	}
 }
 
+func TestWaybackMaxRetries(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		timeout  int
+		expected uint64
+	}{
+		{
+			timeout:  0,
+			expected: 0,
+		},
+		{
+			timeout:  1,
+			expected: 1,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_MAX_RETRIES", strconv.Itoa(test.timeout))
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.WaybackMaxRetries()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set max retires for a wayback request got %d instead of %d`, got, test.expected)
+			}
+		})
+	}
+}
+
 func TestWaybackUserAgent(t *testing.T) {
 	t.Parallel()
 

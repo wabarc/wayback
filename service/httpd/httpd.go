@@ -18,9 +18,11 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/template"
 	"github.com/wabarc/wayback/version"
@@ -55,9 +57,22 @@ func (web *web) handle(pool *pooling.Pool) http.Handler {
 	web.router.HandleFunc("/offline.html", web.showOfflinePage).Methods(http.MethodGet)
 
 	web.router.HandleFunc("/wayback", func(w http.ResponseWriter, r *http.Request) {
-		pool.Roll(func() {
-			web.process(w, r)
-		})
+		bucket := &pooling.Bucket{
+			Request: func(ctx context.Context) error {
+				if err := web.process(ctx, w, r); err != nil {
+					logger.Error("httpd: process retrying: %v", err)
+					return err
+				}
+				return nil
+			},
+			Fallback: func(_ context.Context) error {
+				// TODO: find a better way to response
+				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
+				return nil
+			},
+		}
+		// TODO: duplicate request caching
+		pool.Put(bucket)
 	}).Methods(http.MethodPost)
 
 	web.router.HandleFunc("/playback", web.playback).Methods(http.MethodPost)
@@ -191,27 +206,25 @@ func (web *web) showJavascript(w http.ResponseWriter, r *http.Request) {
 	w.Write(contents)
 }
 
-func (web *web) process(w http.ResponseWriter, r *http.Request) {
+func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	logger.Info("process request start...")
 	metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusRequest)
 
 	if r.Method != http.MethodPost {
-		logger.Warn("request method no specific.")
 		http.Redirect(w, r, "/", http.StatusNotModified)
-		return
+		return errors.New("httpd: request method no specific.")
 	}
 
 	if err := r.ParseForm(); err != nil {
 		logger.Error("parse form error, %v", err)
 		http.Redirect(w, r, "/", http.StatusNotModified)
-		return
+		return errors.Wrap(err, "httpd: parse form error")
 	}
 
 	text := r.PostFormValue("text")
 	if len(strings.TrimSpace(text)) == 0 {
-		logger.Warn("post form value empty.")
 		http.Redirect(w, r, "/", http.StatusFound)
-		return
+		return errors.New("httpd: post form value empty")
 	}
 	logger.Debug("text: %s", text)
 
@@ -220,44 +233,41 @@ func (web *web) process(w http.ResponseWriter, r *http.Request) {
 		logger.Warn("url no found.")
 	}
 
-	cols, rdx, err := wayback.Wayback(context.Background(), urls...)
-	if err != nil {
-		logger.Error("web: wayback failed: %v", err)
-		return
-	}
-	logger.Debug("reduxer: %#v", rdx)
-	defer rdx.Flush()
+	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
+		collector := transform(cols)
+		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
+		switch r.PostFormValue("data-type") {
+		case "json":
+			w.Header().Set("Content-Type", "application/json")
 
-	collector := transform(cols)
-	ctx := context.WithValue(context.Background(), publish.PubBundle{}, rdx)
-	switch r.PostFormValue("data-type") {
-	case "json":
-		w.Header().Set("Content-Type", "application/json")
-
-		if data, err := json.Marshal(collector); err != nil {
-			logger.Error("encode for response failed, %v", err)
-			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
-		} else {
-			if len(urls) > 0 {
-				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-				go publish.To(ctx, cols, "web")
+			if data, err := json.Marshal(collector); err != nil {
+				logger.Error("encode for response failed, %v", err)
+				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
+			} else {
+				if len(urls) > 0 {
+					metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
+					go publish.To(context.Background(), cols, "web")
+				}
+				w.Write(data)
 			}
-			w.Write(data)
-		}
-	default:
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		default:
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		if html, ok := web.template.Render("layout", collector); ok {
-			if len(urls) > 0 {
-				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-				go publish.To(ctx, cols, "web")
+			if html, ok := web.template.Render("layout", collector); ok {
+				if len(urls) > 0 {
+					metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
+					go publish.To(context.Background(), cols, "web")
+				}
+				w.Write(html)
+			} else {
+				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
+				logger.Error("render template for response failed")
 			}
-			w.Write(html)
-		} else {
-			metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
-			logger.Error("render template for response failed")
 		}
+		return nil
 	}
+
+	return service.Wayback(ctx, urls, do)
 }
 
 func (web *web) playback(w http.ResponseWriter, r *http.Request) {

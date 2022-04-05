@@ -217,6 +217,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_STORAGE_DIR`             | -                       | Directory to store binary file, e.g. PDF, html file          |
 | -                   | `WAYBACK_MAX_MEDIA_SIZE`          | `512MB`                 | Max size to limit download stream media                      |
 | -                   | `WAYBACK_TIMEOUT`                 | `300`                   | Timeout for single wayback request, defaults to 300 second   |
+| -                   | `WAYBACK_MAX_RETRIES`             | `2`                     | Max retries for single wayback request, defaults to 2        |
 | -                   | `WAYBACK_USERAGENT`               | `WaybackArchiver/1.0`   | User-Agent for a wayback request                             |
 | -                   | `WAYBACK_FALLBACK`                | `off`                   | Use Google cache as a fallback if the original webpage is unavailable |
 | `-d`, `--daemon`    | -                                 | -                       | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter`, `discord` |

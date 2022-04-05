@@ -16,12 +16,14 @@ import (
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/template/render"
-	matrix "maunium.net/go/mautrix"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
+
+	matrix "maunium.net/go/mautrix"
 )
 
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
@@ -104,15 +106,24 @@ func (m *Matrix) Serve() error {
 				return
 			}
 			metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusRequest)
-			m.pool.Roll(func() {
-				if err := m.process(ev); err != nil {
-					logger.Error("process request failure, error: %v", err)
-					metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusFailure)
-				} else {
+			bucket := &pooling.Bucket{
+				Request: func(ctx context.Context) error {
+					if err := m.process(ctx, ev); err != nil {
+						logger.Error("process request failure, error: %v", err)
+						m.reply(ev, service.MsgWaybackRetrying)
+						return err
+					}
 					metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusSuccess)
-				}
-				// m.destroyRoom(ev.RoomID)
-			})
+					// m.destroyRoom(ev.RoomID)
+					return nil
+				},
+				Fallback: func(_ context.Context) error {
+					m.reply(ev, service.MsgWaybackTimeout)
+					metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusFailure)
+					return nil
+				},
+			}
+			m.pool.Put(bucket)
 		}(ev)
 	})
 	syncer.OnEventType(event.EventEncrypted, func(source matrix.EventSource, ev *event.Event) {
@@ -147,7 +158,7 @@ func (m *Matrix) Shutdown() error {
 	return nil
 }
 
-func (m *Matrix) process(ev *event.Event) error {
+func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 	if ev.Sender == "" {
 		logger.Warn("without sender")
 		return errors.New("Matrix: without sender")
@@ -174,39 +185,32 @@ func (m *Matrix) process(ev *event.Event) error {
 		return errors.New("Matrix: URL no found")
 	}
 
-	cols, rdx, err := wayback.Wayback(m.ctx, urls...)
-	if err != nil {
-		return errors.Wrap(err, "matrix: wayback failed")
-	}
-	logger.Debug("reduxer: %#v", rdx)
-	defer rdx.Flush()
+	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
+		cols, rdx, err := wayback.Wayback(ctx, urls...)
+		if err != nil {
+			return errors.Wrap(err, "matrix: wayback failed")
+		}
+		logger.Debug("reduxer: %#v", rdx)
 
-	body := render.ForReply(&render.Matrix{Cols: cols}).String()
-	content := &event.MessageEventContent{
-		FormattedBody: body,
-		Format:        event.FormatHTML,
-		// Body:          body,
-		// To:            id.UserID(ev.Sender),
-		MsgType: event.MsgText,
-	}
-	content.SetReply(ev)
-	if _, err := m.client.SendMessageEvent(ev.RoomID, event.EventMessage, content); err != nil {
-		logger.Error("send to Matrix room failure: %v", err)
-		return err
-	}
-	// Redact message
-	m.redact(ev, "wayback completed. original message: "+text)
+		body := render.ForReply(&render.Matrix{Cols: cols}).String()
+		if err := m.reply(ev, body); err != nil {
+			return errors.Wrap(err, "send to Matrix room failed")
+		}
+		// Redact message
+		m.redact(ev, "wayback completed. original message: "+text)
 
-	// Mark message as receipt
-	if err := m.client.MarkRead(ev.RoomID, ev.ID); err != nil {
-		logger.Error("mark message as receipt failure: %v", err)
+		// Mark message as receipt
+		if err := m.client.MarkRead(ev.RoomID, ev.ID); err != nil {
+			logger.Error("mark message as receipt failure: %v", err)
+		}
+
+		ctx = context.WithValue(ctx, publish.FlagMatrix, m.client)
+		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
+		publish.To(ctx, cols, publish.FlagMatrix.String())
+		return nil
 	}
 
-	ctx := context.WithValue(m.ctx, publish.FlagMatrix, m.client)
-	ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-	publish.To(ctx, cols, publish.FlagMatrix.String())
-
-	return nil
+	return service.Wayback(ctx, urls, do)
 }
 
 func (m *Matrix) playback(ev *event.Event) error {
@@ -225,17 +229,23 @@ func (m *Matrix) playback(ev *event.Event) error {
 	}
 
 	body := render.ForReply(&render.Matrix{Cols: cols}).String()
+	if err := m.reply(ev, body); err != nil {
+		return errors.Wrap(err, "send to Matrix room failed")
+	}
+
+	return nil
+}
+
+func (m *Matrix) reply(ev *event.Event, msg string) error {
 	content := &event.MessageEventContent{
-		FormattedBody: body,
+		FormattedBody: msg,
 		Format:        event.FormatHTML,
 		MsgType:       event.MsgText,
 	}
 	content.SetReply(ev)
 	if _, err := m.client.SendMessageEvent(ev.RoomID, event.EventMessage, content); err != nil {
-		logger.Error("send to Matrix room failure: %v", err)
 		return err
 	}
-
 	return nil
 }
 

@@ -84,7 +84,9 @@ func TestProcess(t *testing.T) {
 		}()
 	})
 
-	pool := pooling.New(config.Opts.PoolingSize())
+	ctx := context.Background()
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
 	defer pool.Close()
 
 	// Receive privmsg from sender
@@ -94,7 +96,7 @@ func TestProcess(t *testing.T) {
 			i := New(context.Background(), &storage.Storage{}, pool)
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
-			if err = i.process(ev); err != nil {
+			if err = i.process(context.Background(), ev); err != nil {
 				t.Error(err)
 			}
 			recvConn.Quit()
@@ -179,17 +181,20 @@ func TestToIRCChannel(t *testing.T) {
 		}()
 	})
 
-	pool := pooling.New(config.Opts.PoolingSize())
+	ctx := context.Background()
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
 	defer pool.Close()
 
 	// Receive privmsg from sender
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
 			done <- true
-			i := New(context.Background(), &storage.Storage{}, pool)
+			ctx := context.Background()
+			i := New(ctx, &storage.Storage{}, pool)
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
-			if err = i.process(ev); err != nil {
+			if err = i.process(ctx, ev); err != nil {
 				t.Error(err)
 			}
 			recvConn.Quit()

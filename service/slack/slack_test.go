@@ -166,7 +166,8 @@ func TestServe(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	pool := pooling.New(config.Opts.PoolingSize())
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
 	defer pool.Close()
 
 	sl := &Slack{ctx: ctx, bot: bot, pool: pool, client: client}
