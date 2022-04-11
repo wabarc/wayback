@@ -290,7 +290,7 @@ jobs:
       digest: ${{ steps.digest.outputs.result }}
     steps:
     - name: Download math result from build job
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: ${{ env.PRODUCT }}
         path: .
@@ -356,7 +356,7 @@ jobs:
           bina.json
 
     - name: Download math result from build and checksum jobs
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: ${{ env.PRODUCT }}
         path: ${{ env.PRODUCT }}
@@ -387,7 +387,7 @@ jobs:
         repository: 'wabarc/apt-repo'
 
     - name: Download artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: ${{ env.PRODUCT }}
         path: ${{ env.PRODUCT }}
@@ -433,7 +433,7 @@ jobs:
         repository: 'wabarc/rpm-repo'
 
     - name: Download artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: ${{ env.PRODUCT }}
         path: ${{ env.PRODUCT }}
@@ -456,7 +456,7 @@ jobs:
     needs: [release]
     steps:
     - name: Download artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: release-note
         path: .
