@@ -6,7 +6,7 @@ go 1.17
 
 require (
 	github.com/bwmarrin/discordgo v0.23.3-0.20210627161652-421e14965030
-	github.com/cenkalti/backoff/v4 v4.1.2
+	github.com/cenkalti/backoff/v4 v4.1.3
 	github.com/cretz/bine v0.2.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
