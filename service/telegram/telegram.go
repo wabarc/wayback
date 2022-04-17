@@ -223,22 +223,27 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 		t.reply(message, "URL no found.")
 	default:
 		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
-		if message, err = t.reply(message, "Queue..."); err != nil {
-			logger.Error("reply queue failed: %v", err)
-			return
+		queue, err := t.reply(message, "Queue...")
+		if err != nil {
+			return errors.Wrap(err, "reply message failed")
 		}
 		bucket := &pooling.Bucket{
 			Request: func(ctx context.Context) error {
-				if err := t.wayback(ctx, message, urls); err != nil {
-					t.bot.Edit(message, service.MsgWaybackRetrying)
-					logger.Error("archives failed: %v", err)
-					return err
+				onhold, err := t.bot.Edit(queue, "Archiving...")
+				if err != nil {
+					return errors.Wrap(err, "telegram: send archiving message failed")
+				}
+
+				if err := t.wayback(ctx, onhold, urls); err != nil {
+					t.bot.Edit(onhold, service.MsgWaybackRetrying)
+					return errors.Wrap(err, "archives failed")
 				}
 				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusSuccess)
 				return nil
 			},
 			Fallback: func(_ context.Context) error {
-				t.bot.Edit(message, service.MsgWaybackTimeout)
+				t.bot.Delete(queue)
+				t.bot.Reply(message, service.MsgWaybackTimeout)
 				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
 				return nil
 			},
@@ -248,19 +253,13 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 	return nil
 }
 
-func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls []*url.URL) error {
-	stage, err := t.bot.Edit(message, "Archiving...")
-	if err != nil {
-		return errors.Wrap(err, "telegram: send archiving message failed")
-	}
-	logger.Debug("send archiving message result: %v", stage)
-
+func (t *Telegram) wayback(ctx context.Context, onhold *telegram.Message, urls []*url.URL) error {
 	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
 		opts := &telegram.SendOptions{DisableWebPagePreview: true}
 		replyText := render.ForReply(&render.Telegram{Cols: cols, Data: rdx}).String()
 		logger.Debug("reply text, %s", replyText)
 
-		if _, err := t.bot.Edit(stage, replyText, opts); err != nil {
+		if _, err := t.bot.Edit(onhold, replyText, opts); err != nil {
 			return errors.Wrap(err, "telegram: update message failed")
 		}
 
@@ -282,8 +281,8 @@ func (t *Telegram) wayback(ctx context.Context, message *telegram.Message, urls 
 		}
 
 		// Send album attach files, and reply to wayback result message
-		opts = &telegram.SendOptions{ReplyTo: stage, DisableNotification: true}
-		if _, err := t.bot.SendAlbum(stage.Chat, albums, opts); err != nil {
+		opts = &telegram.SendOptions{ReplyTo: onhold, DisableNotification: true}
+		if _, err := t.bot.SendAlbum(onhold.Chat, albums, opts); err != nil {
 			logger.Error("reply failed: %v", err)
 		}
 		return nil
