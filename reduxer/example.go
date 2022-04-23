@@ -4,6 +4,11 @@
 
 package reduxer // import "github.com/wabarc/wayback/reduxer"
 
+import (
+	"github.com/go-shiori/go-readability"
+	"github.com/wabarc/screenshot"
+)
+
 func BundleExample() Reduxer {
 	rdx := NewReduxer()
 	bnd := &bundle{
@@ -57,6 +62,14 @@ func BundleExample() Reduxer {
 					Catbox:   "",
 				},
 			},
+		},
+		shots: &screenshot.Screenshots{
+			Title: "Example",
+		},
+		article: readability.Article{
+			TextContent: `This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
+
+More information...`,
 		},
 	}
 

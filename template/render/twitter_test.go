@@ -10,7 +10,9 @@ import (
 )
 
 func TestRenderTwitter(t *testing.T) {
-	const tweet = `source:
+	const tweet = `‹ Example ›
+
+source:
 • https://example.com/
 
 ————

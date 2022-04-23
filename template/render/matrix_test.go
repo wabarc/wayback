@@ -9,7 +9,9 @@ import (
 )
 
 func TestRenderMatrix(t *testing.T) {
-	const matExp = `<b><a href='https://web.archive.org/'>Internet Archive</a></b>:<br>
+	const matExp = `‹ <b>Example</b> ›<br><br>This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
+
+More information...<br><br><b><a href='https://web.archive.org/'>Internet Archive</a></b>:<br>
 • <a href="https://example.com/">source</a> - https://web.archive.org/web/20211000000001/https://example.com/<br>
 <br>
 <b><a href='https://archive.today/'>archive.today</a></b>:<br>
@@ -31,7 +33,9 @@ func TestRenderMatrix(t *testing.T) {
 }
 
 func TestRenderMatrixWithArtifact(t *testing.T) {
-	const matExp = `<b><a href='https://web.archive.org/'>Internet Archive</a></b>:<br>
+	const matExp = `‹ <b>Example</b> ›<br><br>This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
+
+More information...<br><br><b><a href='https://web.archive.org/'>Internet Archive</a></b>:<br>
 • <a href="https://example.com/">source</a> - https://web.archive.org/web/20211000000001/https://example.com/<br>
 <br>
 <b><a href='https://archive.today/'>archive.today</a></b>:<br>

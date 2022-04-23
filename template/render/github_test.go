@@ -85,7 +85,11 @@ func TestRenderGitHubFlawed(t *testing.T) {
 }
 
 func TestRenderGitHubWithArtifact(t *testing.T) {
-	const expected = `**[Internet Archive](https://web.archive.org/)**:
+	const expected = `This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
+
+More information...
+
+**[Internet Archive](https://web.archive.org/)**:
 > source: [https://example.com/](https://example.com/)
 > archived: [https://web.archive.org/web/20211000000001/https://example.com/](https://web.archive.org/web/20211000000001/https://example.com/)
 
