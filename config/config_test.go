@@ -597,6 +597,42 @@ func TestGitHubRepo(t *testing.T) {
 	}
 }
 
+func TestNotionToken(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_NOTION_TOKEN", "notion:token")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "notion:token"
+	got := opts.NotionToken()
+
+	if got != expected {
+		t.Fatalf(`Unexpected Notion integration token, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestNotionDatabaseID(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_NOTION_DATABASE_ID", "uuid4")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := "uuid4"
+	got := opts.NotionDatabaseID()
+
+	if got != expected {
+		t.Fatalf(`Unexpected Notion's database id, got %v instead of %s`, got, expected)
+	}
+}
+
 func TestMastodonServer(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("WAYBACK_MASTODON_SERVER", "https://mastodon.social")

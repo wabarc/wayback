@@ -145,6 +145,13 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			process(ctx, pub, cols, args...)
 		}
 	}
+	notion := func(ctx context.Context, cols []wayback.Collect, args ...string) {
+		if config.Opts.PublishToNotion() {
+			logger.Debug("[%s] publishing to Notion...", f)
+			pub := NewNotion(nil)
+			process(ctx, pub, cols, args...)
+		}
+	}
 	issue := func(ctx context.Context, cols []wayback.Collect, args ...string) {
 		if config.Opts.PublishToIssues() {
 			logger.Debug("[%s] publishing to GitHub issues...", f)
@@ -220,6 +227,7 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 	}
 	funcs := map[string]func(context.Context, []wayback.Collect, ...string){
 		"channel":  channel,
+		"notion":   notion,
 		"issue":    issue,
 		"mastodon": mastodon,
 		"discord":  discord,
