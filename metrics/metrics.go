@@ -27,6 +27,7 @@ const (
 
 	PublishIRC     = "irc"      // IRC channel
 	PublishGithub  = "github"   // GitHub issues
+	PublishNotion  = "notion"   // Notion page
 	PublishChannel = "telegram" // Telegram channel
 	PublishMstdn   = "mastodon" // Mastodon toot
 	PublishDiscord = "discord"  // Discord channel

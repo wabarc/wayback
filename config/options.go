@@ -38,6 +38,8 @@ const (
 	defGitHubToken      = ""
 	defGitHubOwner      = ""
 	defGitHubRepo       = ""
+	defNotionToken      = ""
+	defNotionDatabaseID = ""
 
 	defMastodonServer        = "https://mastodon.social"
 	defMastodonClientKey     = ""
@@ -101,6 +103,7 @@ type Options struct {
 	discord  *discord
 	twitter  *twitter
 	github   *github
+	notion   *notion
 	matrix   *matrix
 	slack    *slack
 	irc      *irc
@@ -160,6 +163,11 @@ type github struct {
 	token string
 	owner string
 	repo  string
+}
+
+type notion struct {
+	token      string
+	databaseID string
 }
 
 type matrix struct {
@@ -263,6 +271,10 @@ func NewOptions() *Options {
 			token: defGitHubToken,
 			owner: defGitHubOwner,
 			repo:  defGitHubRepo,
+		},
+		notion: &notion{
+			token:      defNotionToken,
+			databaseID: defNotionDatabaseID,
 		},
 		irc: &irc{
 			nick:     defIRCNick,
@@ -583,6 +595,21 @@ func (o *Options) SlackHelptext() string {
 // PublishToSlackChannel returns whether publish results to Slack channel.
 func (o *Options) PublishToSlackChannel() bool {
 	return o.SlackBotToken() != "" && o.SlackChannel() != ""
+}
+
+// NotionToken returns the Notion integration token.
+func (o *Options) NotionToken() string {
+	return o.notion.token
+}
+
+// NotionDatabaseID returns the Notion's dabase id.
+func (o *Options) NotionDatabaseID() string {
+	return o.notion.databaseID
+}
+
+// PublishToNotion determines whether the results should be published on Notion.
+func (o *Options) PublishToNotion() bool {
+	return o.NotionToken() != "" && o.NotionDatabaseID() != ""
 }
 
 // TorPrivKey returns the private key of Tor service.

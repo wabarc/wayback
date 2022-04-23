@@ -234,6 +234,8 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_GITHUB_TOKEN`            | -                       | GitHub Personal Access Token, required the `repo` scope      |
 | -                   | `WAYBACK_GITHUB_OWNER`            | -                       | GitHub account name                                          |
 | -                   | `WAYBACK_GITHUB_REPO`             | -                       | GitHub repository to publish results                         |
+| -                   | `WAYBACK_NOTION_TOKEN`            | -                       | Notion integration token                                     |
+| -                   | `WAYBACK_NOTION_DATABASE_ID`      | -                       | Notion database ID for archiving results                     |
 | `-t`, `--token`     | `WAYBACK_TELEGRAM_TOKEN`          | -                       | Telegram Bot API Token                                       |
 | `--chatid`          | `WAYBACK_TELEGRAM_CHANNEL`        | -                       | The Telegram public/private channel id to publish archive result |
 | -                   | `WAYBACK_TELEGRAM_HELPTEXT`       | -                       | The help text for Telegram command                           |

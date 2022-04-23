@@ -143,6 +143,10 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.github.owner = parseString(val, defGitHubOwner)
 		case "WAYBACK_GITHUB_REPO":
 			p.opts.github.repo = parseString(val, defGitHubRepo)
+		case "WAYBACK_NOTION_TOKEN":
+			p.opts.notion.token = parseString(val, defNotionToken)
+		case "WAYBACK_NOTION_DATABASE_ID":
+			p.opts.notion.databaseID = parseString(val, defNotionDatabaseID)
 		case "WAYBACK_IRC_NICK":
 			p.opts.irc.nick = parseString(val, defIRCNick)
 		case "WAYBACK_IRC_PASSWORD":
