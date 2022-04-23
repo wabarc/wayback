@@ -8,7 +8,14 @@ import (
 	"testing"
 )
 
-var message = `<b><a href="https://web.archive.org/">Internet Archive</a></b>:
+var message = `<b>Example</b>
+
+This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
+
+More information...
+
+
+<b><a href="https://web.archive.org/">Internet Archive</a></b>:
 • <a href="https://example.com/">source</a> - <a href="https://web.archive.org/web/20211000000001/https://example.com/">https://web.archive.org/web/20211000000001/https://example.com/</a>
 
 <b><a href="https://archive.today/">archive.today</a></b>:
