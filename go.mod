@@ -1,6 +1,6 @@
 module github.com/wabarc/wayback
 
-// +heroku goVersion go1.17
+// +heroku goVersion go1.18
 
 go 1.17
 
