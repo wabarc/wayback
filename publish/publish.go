@@ -13,7 +13,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
@@ -43,10 +42,6 @@ const (
 	FlagMatrix               // FlagMatrix publish from matrix service
 	FlagSlack                // FlagSlack publish from slack service
 	FlagIRC                  // FlagIRC publish from relaychat service
-
-	initialInterval = 10 * time.Second
-	maxElapsedTime  = 30 * time.Second
-	maxRetries      = 3
 )
 
 var maxDelayTime = 10
@@ -109,10 +104,7 @@ func process(ctx context.Context, pub Publisher, cols []wayback.Collect, args ..
 				time.Sleep(w)
 			}
 
-			action := func() error {
-				return pub.Publish(ctx, part, args...)
-			}
-			return doRetry(action)
+			return pub.Publish(ctx, part, args...)
 		})
 	}
 	if err := g.Wait(); err != nil {
@@ -284,14 +276,4 @@ func extract(ctx context.Context, cols []wayback.Collect) (rdx reduxer.Reduxer, 
 		return rdx, art, errors.New("reduxer data not found")
 	}
 	return rdx, art, errors.New("invalid reduxer")
-}
-
-func doRetry(o backoff.Operation) error {
-	exp := backoff.NewExponentialBackOff()
-	exp.InitialInterval = initialInterval
-	exp.MaxElapsedTime = maxElapsedTime
-	exp.Reset()
-	b := backoff.WithMaxRetries(exp, maxRetries)
-
-	return backoff.Retry(o, b)
 }
