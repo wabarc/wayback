@@ -213,43 +213,42 @@ func traverseNodes(selections *goquery.Selection, client *imgbb.ImgBB) []notiona
 					blocks = append(blocks, element)
 				}
 			case html.ElementNode:
-				for _, attr := range node.Attr {
-					switch attr.Key {
-					case "src", "data-src":
-						// Upload image to telegra.ph
-						newurl, err := uploadImage(client, attr.Val)
-						if err == nil {
-							attr.Val = newurl
-						}
-						element = notionapi.Block{
-							Object: "block",
-							Type:   notionapi.BlockTypeImage,
-							Image: &notionapi.FileBlock{
-								Type: notionapi.FileTypeExternal,
-								External: &notionapi.FileExternal{
-									URL: attr.Val,
+				switch node.Data {
+				case "img":
+					for _, attr := range node.Attr {
+						if attr.Key == "src" && strings.TrimSpace(attr.Val) != "" {
+							// Upload the image to a third-party image hosting service
+							newurl, err := uploadImage(client, attr.Val)
+							if err == nil {
+								attr.Val = newurl
+							}
+							element = notionapi.Block{
+								Object: "block",
+								Type:   notionapi.BlockTypeImage,
+								Image: &notionapi.FileBlock{
+									Type: notionapi.FileTypeExternal,
+									External: &notionapi.FileExternal{
+										URL: attr.Val,
+									},
 								},
-							},
+							}
+							blocks = append(blocks, element)
 						}
-						blocks = append(blocks, element)
-					default:
-						continue
 					}
+					// case "pre":
+					// 	element = notionapi.Block{
+					// 		Object: "block",
+					// 		Type:   notionapi.BlockTypeCode,
+					// 		Code: &notionapi.Code{
+					// 			RichTextBlock: notionapi.RichTextBlock{
+					//                 Text: []notionapi.RichText{},
+					// 				Children: traverseNodes(child.Contents(), client),
+					// 			},
+					// 		},
+					// 	}
+					// 	blocks = append(blocks, element)
+				default:
 				}
-				// switch node.Data {
-				// case "pre", "code":
-				// 	element = notionapi.Block{
-				// 		Object: "block",
-				// 		Type:   notionapi.BlockTypeCode,
-				// 		Code: &notionapi.Code{
-				// 			RichTextBlock: notionapi.RichTextBlock{
-				//                 Text: []notionapi.RichText{},
-				// 				Children: traverseNodes(child.Contents(), client),
-				// 			},
-				// 		},
-				// 	}
-				// 	blocks = append(blocks, element)
-				// }
 			}
 		}
 		blocks = append(blocks, traverseNodes(child.Contents(), client)...)
