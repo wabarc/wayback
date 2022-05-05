@@ -81,7 +81,7 @@ jobs:
 
       - name: Generate meta
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ${{ steps.prep.outputs.images }}
           tags: |
@@ -175,7 +175,7 @@ jobs:
 
       - name: Generate meta
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ${{ steps.prep.outputs.images }}
           flavor: |
