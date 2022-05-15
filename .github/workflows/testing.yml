@@ -75,7 +75,7 @@ jobs:
         # search package https://pkgs.org/
         sudo add-apt-repository universe
         sudo apt-get -y -qq update
-        sudo apt-get -y -qq install ffmpeg libwebp-dev youtube-dl
+        sudo apt-get -y -qq install ffmpeg webp youtube-dl
         pip3 install you-get
         echo "youtube-dl version $(youtube-dl --version)"
         you-get --version
@@ -106,8 +106,7 @@ jobs:
       shell: bash
       run: |
         # Set env to enable reduxer
-        storage_dir=$GITHUB_WORKSPACE/.tmp
-        echo "WAYBACK_STORAGE_DIR=${storage_dir}" >> $GITHUB_ENV
+        echo "WAYBACK_STORAGE_DIR=${{ runner.temp }}" >> $GITHUB_ENV
         # Append paths to environment path
         # echo "$(which youtube-dl)" >> $GITHUB_PATH
         # echo "$(which you-get)" >> $GITHUB_PATH
