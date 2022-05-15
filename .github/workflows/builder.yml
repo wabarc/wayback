@@ -311,8 +311,9 @@ jobs:
     - name: Release Snap
       uses: snapcore/action-publish@v1
       if: github.repository == 'wabarc/wayback' && github.event_name == 'push'
+      env:
+        SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
       with:
-        store_login: ${{ secrets.SNAPCRAFT_TOKEN }}
         snap: ${{ steps.build.outputs.snap }}
         release: edge
 

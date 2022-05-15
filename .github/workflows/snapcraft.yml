@@ -45,7 +45,8 @@ jobs:
       - uses: snapcore/action-publish@v1
         name: Release Snap
         if: github.repository == 'wabarc/wayback'
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
         with:
-          store_login: ${{ secrets.SNAPCRAFT_TOKEN }}
           snap: ${{ steps.build.outputs.snap }}
           release: stable
