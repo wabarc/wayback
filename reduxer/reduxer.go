@@ -25,6 +25,7 @@ import (
 	"github.com/go-shiori/go-readability"
 	"github.com/iawia002/lux/downloader"
 	"github.com/iawia002/lux/extractors"
+	"github.com/pbnjay/memory"
 	"github.com/wabarc/go-anonfile"
 	"github.com/wabarc/go-catbox"
 	"github.com/wabarc/helper"
@@ -34,6 +35,10 @@ import (
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 	"golang.org/x/sync/errgroup"
+)
+
+const (
+	memoryFactor = 0.85
 )
 
 var (
@@ -153,7 +158,7 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 
 	shots, err := capture(ctx, urls...)
 	if err != nil {
-		return bs, err
+		return bs, errors.Wrap(err, "capture webpage failed")
 	}
 
 	dir, err := createDir(config.Opts.StorageDir())
@@ -176,6 +181,15 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 		if buf == nil {
 			return errors.New("file empty, skipped")
 		}
+
+		dataLength := int64(len(buf))
+		maxDataLength := float64(memory.FreeMemory()) * memoryFactor
+		perPageLength := int64(maxDataLength) / dataLength
+		logger.Debug("maxDataLength: %f, perPageLength: %d", maxDataLength, perPageLength)
+		if dataLength > perPageLength {
+			return errors.New(fmt.Sprintf("write file %s too large, data length is %d, large than %d", uri, dataLength, perPageLength))
+		}
+
 		mt := mimetype.Detect(buf)
 		ft := mt.String()
 		fp := filepath.Join(dir, helper.FileName(uri, ft))
@@ -246,6 +260,8 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 
 // capture returns screenshot.Screenshots of given URLs
 func capture(ctx context.Context, urls ...*url.URL) (shots []*screenshot.Screenshots, err error) {
+	capacity := len(urls)
+	shots = make([]*screenshot.Screenshots, 0, capacity)
 	opts := []screenshot.ScreenshotOption{
 		screenshot.ScaleFactor(1),
 		screenshot.PrintPDF(true), // print pdf
@@ -255,7 +271,6 @@ func capture(ctx context.Context, urls ...*url.URL) (shots []*screenshot.Screens
 	}
 	var mu sync.Mutex
 	var wg sync.WaitGroup
-	shots = make([]*screenshot.Screenshots, 0, len(urls))
 	for _, input := range urls {
 		wg.Add(1)
 		go func(input *url.URL) {
@@ -268,9 +283,9 @@ func capture(ctx context.Context, urls ...*url.URL) (shots []*screenshot.Screens
 			if remote := remoteHeadless(config.Opts.ChromeRemoteAddr()); remote != nil {
 				logger.Debug("reduxer using remote browser")
 				addr := remote.(*net.TCPAddr)
-				browser, er := screenshot.NewChromeRemoteScreenshoter(addr.String())
-				if er != nil {
-					errors.Wrap(err, fmt.Sprintf("screenshot failed: %v", er))
+				browser, serr := screenshot.NewChromeRemoteScreenshoter(addr.String())
+				if serr != nil {
+					err = errors.Wrap(serr, fmt.Sprintf("screenshot uri %s failed", input))
 					return
 				}
 				shot, serr = browser.Screenshot(ctx, input, opts...)
@@ -280,10 +295,17 @@ func capture(ctx context.Context, urls ...*url.URL) (shots []*screenshot.Screens
 			}
 			if serr != nil {
 				if serr == context.DeadlineExceeded {
-					errors.Wrap(err, fmt.Sprintf("screenshot deadline: %v", serr))
+					err = errors.Wrap(serr, fmt.Sprintf("screenshot uri %s deadline", input))
 					return
 				}
-				errors.Wrap(err, fmt.Sprintf("screenshot error: %v", serr))
+				err = errors.Wrap(serr, fmt.Sprintf("screenshot uri %s failed", input))
+				return
+			}
+			maxDataLength := float64(memory.FreeMemory()) * memoryFactor
+			perPageLength := int64(maxDataLength) / int64(capacity)
+			logger.Debug("maxDataLength: %f, perPageLength: %d", maxDataLength, perPageLength)
+			if shot.DataLength > perPageLength {
+				err = errors.Wrap(err, fmt.Sprintf("page %s too large, data length is %d, large than %d", input, shot.DataLength, perPageLength))
 				return
 			}
 			shots = append(shots, shot)

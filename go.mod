@@ -22,6 +22,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/iawia002/lux v0.14.0
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
+	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58
 	github.com/phf/go-queue v0.0.0-20170504031614-9abe38d0371d
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.12.1
@@ -38,8 +39,8 @@ require (
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20220126131044-16299c0dd43d
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
 	github.com/wabarc/playback v0.0.0-20210718054702-cab6c6004933
-	github.com/wabarc/rivet v0.0.0-20220207154318-37fc56bcf4e1
-	github.com/wabarc/screenshot v1.5.1-0.20220318140348-632a135d50db
+	github.com/wabarc/rivet v0.1.3
+	github.com/wabarc/screenshot v1.5.1
 	github.com/wabarc/telegra.ph v0.0.0-20220501011455-b0b8c35c6d09
 	github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5
 	go.etcd.io/bbolt v1.3.6
@@ -68,7 +69,7 @@ require (
 	github.com/dlclark/regexp2 v1.4.1-0.20201116162257-a2a8dda75c91 // indirect
 	github.com/dop251/goja v0.0.0-20211211112501-fb27c91c26ed // indirect
 	github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65 // indirect
-	github.com/go-shiori/obelisk v0.0.0-20220314133127-347d73aad05b // indirect
+	github.com/go-shiori/obelisk v0.0.0-20220524135250-3d6752a59bd7 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
