@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
 
       - name: Set env & Print wayback version
         shell: bash
@@ -32,7 +32,7 @@ jobs:
 
       - id: build
         name: Build Snap
-        uses: snapcore/action-build@v1
+        uses: snapcore/action-build@ea14cdeb353272f75977040488ca191880509a8c # v1.1.0
         with:
           snapcraft-channel: stable
 
@@ -42,7 +42,7 @@ jobs:
           name: wayback-snap
           path: ${{ steps.build.outputs.snap }}
 
-      - uses: snapcore/action-publish@v1
+      - uses: snapcore/action-publish@128198fd2ed6446f70918a2a2d3ae7cbe758bf3a # v1.1.0
         name: Release Snap
         if: github.repository == 'wabarc/wayback'
         with:

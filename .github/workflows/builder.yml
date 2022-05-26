@@ -187,7 +187,7 @@ jobs:
         ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
+      uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
 
     - name: Build Debian package
       id: builder
@@ -288,11 +288,11 @@ jobs:
         ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
+      uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
 
     - id: build
       name: Build Snap
-      uses: snapcore/action-build@v1
+      uses: snapcore/action-build@ea14cdeb353272f75977040488ca191880509a8c # v1.1.0
       with:
         snapcraft-channel: edge
 
@@ -309,7 +309,7 @@ jobs:
         wayback --help
 
     - name: Release Snap
-      uses: snapcore/action-publish@v1
+      uses: snapcore/action-publish@128198fd2ed6446f70918a2a2d3ae7cbe758bf3a # v1.1.0
       if: github.repository == 'wabarc/wayback' && github.event_name == 'push'
       with:
         store_login: ${{ secrets.SNAPCRAFT_TOKEN }}

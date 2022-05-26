@@ -13,7 +13,8 @@ on:
       - '**'
     types: [ opened, synchronize, reopened ]
 
-permissions: write-all
+permissions:
+  contents: read
 
 jobs:
   lint:
@@ -64,7 +65,7 @@ jobs:
           go-version: ^1.18
 
       - name: Golang linter
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@537aa1903e5d359d0b27dbc19ddd22c5087f3fbc # v3.2.0
 
   shellcheck:
     runs-on: ubuntu-latest
@@ -83,7 +84,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run shellcheck with reviewdog
-        uses: reviewdog/action-shellcheck@v1
+        uses: reviewdog/action-shellcheck@66c9a47bf02255b250284a82251cb4cadf5043f5 # v1.15.0
 
   misspell:
     runs-on: ubuntu-latest
@@ -102,7 +103,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run misspell with reviewdog
-        uses: reviewdog/action-misspell@v1
+        uses: reviewdog/action-misspell@811b1e15f531430be3a5784e3d591bd657df18b0 # v1.12.2
 
   alex:
     runs-on: ubuntu-latest
@@ -121,7 +122,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Run alex with reviewdog
-        uses: reviewdog/action-alex@v1
+        uses: reviewdog/action-alex@ba00276838ef57db30fc418f906a09ea79f25efc # v1.5.0
 
   goreportcard:
     if: ${{ github.ref == 'refs/heads/main' }}
