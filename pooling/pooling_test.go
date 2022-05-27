@@ -116,8 +116,7 @@ func TestMaxRetries(t *testing.T) {
 
 	bucket := &Bucket{
 		Request: func(_ context.Context) error {
-			time.Sleep(100 * time.Microsecond)
-			return nil
+			return errors.New("process request failed")
 		},
 		Fallback: func(_ context.Context) error {
 			return nil
@@ -131,7 +130,7 @@ func TestMaxRetries(t *testing.T) {
 	go p.Roll()
 	p.Put(bucket)
 	p.Close()
-	if bucket.elapsed-1 != maxRetries {
+	if bucket.elapsed != maxRetries {
 		t.Fatalf("Unexpected max retries got %d instead of %d", bucket.elapsed, maxRetries)
 	}
 }
@@ -148,7 +147,6 @@ func TestFallback(t *testing.T) {
 	fall := ""
 	bucket := &Bucket{
 		Request: func(_ context.Context) error {
-			time.Sleep(100 * time.Microsecond)
 			return errors.New("some error")
 		},
 		Fallback: func(_ context.Context) error {

@@ -19,8 +19,6 @@ import (
 )
 
 func TestMatchURL(t *testing.T) {
-	t.Parallel()
-
 	parser := config.NewParser()
 	var err error
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
@@ -71,8 +69,6 @@ func TestMatchURL(t *testing.T) {
 }
 
 func TestExcludeURL(t *testing.T) {
-	t.Parallel()
-
 	parser := config.NewParser()
 	var err error
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
@@ -124,13 +120,15 @@ func TestWayback(t *testing.T) {
 	u, _ := url.Parse("https://example.com/")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
+
 	urls := []*url.URL{u}
 	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
+		time.Sleep(3 * time.Second)
 		return nil
 	}
 	w := Wayback(ctx, urls, do)
 
-	if w.Error() != "context deadline exceeded" {
+	if w == nil {
 		t.Fatal("Unexpected wayback exceeded")
 	}
 }

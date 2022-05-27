@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 
 	"github.com/dustin/go-humanize"
 	"github.com/wabarc/helper"
@@ -29,10 +30,20 @@ func MatchURL(s string) (urls []*url.URL) {
 		matches = helper.MatchURLFallback(s)
 	}
 
+	wg := sync.WaitGroup{}
+	urls = make([]*url.URL, len(matches))
 	for i := range matches {
-		u, _ := url.Parse(matches[i])
-		urls = append(urls, helper.RealURI(u))
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			u, err := url.Parse(matches[i])
+			if err != nil {
+				return
+			}
+			urls[i] = helper.RealURI(u)
+		}(i)
 	}
+	wg.Wait()
 
 	return removeDuplicates(urls)
 }

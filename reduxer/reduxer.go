@@ -309,9 +309,11 @@ func remoteHeadless(addr string) net.Addr {
 
 func createDir(baseDir string) (dir string, err error) {
 	dir = filepath.Join(baseDir, time.Now().Format("200601"))
+	if helper.Exists(dir) {
+		return
+	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
-		logger.Error("mkdir failed: %v", err)
-		return "", err
+		return "", errors.Wrap(err, "mkdir failed: "+dir)
 	}
 	return dir, nil
 }

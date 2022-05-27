@@ -163,8 +163,11 @@ func wayback(w Waybacker, r reduxer.Reduxer) string {
 func Wayback(ctx context.Context, urls ...*url.URL) ([]Collect, reduxer.Reduxer, error) {
 	logger.Debug("start...")
 
-	ctx, cancel := context.WithTimeout(ctx, config.Opts.WaybackTimeout())
-	defer cancel()
+	if _, ok := ctx.Deadline(); !ok {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, config.Opts.WaybackTimeout())
+		defer cancel()
+	}
 
 	rdx, err := reduxer.Do(ctx, urls...)
 	if err != nil {
@@ -207,7 +210,7 @@ func Wayback(ctx context.Context, urls ...*url.URL) ([]Collect, reduxer.Reduxer,
 		}
 	}
 	if err := g.Wait(); err != nil {
-		return cols, rdx, errors.Wrap(err, "archiving failed")
+		logger.Error("archiving some slot unexpected: %v", err)
 	}
 
 	if len(cols) == 0 {
@@ -258,7 +261,11 @@ func Playback(ctx context.Context, urls ...*url.URL) (cols []Collect, err error)
 		}
 	}
 	if err := g.Wait(); err != nil {
-		return cols, errors.Wrap(err, "playback failed")
+		logger.Error("playback some slot unexpected: %v", err)
+	}
+
+	if len(cols) == 0 {
+		return cols, errors.New("playback failed: no cols")
 	}
 
 	return cols, nil

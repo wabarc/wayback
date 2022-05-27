@@ -7,7 +7,6 @@ package service // import "github.com/wabarc/wayback/service"
 import (
 	"context"
 	"net/url"
-	"sync"
 
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/errors"
@@ -21,28 +20,34 @@ const (
 
 // Wayback in a separate goroutine.
 func Wayback(ctx context.Context, urls []*url.URL, do func(cols []wayback.Collect, rdx reduxer.Reduxer) error) error {
-	var once sync.Once
-	var done = make(chan bool, 1)
+	var done = make(chan error, 1)
 	var cols []wayback.Collect
 	var rdx reduxer.Reduxer
-	var err error
-	for {
+
+	go func() {
+		go func() {
+			var err error
+			cols, rdx, err = wayback.Wayback(ctx, urls...)
+			if err != nil {
+				done <- errors.Wrap(err, "wayback failed")
+				return
+			}
+			defer rdx.Flush()
+			done <- do(cols, rdx)
+		}()
+
+		// Block until context is finished.
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
-		case <-done:
-			err = do(cols, rdx)
-			rdx.Flush()
-			return err
-		default:
-			once.Do(func() {
-				cols, rdx, err = wayback.Wayback(ctx, urls...)
-				if err != nil {
-					err = errors.Wrap(err, "wayback failed")
-				} else {
-					done <- true
-				}
-			})
+			return
 		}
+	}()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case err := <-done:
+		close(done)
+		return err
 	}
 }

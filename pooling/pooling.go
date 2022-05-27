@@ -10,7 +10,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/phf/go-queue/queue"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
@@ -55,8 +54,8 @@ type Bucket struct {
 	// Count of retried attempts
 	elapsed uint64
 
-	// Reports whether it is process has been completed.
-	// processed chan bool
+	// An object that will perform exactly one action.
+	once sync.Once
 }
 
 func newResource(id int) *resource {
@@ -80,7 +79,7 @@ func New(ctx context.Context, capacity int) *Pool {
 
 	p.closed = make(chan bool, 1)
 	p.timeout = config.Opts.WaybackTimeout()
-	p.maxRetries = config.Opts.WaybackMaxRetries()
+	p.maxRetries = config.Opts.WaybackMaxRetries() + 1
 	p.multiplier = 0.75
 	p.context = ctx
 
@@ -111,6 +110,7 @@ func (p *Pool) Roll() {
 		select {
 		default:
 		case <-p.closed:
+			close(p.closed)
 			return
 		}
 
@@ -119,11 +119,11 @@ func (p *Pool) Roll() {
 			continue
 		}
 
-		b := p.bucket()
-		if b == nil {
-			continue
+		if b := p.bucket(); b != nil {
+			go b.once.Do(func() {
+				p.do(b)
+			})
 		}
-		go p.do(b, b.Request, b.Fallback)
 	}
 }
 
@@ -144,7 +144,6 @@ func (p *Pool) Close() {
 		processing := atomic.LoadInt32(&p.processing)
 		if p.resource != nil && waiting == 0 && processing == 0 {
 			once.Do(func() {
-				close(p.resource)
 				p.closed <- true
 			})
 			return
@@ -169,7 +168,7 @@ func (p *Pool) push(r *resource) error {
 	return nil
 }
 
-func (p *Pool) do(b *Bucket, request, fallback func(context.Context) error) error {
+func (p *Pool) do(b *Bucket) error {
 	atomic.AddInt32(&p.processing, 1)
 	defer func() {
 		atomic.AddInt32(&p.waiting, -1)
@@ -177,66 +176,62 @@ func (p *Pool) do(b *Bucket, request, fallback func(context.Context) error) erro
 	}()
 
 	action := func() error {
-		ctx, cancel := context.WithCancel(p.context)
+		interval := float64(b.elapsed) * p.multiplier
+		timeout := p.timeout + p.timeout*time.Duration(interval)
+		ctx, cancel := context.WithTimeout(p.context, timeout)
 		defer cancel()
-
-		if b.elapsed > p.maxRetries {
-			if fallback != nil {
-				fallback(ctx)
-			}
-			return errElapsed
-		}
 
 		r := p.pull()
 		defer func() {
 			p.push(r)
-		}()
-
-		res := make(chan error, 1)
-		go func() {
-			if request != nil {
-				res <- request(ctx)
-				return
-			}
-			res <- nil
-			return
-		}()
-
-		interval := float64(b.elapsed) * p.multiplier
-		timeout := p.timeout + p.timeout*time.Duration(interval)
-		for {
-			select {
-			case err := <-res:
-				if err != nil {
-					atomic.AddUint64(&b.elapsed, 1)
+			if b.elapsed >= p.maxRetries {
+				if b.Fallback != nil {
+					b.Fallback(ctx)
 				}
-				return err
-			case <-time.After(timeout):
-				atomic.AddUint64(&b.elapsed, 1)
-				return errRollTimeout
 			}
+		}()
+
+		ch := make(chan error, 1)
+		go func() {
+			if b.Request != nil {
+				ch <- b.Request(ctx)
+			}
+		}()
+
+		select {
+		case err := <-ch:
+			if err != nil {
+				atomic.AddUint64(&b.elapsed, 1)
+			}
+			close(ch)
+			return err
+		case <-ctx.Done():
+			atomic.AddUint64(&b.elapsed, 1)
+			return errRollTimeout
 		}
 	}
 
-	return p.doRetry(action)
+	ran := uint64(1)
+	max := p.maxRetries
+	for ; ran <= max; ran++ {
+		err := action()
+		switch err {
+		case nil, errElapsed:
+			return err
+		case errRollTimeout:
+		}
+	}
+
+	return nil
 }
 
 func (p *Pool) bucket() *Bucket {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	b, ok := p.staging.PopBack().(*Bucket)
-	if !ok {
-		return nil
+	if b, ok := p.staging.PopBack().(*Bucket); ok {
+		return b
 	}
 
-	return b
-}
-
-func (p *Pool) doRetry(o backoff.Operation) error {
-	exp := backoff.NewExponentialBackOff()
-	exp.Reset()
-	b := backoff.WithMaxRetries(exp, p.maxRetries+1) // One more retry for fallback to be triggered
-
-	return backoff.Retry(o, b)
+	return nil
 }

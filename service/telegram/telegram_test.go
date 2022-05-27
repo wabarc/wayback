@@ -123,6 +123,7 @@ var (
 
 func handle(mux *http.ServeMux, updatesJSON string) {
 	var count int32
+	var edit int32
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -159,7 +160,12 @@ func handle(mux *http.ServeMux, updatesJSON string) {
 			}
 		case "editMessageText":
 			if strings.Contains(text, config.SlotName("ia")) || strings.Contains(text, "Archiving...") {
-				fmt.Fprintln(w, replyJSON)
+				atomic.AddInt32(&edit, 1)
+				if edit == 0 {
+					fmt.Fprintln(w, replyJSON)
+				} else {
+					fmt.Fprintln(w, fmt.Sprintf(`{"ok":true, "result":{"message":"%s"}}`, telegram.ErrSameMessageContent))
+				}
 			} else {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			}
