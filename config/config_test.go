@@ -1457,3 +1457,147 @@ func TestWaybackFallback(t *testing.T) {
 		})
 	}
 }
+
+func TestWaybackMeiliEndpoint(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		endpoint string
+		expected string
+	}{
+		{
+			endpoint: "",
+			expected: defWaybackMeiliEndpoint,
+		},
+		{
+			endpoint: "https://example.com",
+			expected: "https://example.com",
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_MEILI_ENDPOINT", test.endpoint)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.WaybackMeiliEndpoint()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set meilisearch endpoint got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}
+
+func TestWaybackMeiliIndexing(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		indexing string
+		expected string
+	}{
+		{
+			indexing: "",
+			expected: defWaybackMeiliIndexing,
+		},
+		{
+			indexing: "foo-bar",
+			expected: "foo-bar",
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_MEILI_INDEXING", test.indexing)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.WaybackMeiliIndexing()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set meilisearch indexing got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}
+
+func TestWaybackMeiliApikey(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		apikey   string
+		expected string
+	}{
+		{
+			apikey:   "",
+			expected: defWaybackMeiliApikey,
+		},
+		{
+			apikey:   "foo.bar",
+			expected: "foo.bar",
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_MEILI_APIKEY", test.apikey)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.WaybackMeiliApikey()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set meilisearch api key got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}
+
+func TestEnabledMeilisearch(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		endpoint string
+		expected bool
+	}{
+		{
+			endpoint: "",
+			expected: false,
+		},
+		{
+			endpoint: "https://example.com",
+			expected: true,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_MEILI_ENDPOINT", test.endpoint)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.EnabledMeilisearch()
+			if got != test.expected {
+				t.Fatalf(`Unexpected enabled meilisearch got %t instead of %t`, got, test.expected)
+			}
+		})
+	}
+}

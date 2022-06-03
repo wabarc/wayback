@@ -15,6 +15,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/service/discord"
 	"github.com/wabarc/wayback/service/httpd"
 	"github.com/wabarc/wayback/service/mastodon"
@@ -32,7 +33,7 @@ type target struct {
 	name string
 }
 
-type service struct {
+type services struct {
 	targets []target
 }
 
@@ -47,7 +48,18 @@ func serve(_ *cobra.Command, _ []string) {
 	pool := pooling.New(ctx, config.Opts.PoolingSize())
 	go pool.Roll()
 
-	srv := &service{}
+	if config.Opts.EnabledMeilisearch() {
+		endpoint := config.Opts.WaybackMeiliEndpoint()
+		indexing := config.Opts.WaybackMeiliIndexing()
+		apikey := config.Opts.WaybackMeiliApikey()
+		meili := service.NewMeili(endpoint, apikey, indexing)
+		if err := meili.Setup(); err != nil {
+			logger.Error("setup meilisearch failed: %v", err)
+		}
+		logger.Debug("setup meilisearch success")
+	}
+
+	srv := &services{}
 	_ = srv.run(ctx, store, pool)
 
 	if systemd.HasNotifySocket() {
@@ -65,7 +77,7 @@ func serve(_ *cobra.Command, _ []string) {
 }
 
 // nolint:gocyclo
-func (srv *service) run(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *service {
+func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *services {
 	size := len(daemon)
 	srv.targets = make([]target, 0, size)
 	for _, s := range daemon {
@@ -166,7 +178,7 @@ func (srv *service) run(ctx context.Context, store *storage.Storage, pool *pooli
 	return srv
 }
 
-func (srv *service) stop(pool *pooling.Pool, cancel context.CancelFunc) {
+func (srv *services) stop(pool *pooling.Pool, cancel context.CancelFunc) {
 	signalChan := make(chan os.Signal, 1)
 
 	signal.Notify(
@@ -193,7 +205,7 @@ func (srv *service) stop(pool *pooling.Pool, cancel context.CancelFunc) {
 	}
 }
 
-func (srv *service) shutdown() {
+func (srv *services) shutdown() {
 	for _, target := range srv.targets {
 		logger.Info("stopping %s service...", target.name)
 		target.call()

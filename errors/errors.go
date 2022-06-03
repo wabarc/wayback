@@ -30,3 +30,8 @@ func New(message string, args ...interface{}) *Error {
 func Wrap(err error, message string) error {
 	return errors.Wrap(err, message)
 }
+
+// Is reports whether any error in err's chain matches target.
+func Is(err, target error) bool {
+	return errors.Is(err, target)
+}

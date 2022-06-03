@@ -82,6 +82,10 @@ const (
 	defWaybackMaxRetries   = 2
 	defWaybackUserAgent    = "WaybackArchiver/1.0"
 	defWaybackFallback     = false
+
+	defWaybackMeiliEndpoint = ""
+	defWaybackMeiliIndexing = "capsules"
+	defWaybackMeiliApikey   = ""
 )
 
 var (
@@ -120,6 +124,10 @@ type Options struct {
 	waybackMaxRetries   int
 	waybackUserAgent    string
 	waybackFallback     bool
+
+	waybackMeiliEndpoint string
+	waybackMeiliIndexing string
+	waybackMeiliApikey   string
 }
 
 type ipfs struct {
@@ -202,22 +210,25 @@ type tor struct {
 // NewOptions returns Options with default values.
 func NewOptions() *Options {
 	opts := &Options{
-		debug:               defDebug,
-		logTime:             defLogTime,
-		logLevel:            defLogLevel,
-		overTor:             defOverTor,
-		metrics:             defMetrics,
-		listenAddr:          defListenAddr,
-		chromeRemoteAddr:    defChromeRemoteAddr,
-		enabledChromeRemote: defEnabledChromeRemote,
-		boltPathname:        defBoltPathname,
-		poolingSize:         defPoolingSize,
-		storageDir:          defStorageDir,
-		maxMediaSize:        defMaxMediaSize,
-		waybackTimeout:      defWaybackTimeout,
-		waybackMaxRetries:   defWaybackMaxRetries,
-		waybackUserAgent:    defWaybackUserAgent,
-		waybackFallback:     defWaybackFallback,
+		debug:                defDebug,
+		logTime:              defLogTime,
+		logLevel:             defLogLevel,
+		overTor:              defOverTor,
+		metrics:              defMetrics,
+		listenAddr:           defListenAddr,
+		chromeRemoteAddr:     defChromeRemoteAddr,
+		enabledChromeRemote:  defEnabledChromeRemote,
+		boltPathname:         defBoltPathname,
+		poolingSize:          defPoolingSize,
+		storageDir:           defStorageDir,
+		maxMediaSize:         defMaxMediaSize,
+		waybackTimeout:       defWaybackTimeout,
+		waybackMaxRetries:    defWaybackMaxRetries,
+		waybackUserAgent:     defWaybackUserAgent,
+		waybackFallback:      defWaybackFallback,
+		waybackMeiliEndpoint: defWaybackMeiliEndpoint,
+		waybackMeiliIndexing: defWaybackMeiliIndexing,
+		waybackMeiliApikey:   defWaybackMeiliApikey,
 		ipfs: &ipfs{
 			host:   defIPFSHost,
 			port:   defIPFSPort,
@@ -707,4 +718,24 @@ func (o *Options) WaybackUserAgent() string {
 // the original webpage is unavailable.
 func (o *Options) WaybackFallback() bool {
 	return o.waybackFallback
+}
+
+// WaybackMeiliEndpoint returns the Meilisearch API endpoint.
+func (o *Options) WaybackMeiliEndpoint() string {
+	return o.waybackMeiliEndpoint
+}
+
+// WaybackMeiliIndexing returns the Meilisearch indexing name.
+func (o *Options) WaybackMeiliIndexing() string {
+	return o.waybackMeiliIndexing
+}
+
+// WaybackMeiliApikey returns the Meilisearch admin apikey.
+func (o *Options) WaybackMeiliApikey() string {
+	return o.waybackMeiliApikey
+}
+
+// EnabledMeilisearch returns whether enable meilisearch server.
+func (o *Options) EnabledMeilisearch() bool {
+	return o.WaybackMeiliEndpoint() != ""
 }

@@ -33,6 +33,10 @@ func Wayback(ctx context.Context, urls []*url.URL, do func(cols []wayback.Collec
 				return
 			}
 			defer rdx.Flush()
+			// push collects to the Meilisearch
+			if meili != nil {
+				go meili.push(cols)
+			}
 			done <- do(cols, rdx)
 		}()
 
