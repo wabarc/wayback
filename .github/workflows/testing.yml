@@ -73,7 +73,7 @@ jobs:
 
     - name: Set up Chocolatey
       if: matrix.os == 'windows-latest'
-      uses: crazy-max/ghaction-chocolatey@b59ffdb6594d2e2c36d9e1174e15ac799dd0a8f1 # v1.7.0
+      uses: crazy-max/ghaction-chocolatey@b59ffdb6594d2e2c36d9e1174e15ac799dd0a8f1 # v2.0.0
       with:
         args: -h
 
