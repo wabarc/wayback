@@ -71,9 +71,12 @@ func NewMeili(endpoint, apikey, idxname string) *Meili {
 func (m *Meili) Setup() error {
 	err := m.existIndex()
 	if errors.Is(err, errIndexNotFound) {
-		return m.createIndex()
+		err = m.createIndex()
 	}
-	return err
+	if err != nil {
+		return err
+	}
+	return m.sortable()
 }
 
 type indexes struct {
@@ -147,6 +150,35 @@ func (m *Meili) createIndex() error {
 	var idx creates
 	if err := json.Unmarshal(body, &idx); err != nil {
 		return errors.Wrap(err, `create index: unmarshal json failed`)
+	}
+	if idx.IndexUID != m.indexing {
+		return errIndexNotMatch
+	}
+
+	return nil
+}
+
+// sortable sets an index's sortable attributes.
+func (m *Meili) sortable() error {
+	endpoint := fmt.Sprintf(`%s/indexes/%s/settings/sortable-attributes`, m.endpoint, m.indexing)
+	payload := fmt.Sprintf(`["id"]`)
+	resp, err := m.do(http.MethodPost, endpoint, strings.NewReader(payload))
+	if err != nil {
+		return errors.Wrap(err, `set sortable attributes: request failed`)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusAccepted {
+		return errors.New(`set sortable attributes: unexpected status: ` + resp.Status)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return errors.Wrap(err, `set sortable attributes: reads body failed`)
+	}
+
+	var idx creates
+	if err := json.Unmarshal(body, &idx); err != nil {
+		return errors.Wrap(err, `set sortable attributes: unmarshal json failed`)
 	}
 	if idx.IndexUID != m.indexing {
 		return errIndexNotMatch
