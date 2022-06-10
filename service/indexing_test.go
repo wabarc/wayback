@@ -51,7 +51,7 @@ var (
     "enqueuedAt": "2021-08-11T09:25:53.000000Z"
 }`, indexing)
 
-	simple = []wayback.Collect{
+	sample = []wayback.Collect{
 		{
 			Arc: config.SLOT_IA,
 			Dst: "https://web.archive.org/web/20211000000001/https://example.com/",
@@ -77,25 +77,99 @@ var (
 			Ext: config.SLOT_PH,
 		},
 	}
+
+	handlerFunc = func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case !strings.Contains(r.Header.Get(`Authorization`), apiKey):
+			w.WriteHeader(http.StatusUnauthorized)
+			_, _ = w.Write([]byte(respInvalidRequest))
+		case r.Method == http.MethodGet && r.URL.Path == `/indexes/`+indexing: // get index
+			_, _ = w.Write([]byte(respGetIndex))
+		case r.Method == http.MethodPost && r.URL.Path == `/indexes`: // create index
+			w.WriteHeader(http.StatusAccepted)
+			_, _ = w.Write([]byte(respCreateIndex))
+		case r.Method == http.MethodPost && r.URL.Path == fmt.Sprintf(`/indexes/%s/settings/sortable-attributes`, indexing): // set sortable attributes
+			w.WriteHeader(http.StatusAccepted)
+			_, _ = w.Write([]byte(respCreateIndex))
+		case r.Method == http.MethodPost && r.URL.Path == fmt.Sprintf(`/indexes/%s/documents`, indexing): // add documents
+			buf, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				_, _ = w.Write([]byte(respInvalidRequest))
+				return
+			}
+
+			var docs []document
+			if err := json.Unmarshal(buf, &docs); err != nil {
+				return
+			}
+			if len(docs) != 1 {
+				w.WriteHeader(http.StatusBadRequest)
+				_, _ = w.Write([]byte(respInvalidRequest))
+				return
+			}
+
+			w.WriteHeader(http.StatusAccepted)
+			_, _ = w.Write([]byte(respPushDocument))
+		default:
+			// Response invalid request
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(respInvalidRequest))
+		}
+	}
 )
+
+func TestNewMeili(t *testing.T) {
+	tests := []struct {
+		indexing string
+		expected string
+	}{
+		{"", indexing},
+		{"foo", "foo"},
+	}
+
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			m := NewMeili("", "", test.indexing)
+			if m.indexing != test.expected {
+				t.Fatalf(`unexpected new meilisearch client got indexing name %s instead of %s`, m.indexing, test.expected)
+			}
+		})
+	}
+}
+
+func TestSetup(t *testing.T) {
+	tests := []struct {
+		handler func(http.ResponseWriter, *http.Request)
+		returns error
+	}{
+		{
+			handler: handlerFunc,
+			returns: nil,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			_, mux, server := helper.MockServer()
+			defer server.Close()
+
+			mux.HandleFunc("/", test.handler)
+
+			m := NewMeili(server.URL, apiKey, indexing)
+			err := m.Setup()
+			if err != test.returns {
+				t.Fatalf(`unexpected setup meilisearch, got error: %v`, err)
+			}
+		})
+	}
+}
 
 func TestExistIndex(t *testing.T) {
 	_, mux, server := helper.MockServer()
 	defer server.Close()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != `/indexes/`+indexing {
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(w, respInvalidRequest)
-			return
-		}
-		if !strings.Contains(r.Header.Get(`Authorization`), apiKey) {
-			w.WriteHeader(http.StatusUnauthorized)
-			fmt.Fprintf(w, respInvalidRequest)
-			return
-		}
-		fmt.Fprintf(w, respGetIndex)
-	})
+	mux.HandleFunc("/", handlerFunc)
 
 	m := NewMeili(server.URL, apiKey, indexing)
 	err := m.existIndex()
@@ -108,20 +182,7 @@ func TestCreateIndex(t *testing.T) {
 	_, mux, server := helper.MockServer()
 	defer server.Close()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != `/indexes` {
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(w, respInvalidRequest)
-			return
-		}
-		if !strings.Contains(r.Header.Get(`Authorization`), apiKey) {
-			w.WriteHeader(http.StatusUnauthorized)
-			fmt.Fprintf(w, respInvalidRequest)
-			return
-		}
-		w.WriteHeader(http.StatusAccepted)
-		fmt.Fprintf(w, respCreateIndex)
-	})
+	mux.HandleFunc("/", handlerFunc)
 
 	m := NewMeili(server.URL, apiKey, indexing)
 	err := m.createIndex()
@@ -134,41 +195,30 @@ func TestPushDocument(t *testing.T) {
 	_, mux, server := helper.MockServer()
 	defer server.Close()
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != fmt.Sprintf(`/indexes/%s/documents`, indexing) {
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(w, respInvalidRequest)
-			return
-		}
-		if !strings.Contains(r.Header.Get(`Authorization`), apiKey) {
-			w.WriteHeader(http.StatusUnauthorized)
-			fmt.Fprintf(w, respInvalidRequest)
-			return
-		}
-		buf, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, respInvalidRequest)
-			return
-		}
-
-		var docs []document
-		if err := json.Unmarshal(buf, &docs); err != nil {
-			return
-		}
-		if len(docs) != 1 {
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, respInvalidRequest)
-			return
-		}
-
-		w.WriteHeader(http.StatusAccepted)
-		fmt.Fprintf(w, respPushDocument)
-	})
+	mux.HandleFunc("/", handlerFunc)
 
 	m := NewMeili(server.URL, apiKey, indexing)
-	err := m.push(simple)
-	if err != nil {
-		t.Fatalf(`unexpected push document: %v`, err)
+
+	tests := []struct {
+		collect []wayback.Collect
+		returns string
+	}{
+		{
+			collect: []wayback.Collect{},
+			returns: `push documents failed: cols empty`,
+		},
+		{
+			collect: sample,
+			returns: ``,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			err := m.push(sample)
+			if err != nil && err.Error() != test.returns {
+				t.Fatalf(`unexpected push document: %v`, err)
+			}
+		})
 	}
 }
