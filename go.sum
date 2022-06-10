@@ -719,8 +719,8 @@ github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792 h1:0xD4NsQtdPCB77q4w
 github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792/go.mod h1:2an5YHL0CegFbaDNSU3kwqYRfxFfmcwlwSi5Bk4yk5c=
 github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae h1:7TLEQYM7GxeysDd6IbK5F7krZuYEipdXno9qV3eedWU=
 github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae/go.mod h1:qP6GisnqoSDc5Ivj34yV+Qar3B6tYyLDKx42oCDX1zY=
-github.com/wabarc/playback v0.0.0-20220608144549-dc4651b514d5 h1:6eDrdd2A6b0xj1fBQma54RLr2jsZNXd5qbn9jHhZlkc=
-github.com/wabarc/playback v0.0.0-20220608144549-dc4651b514d5/go.mod h1:rxvBzfzci+rMEEsupy1yo58Nbg9KtUmY4WJ67EPzNH8=
+github.com/wabarc/playback v0.0.0-20220610121013-427fb317031c h1:8a4FvrKx6esUHAX3kU5yioPZZ9YTUU7ojDSCsPd47eg=
+github.com/wabarc/playback v0.0.0-20220610121013-427fb317031c/go.mod h1:rxvBzfzci+rMEEsupy1yo58Nbg9KtUmY4WJ67EPzNH8=
 github.com/wabarc/rivet v0.0.0-20220207154318-37fc56bcf4e1 h1:4TKACQ7hhNwQ4SUaIVXAibaqSs5r/4CrgaYL/+HtEak=
 github.com/wabarc/rivet v0.0.0-20220207154318-37fc56bcf4e1/go.mod h1:aWsIBu+Jr99P+G8KZ/NS/e6Yr5OEamt3i397U31QRu8=
 github.com/wabarc/screenshot v1.5.0/go.mod h1:zacDw0LvNwstoCSqu2BYm8drXYOZ877TfDE6KhBEswY=
