@@ -220,6 +220,9 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_MAX_RETRIES`             | `2`                     | Max retries for single wayback request, defaults to 2        |
 | -                   | `WAYBACK_USERAGENT`               | `WaybackArchiver/1.0`   | User-Agent for a wayback request                             |
 | -                   | `WAYBACK_FALLBACK`                | `off`                   | Use Google cache as a fallback if the original webpage is unavailable |
+| -                   | `WAYBACK_MEILI_ENDPOINT`          | -                       | Meilisearch API endpoint                                     |
+| -                   | `WAYBACK_MEILI_INDEXING`          | `capsules`              | Meilisearch indexing name                                    |
+| -                   | `WAYBACK_MEILI_APIKEY`            | -                       | Meilisearch admin API key                                    |
 | `-d`, `--daemon`    | -                                 | -                       | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter`, `discord` |
 | `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                  | Wayback webpages to **Internet Archive**                     |
 | `--is`              | `WAYBACK_ENABLE_IS`               | `true`                  | Wayback webpages to **Archive Today**                        |

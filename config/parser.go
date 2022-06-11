@@ -201,6 +201,12 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.waybackUserAgent = parseString(val, defWaybackUserAgent)
 		case "WAYBACK_FALLBACK":
 			p.opts.waybackFallback = parseBool(val, defWaybackFallback)
+		case "WAYBACK_MEILI_ENDPOINT":
+			p.opts.waybackMeiliEndpoint = parseString(val, defWaybackMeiliEndpoint)
+		case "WAYBACK_MEILI_INDEXING":
+			p.opts.waybackMeiliIndexing = parseString(val, defWaybackMeiliIndexing)
+		case "WAYBACK_MEILI_APIKEY":
+			p.opts.waybackMeiliApikey = parseString(val, defWaybackMeiliApikey)
 		default:
 			if os.Getenv(key) == "" && val != "" {
 				os.Setenv(key, val)
