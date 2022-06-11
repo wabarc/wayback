@@ -23,7 +23,7 @@ require (
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
 	github.com/phf/go-queue v0.0.0-20170504031614-9abe38d0371d
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.12.1
+	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.32.1
 	github.com/rs/xid v1.4.0
 	github.com/slack-go/slack v0.10.2
