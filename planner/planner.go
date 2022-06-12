@@ -37,31 +37,42 @@ func (p *Planner) Start(ctx context.Context) *Planner {
 	tArchiveis := time.NewTicker(5 * time.Minute) // ticker for archive.is
 	p.tickers = []*time.Ticker{tArchiveis}
 
+	ch := make(chan bool, 1)
+	wd := path.Join(p.home, "starter")
+	if err := os.MkdirAll(wd, 0o700); err != nil {
+		logger.Error("create starter directory failed: %v", err)
+	}
+	today := today{
+		userDataDir: path.Join(wd, "UserDataDir"),
+		workspace:   wd,
+	}
 	go func() {
-		wd := path.Join(p.home, "starter")
-		if err := os.MkdirAll(wd, 0o600); err != nil {
-			logger.Error("create starter directory failed: %v", err)
-		}
-		today := today{
-			userDataDir: path.Join(wd, "UserDataDir"),
-			workspace:   wd,
-		}
-		go today.init()
-
-		for {
-			select {
-			default:
-			case <-tArchiveis.C:
-				rctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
-				defer cancel()
-				if err := today.run(rctx); err != nil {
-					logger.Error("regularly update the 'ARCHIVE_COOKIE' environment failed: %v", err)
-				}
-			}
+		if err := today.init(ch); err != nil {
+			logger.Error("install starter failed: %v", err)
+			return
 		}
 	}()
 
-	return p
+	// Wait until the starter setup is finished.
+	<-ch
+
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Warn("recovered in `planner.Start`: %v", r)
+		}
+	}()
+
+	for {
+		select {
+		default:
+		case <-tArchiveis.C:
+			rctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
+			defer cancel()
+			if err := today.run(rctx); err != nil {
+				logger.Error("regularly update the 'ARCHIVE_COOKIE' environment failed: %v", err)
+			}
+		}
+	}
 }
 
 // Stop stop scheduling services.

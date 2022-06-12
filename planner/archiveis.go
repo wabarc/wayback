@@ -23,6 +23,7 @@ import (
 	"github.com/chromedp/cdproto/dom"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/cdproto/page"
+	"github.com/chromedp/cdproto/target"
 	"github.com/chromedp/chromedp"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/starter/installer"
@@ -33,6 +34,9 @@ import (
 var (
 	remoteDebuggingPort = "9223"
 	remoteDebuggingAddr = "localhost"
+
+	recaptchaIframe = "/recaptcha/api2/anchor"
+	dialogSelector  = "rc-anchor-container"
 )
 
 type today struct {
@@ -40,7 +44,7 @@ type today struct {
 	userDataDir string
 }
 
-func (t today) init() error {
+func (t today) init(ch chan bool) error {
 	starter := &installer.Starter{
 		Home: t.workspace,
 	}
@@ -48,6 +52,7 @@ func (t today) init() error {
 	if err != nil {
 		return errors.Wrap(err, "install starter failed")
 	}
+	ch <- true
 
 	// Installed starter's executable binary path (chromium)
 	command := starter.Command()
@@ -106,7 +111,7 @@ func (t today) run(ctx context.Context) error {
 	ctx, cancel := chromedp.NewRemoteAllocator(ctx, uri)
 	defer cancel()
 
-	var opts chromedp.ContextOption
+	opts := chromedp.WithErrorf(log.Printf)
 	if config.Opts.HasDebugMode() {
 		opts = chromedp.WithDebugf(log.Printf)
 	}
@@ -115,47 +120,64 @@ func (t today) run(ctx context.Context) error {
 
 	// Get the archive.today's final URL.
 	// uri = t.resolve("https://archive.ph")
-	uri = "https://archive.ph"
-	domains := []string{
-		// "archive.today",
-		// "archive.is",
-		// "archive.li",
-		// "archive.vn",
-		// "archive.fo",
-		// "archive.md",
-		"archive.ph",
-		"archiveiya74codqgiixo33q62qlrqtkgmcitqx5u2oeqnmn5bpcbiyd.onion",
+	uri = "http://archive.ph"
+	// "archive.today",
+	// "archive.is",
+	// "archive.li",
+	// "archive.vn",
+	// "archive.fo",
+	// "archive.md",
+	// "archive.ph",
+	// "archiveiya74codqgiixo33q62qlrqtkgmcitqx5u2oeqnmn5bpcbiyd.onion",
+	// err = chromedp.Run(ctx, network.DeleteCookies("cf_clearance"), chromedp.Navigate(uri))
+	err = chromedp.Run(ctx, chromedp.Navigate(uri))
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("open %s failed", uri))
 	}
-	for _, domain := range domains {
-		logger.Debug("archive.today's uri: %s", domain)
-		uri = fmt.Sprintf("http://%s", domain)
-		err = chromedp.Run(ctx, network.DeleteCookies("cf_clearance"), chromedp.Navigate(uri))
-		if err != nil {
-			logger.Warn("open %s failed: %v", domain, err)
-			continue
-		}
-		break
-	}
+	logger.Debug("open %s successfully", uri)
 
+	ok := false
 	script := `() => {
 try{
-  const input = document.getElementById('url')
+  const input = document.getElementById('url');
   if (input !== null) {
     input.value = 'https://example.com';
     document.querySelector('#submiturl input[type=submit]').click();
+    return true;
+  }
+  const recaptcha = document.getElementById('g-recaptcha');
+  if (recaptcha !== null) {
+    return true;
   }
 }catch(_){};
-return true;
+return false;
 }`
 	err = chromedp.Run(ctx,
 		dom.Enable(),
-		// chromedp.Navigate(uri),
-		chromedp.WaitReady("body"),
-		chromedp.Sleep(5*time.Second),
-		chromedp.Evaluate(script, nil, chromedp.EvalIgnoreExceptions),
+		chromedp.Navigate(uri),
+		chromedp.PollFunction(script, &ok, chromedp.WithPollingTimeout(10*time.Second)),
 	)
 	if err != nil {
 		return errors.Wrap(err, "trigger recaptcha failed")
+	}
+	logger.Debug("trigger recaptcha result: %t", ok)
+
+	iframe := `iframe[title="reCAPTCHA"]`
+	err = chromedp.Run(ctx, chromedp.WaitVisible(iframe, chromedp.ByQuery))
+	if err != nil {
+		return errors.Wrap(err, "wait elements failed")
+	}
+
+	ictx := getIframeContext(ctx, recaptchaIframe)
+	script = fmt.Sprintf(`document.getElementById("%s");`, dialogSelector)
+	var b []byte
+	err = chromedp.Run(
+		ictx,
+		chromedp.WaitReady(dialogSelector, chromedp.ByID),
+		chromedp.Evaluate(script, &b),
+	)
+	if err != nil {
+		return errors.Wrap(err, "dialog recaptcha failed")
 	}
 
 	// paste to console `monitorEvents(window, 'click')` to get the position
@@ -242,6 +264,23 @@ func (t today) resolve(u string) string {
 	defer resp.Body.Close()
 
 	return resp.Request.URL.String()
+}
+
+// copied from https://github.com/chromedp/chromedp/issues/72#issuecomment-570791861
+func getIframeContext(ctx context.Context, uriPart string) context.Context {
+	targets, _ := chromedp.Targets(ctx)
+	var tgt *target.Info
+	for _, t := range targets {
+		logger.Debug("%s | %s | %s | %s", t.Title, t.Type, t.URL, t.TargetID)
+		if t.Type == "iframe" && strings.Contains(t.URL, uriPart) {
+			tgt = t
+		}
+	}
+	if tgt != nil {
+		ictx, _ := chromedp.NewContext(ctx, chromedp.WithTargetID(tgt.TargetID))
+		return ictx
+	}
+	return nil
 }
 
 func readOutput(rc io.ReadCloser) {

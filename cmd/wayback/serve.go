@@ -63,7 +63,7 @@ func serve(_ *cobra.Command, _ []string) {
 	if config.Opts.EnabledScheduler() {
 		sched := planner.New()
 		defer sched.Stop()
-		sched.Start(ctx)
+		go sched.Start(ctx)
 	}
 
 	srv := &services{}
