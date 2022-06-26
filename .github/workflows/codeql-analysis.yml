@@ -120,6 +120,49 @@ jobs:
       uses: sonatype-nexus-community/nancy-github-action@aae196481b961d446f4bff9012e4e3b63d7921a4 # v1.0.2
       continue-on-error: true
 
+  semgrep:
+    name: Semgrep Scan
+    runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
+    steps:
+    - name: Check out code base
+      if: github.event_name == 'push' || github.event_name == 'schedule'
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Check out code base
+      if: github.event_name == 'pull_request'
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Run Bug Scan
+      uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+      with:
+        config: p/r2c-bug-scan
+
+    - name: Run CI
+      uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+      with:
+        config: p/r2c-ci
+
+    - name: Run Best Practices
+      uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+      with:
+        config: p/r2c-best-practices
+
+    - name: Run Security Audit
+      uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+      with:
+        config: p/r2c-security-audit
+
+    - name: Run GoSec
+      uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+      with:
+        config: p/gosec
+
   fossa:
     if: github.repository == 'wabarc/wayback'
     name: FOSSA
@@ -143,4 +186,3 @@ jobs:
       uses: fossas/fossa-action@f61a4c0c263690f2ddb54b9822a719c25a7b608f # v1.3.1
       with:
         api-key: ${{ secrets.FOSSA_APIKEY }}
-
