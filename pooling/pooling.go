@@ -162,9 +162,7 @@ func (p *Pool) push(r *resource) error {
 	if p == nil {
 		return ErrPoolNotExist
 	}
-	p.mutex.Lock()
 	p.resource <- r
-	p.mutex.Unlock()
 	return nil
 }
 
