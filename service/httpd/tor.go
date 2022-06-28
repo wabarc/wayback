@@ -81,7 +81,7 @@ func (t *Tor) Serve() error {
 	default:
 		logger.Info("start a clear web server")
 		server.Addr = config.Opts.ListenAddr()
-		startHTTPServer(server)
+		go startHTTPServer(server)
 		t.server = server
 	}
 
@@ -175,12 +175,10 @@ func (t *Tor) startTorServer(server *http.Server) {
 }
 
 func startHTTPServer(server *http.Server) {
-	go func() {
-		logger.Info(`Listening on "%s" without TLS`, color.BlueString(server.Addr))
-		if err := server.ListenAndServe(); err != http.ErrServerClosed {
-			logger.Fatal("Server failed to start: %v", err)
-		}
-	}()
+	logger.Info(`Listening on "%s" without TLS`, color.BlueString(server.Addr))
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+		logger.Fatal("Server failed to start: %v", err)
+	}
 }
 
 func torPortBusy() bool {
