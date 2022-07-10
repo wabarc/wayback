@@ -82,7 +82,7 @@ func (i *IRC) Serve() error {
 	i.conn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		go func(ev *irc.Event) {
 			metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusRequest)
-			bucket := &pooling.Bucket{
+			bucket := pooling.Bucket{
 				Request: func(ctx context.Context) error {
 					if err := i.process(ctx, ev); err != nil {
 						logger.Error("process failure, message: %s, error: %v", ev.Message(), err)

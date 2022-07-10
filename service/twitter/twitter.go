@@ -104,7 +104,7 @@ func (t *Twitter) Serve() error {
 					}
 					go func(event twitter.DirectMessageEvent) {
 						metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusRequest)
-						bucket := &pooling.Bucket{
+						bucket := pooling.Bucket{
 							Request: func(ctx context.Context) error {
 								if err := t.process(ctx, event); err != nil {
 									logger.Error("process failure, message: %#v, error: %v", event.Message, err)

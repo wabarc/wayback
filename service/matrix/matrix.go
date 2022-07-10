@@ -106,7 +106,7 @@ func (m *Matrix) Serve() error {
 				return
 			}
 			metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusRequest)
-			bucket := &pooling.Bucket{
+			bucket := pooling.Bucket{
 				Request: func(ctx context.Context) error {
 					if err := m.process(ctx, ev); err != nil {
 						logger.Error("process request failure, error: %v", err)

@@ -227,7 +227,7 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 		if err != nil {
 			return errors.Wrap(err, "reply message failed")
 		}
-		bucket := &pooling.Bucket{
+		bucket := pooling.Bucket{
 			Request: func(ctx context.Context) error {
 				_, err := t.bot.Edit(request, "Archiving...")
 				if err != nil && err != telegram.ErrSameMessageContent {

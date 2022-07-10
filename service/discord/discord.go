@@ -253,7 +253,7 @@ func (d *Discord) process(m *discord.MessageCreate) (err error) {
 			logger.Error("reply queue failed: %v", err)
 			return
 		}
-		bucket := &pooling.Bucket{
+		bucket := pooling.Bucket{
 			Request: func(ctx context.Context) error {
 				logger.Debug("content: %v", urls)
 				if err := d.wayback(ctx, m, urls); err != nil {
