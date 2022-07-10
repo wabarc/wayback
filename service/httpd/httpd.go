@@ -57,7 +57,7 @@ func (web *web) handle(pool *pooling.Pool) http.Handler {
 	web.router.HandleFunc("/offline.html", web.showOfflinePage).Methods(http.MethodGet)
 
 	web.router.HandleFunc("/wayback", func(w http.ResponseWriter, r *http.Request) {
-		bucket := &pooling.Bucket{
+		bucket := pooling.Bucket{
 			Request: func(ctx context.Context) error {
 				if err := web.process(ctx, w, r); err != nil {
 					logger.Error("httpd: process retrying: %v", err)

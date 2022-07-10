@@ -136,7 +136,7 @@ func (m *Mastodon) Serve() error {
 						m.archiving[n.Status.ID] = true
 						m.Unlock()
 						metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusRequest)
-						bucket := &pooling.Bucket{
+						bucket := pooling.Bucket{
 							Request: func(ctx context.Context) error {
 								if err := m.process(ctx, n.ID, n.Status); err != nil {
 									logger.Error("process failure, notification: %#v, error: %v", n, err)

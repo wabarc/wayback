@@ -7,6 +7,7 @@ package pooling // import "github.com/wabarc/wayback/pooling"
 import (
 	"context"
 	"errors"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -39,7 +40,7 @@ func TestRoll(t *testing.T) {
 	for i < capacity {
 		ch := make(chan struct{}, 1)
 		go func(i int) {
-			bucket := &Bucket{
+			bucket := Bucket{
 				Request: func(_ context.Context) error {
 					time.Sleep(time.Millisecond)
 					return nil
@@ -87,7 +88,7 @@ func TestTimeout(t *testing.T) {
 	for i < capacity {
 		ch := make(chan struct{}, 1)
 		go func(i int) {
-			bucket := &Bucket{
+			bucket := Bucket{
 				Request: func(_ context.Context) error {
 					time.Sleep(10 * time.Millisecond)
 					return nil
@@ -122,8 +123,10 @@ func TestMaxRetries(t *testing.T) {
 	}
 	logger.SetLogLevel(logger.LevelFatal)
 
-	bucket := &Bucket{
+	var elapsed uint64
+	bucket := Bucket{
 		Request: func(_ context.Context) error {
+			atomic.AddUint64(&elapsed, 1)
 			return errors.New("process request failed")
 		},
 		Fallback: func(_ context.Context) error {
@@ -133,13 +136,13 @@ func TestMaxRetries(t *testing.T) {
 
 	maxRetries := uint64(3)
 	p := New(context.Background(), 1)
-	p.timeout = time.Microsecond
+	p.timeout = time.Second
 	p.maxRetries = maxRetries
 	go p.Roll()
 	p.Put(bucket)
 	p.Close()
-	if bucket.elapsed != maxRetries {
-		t.Fatalf("Unexpected max retries got %d instead of %d", bucket.elapsed, maxRetries)
+	if elapsed != maxRetries {
+		t.Fatalf("Unexpected max retries got %d instead of %d", elapsed, maxRetries)
 	}
 }
 
@@ -155,7 +158,7 @@ func TestFallback(t *testing.T) {
 
 	want := "foo"
 	fall := ""
-	bucket := &Bucket{
+	bucket := Bucket{
 		Request: func(_ context.Context) error {
 			return errors.New("some error")
 		},

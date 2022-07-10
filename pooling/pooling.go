@@ -55,7 +55,7 @@ type Bucket struct {
 	elapsed uint64
 
 	// An object that will perform exactly one action.
-	once sync.Once
+	once *sync.Once
 }
 
 func newResource(id int) *resource {
@@ -119,7 +119,7 @@ func (p *Pool) Roll() {
 			continue
 		}
 
-		if b := p.bucket(); b != nil {
+		if b, has := p.bucket(); has {
 			go b.once.Do(func() {
 				p.do(b)
 			})
@@ -128,7 +128,7 @@ func (p *Pool) Roll() {
 }
 
 // Pub puts wayback requests to the resource pool
-func (p *Pool) Put(b *Bucket) {
+func (p *Pool) Put(b Bucket) {
 	// Inserts a new bucket at the front of queue.
 	p.mutex.Lock()
 	p.staging.PushFront(b)
@@ -166,7 +166,7 @@ func (p *Pool) push(r *resource) error {
 	return nil
 }
 
-func (p *Pool) do(b *Bucket) error {
+func (p *Pool) do(b Bucket) error {
 	atomic.AddInt32(&p.processing, 1)
 	defer func() {
 		atomic.AddInt32(&p.waiting, -1)
@@ -223,13 +223,14 @@ func (p *Pool) do(b *Bucket) error {
 	return nil
 }
 
-func (p *Pool) bucket() *Bucket {
+func (p *Pool) bucket() (b Bucket, ok bool) {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	if b, ok := p.staging.PopBack().(*Bucket); ok {
-		return b
+	if b, ok = p.staging.PopBack().(Bucket); ok {
+		b.once = new(sync.Once)
+		return b, ok
 	}
 
-	return nil
+	return
 }

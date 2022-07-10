@@ -270,7 +270,7 @@ func (s *Slack) process(ev *event) (err error) {
 		logger.Error("reply queue failed: %v", err)
 		return
 	}
-	bucket := &pooling.Bucket{
+	bucket := pooling.Bucket{
 		Request: func(ctx context.Context) error {
 			if err := s.wayback(ctx, ev, urls); err != nil {
 				logger.Error("archives failed: %v", err)
