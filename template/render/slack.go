@@ -93,11 +93,13 @@ func (s *Slack) parseArtifact(assets reduxer.Artifact, tmplBytes *bytes.Buffer) 
 	tmpl := `<https://anonfiles.com/|AnonFiles> - [ <{{ .Img.Remote.Anonfile | url -}}
 |IMG> ¦ <{{ .PDF.Remote.Anonfile | url }}|PDF> ¦ <{{ .Raw.Remote.Anonfile | url -}}
 |RAW> ¦ <{{ .Txt.Remote.Anonfile | url }}|TXT> ¦ <{{ .HAR.Remote.Anonfile | url -}}
-|HAR> ¦ <{{ .WARC.Remote.Anonfile | url }}|WARC> ¦ <{{ .Media.Remote.Anonfile | url }}|MEDIA> ]
+|HAR> ¦ <{{ .HTM.Remote.Anonfile | url }}|HTM> ¦ <{{ .WARC.Remote.Anonfile | url -}}
+|WARC> ¦ <{{ .Media.Remote.Anonfile | url }}|MEDIA> ]
 <https://catbox.moe/|Catbox> - [ <{{ .Img.Remote.Catbox | url -}}
 |IMG> ¦ <{{ .PDF.Remote.Catbox | url }}|PDF> ¦ <{{ .Raw.Remote.Catbox | url -}}
 |RAW> ¦ <{{ .Txt.Remote.Catbox | url }}|TXT> ¦ <{{ .HAR.Remote.Catbox | url -}}
-|HAR> ¦ <{{ .WARC.Remote.Catbox | url }}|WARC> ¦ <{{ .Media.Remote.Catbox | url }}|MEDIA> ]`
+|HAR> ¦ <{{ .HTM.Remote.Catbox | url }}|HTM> ¦ <{{ .WARC.Remote.Catbox | url -}}
+|WARC> ¦ <{{ .Media.Remote.Catbox | url }}|MEDIA> ]`
 
 	tpl, err := template.New("assets").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {

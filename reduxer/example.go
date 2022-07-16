@@ -48,6 +48,13 @@ func BundleExample() Reduxer {
 					Catbox:   "https://files.catbox.moe/3agtva.har",
 				},
 			},
+			HTM: Asset{
+				Local: "/path/to/single-htm",
+				Remote: Remote{
+					Anonfile: "https://anonfiles.com/v4G4S09abc",
+					Catbox:   "",
+				},
+			},
 			WARC: Asset{
 				Local: "/path/to/warc",
 				Remote: Remote{

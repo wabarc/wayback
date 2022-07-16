@@ -23,6 +23,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/go-shiori/go-readability"
+	"github.com/go-shiori/obelisk"
 	"github.com/iawia002/lux/downloader"
 	"github.com/iawia002/lux/extractors"
 	"github.com/wabarc/go-anonfile"
@@ -37,6 +38,10 @@ import (
 )
 
 var (
+	ctxBasenameKey struct{}
+
+	filePerm = os.FileMode(0o600)
+
 	_, existFFmpeg       = exists("ffmpeg")
 	youget, existYouGet  = exists("you-get")
 	ytdl, existYoutubeDL = exists("youtube-dl")
@@ -65,13 +70,13 @@ type bundle struct {
 
 // Artifact represents the file paths stored on the local disk.
 type Artifact struct {
-	Img, PDF, Raw, Txt, HAR, WARC, Media Asset
+	Img, PDF, Raw, Txt, HAR, HTM, WARC, Media Asset
 }
 
 // Asset represents the files on the local disk and the remote servers.
 type Asset struct {
-	Local  string
 	Remote Remote
+	Local  string
 }
 
 // Remote represents the file on the remote server.
@@ -184,7 +189,7 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 			fp = strings.TrimSuffix(fp, ".json") + mt.Extension()
 		}
 		logger.Debug("writing file: %s", fp)
-		if err := os.WriteFile(fp, buf, 0o600); err != nil {
+		if err := os.WriteFile(fp, buf, filePerm); err != nil {
 			return errors.Wrap(err, fmt.Sprintf("write %s file failed", ft))
 		}
 		if err := helper.SetField(key, "Local", fp); err != nil {
@@ -200,6 +205,10 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 
 			var artifact Artifact
 			u, _ := url.Parse(shot.URL)
+
+			basename := strings.TrimRight(helper.FileName(shot.URL, ""), ".html")
+			basename = strings.TrimRight(basename, ".htm")
+			ctx = context.WithValue(ctx, ctxBasenameKey, basename)
 
 			if err := assign(&artifact.Img, shot.Image, shot.URL); err != nil {
 				logger.Error("assign field Img to path struct failed: %v", err)
@@ -220,13 +229,18 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 			if err := helper.SetField(&artifact.Media, "Local", media(ctx, dir, shot.URL)); err != nil {
 				logger.Error("assign field Media to path struct failed: %v", err)
 			}
+			// Attach single file
+			singleFilePath := singleFile(ctx, bytes.NewReader(shot.HTML), dir, shot.URL)
+			if err := helper.SetField(&artifact.HTM, "Local", singleFilePath); err != nil {
+				logger.Error("assign field HTM to path struct failed: %v", err)
+			}
 			article, err := readability.FromReader(bytes.NewReader(shot.HTML), u)
 			if err != nil {
 				logger.Error("parse html failed: %v", err)
 			}
-			fn := strings.TrimRight(helper.FileName(shot.URL, ""), "html") + "txt"
-			fp := filepath.Join(dir, fn)
-			if err := os.WriteFile(fp, helper.String2Byte(article.TextContent), 0o600); err == nil && article.TextContent != "" {
+			txtName := basename + ".txt"
+			fp := filepath.Join(dir, txtName)
+			if err := os.WriteFile(fp, helper.String2Byte(article.TextContent), filePerm); err == nil && article.TextContent != "" {
 				if err := helper.SetField(&artifact.Txt, "Local", fp); err != nil {
 					logger.Error("assign field Txt to artifact struct failed: %v", err)
 				}
@@ -342,7 +356,7 @@ func exists(tool string) (string, bool) {
 // nolint:gocyclo
 func media(ctx context.Context, dir, in string) string {
 	logger.Debug("download media to %s, url: %s", dir, in)
-	fn := strings.TrimSuffix(helper.FileName(in, ""), ".html")
+	fn := basename(ctx)
 	fp := filepath.Join(dir, fn)
 
 	// Glob files by given pattern and return first file
@@ -508,6 +522,7 @@ func remotely(ctx context.Context, artifact *Artifact) error {
 		&artifact.Raw,
 		&artifact.Txt,
 		&artifact.HAR,
+		&artifact.HTM,
 		&artifact.WARC,
 		&artifact.Media,
 	}
@@ -551,6 +566,34 @@ func remotely(ctx context.Context, artifact *Artifact) error {
 	}
 
 	return nil
+}
+
+func singleFile(ctx context.Context, inp io.Reader, dir, uri string) string {
+	req := obelisk.Request{URL: uri, Input: inp}
+	arc := &obelisk.Archiver{
+		SkipResourceURLError: true,
+		RequestTimeout:       3 * time.Second,
+	}
+	arc.Validate()
+
+	content, _, err := arc.Archive(ctx, req)
+	if err != nil {
+		return ""
+	}
+
+	name := basename(ctx) + ".htm"
+	path := filepath.Join(dir, name)
+	if err := os.WriteFile(path, content, filePerm); err != nil {
+		return ""
+	}
+	return path
+}
+
+func basename(ctx context.Context) string {
+	if v, ok := ctx.Value(ctxBasenameKey).(string); ok {
+		return v
+	}
+	return ""
 }
 
 func readOutput(rc io.ReadCloser) {

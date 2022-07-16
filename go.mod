@@ -16,6 +16,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/gabriel-vasile/mimetype v1.4.0
 	github.com/go-shiori/go-readability v0.0.0-20220215145315-dd6828d2f09b
+	github.com/go-shiori/obelisk v0.0.0-20220524135250-3d6752a59bd7
 	github.com/google/go-github/v40 v40.0.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
@@ -37,7 +38,7 @@ require (
 	github.com/wabarc/imgbb v1.0.0
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20220126131044-16299c0dd43d
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
-	github.com/wabarc/playback v0.0.0-20220610121013-427fb317031c
+	github.com/wabarc/playback v0.0.0-20220715111526-90d0327d3f04
 	github.com/wabarc/rivet v0.0.0-20220207154318-37fc56bcf4e1
 	github.com/wabarc/screenshot v1.5.1-0.20220318140348-632a135d50db
 	github.com/wabarc/telegra.ph v0.0.0-20220501011455-b0b8c35c6d09
@@ -68,7 +69,6 @@ require (
 	github.com/dlclark/regexp2 v1.4.1-0.20201116162257-a2a8dda75c91 // indirect
 	github.com/dop251/goja v0.0.0-20211211112501-fb27c91c26ed // indirect
 	github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65 // indirect
-	github.com/go-shiori/obelisk v0.0.0-20220314133127-347d73aad05b // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect

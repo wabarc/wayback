@@ -86,6 +86,7 @@ func filterArtifact(art reduxer.Artifact, upper int64) (paths []string) {
 		art.Raw,
 		art.Txt,
 		art.HAR,
+		art.HTM,
 		art.WARC,
 		art.Media,
 	}
