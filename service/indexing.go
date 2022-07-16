@@ -88,7 +88,7 @@ func (m *Meili) Setup() error {
 	return m.sortable()
 }
 
-// version specifies its version of the meilisearch server.
+// getVersion specifies its version of the meilisearch server.
 func (m *Meili) getVersion() error {
 	endpoint := fmt.Sprintf(`%s/version`, m.endpoint)
 	resp, err := m.do(http.MethodGet, endpoint, nil)
