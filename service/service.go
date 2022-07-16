@@ -18,8 +18,10 @@ const (
 	MsgWaybackTimeout  = "wayback timeout, please try later."
 )
 
+type doFunc func(cols []wayback.Collect, rdx reduxer.Reduxer) error
+
 // Wayback in a separate goroutine.
-func Wayback(ctx context.Context, urls []*url.URL, do func(cols []wayback.Collect, rdx reduxer.Reduxer) error) error {
+func Wayback(ctx context.Context, urls []*url.URL, do doFunc) error {
 	var done = make(chan error, 1)
 	var cols []wayback.Collect
 	var rdx reduxer.Reduxer
@@ -31,12 +33,7 @@ func Wayback(ctx context.Context, urls []*url.URL, do func(cols []wayback.Collec
 			done <- errors.Wrap(err, "wayback failed")
 			return
 		}
-		defer rdx.Flush()
-		// push collects to the Meilisearch
-		if meili != nil {
-			meili.push(cols)
-		}
-		done <- do(cols, rdx)
+		done <- nil
 	}()
 
 	select {
@@ -44,6 +41,15 @@ func Wayback(ctx context.Context, urls []*url.URL, do func(cols []wayback.Collec
 		return ctx.Err()
 	case err := <-done:
 		close(done)
-		return err
+		if err != nil {
+			return err
+		}
+		defer rdx.Flush()
+
+		// push collects to the Meilisearch
+		if meili != nil {
+			meili.push(cols)
+		}
+		return do(cols, rdx)
 	}
 }

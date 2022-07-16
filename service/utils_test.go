@@ -125,7 +125,7 @@ func TestWayback(t *testing.T) {
 	logger.SetLogLevel(logger.LevelFatal)
 
 	u, _ := url.Parse("https://example.com/")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 	defer helper.CheckContext(ctx, t)
 
