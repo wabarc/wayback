@@ -105,8 +105,8 @@ More information...
 > source: [https://example.com/](https://example.com/)
 > archived: [http://telegra.ph/title-01-01](http://telegra.ph/title-01-01)
 
-**[AnonFiles](https://anonfiles.com/)** - [ [IMG](https://anonfiles.com/FbZfSa9eu4) ¦ [PDF](https://anonfiles.com/r4G8Sb90ud) ¦ [RAW](https://anonfiles.com/pbG4Se94ua) ¦ [TXT](https://anonfiles.com/naG6S09bu1) ¦ [HAR](https://anonfiles.com/n1paZfB3ub) ¦ [WARC](https://anonfiles.com/v4G4S09auc) ¦ [MEDIA]() ]
-**[Catbox](https://catbox.moe/)** - [ [IMG](https://files.catbox.moe/9u6yvu.png) ¦ [PDF](https://files.catbox.moe/q73uqh.pdf) ¦ [RAW](https://files.catbox.moe/bph1g6.htm) ¦ [TXT](https://files.catbox.moe/wwrby6.txt) ¦ [HAR](https://files.catbox.moe/3agtva.har) ¦ [WARC]() ¦ [MEDIA]() ]`
+**[AnonFiles](https://anonfiles.com/)** - [ [IMG](https://anonfiles.com/FbZfSa9eu4) ¦ [PDF](https://anonfiles.com/r4G8Sb90ud) ¦ [RAW](https://anonfiles.com/pbG4Se94ua) ¦ [TXT](https://anonfiles.com/naG6S09bu1) ¦ [HAR](https://anonfiles.com/n1paZfB3ub) ¦ [HTM](https://anonfiles.com/v4G4S09abc) ¦ [WARC](https://anonfiles.com/v4G4S09auc) ¦ [MEDIA]() ]
+**[Catbox](https://catbox.moe/)** - [ [IMG](https://files.catbox.moe/9u6yvu.png) ¦ [PDF](https://files.catbox.moe/q73uqh.pdf) ¦ [RAW](https://files.catbox.moe/bph1g6.htm) ¦ [TXT](https://files.catbox.moe/wwrby6.txt) ¦ [HAR](https://files.catbox.moe/3agtva.har) ¦ [HTM]() ¦ [WARC]() ¦ [MEDIA]() ]`
 
 	got := ForPublish(&GitHub{Cols: collects, Data: bundleExample}).String()
 	if got != expected {

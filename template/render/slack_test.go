@@ -28,8 +28,8 @@ Telegraph:
 • http://telegra.ph/title-01-01
 
 
-<https://anonfiles.com/|AnonFiles> - [ <https://anonfiles.com/FbZfSa9eu4|IMG> ¦ <https://anonfiles.com/r4G8Sb90ud|PDF> ¦ <https://anonfiles.com/pbG4Se94ua|RAW> ¦ <https://anonfiles.com/naG6S09bu1|TXT> ¦ <https://anonfiles.com/n1paZfB3ub|HAR> ¦ <https://anonfiles.com/v4G4S09auc|WARC> ¦ <|MEDIA> ]
-<https://catbox.moe/|Catbox> - [ <https://files.catbox.moe/9u6yvu.png|IMG> ¦ <https://files.catbox.moe/q73uqh.pdf|PDF> ¦ <https://files.catbox.moe/bph1g6.htm|RAW> ¦ <https://files.catbox.moe/wwrby6.txt|TXT> ¦ <https://files.catbox.moe/3agtva.har|HAR> ¦ <|WARC> ¦ <|MEDIA> ]`
+<https://anonfiles.com/|AnonFiles> - [ <https://anonfiles.com/FbZfSa9eu4|IMG> ¦ <https://anonfiles.com/r4G8Sb90ud|PDF> ¦ <https://anonfiles.com/pbG4Se94ua|RAW> ¦ <https://anonfiles.com/naG6S09bu1|TXT> ¦ <https://anonfiles.com/n1paZfB3ub|HAR> ¦ <https://anonfiles.com/v4G4S09abc|HTM> ¦ <https://anonfiles.com/v4G4S09auc|WARC> ¦ <|MEDIA> ]
+<https://catbox.moe/|Catbox> - [ <https://files.catbox.moe/9u6yvu.png|IMG> ¦ <https://files.catbox.moe/q73uqh.pdf|PDF> ¦ <https://files.catbox.moe/bph1g6.htm|RAW> ¦ <https://files.catbox.moe/wwrby6.txt|TXT> ¦ <https://files.catbox.moe/3agtva.har|HAR> ¦ <|HTM> ¦ <|WARC> ¦ <|MEDIA> ]`
 
 	got := ForPublish(&Slack{Cols: collects, Data: bundleExample}).String()
 	if got != message {
@@ -70,8 +70,8 @@ archive.today:
 • http://archive.today/abc
 
 
-<https://anonfiles.com/|AnonFiles> - [ <https://anonfiles.com/FbZfSa9eu4|IMG> ¦ <https://anonfiles.com/r4G8Sb90ud|PDF> ¦ <https://anonfiles.com/pbG4Se94ua|RAW> ¦ <https://anonfiles.com/naG6S09bu1|TXT> ¦ <https://anonfiles.com/n1paZfB3ub|HAR> ¦ <https://anonfiles.com/v4G4S09auc|WARC> ¦ <|MEDIA> ]
-<https://catbox.moe/|Catbox> - [ <https://files.catbox.moe/9u6yvu.png|IMG> ¦ <https://files.catbox.moe/q73uqh.pdf|PDF> ¦ <https://files.catbox.moe/bph1g6.htm|RAW> ¦ <https://files.catbox.moe/wwrby6.txt|TXT> ¦ <https://files.catbox.moe/3agtva.har|HAR> ¦ <|WARC> ¦ <|MEDIA> ]`
+<https://anonfiles.com/|AnonFiles> - [ <https://anonfiles.com/FbZfSa9eu4|IMG> ¦ <https://anonfiles.com/r4G8Sb90ud|PDF> ¦ <https://anonfiles.com/pbG4Se94ua|RAW> ¦ <https://anonfiles.com/naG6S09bu1|TXT> ¦ <https://anonfiles.com/n1paZfB3ub|HAR> ¦ <https://anonfiles.com/v4G4S09abc|HTM> ¦ <https://anonfiles.com/v4G4S09auc|WARC> ¦ <|MEDIA> ]
+<https://catbox.moe/|Catbox> - [ <https://files.catbox.moe/9u6yvu.png|IMG> ¦ <https://files.catbox.moe/q73uqh.pdf|PDF> ¦ <https://files.catbox.moe/bph1g6.htm|RAW> ¦ <https://files.catbox.moe/wwrby6.txt|TXT> ¦ <https://files.catbox.moe/3agtva.har|HAR> ¦ <|HTM> ¦ <|WARC> ¦ <|MEDIA> ]`
 
 	got := ForReply(&Slack{Cols: multi, Data: bundleExample}).String()
 	if got != message {

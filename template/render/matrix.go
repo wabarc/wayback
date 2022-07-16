@@ -103,11 +103,13 @@ func (m *Matrix) parseArtifact(assets reduxer.Artifact, tmplBytes *bytes.Buffer)
 	tmpl := `<b><a href="https://anonfiles.com/">AnonFiles</a></b> - [ <a href="{{ .Img.Remote.Anonfile | url -}}
 ">IMG</a> ¦ <a href="{{ .PDF.Remote.Anonfile | url }}">PDF</a> ¦ <a href="{{ .Raw.Remote.Anonfile | url -}}
 ">RAW</a> ¦ <a href="{{ .Txt.Remote.Anonfile | url }}">TXT</a> ¦ <a href="{{ .HAR.Remote.Anonfile | url -}}
-">HAR</a> ¦ <a href="{{ .WARC.Remote.Anonfile | url }}">WARC</a> ¦ <a href="{{ .Media.Remote.Anonfile | url }}">MEDIA</a> ]<br>
+">HAR</a> ¦ <a href="{{ .HTM.Remote.Anonfile | url }}">HTM</a> ¦ <a href="{{ .WARC.Remote.Anonfile | url -}}
+">WARC</a> ¦ <a href="{{ .Media.Remote.Anonfile | url }}">MEDIA</a> ]<br>
 <b><a href="https://catbox.moe/">Catbox</a></b> - [ <a href="{{ .Img.Remote.Catbox | url -}}
 ">IMG</a> ¦ <a href="{{ .PDF.Remote.Catbox | url }}">PDF</a> ¦ <a href="{{ .Raw.Remote.Catbox | url -}}
 ">RAW</a> ¦ <a href="{{ .Txt.Remote.Catbox | url }}">TXT</a> ¦ <a href="{{ .HAR.Remote.Catbox | url -}}
-">HAR</a> ¦ <a href="{{ .WARC.Remote.Catbox | url }}">WARC</a> ¦ <a href="{{ .Media.Remote.Catbox | url }}">MEDIA</a> ]`
+">HAR</a> ¦ <a href="{{ .HTM.Remote.Catbox | url }}">HTM</a> ¦ <a href="{{ .WARC.Remote.Catbox | url -}}
+">WARC</a> ¦ <a href="{{ .Media.Remote.Catbox | url }}">MEDIA</a> ]`
 
 	tpl, err := template.New("assets").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
