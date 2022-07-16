@@ -25,26 +25,18 @@ func Wayback(ctx context.Context, urls []*url.URL, do func(cols []wayback.Collec
 	var rdx reduxer.Reduxer
 
 	go func() {
-		go func() {
-			var err error
-			cols, rdx, err = wayback.Wayback(ctx, urls...)
-			if err != nil {
-				done <- errors.Wrap(err, "wayback failed")
-				return
-			}
-			defer rdx.Flush()
-			// push collects to the Meilisearch
-			if meili != nil {
-				go meili.push(cols)
-			}
-			done <- do(cols, rdx)
-		}()
-
-		// Block until context is finished.
-		select {
-		case <-ctx.Done():
+		var err error
+		cols, rdx, err = wayback.Wayback(ctx, urls...)
+		if err != nil {
+			done <- errors.Wrap(err, "wayback failed")
 			return
 		}
+		defer rdx.Flush()
+		// push collects to the Meilisearch
+		if meili != nil {
+			meili.push(cols)
+		}
+		done <- do(cols, rdx)
 	}()
 
 	select {

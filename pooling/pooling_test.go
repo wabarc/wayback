@@ -10,11 +10,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 )
 
 func TestRoll(t *testing.T) {
+	defer helper.CheckTest(t)
+
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
@@ -25,6 +28,7 @@ func TestRoll(t *testing.T) {
 	c := 2
 	p := New(context.Background(), c)
 	p.timeout = 10 * time.Millisecond
+	defer helper.CheckContext(p.context, t)
 
 	if l := len(p.resource); l != c {
 		t.Fatalf("The length of pool got %d instead of %d", l, c)
@@ -61,6 +65,8 @@ func TestRoll(t *testing.T) {
 }
 
 func TestTimeout(t *testing.T) {
+	defer helper.CheckTest(t)
+
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
@@ -107,6 +113,8 @@ func TestTimeout(t *testing.T) {
 }
 
 func TestMaxRetries(t *testing.T) {
+	defer helper.CheckTest(t)
+
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
@@ -136,6 +144,8 @@ func TestMaxRetries(t *testing.T) {
 }
 
 func TestFallback(t *testing.T) {
+	defer helper.CheckTest(t)
+
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
@@ -168,6 +178,8 @@ func TestFallback(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
+	defer helper.CheckTest(t)
+
 	var err error
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
