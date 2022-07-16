@@ -208,6 +208,9 @@ func (m *Meili) sortable() error {
 	// The method of updating the searchable attributes settings changed to `PUT`
 	// See https://github.com/meilisearch/meilisearch/releases/tag/v0.28.0
 	constraints, err := version.NewConstraint(`>= 0.28`)
+	if err != nil {
+		return errors.Wrap(err, `set sortable attributes: new constraint failed`)
+	}
 	if constraints.Check(ver) {
 		method = http.MethodPut
 	}
