@@ -35,7 +35,7 @@ require (
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/go-anonfile v0.1.0
 	github.com/wabarc/go-catbox v0.1.0
-	github.com/wabarc/helper v0.0.0-20220320101038-dbb2ea36249b
+	github.com/wabarc/helper v0.0.0-20220717024606-0f088ee08afa
 	github.com/wabarc/imgbb v1.0.0
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20220126131044-16299c0dd43d
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
@@ -45,7 +45,7 @@ require (
 	github.com/wabarc/telegra.ph v0.0.0-20220501011455-b0b8c35c6d09
 	github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5
 	go.etcd.io/bbolt v1.3.6
-	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4
+	golang.org/x/net v0.0.0-20220708220712-1185a9018129
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/telebot.v3 v3.0.0-20220130115853-f0291132d3c3
 	maunium.net/go/mautrix v0.10.12
@@ -69,6 +69,7 @@ require (
 	github.com/dghubble/sling v1.3.0 // indirect
 	github.com/dlclark/regexp2 v1.4.1-0.20201116162257-a2a8dda75c91 // indirect
 	github.com/dop251/goja v0.0.0-20211211112501-fb27c91c26ed // indirect
+	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
@@ -130,11 +131,12 @@ require (
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	github.com/ybbus/httpretry v1.0.1 // indirect
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
-	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150 // indirect
+	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/blake3 v1.1.7 // indirect
 	mvdan.cc/xurls/v2 v2.4.0 // indirect
 )

@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -19,6 +20,8 @@ import (
 )
 
 func TestMatchURL(t *testing.T) {
+	defer helper.CheckTest(t)
+
 	parser := config.NewParser()
 	var err error
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
@@ -69,6 +72,8 @@ func TestMatchURL(t *testing.T) {
 }
 
 func TestExcludeURL(t *testing.T) {
+	defer helper.CheckTest(t)
+
 	parser := config.NewParser()
 	var err error
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
@@ -110,6 +115,8 @@ func TestExcludeURL(t *testing.T) {
 }
 
 func TestWayback(t *testing.T) {
+	defer helper.CheckTest(t)
+
 	parser := config.NewParser()
 	var err error
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
@@ -120,6 +127,7 @@ func TestWayback(t *testing.T) {
 	u, _ := url.Parse("https://example.com/")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
+	defer helper.CheckContext(ctx, t)
 
 	urls := []*url.URL{u}
 	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
