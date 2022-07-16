@@ -19,6 +19,7 @@ require (
 	github.com/google/go-github/v40 v40.0.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
+	github.com/hashicorp/go-version v1.6.0
 	github.com/iawia002/lux v0.14.0
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
 	github.com/phf/go-queue v0.0.0-20170504031614-9abe38d0371d
