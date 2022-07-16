@@ -104,7 +104,18 @@ func process(ctx context.Context, pub Publisher, cols []wayback.Collect, args ..
 				time.Sleep(w)
 			}
 
-			return pub.Publish(ctx, part, args...)
+			ch := make(chan error, 1)
+			go func() {
+				ch <- pub.Publish(ctx, part, args...)
+			}()
+
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case err := <-ch:
+				close(ch)
+				return err
+			}
 		})
 	}
 	if err := g.Wait(); err != nil {
