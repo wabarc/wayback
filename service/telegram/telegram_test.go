@@ -19,6 +19,7 @@ import (
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	telegram "gopkg.in/telebot.v3"
 )
@@ -327,6 +328,15 @@ func TestPlayback(t *testing.T) {
 	parser := config.NewParser()
 	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
+	}
+	if config.Opts.EnabledMeilisearch() {
+		endpoint := config.Opts.WaybackMeiliEndpoint()
+		indexing := config.Opts.WaybackMeiliIndexing()
+		apikey := config.Opts.WaybackMeiliApikey()
+		meili := service.NewMeili(endpoint, apikey, indexing)
+		if err := meili.Setup(); err != nil {
+			t.Errorf("setup meilisearch failed: %v", err)
+		}
 	}
 
 	getUpdatesJSON = `{
