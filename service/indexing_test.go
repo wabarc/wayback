@@ -20,6 +20,12 @@ import (
 var (
 	apiKey = `foo`
 
+	respGetVersion = `{
+  "commitSha": "b46889b5f0f2f8b91438a08a358ba8f05fc09fc1",
+  "commitDate": "2019-11-15T09:51:54.278247+00:00",
+  "pkgVersion": "0.1.1"
+}
+`
 	respGetIndex = fmt.Sprintf(`{
   "uid": "%s",
   "name": "%s",
@@ -77,12 +83,22 @@ var (
 			Ext: config.SLOT_PH,
 		},
 	}
+	invalidSample = []wayback.Collect{
+		{
+			Arc: config.SLOT_IA,
+			Dst: "invalid URL",
+			Src: "https://example.com/",
+			Ext: config.SLOT_IA,
+		},
+	}
 
 	handlerFunc = func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case !strings.Contains(r.Header.Get(`Authorization`), apiKey):
 			w.WriteHeader(http.StatusUnauthorized)
 			_, _ = w.Write([]byte(respInvalidRequest))
+		case r.URL.Path == `/version`:
+			_, _ = w.Write([]byte(respGetVersion))
 		case r.Method == http.MethodGet && r.URL.Path == `/indexes/`+indexing: // get index
 			_, _ = w.Write([]byte(respGetIndex))
 		case r.Method == http.MethodPost && r.URL.Path == `/indexes`: // create index
@@ -211,14 +227,34 @@ func TestPushDocument(t *testing.T) {
 			collect: sample,
 			returns: ``,
 		},
+		{
+			collect: invalidSample,
+			returns: ``,
+		},
 	}
 
 	for _, test := range tests {
 		t.Run("", func(t *testing.T) {
-			err := m.push(sample)
+			err := m.push(test.collect)
 			if err != nil && err.Error() != test.returns {
 				t.Fatalf(`unexpected push document: %v`, err)
 			}
 		})
+	}
+}
+
+func TestVersion(t *testing.T) {
+	_, mux, server := helper.MockServer()
+	defer server.Close()
+
+	mux.HandleFunc("/", handlerFunc)
+
+	m := NewMeili(server.URL, apiKey, indexing)
+	err := m.getVersion()
+	if err != nil {
+		t.Fatalf(`unexpected get version: %v`, err)
+	}
+	if m.version == "" {
+		t.Fatal(`unexpected version`)
 	}
 }

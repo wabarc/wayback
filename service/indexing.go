@@ -11,9 +11,11 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-version"
 	"github.com/rs/xid"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -46,6 +48,9 @@ type Meili struct {
 	// Meilisearch admin API key, which can be emptied.
 	apikey string
 
+	// Version of the Meilisearch server.
+	version string
+
 	client *http.Client
 }
 
@@ -76,7 +81,40 @@ func (m *Meili) Setup() error {
 	if err != nil {
 		return err
 	}
+	err = m.getVersion()
+	if err != nil {
+		return err
+	}
 	return m.sortable()
+}
+
+// getVersion specifies its version of the meilisearch server.
+func (m *Meili) getVersion() error {
+	endpoint := fmt.Sprintf(`%s/version`, m.endpoint)
+	resp, err := m.do(http.MethodGet, endpoint, nil)
+	if err != nil {
+		return errors.Wrap(err, `get version: request failed`)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New(`get version: request failed: ` + resp.Status)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return errors.Wrap(err, `get version: reads body failed`)
+	}
+
+	var server struct {
+		Version string `json:"pkgVersion"`
+	}
+	if err := json.Unmarshal(body, &server); err != nil {
+		return errors.Wrap(err, `get version: unmarshal json failed`)
+	}
+	m.version = server.Version
+
+	return nil
 }
 
 type indexes struct {
@@ -162,7 +200,22 @@ func (m *Meili) createIndex() error {
 func (m *Meili) sortable() error {
 	endpoint := fmt.Sprintf(`%s/indexes/%s/settings/sortable-attributes`, m.endpoint, m.indexing)
 	payload := fmt.Sprintf(`["id"]`)
-	resp, err := m.do(http.MethodPost, endpoint, strings.NewReader(payload))
+	method := http.MethodPost
+	ver, err := version.NewVersion(m.version)
+	if err != nil {
+		return errors.Wrap(err, `set sortable attributes: invalid version: `+m.version)
+	}
+	// The method of updating the searchable attributes settings changed to `PUT`
+	// See https://github.com/meilisearch/meilisearch/releases/tag/v0.28.0
+	constraints, err := version.NewConstraint(`>= 0.28`)
+	if err != nil {
+		return errors.Wrap(err, `set sortable attributes: new constraint failed`)
+	}
+	if constraints.Check(ver) {
+		method = http.MethodPut
+	}
+
+	resp, err := m.do(method, endpoint, strings.NewReader(payload))
 	if err != nil {
 		return errors.Wrap(err, `set sortable attributes: request failed`)
 	}
@@ -254,6 +307,11 @@ func (m *Meili) documents(cols []wayback.Collect) (docs []document) {
 			Source: src,
 		}
 		for _, col := range maps {
+			_, err := url.Parse(col.Dst)
+			// If the URI is invalid, the results will be an empty string.
+			if err != nil {
+				col.Dst = ""
+			}
 			switch col.Arc {
 			case config.SLOT_IA:
 				doc.IA = col.Dst
