@@ -14,7 +14,7 @@ require (
 	github.com/dstotijn/go-notion v0.6.1
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.13.0
-	github.com/gabriel-vasile/mimetype v1.4.0
+	github.com/gabriel-vasile/mimetype v1.4.1
 	github.com/go-shiori/go-readability v0.0.0-20220215145315-dd6828d2f09b
 	github.com/go-shiori/obelisk v0.0.0-20220524135250-3d6752a59bd7
 	github.com/google/go-github/v40 v40.0.0
