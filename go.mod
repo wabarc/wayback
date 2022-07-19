@@ -48,7 +48,7 @@ require (
 	golang.org/x/net v0.0.0-20220708220712-1185a9018129
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/telebot.v3 v3.0.0-20220130115853-f0291132d3c3
-	maunium.net/go/mautrix v0.10.12
+	maunium.net/go/mautrix v0.11.0
 )
 
 require (
@@ -130,7 +130,7 @@ require (
 	github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae // indirect
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	github.com/ybbus/httpretry v1.0.1 // indirect
-	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
+	golang.org/x/crypto v0.0.0-20220513210258-46612604a0f9 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
