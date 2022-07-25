@@ -344,11 +344,11 @@ func (s *Slack) playback(channel, text, triggerID string) error {
 	urls := service.MatchURL(text)
 	if len(urls) == 0 {
 		// Only the inputs in input blocks will be included in view_submission’s view.state.values: https://slack.dev/java-slack-sdk/guides/modals
+		playbackHint := slack.NewTextBlockObject(slack.PlainTextType, "Playback URLs", false, false)
 		playbackNameText := slack.NewTextBlockObject(slack.PlainTextType, "URLs", false, false)
 		playbackPlaceholder := slack.NewTextBlockObject(slack.PlainTextType, "Please send me URLs to playback...", false, false)
 		playbackNameElement := slack.NewPlainTextInputBlockElement(playbackPlaceholder, callbackKey)
-		playbackNameBlock := slack.NewInputBlock(callbackKey, playbackNameText, playbackNameElement)
-		// playbackNameBlock.Hint = slack.NewTextBlockObject(slack.PlainTextType, "Playback URLs", false, false)
+		playbackNameBlock := slack.NewInputBlock(callbackKey, playbackNameText, playbackHint, playbackNameElement)
 		blocks := slack.Blocks{
 			BlockSet: []slack.Block{playbackNameBlock},
 		}
