@@ -44,7 +44,7 @@ require (
 	github.com/wabarc/screenshot v1.5.1-0.20220318140348-632a135d50db
 	github.com/wabarc/telegra.ph v0.0.0-20220501011455-b0b8c35c6d09
 	github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5
-	github.com/zoomio/tagify v0.53.0
+	github.com/zoomio/tagify v0.58.0
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/net v0.0.0-20220708220712-1185a9018129
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
@@ -64,8 +64,8 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.8 // indirect
-	github.com/chromedp/cdproto v0.0.0-20220426083054-c58585551e6c // indirect
-	github.com/chromedp/chromedp v0.8.0 // indirect
+	github.com/chromedp/cdproto v0.0.0-20220725225757-5988d9195a6c // indirect
+	github.com/chromedp/chromedp v0.8.3 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
 	github.com/dghubble/sling v1.3.0 // indirect
@@ -133,10 +133,10 @@ require (
 	github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae // indirect
 	github.com/whyrusleeping/tar-utils v0.0.0-20180509141711-8c6c8ba81d5c // indirect
 	github.com/ybbus/httpretry v1.0.1 // indirect
-	github.com/zoomio/inout v0.11.0 // indirect
+	github.com/zoomio/inout v0.12.0 // indirect
 	github.com/zoomio/stopwords v0.10.0 // indirect
 	golang.org/x/crypto v0.0.0-20220315160706-3147a52a75dd // indirect
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
@@ -145,5 +145,3 @@ require (
 	lukechampine.com/blake3 v1.1.7 // indirect
 	mvdan.cc/xurls/v2 v2.4.0 // indirect
 )
-
-replace github.com/zoomio/tagify => github.com/zoomio/tagify v0.55.1-0.20220624022425-774559dc8483
