@@ -88,22 +88,21 @@ func New(ctx context.Context, capacity int) *Pool {
 
 // Roll process wayback requests from the resource pool for execution.
 //
-//  // Stream generates values with DoSomething and sends them to out
-//  // until DoSomething returns an error or ctx.Done is closed.
-//  func Stream(ctx context.Context, out chan<- Value) error {
-//  	for {
-//  		v, err := DoSomething(ctx)
-//  		if err != nil {
-//  			return err
-//  		}
-//  		select {
-//  		case <-ctx.Done():
-//  			return ctx.Err()
-//  		case out <- v:
-//  		}
-//  	}
-//  }
-//
+//	// Stream generates values with DoSomething and sends them to out
+//	// until DoSomething returns an error or ctx.Done is closed.
+//	func Stream(ctx context.Context, out chan<- Value) error {
+//		for {
+//			v, err := DoSomething(ctx)
+//			if err != nil {
+//				return err
+//			}
+//			select {
+//			case <-ctx.Done():
+//				return ctx.Err()
+//			case out <- v:
+//			}
+//		}
+//	}
 func (p *Pool) Roll() {
 	// Blocks until closed
 	for {
@@ -121,6 +120,7 @@ func (p *Pool) Roll() {
 
 		if b, has := p.bucket(); has {
 			go b.once.Do(func() {
+				// nolint:errcheck
 				p.do(b)
 			})
 		}
@@ -151,11 +151,9 @@ func (p *Pool) Close() {
 	}
 }
 
-func (p *Pool) pull() (r *resource) {
-	select {
-	case r = <-p.resource:
-		return r
-	}
+func (p *Pool) pull() *resource {
+	r := <-p.resource
+	return r
 }
 
 func (p *Pool) push(r *resource) error {
@@ -181,9 +179,10 @@ func (p *Pool) do(b Bucket) error {
 
 		r := p.pull()
 		defer func() {
-			p.push(r)
+			p.push(r) // nolint:errcheck
 			if b.elapsed >= p.maxRetries {
 				if b.Fallback != nil {
+					// nolint:errcheck
 					b.Fallback(ctx)
 				}
 			}

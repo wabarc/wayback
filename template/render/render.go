@@ -187,6 +187,4 @@ func writeArtifact(cols []wayback.Collect, rdx reduxer.Reduxer, fn func(art redu
 			fn(bundle.Artifact())
 		}
 	}
-
-	return
 }

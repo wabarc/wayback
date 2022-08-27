@@ -67,6 +67,31 @@ func (m *Matrix) setup(roomIDs []id.RoomID) {
 	}
 }
 
+func (m *Matrix) joinedRooms() []id.RoomID {
+	var rooms []id.RoomID
+	if m.client == nil {
+		return rooms
+	}
+	resp, err := m.client.JoinedRooms()
+	if err != nil {
+		return rooms
+	}
+
+	return resp.JoinedRooms
+}
+
+func (m *Matrix) destroyRoom(roomID id.RoomID) {
+	if roomID == "" || m.client == nil {
+		return
+	}
+	if id.RoomID(config.Opts.MatrixRoomID()) == roomID {
+		return
+	}
+
+	m.client.LeaveRoom(roomID)
+	m.client.ForgetRoom(roomID)
+}
+
 var (
 	homeserver = "https://matrix.org"
 	senderUID  = os.Getenv("SENDER_UID")

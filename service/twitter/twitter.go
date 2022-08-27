@@ -86,7 +86,7 @@ func (t *Twitter) Serve() error {
 	t.fetchTick = time.NewTicker(time.Minute) // Fetch Direct Message event
 	go func() {
 		t.archiving = make(map[string]bool)
-		for {
+		for { // nolint:gosimple
 			select {
 			case <-t.fetchTick.C:
 				messages, resp, err := t.client.DirectMessages.EventsList(
@@ -114,7 +114,7 @@ func (t *Twitter) Serve() error {
 								return nil
 							},
 							Fallback: func(_ context.Context) error {
-								t.reply(event, service.MsgWaybackTimeout)
+								t.reply(event, service.MsgWaybackTimeout) // nolint:errcheck
 								metrics.IncrementWayback(metrics.ServiceTwitter, metrics.StatusFailure)
 								return nil
 							},
@@ -174,10 +174,6 @@ func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent)
 	}
 
 	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
-		cols, rdx, err := wayback.Wayback(ctx, urls...)
-		if err != nil {
-			return errors.Wrap(err, "twitter: wayback failed")
-		}
 		logger.Debug("reduxer: %#v", rdx)
 
 		replyText := render.ForReply(&render.Twitter{Cols: cols}).String()

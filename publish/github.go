@@ -84,7 +84,7 @@ func (gh *gitHub) toIssues(ctx context.Context, head, body string) bool {
 	}
 
 	if config.Opts.HasDebugMode() {
-		user, _, _ := gh.client.Users.Get(ctx, "")
+		user, _, _ := gh.client.Users.Get(ctx, "") // nolint:errcheck
 		logger.Debug("authorized GitHub user: %v", user)
 	}
 

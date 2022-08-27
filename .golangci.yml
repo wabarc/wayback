@@ -28,21 +28,26 @@ issues:
 linters:
   disable-all: true
   enable:
-    - gosec
-    - unconvert
-    - gocyclo
-    - goconst
-    - goimports
-    - gocritic
     - bodyclose
+    - errcheck
+    - goconst
+    - gocyclo
+    - gocritic
+    - gofmt
+    - goimports
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
     - misspell
+    - prealloc
     - rowserrcheck
-    - structcheck
+    - staticcheck
     - stylecheck
     - typecheck
-    - varcheck
     - unconvert
     - unparam
+    - unused
     - whitespace
 linters-settings:
   errcheck:

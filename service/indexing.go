@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -101,7 +100,7 @@ func (m *Meili) getVersion() error {
 		return errors.New(`get version: request failed: ` + resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return errors.Wrap(err, `get version: reads body failed`)
 	}
@@ -143,7 +142,7 @@ func (m *Meili) existIndex() error {
 		return errors.New(`get index: request failed: ` + resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return errors.Wrap(err, `get index: reads body failed`)
 	}
@@ -180,7 +179,7 @@ func (m *Meili) createIndex() error {
 		return errors.New(`create index: unexpected status: ` + resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return errors.Wrap(err, `create index: reads body failed`)
 	}
@@ -199,7 +198,7 @@ func (m *Meili) createIndex() error {
 // sortable sets an index's sortable attributes.
 func (m *Meili) sortable() error {
 	endpoint := fmt.Sprintf(`%s/indexes/%s/settings/sortable-attributes`, m.endpoint, m.indexing)
-	payload := fmt.Sprintf(`["id"]`)
+	payload := `["id"]`
 	method := http.MethodPost
 	ver, err := version.NewVersion(m.version)
 	if err != nil {
@@ -224,7 +223,7 @@ func (m *Meili) sortable() error {
 		return errors.New(`set sortable attributes: unexpected status: ` + resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return errors.Wrap(err, `set sortable attributes: reads body failed`)
 	}
@@ -270,7 +269,7 @@ func (m *Meili) push(cols []wayback.Collect) error {
 		return errors.New(`push document: unexpected status: ` + resp.Status)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return errors.Wrap(err, `push document: reads body failed`)
 	}
@@ -287,7 +286,7 @@ func (m *Meili) push(cols []wayback.Collect) error {
 }
 
 func (m *Meili) do(method, url string, body io.Reader) (*http.Response, error) {
-	req, _ := http.NewRequest(method, url, body)
+	req, _ := http.NewRequest(method, url, body) // nolint:errcheck
 	req.Header.Add("Authorization", "Bearer "+m.apikey)
 	req.Header.Add("Content-Type", contentType)
 	req.Header.Add("User-Agent", userAgent)

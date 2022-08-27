@@ -262,10 +262,10 @@ func parseIntList(val string, fallback []int) []int {
 		return fallback
 	}
 
-	var intList []int
 	items := strings.Split(val, ",")
+	intList := make([]int, 0, len(items))
 	for _, item := range items {
-		i, _ := strconv.Atoi(strings.TrimSpace(item))
+		i, _ := strconv.Atoi(strings.TrimSpace(item)) // nolint:errcheck
 		intList = append(intList, i)
 	}
 
@@ -274,7 +274,7 @@ func parseIntList(val string, fallback []int) []int {
 
 func defaultFilenames() []string {
 	name := "wayback.conf"
-	home, _ := os.UserHomeDir()
+	home, _ := os.UserHomeDir() // nolint:errcheck
 	return []string{
 		name,
 		filepath.Join(home, name),

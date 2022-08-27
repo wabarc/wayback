@@ -78,11 +78,11 @@ func (web *web) handle(pool *pooling.Pool) http.Handler {
 	web.router.HandleFunc("/playback", web.playback).Methods(http.MethodPost)
 
 	web.router.HandleFunc("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
-		w.Write(helper.String2Byte("ok"))
+		w.Write(helper.String2Byte("ok")) // nolint:errcheck
 	}).Name("healthcheck")
 
 	web.router.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
-		w.Write(helper.String2Byte(version.Version))
+		w.Write(helper.String2Byte(version.Version)) // nolint:errcheck
 	}).Name("version")
 
 	if config.Opts.EnabledMetrics() {
@@ -95,7 +95,7 @@ func (web *web) handle(pool *pooling.Pool) http.Handler {
 
 	web.router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write(helper.String2Byte("User-agent: *\nDisallow: /"))
+		w.Write(helper.String2Byte("User-agent: *\nDisallow: /")) // nolint:errcheck
 	})
 
 	return web.router
@@ -105,7 +105,7 @@ func (web *web) home(w http.ResponseWriter, r *http.Request) {
 	logger.Debug("access home")
 	w.Header().Set("Cache-Control", "max-age=2592000")
 	if html, ok := web.template.Render("layout", nil); ok {
-		w.Write(html)
+		w.Write(html) // nolint:errcheck
 	} else {
 		logger.Error("render template for home request failed")
 		http.Error(w, "Internal Server Error", 500)
@@ -118,7 +118,7 @@ func (web *web) showOfflinePage(w http.ResponseWriter, r *http.Request) {
 	// 	f.Flush()
 	// }
 	if html, ok := web.template.Render("offline", nil); ok {
-		w.Write(html)
+		w.Write(html) // nolint:errcheck
 	} else {
 		logger.Error("render template for offline request failed")
 		http.Error(w, "Internal Server Error", 500)
@@ -162,7 +162,7 @@ func (web *web) showWebManifest(w http.ResponseWriter, r *http.Request) {
 	if data, err := json.Marshal(manifest); err != nil {
 		logger.Error("encode for response failed, %v", err)
 	} else {
-		w.Write(data)
+		w.Write(data) // nolint:errcheck
 	}
 }
 
@@ -175,7 +175,7 @@ func (web *web) showFavicon(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Cache-Control", "max-age=2592000")
 	w.Header().Set("Content-Type", "image/x-icon")
-	w.Write(blob)
+	w.Write(blob) // nolint:errcheck
 }
 
 func (web *web) showAppIcon(w http.ResponseWriter, r *http.Request) {
@@ -189,7 +189,7 @@ func (web *web) showAppIcon(w http.ResponseWriter, r *http.Request) {
 	ext := path.Ext(filename)
 	w.Header().Set("Cache-Control", "max-age=2592000")
 	w.Header().Set("Content-Type", mime.TypeByExtension(ext))
-	w.Write(blob)
+	w.Write(blob) // nolint:errcheck
 }
 
 func (web *web) showJavascript(w http.ResponseWriter, r *http.Request) {
@@ -203,7 +203,7 @@ func (web *web) showJavascript(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Cache-Control", "max-age=2592000")
 	w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
-	w.Write(contents)
+	w.Write(contents) // nolint:errcheck
 }
 
 func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
@@ -248,7 +248,7 @@ func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Requ
 					metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
 					go publish.To(context.Background(), cols, "web")
 				}
-				w.Write(data)
+				w.Write(data) // nolint:errcheck
 			}
 		default:
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -258,7 +258,7 @@ func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Requ
 					metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
 					go publish.To(context.Background(), cols, "web")
 				}
-				w.Write(html)
+				w.Write(html) // nolint:errcheck
 			} else {
 				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
 				logger.Error("render template for response failed")
@@ -309,7 +309,7 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 			if len(urls) > 0 {
 				metrics.IncrementPlayback(metrics.ServiceWeb, metrics.StatusSuccess)
 			}
-			w.Write(data)
+			w.Write(data) // nolint:errcheck
 		}
 	default:
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -318,7 +318,7 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 			if len(urls) > 0 {
 				metrics.IncrementPlayback(metrics.ServiceWeb, metrics.StatusSuccess)
 			}
-			w.Write(html)
+			w.Write(html) // nolint:errcheck
 		} else {
 			metrics.IncrementPlayback(metrics.ServiceWeb, metrics.StatusFailure)
 			logger.Error("render template for response failed")

@@ -7,14 +7,11 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"context"
 	"math/rand"
-	"net/url"
 	"os"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
-	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -122,8 +119,6 @@ func process(ctx context.Context, pub Publisher, cols []wayback.Collect, args ..
 		logger.Error("[%s] produce failed: %v", f, err)
 		return
 	}
-
-	return
 }
 
 func from(args ...string) (f string) {
@@ -254,33 +249,14 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 	}
 }
 
-func funcMap() template.FuncMap {
-	cache := "https://webcache.googleusercontent.com/search?q=cache:"
-	return template.FuncMap{
-		"unescape": func(link string) string {
-			unescaped, err := url.QueryUnescape(link)
-			if err != nil {
-				return link
-			}
-			return unescaped
-		},
-		"isURL": helper.IsURL,
-		"revert": func(link string) string {
-			return strings.Replace(link, cache, "", 1)
-		},
-		"not": func(text, s string) bool {
-			return !strings.Contains(text, s)
-		},
-	}
-}
-
 func extract(ctx context.Context, cols []wayback.Collect) (rdx reduxer.Reduxer, art reduxer.Artifact, err error) {
 	if len(cols) == 0 {
 		return rdx, art, errors.New("no collect")
 	}
 
+	var ok bool
 	var uri = cols[0].Src
-	if rdx, ok := ctx.Value(PubBundle{}).(reduxer.Reduxer); ok {
+	if rdx, ok = ctx.Value(PubBundle{}).(reduxer.Reduxer); ok {
 		if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
 			return rdx, bundle.Artifact(), nil
 		}

@@ -48,7 +48,7 @@ func Wayback(ctx context.Context, urls []*url.URL, do doFunc) error {
 
 		// push collects to the Meilisearch
 		if meili != nil {
-			meili.push(cols)
+			meili.push(cols) // nolint:errcheck
 		}
 		return do(cols, rdx)
 	}

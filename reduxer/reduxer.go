@@ -204,7 +204,7 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 			defer wg.Done()
 
 			var artifact Artifact
-			u, _ := url.Parse(shot.URL)
+			u, _ := url.Parse(shot.URL) // nolint:errcheck
 
 			basename := strings.TrimRight(helper.FileName(shot.URL, ""), ".html")
 			basename = strings.TrimRight(basename, ".htm")
@@ -240,13 +240,13 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 			}
 			txtName := basename + ".txt"
 			fp := filepath.Join(dir, txtName)
-			if err := os.WriteFile(fp, helper.String2Byte(article.TextContent), filePerm); err == nil && article.TextContent != "" {
-				if err := helper.SetField(&artifact.Txt, "Local", fp); err != nil {
+			if err = os.WriteFile(fp, helper.String2Byte(article.TextContent), filePerm); err == nil && article.TextContent != "" {
+				if err = helper.SetField(&artifact.Txt, "Local", fp); err != nil {
 					logger.Error("assign field Txt to artifact struct failed: %v", err)
 				}
 			}
 			// Upload files to third-party server
-			if err := remotely(ctx, &artifact); err != nil {
+			if err = remotely(ctx, &artifact); err != nil {
 				logger.Error("upload files to remote server failed: %v", err)
 			}
 			bundle := &bundle{shots: shot, artifact: artifact, article: article}
@@ -284,6 +284,7 @@ func capture(ctx context.Context, urls ...*url.URL) (shots []*screenshot.Screens
 				addr := remote.(*net.TCPAddr)
 				browser, er := screenshot.NewChromeRemoteScreenshoter(addr.String())
 				if er != nil {
+					// nolint:errcheck
 					errors.Wrap(err, fmt.Sprintf("screenshot failed: %v", er))
 					return
 				}
@@ -294,9 +295,11 @@ func capture(ctx context.Context, urls ...*url.URL) (shots []*screenshot.Screens
 			}
 			if serr != nil {
 				if serr == context.DeadlineExceeded {
+					// nolint:errcheck
 					errors.Wrap(err, fmt.Sprintf("screenshot deadline: %v", serr))
 					return
 				}
+				// nolint:errcheck
 				errors.Wrap(err, fmt.Sprintf("screenshot error: %v", serr))
 				return
 			}
@@ -387,6 +390,7 @@ func media(ctx context.Context, dir, in string) string {
 
 		// Wait for the process to be finished.
 		// Don't care about this error in any scenario.
+		// nolint:errcheck
 		_ = cmd.Wait()
 
 		return nil
@@ -495,7 +499,7 @@ func media(ctx context.Context, dir, in string) string {
 		logger.Warn("file %s not exists", fp)
 		return ""
 	}
-	mtype, _ := mimetype.DetectFile(v)
+	mtype, _ := mimetype.DetectFile(v) // nolint:errcheck
 	if strings.HasPrefix(mtype.String(), "video") || strings.HasPrefix(mtype.String(), "audio") {
 		return v
 	}

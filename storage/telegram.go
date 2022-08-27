@@ -18,7 +18,7 @@ func (s *Storage) createPlaybackBucket() error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer tx.Rollback() //nolint:errcheck
 
 	_, err = tx.CreateBucketIfNotExists(helper.String2Byte(entity.EntityPlayback))
 	if err != nil {
