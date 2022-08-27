@@ -107,7 +107,7 @@ func (m *Mastodon) Serve() error {
 			select {
 			case <-m.clearTick.C:
 				logger.Debug("clear notifications...")
-				m.client.ClearNotifications(m.ctx)
+				m.client.ClearNotifications(m.ctx) // nolint:errcheck
 			case <-m.fetchTick.C:
 				noti, err := m.client.GetNotifications(m.ctx, nil)
 				if err != nil {
@@ -212,10 +212,6 @@ func (m *Mastodon) process(ctx context.Context, id mastodon.ID, status *mastodon
 	}
 
 	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
-		cols, rdx, err := wayback.Wayback(ctx, urls...)
-		if err != nil {
-			return errors.Wrap(err, "mastodon: wayback failed")
-		}
 		logger.Debug("reduxer: %#v", rdx)
 
 		// Reply and publish toot as public

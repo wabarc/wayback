@@ -76,7 +76,7 @@ func (no *notion) Publish(ctx context.Context, cols []wayback.Collect, args ...s
 	}
 
 	params := no.params(cols, head, body)
-	if err := params.Validate(); err != nil {
+	if err = params.Validate(); err != nil {
 		return errors.Wrap(err, "notion page params invalid")
 	}
 
@@ -173,7 +173,7 @@ func (no *notion) params(cols []wayback.Collect, head, body string) notionapi.Cr
 		DatabasePageProperties: &notionapi.DatabasePageProperties{
 			"Name": notionapi.DatabasePageProperty{
 				Title: []notionapi.RichText{
-					notionapi.RichText{
+					{
 						Type: notionapi.RichTextTypeText,
 						Text: &notionapi.Text{
 							Content: head,
@@ -201,7 +201,7 @@ func traverseNodes(selections *goquery.Selection, client *imgbb.ImgBB) []notiona
 						Type:   notionapi.BlockTypeParagraph,
 						Paragraph: &notionapi.RichTextBlock{
 							Text: []notionapi.RichText{
-								notionapi.RichText{
+								{
 									Type: notionapi.RichTextTypeText,
 									Text: &notionapi.Text{
 										Content: html.EscapeString(node.Data),

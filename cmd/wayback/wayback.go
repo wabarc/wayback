@@ -1,7 +1,6 @@
 // Copyright 2020 Wayback Archiver. All rights reserved.
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
-//
 package main
 
 import (
@@ -16,13 +15,6 @@ import (
 	"github.com/wabarc/wayback/reduxer"
 	"golang.org/x/sync/errgroup"
 )
-
-func output(tit string, args map[string]string) {
-	fmt.Printf("[%s]\n", tit)
-	for ori, dst := range args {
-		fmt.Printf("%s => %s\n", ori, dst)
-	}
-}
 
 func assets(art reduxer.Artifact) []reduxer.Asset {
 	return []reduxer.Asset{

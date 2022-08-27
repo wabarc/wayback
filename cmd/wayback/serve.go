@@ -1,7 +1,6 @@
 // Copyright 2020 Wayback Archiver. All rights reserved.
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
-//
 package main
 
 import (
@@ -90,7 +89,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				}
 			}()
 			srv.targets = append(srv.targets, target{
-				call: func() { irc.Shutdown() },
+				call: func() { irc.Shutdown() }, // nolint:errcheck
 				name: s,
 			})
 		case "slack":
@@ -101,7 +100,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				}
 			}()
 			srv.targets = append(srv.targets, target{
-				call: func() { sl.Shutdown() },
+				call: func() { sl.Shutdown() }, // nolint:errcheck
 				name: s,
 			})
 		case "discord":
@@ -112,7 +111,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				}
 			}()
 			srv.targets = append(srv.targets, target{
-				call: func() { d.Shutdown() },
+				call: func() { d.Shutdown() }, // nolint:errcheck
 				name: s,
 			})
 		case "mastodon", "mstdn":
@@ -123,7 +122,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				}
 			}()
 			srv.targets = append(srv.targets, target{
-				call: func() { m.Shutdown() },
+				call: func() { m.Shutdown() }, // nolint:errcheck
 				name: s,
 			})
 		case "telegram":
@@ -134,7 +133,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				}
 			}()
 			srv.targets = append(srv.targets, target{
-				call: func() { t.Shutdown() },
+				call: func() { t.Shutdown() }, // nolint:errcheck
 				name: s,
 			})
 		case "twitter":
@@ -145,7 +144,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				}
 			}()
 			srv.targets = append(srv.targets, target{
-				call: func() { t.Shutdown() },
+				call: func() { t.Shutdown() }, // nolint:errcheck
 				name: s,
 			})
 		case "matrix":
@@ -156,7 +155,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				}
 			}()
 			srv.targets = append(srv.targets, target{
-				call: func() { m.Shutdown() },
+				call: func() { m.Shutdown() }, // nolint:errcheck
 				name: s,
 			})
 		case "web", "httpd":
@@ -167,7 +166,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				}
 			}()
 			srv.targets = append(srv.targets, target{
-				call: func() { h.Shutdown() },
+				call: func() { h.Shutdown() }, // nolint:errcheck
 				name: s,
 			})
 		default:

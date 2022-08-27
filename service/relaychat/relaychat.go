@@ -141,10 +141,6 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 	}
 
 	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
-		cols, rdx, err := wayback.Wayback(ctx, urls...)
-		if err != nil {
-			return errors.Wrap(err, "irc: wayback failed")
-		}
 		logger.Debug("reduxer: %#v", rdx)
 
 		replyText := render.ForReply(&render.Relaychat{Cols: cols}).String()

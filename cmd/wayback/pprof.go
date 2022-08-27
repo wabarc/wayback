@@ -1,7 +1,6 @@
 // Copyright 2020 Wayback Archiver. All rights reserved.
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
-//
 package main
 
 import (
@@ -25,6 +24,7 @@ func profiling() {
 	logger.Info("More defails can be found at https://go.dev/blog/pprof")
 
 	go func() {
+		//#nosec G114 -- Ignored for convenience
 		log.Println(http.Serve(listener, nil))
 	}()
 }

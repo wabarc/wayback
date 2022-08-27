@@ -101,6 +101,7 @@ func (t *Telegram) Serve() (err error) {
 	}
 
 	// Set bot commands
+	// nolint:errcheck
 	t.setCommands()
 
 	t.bot.Poller = telegram.NewMiddlewarePoller(t.bot.Poller, func(update *telegram.Update) bool {
@@ -132,7 +133,7 @@ func (t *Telegram) Serve() (err error) {
 			}
 
 			callback.Message.Text = helper.Byte2String(data)
-			go t.process(callback.Message)
+			go t.process(callback.Message) // nolint:errcheck
 		case update.Message != nil && update.Message.FromGroup():
 			transform(update.Message)
 			logger.Debug("message: %#v", update.Message)
@@ -143,11 +144,11 @@ func (t *Telegram) Serve() (err error) {
 			if !strings.Contains(update.Message.Text, "@"+t.bot.Me.Username) {
 				return false
 			}
-			go t.process(update.Message)
+			go t.process(update.Message) // nolint:errcheck
 		case update.Message != nil:
 			transform(update.Message)
 			logger.Debug("message: %#v", update.Message)
-			go t.process(update.Message)
+			go t.process(update.Message) // nolint:errcheck
 		default:
 			logger.Debug("update: %#v", update)
 		}
@@ -200,6 +201,7 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 	command := command(content)
 	switch {
 	case command == "help", command == "start":
+		// nolint:errcheck
 		t.reply(message, config.Opts.TelegramHelptext())
 	case command == "playback":
 		return t.playback(message)
@@ -216,11 +218,12 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 		if fallback != "" {
 			fallback = fmt.Sprintf("\n\nAvailable commands:\n%s", fallback)
 		}
+		// nolint:errcheck
 		t.reply(message, fmt.Sprintf("/%s is an illegal command%s", command, fallback))
 	case len(urls) == 0:
 		logger.Warn("archives failure, URL no found.")
 		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
-		t.reply(message, "URL no found.")
+		t.reply(message, "URL no found.") // nolint:errcheck
 	default:
 		metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusRequest)
 		request, err := t.reply(message, "Queue...")
@@ -235,6 +238,7 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 				}
 
 				if err := t.wayback(ctx, request, urls); err != nil {
+					// nolint:errcheck
 					t.bot.Edit(request, service.MsgWaybackRetrying)
 					return errors.Wrap(err, "archives failed")
 				}
@@ -242,8 +246,8 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 				return nil
 			},
 			Fallback: func(_ context.Context) error {
-				t.bot.Delete(request)
-				t.bot.Reply(message, service.MsgWaybackTimeout)
+				t.bot.Delete(request)                           // nolint:errcheck
+				t.bot.Reply(message, service.MsgWaybackTimeout) // nolint:errcheck
 				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
 				return nil
 			},
@@ -487,5 +491,4 @@ func transform(m *telegram.Message) {
 		uri := entities(m.CaptionEntities)
 		m.Text = fmt.Sprintf("%s and URI in caption entity: %s", m.Text, strings.Join(uri, space))
 	}
-	return
 }

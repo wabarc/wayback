@@ -140,7 +140,9 @@ func (s *Slack) Serve() (err error) {
 
 	logger.Info("starting slack service...")
 	// Block until context done
-	s.client.RunContext(s.ctx)
+	if err = s.client.RunContext(s.ctx); err != nil && err != context.Canceled {
+		return err
+	}
 
 	return ErrServiceClosed
 }
@@ -166,6 +168,7 @@ func (s *Slack) handleRequest(evt socketmode.Event) {
 		switch ev := innerEvent.Data.(type) {
 		case *slackevents.AppMentionEvent:
 			logger.Debug("channel mention message event: %+v", ev)
+			// nolint:errcheck
 			go s.process(&event{ev.User, ev.Text, ev.Channel, ev.TimeStamp, ev.ThreadTimeStamp})
 		case *slackevents.MessageEvent:
 			logger.Debug("direct message event: %+v", ev)
@@ -176,6 +179,7 @@ func (s *Slack) handleRequest(evt socketmode.Event) {
 				logger.Debug("skipped event from bot")
 				return
 			}
+			// nolint:errcheck
 			go s.process(&event{ev.User, ev.Text, ev.Channel, ev.TimeStamp, ev.ThreadTimeStamp})
 		}
 	default:
@@ -200,14 +204,15 @@ func (s *Slack) handleButton(evt socketmode.Event) {
 			// Process wayback request from a playback action
 			block := callback.ActionCallback.BlockActions[0]
 			logger.Debug("received wayback action: %+v", block)
+			// nolint:errcheck
 			go s.process(&event{callback.User.ID, block.Value, callback.Container.ChannelID, callback.Container.MessageTs, callback.Container.ThreadTs})
 		}
 	case slack.InteractionTypeViewSubmission:
 		// See https://api.slack.com/apis/connections/socket-implement#modal
 		logger.Debug("received view submission: %+v", callback.View)
+		// nolint:errcheck
 		s.playback(callback.View.ExternalID, callback.View.State.Values[callbackKey][callbackKey].Value, callback.TriggerID)
 	}
-	return
 }
 
 func (s *Slack) handleCommand(evt socketmode.Event) {
@@ -246,11 +251,11 @@ func (s *Slack) handleCommand(evt socketmode.Event) {
 				}}
 		}
 	case "/playback":
+		// nolint:errcheck
 		s.playback(cmd.ChannelID, cmd.Text, cmd.TriggerID)
 	default:
 	}
 	s.client.Ack(*evt.Request, payload)
-	return
 }
 
 func (s *Slack) process(ev *event) (err error) {
@@ -261,6 +266,7 @@ func (s *Slack) process(ev *event) (err error) {
 
 	metrics.IncrementWayback(metrics.ServiceSlack, metrics.StatusRequest)
 	if len(urls) == 0 {
+		// nolint:errcheck
 		s.reply(ev, "URL no found.")
 		return errors.New("URL no found")
 	}
@@ -274,6 +280,7 @@ func (s *Slack) process(ev *event) (err error) {
 		Request: func(ctx context.Context) error {
 			if err := s.wayback(ctx, ev, urls); err != nil {
 				logger.Error("archives failed: %v", err)
+				// nolint:errcheck
 				s.edit(ev.Channel, ev.ThreadTimeStamp, service.MsgWaybackRetrying)
 				return err
 			}
@@ -282,6 +289,7 @@ func (s *Slack) process(ev *event) (err error) {
 		},
 		Fallback: func(_ context.Context) error {
 			replyText := service.MsgWaybackTimeout
+			// nolint:errcheck
 			s.edit(ev.Channel, ev.ThreadTimeStamp, replyText)
 			metrics.IncrementWayback(metrics.ServiceSlack, metrics.StatusFailure)
 			return nil
@@ -300,10 +308,6 @@ func (s *Slack) wayback(ctx context.Context, ev *event, urls []*url.URL) error {
 	}
 
 	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
-		cols, rdx, err := wayback.Wayback(ctx, urls...)
-		if err != nil {
-			return errors.Wrap(err, "slack: wayback failed")
-		}
 		logger.Debug("reduxer: %#v", rdx)
 
 		replyText := render.ForReply(&render.Slack{Cols: cols, Data: rdx}).String()
@@ -381,6 +385,7 @@ func (s *Slack) playback(channel, text, triggerID string) error {
 	}
 
 	go func() {
+		// nolint:errcheck
 		cols, _ := wayback.Playback(s.ctx, urls...)
 		logger.Debug("playback collections: %#v", cols)
 

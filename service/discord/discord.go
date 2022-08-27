@@ -124,6 +124,7 @@ func (d *Discord) Serve() (err error) {
 				m.Message.Content += msg.Content
 			}
 		}
+		// nolint:errcheck
 		d.process(m)
 	})
 
@@ -136,6 +137,7 @@ func (d *Discord) Serve() (err error) {
 	d.bot.AddHandler(func(s *discord.Session, _ *discord.Ready) {
 		logger.Debug("set global commands")
 		// Set global bot commands
+		// nolint:errcheck
 		d.setCommands("")
 	})
 
@@ -164,6 +166,7 @@ func (d *Discord) Shutdown() error {
 func (d *Discord) commandHandlers() map[string]func(*discord.Session, *discord.InteractionCreate) {
 	return map[string]func(s *discord.Session, i *discord.InteractionCreate){
 		"help": func(s *discord.Session, i *discord.InteractionCreate) {
+			// nolint:errcheck
 			s.InteractionRespond(i.Interaction, &discord.InteractionResponse{
 				Type: discord.InteractionResponseChannelMessageWithSource,
 				Data: &discord.InteractionResponseData{
@@ -172,13 +175,14 @@ func (d *Discord) commandHandlers() map[string]func(*discord.Session, *discord.I
 			})
 		},
 		"playback": func(s *discord.Session, i *discord.InteractionCreate) {
-			d.playback(s, i)
+			d.playback(s, i) // nolint:errcheck
 		},
 		"metrics": func(s *discord.Session, i *discord.InteractionCreate) {
 			stats := metrics.Gather.Export("wayback")
 			if !config.Opts.EnabledMetrics() || stats == "" {
 				return
 			}
+			// nolint:errcheck
 			s.InteractionRespond(i.Interaction, &discord.InteractionResponse{
 				Type: discord.InteractionResponseChannelMessageWithSource,
 				Data: &discord.InteractionResponseData{
@@ -215,6 +219,7 @@ func (d *Discord) buttonHandlers() map[string]func(*discord.Session, *discord.In
 			}
 
 			// Send an interaction respond to markup interact status
+			// nolint:errcheck
 			s.InteractionRespond(i.Interaction, &discord.InteractionResponse{
 				Type: discord.InteractionResponseChannelMessageWithSource,
 				Data: &discord.InteractionResponseData{
@@ -222,12 +227,12 @@ func (d *Discord) buttonHandlers() map[string]func(*discord.Session, *discord.In
 				},
 			})
 
+			// nolint:errcheck
 			s.ChannelTyping(i.Message.ChannelID)
 
 			i.Message.Content = helper.Byte2String(data)
-			d.process(&discord.MessageCreate{Message: i.Message})
-			s.InteractionResponseDelete(s.State.User.ID, i.Interaction)
-			return
+			d.process(&discord.MessageCreate{Message: i.Message})       // nolint:errcheck
+			s.InteractionResponseDelete(s.State.User.ID, i.Interaction) // nolint:errcheck
 		},
 	}
 }
@@ -246,7 +251,7 @@ func (d *Discord) process(m *discord.MessageCreate) (err error) {
 	case len(urls) == 0:
 		logger.Warn("archives failure, URL no found.")
 		metrics.IncrementWayback(metrics.ServiceDiscord, metrics.StatusRequest)
-		d.reply(m, "URL no found.")
+		d.reply(m, "URL no found.") // nolint:errcheck
 	default:
 		metrics.IncrementWayback(metrics.ServiceDiscord, metrics.StatusRequest)
 		if m, err = d.reply(m, "Queue..."); err != nil {
@@ -258,6 +263,7 @@ func (d *Discord) process(m *discord.MessageCreate) (err error) {
 				logger.Debug("content: %v", urls)
 				if err := d.wayback(ctx, m, urls); err != nil {
 					logger.Error("archives failed: %v", err)
+					// nolint:errcheck
 					d.reply(m, service.MsgWaybackRetrying)
 					return err
 				}
@@ -265,6 +271,7 @@ func (d *Discord) process(m *discord.MessageCreate) (err error) {
 				return nil
 			},
 			Fallback: func(_ context.Context) error {
+				// nolint:errcheck
 				d.reply(m, service.MsgWaybackTimeout)
 				metrics.IncrementWayback(metrics.ServiceDiscord, metrics.StatusFailure)
 				return nil
@@ -335,6 +342,7 @@ func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) err
 		})
 	}
 
+	// nolint:errcheck
 	s.InteractionRespond(i.Interaction, &discord.InteractionResponse{
 		Type: discord.InteractionResponseChannelMessageWithSource,
 		Data: &discord.InteractionResponseData{
@@ -351,7 +359,7 @@ func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) err
 	// Due to Discord restricted custom_id up to 100 characters, it requires to store
 	// playback URLs to database.
 	pb := &entity.Playback{Source: base64.StdEncoding.EncodeToString(helper.String2Byte(text))}
-	if err := d.store.CreatePlayback(pb); err != nil {
+	if err = d.store.CreatePlayback(pb); err != nil {
 		logger.Error("store collections failed: %v", err)
 		return err
 	}

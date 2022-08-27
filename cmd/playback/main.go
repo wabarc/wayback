@@ -1,7 +1,6 @@
 // Copyright 2020 Wayback Archiver. All rights reserved.
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
-//
 package main
 
 import (
@@ -26,11 +25,13 @@ func main() {
 		},
 	}
 
+	// nolint:errcheck
 	rootCmd.Execute()
 }
 
 func handle(cmd *cobra.Command, args []string) {
 	if len(args) < 1 {
+		// nolint:errcheck
 		cmd.Usage()
 		os.Exit(0)
 	}
@@ -41,7 +42,12 @@ func handle(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	collects, _ := wayback.Playback(context.TODO(), urls...)
+	collects, err := wayback.Playback(context.TODO(), urls...)
+	if err != nil {
+		cmd.Println(err)
+		os.Exit(1)
+	}
+
 	for _, collect := range collects {
 		fmt.Printf("[%s]\n", collect.Arc)
 		for orig, dest := range collect.Dst {

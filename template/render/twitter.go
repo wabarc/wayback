@@ -119,7 +119,7 @@ func original(v interface{}) (o string) {
 		Value int
 	}
 
-	var ss []kv
+	ss := make([]kv, 0, len(sm))
 	for k, v := range sm {
 		ss = append(ss, kv{k, v})
 	}

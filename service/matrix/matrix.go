@@ -110,6 +110,7 @@ func (m *Matrix) Serve() error {
 				Request: func(ctx context.Context) error {
 					if err := m.process(ctx, ev); err != nil {
 						logger.Error("process request failure, error: %v", err)
+						// nolint:errcheck
 						m.reply(ev, service.MsgWaybackRetrying)
 						return err
 					}
@@ -118,9 +119,8 @@ func (m *Matrix) Serve() error {
 					return nil
 				},
 				Fallback: func(_ context.Context) error {
-					m.reply(ev, service.MsgWaybackTimeout)
 					metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusFailure)
-					return nil
+					return m.reply(ev, service.MsgWaybackTimeout)
 				},
 			}
 			m.pool.Put(bucket)
@@ -152,6 +152,7 @@ func (m *Matrix) Shutdown() error {
 	if m.client != nil {
 		// Stopping sync and logout all sessions
 		m.client.StopSync()
+		// nolint:errcheck
 		m.client.LogoutAll()
 	}
 
@@ -186,10 +187,6 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 	}
 
 	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
-		cols, rdx, err := wayback.Wayback(ctx, urls...)
-		if err != nil {
-			return errors.Wrap(err, "matrix: wayback failed")
-		}
 		logger.Debug("reduxer: %#v", rdx)
 
 		body := render.ForReply(&render.Matrix{Cols: cols}).String()
@@ -257,29 +254,4 @@ func (m *Matrix) redact(ev *event.Event, reason string) {
 	if _, err := m.client.RedactEvent(ev.RoomID, ev.ID, extra); err != nil {
 		logger.Error("react message failure, error: %v", err)
 	}
-}
-
-func (m *Matrix) joinedRooms() []id.RoomID {
-	var rooms []id.RoomID
-	if m.client == nil {
-		return rooms
-	}
-	resp, err := m.client.JoinedRooms()
-	if err != nil {
-		return rooms
-	}
-
-	return resp.JoinedRooms
-}
-
-func (m *Matrix) destroyRoom(roomID id.RoomID) {
-	if roomID == "" || m.client == nil {
-		return
-	}
-	if id.RoomID(config.Opts.MatrixRoomID()) == roomID {
-		return
-	}
-
-	m.client.LeaveRoom(roomID)
-	m.client.ForgetRoom(roomID)
 }
