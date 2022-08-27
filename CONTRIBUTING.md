@@ -70,6 +70,5 @@ Use [this search][good-first-issue-search] to find Wayback Archiver that have is
 
 [fork]: https://github.com/wabarc/wayback/fork
 [pr]: https://github.com/wabarc/wayback/compare
-[change-log]: CHANGELOG.md
-[code-of-conduct]: CODE_OF_CONDUCT.md
+[code-of-conduct]: ./CODE_OF_CONDUCT.md
 [good-first-issue-search]: https://github.com/search?q=org%3Awabarc+good-first-issues%3A%3E0
