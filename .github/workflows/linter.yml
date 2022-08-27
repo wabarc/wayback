@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 jobs:
-  lint:
+  super-linter:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code base
@@ -43,8 +43,11 @@ jobs:
           VALIDATE_BASH_EXEC: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  go:
-    runs-on: ubuntu-latest
+  golangci:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out code base
         if: github.event_name == 'push'
@@ -66,6 +69,12 @@ jobs:
 
       - name: Golang linter
         uses: golangci/golangci-lint-action@537aa1903e5d359d0b27dbc19ddd22c5087f3fbc # v3.2.0
+        with:
+          version: v1.49
+          # Optional: golangci-lint command line arguments.
+          # args: --issues-exit-code=0
+          # Optional: show only new issues if it's a pull request. The default value is `false`.
+          only-new-issues: true
 
   shellcheck:
     runs-on: ubuntu-latest
