@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.2
-ARG GO_VERSION=1.18
+ARG GO_VERSION=1.19
 
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS builder
 COPY --from=tonistiigi/xx:golang / /
@@ -37,6 +37,7 @@ ENV PGROUP wayback
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
+ENV DISPLAY=:99.0
 
 WORKDIR $BASE_DIR
 
