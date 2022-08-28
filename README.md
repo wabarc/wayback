@@ -36,7 +36,7 @@ The simplest, cross-platform way is to download from [GitHub Releases](https://g
 From source:
 
 ```sh
-go get -u github.com/wabarc/wayback/cmd/wayback
+go install github.com/wabarc/wayback/cmd/wayback
 ```
 
 From GitHub Releases:
