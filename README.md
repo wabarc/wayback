@@ -60,8 +60,8 @@ sudo snap install wayback
 Via [APT](https://github.com/wabarc/apt-repo):
 
 ```bash
-curl -s https://apt.wabarc.eu.org/KEY.gpg | sudo apt-key add -
-sudo echo "deb https://apt.wabarc.eu.org/ /" > /etc/apt/sources.list.d/wayback.list
+curl -fsSL https://repo.wabarc.eu.org/apt/gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/packages.wabarc.gpg
+echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/packages.wabarc.gpg] https://repo.wabarc.eu.org/apt/ /" | sudo tee /etc/apt/sources.list.d/wayback.list
 sudo apt update
 sudo apt install wayback
 ```
@@ -69,15 +69,17 @@ sudo apt install wayback
 Via [RPM](https://github.com/wabarc/rpm-repo):
 
 ```bash
-sudo cat > /etc/yum.repos.d/wayback.repo<< EOF
+sudo rpm --import https://repo.wabarc.eu.org/yum/gpg.key
+sudo tee /etc/yum.repos.d/wayback.repo > /dev/null <<EOT
 [wayback]
-name=Wayback Repository
-baseurl=https://rpm.wabarc.eu.org/x86_64/
+name=Wayback Archiver
+baseurl=https://repo.wabarc.eu.org/yum/
 enabled=1
-gpgcheck=0
-EOF
+gpgcheck=1
+gpgkey=https://repo.wabarc.eu.org/yum/gpg.key
+EOT
 
-sudo yum install -y wayback
+sudo dnf install -y wayback
 ```
 
 Via [Homebrew](https://github.com/wabarc/homebrew-wayback):
