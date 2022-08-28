@@ -88,7 +88,7 @@ jobs:
             type=raw,${{ steps.prep.outputs.version }}
 
       - name: Build artifacts
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@e878ca2dcabf3e92e501fbbe72cda83e0046e0de # v2.0.0
         with:
           files: ./docker-bake.hcl
           targets: artifact-all
@@ -97,7 +97,7 @@ jobs:
             *.cache-to=type=local,dest=/tmp/.image-cache-new/artifacts
 
       - name: Build and push Docker image
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@e878ca2dcabf3e92e501fbbe72cda83e0046e0de # v2.0.0
         with:
           files: |
             ./docker-bake.hcl
@@ -183,7 +183,7 @@ jobs:
             type=raw,${{ steps.prep.outputs.version }}
 
       - name: Build artifacts
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@e878ca2dcabf3e92e501fbbe72cda83e0046e0de # v2.0.0
         with:
           files: ./docker-bake.hcl
           targets: artifact-all
@@ -192,7 +192,7 @@ jobs:
             *.cache-to=type=local,dest=/tmp/.image-cache-new/artifacts
 
       - name: Build and push Docker image
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@e878ca2dcabf3e92e501fbbe72cda83e0046e0de # v2.0.0
         with:
           files: |
             ./docker-bake.hcl
