@@ -309,7 +309,7 @@ jobs:
         wayback --help
 
     - name: Release Snap
-      uses: snapcore/action-publish@128198fd2ed6446f70918a2a2d3ae7cbe758bf3a # v1.1.0
+      uses: snapcore/action-publish@0a8d537ae06f4a292e8b4ef1084cd5631b3c6871 # v1.1.0
       if: github.repository == 'wabarc/wayback' && github.event_name == 'push'
       with:
         store_login: ${{ secrets.SNAPCRAFT_TOKEN }}
