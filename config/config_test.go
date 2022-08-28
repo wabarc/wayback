@@ -18,20 +18,42 @@ import (
 )
 
 func TestSlotName(t *testing.T) {
-	expected := "Internet Archive"
-	got := SlotName(SLOT_IA)
+	tests := []struct {
+		slot string
+		name string
+	}{
+		{SLOT_IA, "Internet Archive"},
+		{"something", UNKNOWN},
+	}
 
-	if got != expected {
-		t.Fatalf(`Unexpected get the slot name description, got %v instead of %s`, got, expected)
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := SlotName(test.slot)
+
+			if got != test.name {
+				t.Fatalf(`Unexpected get the slot name description, got %v instead of %s`, got, test.name)
+			}
+		})
 	}
 }
 
-func TestSlotNameNotExist(t *testing.T) {
-	expected := UNKNOWN
-	got := SlotName("something")
+func TestSlotExtra(t *testing.T) {
+	tests := []struct {
+		slot  string
+		extra string
+	}{
+		{SLOT_IA, "https://web.archive.org/"},
+		{"something", UNKNOWN},
+	}
 
-	if got != expected {
-		t.Fatalf(`Unexpected get the slot name description, got %v instead of %s`, got, expected)
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			got := SlotExtra(test.slot)
+
+			if got != test.extra {
+				t.Errorf(`Unexpected get the slot's extra data, got %v instead of %s`, got, test.extra)
+			}
+		})
 	}
 }
 
@@ -419,6 +441,24 @@ func TestTelegramHelptext(t *testing.T) {
 	}
 }
 
+func TestPublishToChannel(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "foo")
+	os.Setenv("WAYBACK_TELEGRAM_TOKEN", "tg:token")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	ok := opts.PublishToChannel()
+
+	if !ok {
+		t.Fatalf(`Unexpected publish to telegram channel, got %v instead of true`, ok)
+	}
+}
+
 func TestTorPrivateKey(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("WAYBACK_TOR_PRIVKEY", "tor:private:key")
@@ -487,6 +527,24 @@ func TestTorRemotePorts(t *testing.T) {
 
 	if got == nil || len(got) != 3 {
 		t.Fatalf(`Unexpected Tor remote port, got %v instead of %v`, got, expected)
+	}
+}
+
+func TestTorrcFile(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_TORRC", "/path/to/torrc")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	expected := `/path/to/torrc`
+	got := opts.TorrcFile()
+
+	if got != expected {
+		t.Fatalf(`Unexpected Set torrc file, got %v instead of %v`, got, expected)
 	}
 }
 
@@ -597,6 +655,25 @@ func TestGitHubRepo(t *testing.T) {
 	}
 }
 
+func TestPublishToIssues(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_GITHUB_REPO", "github-repo")
+	os.Setenv("WAYBACK_GITHUB_TOKEN", "github:token")
+	os.Setenv("WAYBACK_GITHUB_OWNER", "github-owner")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	ok := opts.PublishToIssues()
+
+	if !ok {
+		t.Fatalf(`Unexpected publish to github issue, got %v instead of true`, ok)
+	}
+}
+
 func TestNotionToken(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("WAYBACK_NOTION_TOKEN", "notion:token")
@@ -630,6 +707,24 @@ func TestNotionDatabaseID(t *testing.T) {
 
 	if got != expected {
 		t.Fatalf(`Unexpected Notion's database id, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestPublishToNotion(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_NOTION_TOKEN", "notion:token")
+	os.Setenv("WAYBACK_NOTION_DATABASE_ID", "uuid4")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	ok := opts.PublishToNotion()
+
+	if !ok {
+		t.Fatalf(`Unexpected publish to notion, got %v instead of true`, ok)
 	}
 }
 
@@ -702,6 +797,45 @@ func TestMastodonAccessToken(t *testing.T) {
 
 	if got != expected {
 		t.Fatalf(`Unexpected Mastodon access token, got %v instead of %s`, got, expected)
+	}
+}
+
+func TestPublishToMastodon(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
+	os.Setenv("WAYBACK_MASTODON_SECRET", "foo")
+	os.Setenv("WAYBACK_MASTODON_TOKEN", "foo")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	ok := opts.PublishToMastodon()
+
+	if !ok {
+		t.Fatalf(`Unexpected publish to mastodon, got %v instead of true`, ok)
+	}
+}
+
+func TestPublishToTwitter(t *testing.T) {
+	os.Clearenv()
+	os.Setenv("WAYBACK_TWITTER_CONSUMER_KEY", "foo")
+	os.Setenv("WAYBACK_TWITTER_CONSUMER_SECRET", "foo")
+	os.Setenv("WAYBACK_TWITTER_ACCESS_TOKEN", "foo")
+	os.Setenv("WAYBACK_TWITTER_ACCESS_SECRET", "foo")
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	ok := opts.PublishToTwitter()
+
+	if !ok {
+		t.Fatalf(`Unexpected publish to twitter, got %v instead of true`, ok)
 	}
 }
 
@@ -1299,6 +1433,15 @@ func TestMaxMediaSize(t *testing.T) {
 				t.Fatalf(`Unexpected set max media size got %d instead of %d`, got, test.expected)
 			}
 		})
+	}
+}
+
+func TestMaxAttachSize(t *testing.T) {
+	parser := NewParser()
+	opts, _ := parser.ParseEnvironmentVariables()
+	got := opts.MaxAttachSize("telegram")
+	if got != maxAttachSizeTelegram {
+		t.Fatalf(`Unexpected set wayback timeout got %d instead of %d`, got, maxAttachSizeTelegram)
 	}
 }
 

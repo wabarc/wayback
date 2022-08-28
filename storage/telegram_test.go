@@ -56,3 +56,18 @@ func TestPlayback(t *testing.T) {
 		t.Errorf("Unexpected query playback, got %s instead of %s", pb.Source, dt)
 	}
 }
+
+func TestRemovePlayback(t *testing.T) {
+	dbpath := tmpPath()
+	defer os.Remove(dbpath)
+
+	s, err := Open(dbpath)
+	if err != nil {
+		t.Fatalf("Unexpected open a bolt db: %v", err)
+	}
+	defer s.Close()
+
+	if s.RemovePlayback(0) != nil {
+		t.Error("Unexpected remove playback data")
+	}
+}
