@@ -86,6 +86,10 @@ const (
 	defWaybackMeiliEndpoint = ""
 	defWaybackMeiliIndexing = "capsules"
 	defWaybackMeiliApikey   = ""
+
+	maxAttachSizeTelegram = 50000000   // 50MB
+	maxAttachSizeDiscord  = 8000000    // 8MB
+	maxAttachSizeSlack    = 5000000000 // 5GB
 )
 
 var (
@@ -692,9 +696,9 @@ func (o *Options) MaxMediaSize() uint64 {
 // scope: telegram
 func (o *Options) MaxAttachSize(scope string) int64 {
 	scopes := map[string]int64{
-		"telegram": 50000000,   // 50MB
-		"discord":  8000000,    // 8MB
-		"slack":    5000000000, // 5GB
+		"telegram": maxAttachSizeTelegram,
+		"discord":  maxAttachSizeDiscord,
+		"slack":    maxAttachSizeSlack,
 	}
 	return scopes[scope]
 }
