@@ -32,4 +32,4 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Check License Header
-        uses: apache/skywalking-eyes/header@501a28d2fb4a9b962661987e50cf0219631b32ff
+        uses: apache/skywalking-eyes/header@438e4ea5682269933ea2c8b5608662e52af26959
