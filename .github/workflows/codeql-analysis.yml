@@ -139,27 +139,27 @@ jobs:
         ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Run Bug Scan
-      uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+      uses: returntocorp/semgrep-action@aeafd770072c4f48798b991e3449592bddc2c435
       with:
         config: p/r2c-bug-scan
 
     - name: Run CI
-      uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+      uses: returntocorp/semgrep-action@aeafd770072c4f48798b991e3449592bddc2c435
       with:
         config: p/r2c-ci
 
     - name: Run Best Practices
-      uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+      uses: returntocorp/semgrep-action@aeafd770072c4f48798b991e3449592bddc2c435
       with:
         config: p/r2c-best-practices
 
     - name: Run Security Audit
-      uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+      uses: returntocorp/semgrep-action@aeafd770072c4f48798b991e3449592bddc2c435
       with:
         config: p/r2c-security-audit
 
     - name: Run GoSec
-      uses: returntocorp/semgrep-action@e9c03cf55b6e6228674d9c6837158af4b61598c9
+      uses: returntocorp/semgrep-action@aeafd770072c4f48798b991e3449592bddc2c435
       with:
         config: p/gosec
 
