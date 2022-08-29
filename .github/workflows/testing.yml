@@ -67,7 +67,7 @@ jobs:
         daemon: true
 
     - name: Set up Chrome
-      uses: browser-actions/setup-chrome@37c79b7f0199cec79c8b6a414e806d88c8662bdd
+      uses: browser-actions/setup-chrome@4fa655aad48f56911cad16db9252399a9e592848
       with:
         chrome-version: stable
 
