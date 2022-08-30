@@ -362,7 +362,7 @@ jobs:
         path: ${{ env.PRODUCT }}
 
     - name: Create Release
-      uses: softprops/action-gh-release@50195ba7f6f93d1ac97ba8332a178e008ad176aa
+      uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
       if: startsWith(github.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
