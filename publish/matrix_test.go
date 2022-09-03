@@ -35,7 +35,7 @@ func TestToMatrixRoom(t *testing.T) {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch {
-		case r.URL.Path == "/_matrix/client/r0/login":
+		case r.URL.Path == "/_matrix/client/r0/login", r.URL.Path == "/_matrix/client/v3/login":
 			fmt.Fprintln(w, `{"access_token": "zoo"}`)
 		case strings.Contains(r.URL.Path, "!bar:example.com/send/m.room.message"):
 			body, _ := ioutil.ReadAll(r.Body)
