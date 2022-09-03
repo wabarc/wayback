@@ -25,10 +25,16 @@ func Wayback(ctx context.Context, urls []*url.URL, do doFunc) error {
 	var done = make(chan error, 1)
 	var cols []wayback.Collect
 	var rdx reduxer.Reduxer
+	var err error
 
 	go func() {
-		var err error
-		cols, rdx, err = wayback.Wayback(ctx, urls...)
+		rdx, err = reduxer.Do(ctx, urls...)
+		if err != nil {
+			done <- errors.Wrap(err, "reduxer unexpected")
+			return
+		}
+
+		cols, err = wayback.Wayback(ctx, rdx, urls...)
 		if err != nil {
 			done <- errors.Wrap(err, "wayback failed")
 			return

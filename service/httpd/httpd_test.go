@@ -18,6 +18,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
+	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 )
 
@@ -33,7 +34,7 @@ func TestTransform(t *testing.T) {
 
 	text := "some text https://example.com"
 	urls := service.MatchURL(text)
-	col, _, _ := wayback.Wayback(context.Background(), urls...)
+	col, _ := wayback.Wayback(context.Background(), reduxer.BundleExample(), urls...)
 	collector := transform(col)
 
 	bytes, err := json.Marshal(collector)

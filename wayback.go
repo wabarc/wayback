@@ -160,18 +160,13 @@ func wayback(w Waybacker, r reduxer.Reduxer) string {
 }
 
 // Wayback returns URLs archived to the time capsules of given URLs.
-func Wayback(ctx context.Context, urls ...*url.URL) ([]Collect, reduxer.Reduxer, error) {
+func Wayback(ctx context.Context, rdx reduxer.Reduxer, urls ...*url.URL) ([]Collect, error) {
 	logger.Debug("start...")
 
 	if _, ok := ctx.Deadline(); !ok {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, config.Opts.WaybackTimeout())
 		defer cancel()
-	}
-
-	rdx, err := reduxer.Do(ctx, urls...)
-	if err != nil {
-		logger.Warn("reduxer error: %v", err)
 	}
 
 	mu := sync.Mutex{}
@@ -214,10 +209,10 @@ func Wayback(ctx context.Context, urls ...*url.URL) ([]Collect, reduxer.Reduxer,
 	}
 
 	if len(cols) == 0 {
-		return cols, rdx, errors.New("archiving failed: no cols")
+		return cols, errors.New("archiving failed: no cols")
 	}
 
-	return cols, rdx, nil
+	return cols, nil
 }
 
 // Playback returns URLs archived from the time capsules.
