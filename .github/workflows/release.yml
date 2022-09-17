@@ -382,9 +382,6 @@ jobs:
     steps:
     - name: Check out code base
       uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.GH_PAT }}
-        repository: 'wabarc/apt-repo'
 
     - name: Download artifact
       uses: actions/download-artifact@v2
@@ -392,33 +389,13 @@ jobs:
         name: ${{ env.PRODUCT }}
         path: ${{ env.PRODUCT }}
 
-    - name: Import GPG key
-      id: gpg
-      uses: crazy-max/ghaction-import-gpg@34ea557550c84ea665cae5c61c3b084feac7e042 # v5.0.0
-      with:
-        gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-
-    - name: GPG user IDs
-      run: |
-        echo "fingerprint: ${{ steps.gpg.outputs.fingerprint }}"
-        echo "keyid:       ${{ steps.gpg.outputs.keyid }}"
-        echo "name:        ${{ steps.gpg.outputs.name }}"
-        echo "email:       ${{ steps.gpg.outputs.email }}"
-        gpg --armor --export-secret-keys > priv.asc
-
-    - name: Build APT Repository
-      if: ${{ steps.gpg.outputs.keyid != '' }}
-      run: |
-        cp ./${{ env.PRODUCT }}/*.deb .
-        make build
+    - name: List generated files
+      run: ls -l ./${{ env.PRODUCT }}/*.deb
 
     - name: Publish APT Repository
-      if: ${{ steps.gpg.outputs.keyid != '' }}
-      run: |
-        git config --local user.name 'github-actions[bot]'
-        git config --local user.email '41898282+github-actions[bot]@users.noreply.github.com'
-        make publish
-        rm -f priv.asc
+      env:
+        FURY_TOKEN: ${{ secrets.FURY_TOKEN }}
+      run: for f in ./${{ env.PRODUCT }}/*.deb; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/wabarc/; done
 
   release-rpm:
     if: github.repository == 'wabarc/wayback'
@@ -428,9 +405,6 @@ jobs:
     steps:
     - name: Check out code base
       uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.GH_PAT }}
-        repository: 'wabarc/rpm-repo'
 
     - name: Download artifact
       uses: actions/download-artifact@v2
@@ -438,16 +412,13 @@ jobs:
         name: ${{ env.PRODUCT }}
         path: ${{ env.PRODUCT }}
 
-    - name: Build RPM Repository
-      run: |
-        cp ./${{ env.PRODUCT }}/*.rpm ./x86_64
-        make build
+    - name: List generated files
+      run: ls -l ./${{ env.PRODUCT }}/*.rpm
 
     - name: Publish RPM Repository
-      run: |
-        git config --local user.name 'github-actions[bot]'
-        git config --local user.email '41898282+github-actions[bot]@users.noreply.github.com'
-        make publish
+      env:
+        FURY_TOKEN: ${{ secrets.FURY_TOKEN }}
+      run: for f in ./${{ env.PRODUCT }}/*.rpm; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/wabarc/; done
 
   notification:
     if: github.repository == 'wabarc/wayback'
