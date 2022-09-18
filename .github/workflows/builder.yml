@@ -25,6 +25,7 @@ on:
 
 env:
   PRODUCT: wayback
+  WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
 permissions: write-all
 

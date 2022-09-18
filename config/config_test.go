@@ -243,38 +243,114 @@ func TestIPFSMode(t *testing.T) {
 }
 
 func TestIPFSTarget(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_IPFS_TARGET", "target")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	var tests = []struct {
+		token      string // managed ipfs token
+		userApikey string
+		userTarget string
+		expected   string
+	}{
+		{
+			token:      "",
+			userApikey: "",
+			userTarget: "",
+			expected:   "",
+		},
+		{
+			token:      "foo",
+			userApikey: "",
+			userTarget: "",
+			expected:   IPFSTarget,
+		},
+		{
+			token:      "",
+			userApikey: "bar",
+			userTarget: "",
+			expected:   "",
+		},
+		{
+			token:      "",
+			userApikey: "",
+			userTarget: "foo-ipfs-pinning",
+			expected:   "foo-ipfs-pinning",
+		},
 	}
 
-	expected := "target"
-	got := opts.IPFSTarget()
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_IPFS_TARGET", test.userTarget)
+			os.Setenv("WAYBACK_IPFS_APIKEY", test.userApikey)
+			IPFSToken = test.token
 
-	if got != expected {
-		t.Fatalf(`Unexpected IPFS target, got %v instead of %s`, got, expected)
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			expected := test.expected
+			got := opts.IPFSTarget()
+
+			if got != expected {
+				t.Errorf(`Unexpected IPFS target, got %v instead of %s`, got, expected)
+			}
+		})
 	}
 }
 
 func TestIPFSApikey(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_IPFS_APIKEY", "apikey")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	var tests = []struct {
+		token      string // managed ipfs token
+		userApikey string
+		userTarget string
+		expected   string
+	}{
+		{
+			token:      "",
+			userApikey: "",
+			userTarget: "",
+			expected:   "",
+		},
+		{
+			token:      "foo",
+			userApikey: "",
+			userTarget: "",
+			expected:   "foo",
+		},
+		{
+			token:      "bar",
+			userApikey: "zoo",
+			userTarget: "",
+			expected:   "zoo",
+		},
+		{
+			token:      "",
+			userApikey: "",
+			userTarget: "foo-ipfs-pinning",
+			expected:   "",
+		},
 	}
 
-	expected := "apikey"
-	got := opts.IPFSApikey()
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_IPFS_TARGET", test.userTarget)
+			os.Setenv("WAYBACK_IPFS_APIKEY", test.userApikey)
+			IPFSToken = test.token
 
-	if got != expected {
-		t.Fatalf(`Unexpected IPFS apikey, got %v instead of %s`, got, expected)
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			expected := test.expected
+			got := opts.IPFSApikey()
+
+			if got != expected {
+				t.Errorf(`Unexpected IPFS apikey, got %v instead of %s`, got, expected)
+			}
+		})
 	}
 }
 
