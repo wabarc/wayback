@@ -7,6 +7,7 @@ package service // import "github.com/wabarc/wayback/service"
 import (
 	"context"
 	"net/url"
+	"os"
 	"reflect"
 	"strconv"
 	"testing"
@@ -116,6 +117,13 @@ func TestExcludeURL(t *testing.T) {
 
 func TestWayback(t *testing.T) {
 	defer helper.CheckTest(t)
+
+	// Don't wayback to any slot to speed up testing.
+	os.Clearenv()
+	os.Setenv("WAYBACK_ENABLE_IA", "false")
+	os.Setenv("WAYBACK_ENABLE_IS", "false")
+	os.Setenv("WAYBACK_ENABLE_IP", "false")
+	os.Setenv("WAYBACK_ENABLE_PH", "false")
 
 	parser := config.NewParser()
 	var err error
