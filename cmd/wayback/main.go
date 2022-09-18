@@ -68,10 +68,10 @@ func main() {
 }
 
 func init() {
-	rootCmd.Flags().BoolVarP(&ia, "ia", "", false, "Wayback webpages to Internet Archive")
-	rootCmd.Flags().BoolVarP(&is, "is", "", false, "Wayback webpages to Archive Today")
-	rootCmd.Flags().BoolVarP(&ip, "ip", "", false, "Wayback webpages to IPFS")
-	rootCmd.Flags().BoolVarP(&ph, "ph", "", false, "Wayback webpages to Telegraph")
+	rootCmd.Flags().BoolVarP(&ia, "ia", "", true, "Wayback webpages to Internet Archive")
+	rootCmd.Flags().BoolVarP(&is, "is", "", true, "Wayback webpages to Archive Today")
+	rootCmd.Flags().BoolVarP(&ip, "ip", "", true, "Wayback webpages to IPFS")
+	rootCmd.Flags().BoolVarP(&ph, "ph", "", true, "Wayback webpages to Telegraph")
 	rootCmd.Flags().StringSliceVarP(&daemon, "daemon", "d", []string{}, "Run as daemon service, supported services are telegram, web, mastodon, twitter, discord, slack, irc")
 	rootCmd.Flags().StringVarP(&host, "ipfs-host", "", "127.0.0.1", "IPFS daemon host, do not require, unless enable ipfs")
 	rootCmd.Flags().UintVarP(&port, "ipfs-port", "p", 5001, "IPFS daemon port")
