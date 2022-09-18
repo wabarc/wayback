@@ -23,7 +23,7 @@ const (
 	defIPFSHost   = "127.0.0.1"
 	defIPFSPort   = 4001
 	defIPFSMode   = "pinner"
-	defIPFSTarget = "infura"
+	defIPFSTarget = ""
 	defIPFSApikey = ""
 	defIPFSSecret = ""
 
@@ -93,6 +93,9 @@ const (
 )
 
 var (
+	IPFSToken  = ""
+	IPFSTarget = "web3storage"
+
 	defTorRemotePorts = []int{80}
 )
 
@@ -358,11 +361,18 @@ func (o *Options) IPFSMode() string {
 
 // IPFSTarget returns which IPFS pinning service to use.
 func (o *Options) IPFSTarget() string {
+	if IPFSToken != "" {
+		return IPFSTarget
+	}
 	return o.ipfs.target
 }
 
 // IPFSApiKey returns the apikey of the IPFS pinning service.
+// It returns a managed IPFS credential if env `WAYBACK_IPFS_APIKEY` empty.
 func (o *Options) IPFSApikey() string {
+	if o.ipfs.apikey == "" {
+		return IPFSToken
+	}
 	return o.ipfs.apikey
 }
 
