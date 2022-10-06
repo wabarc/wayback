@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.18.0] - 2022-10-06
+
+### Added
+- Add support for placing a managed IPFS credential
+- Add renovate.json (#180)
+- Add semgrep scan
+- Add context cancellation for publish
+- Add support for storing a page as a single file (#184)
+- Add support for push documents to Meilisearch (#174)
+- Add support for publishing to notion
+- Add support for retrying wayback requests
+- Add retry strategy for publish
+- Add support for installing from Bina
+
+### Changed
+- Improve reduxer calls
+- Enable all wayback slot
+- Upload packages to Gemfury (#223)
+- Add testing for config
+- Set go version to 1.19 for build binary
+- Upgrade dependencies
+- Run golangci-lint on multiple os
+- Turns the pooling bucket into a non-pointer
+- Remove unused code from pooling
+- Handle startHTTPServer with goroutine
+- Set up the Meilisearch server for testing workflow
+- Minor improvements to the service goroutine
+- Context leak detection
+- Meilisearch endpoint version compatible (#185)
+- skywalking-eyes now has a dedicated header checker path (#181)
+- Minor enhancements to the worker pool
+- Pin non-official workflow dependencies
+- Upload coverage to Codecov
+- Cache go module for workflow
+- Upgrade the go version for the Docker workflow
+- Removing the retry strategy for publishing
+- Minor improvements for processing notion block
+- Several improvements from `telegra.ph`
+- Minor changes for render testing
+- Convert the publish flag to a name
+
+### Fixed
+- Fix install command to use `go install`
+- Fix license checker
+- Fix markdown link
+- Fix golang linter
+- Fix testing workflow
+- Fix unspecified failure response message
+
 ## [0.17.0] - 2022-03-14
 
 ### Added
