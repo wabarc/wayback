@@ -151,11 +151,15 @@ profile: ## Test and profile
 
 docker-image: ## Build Docker image
 	@echo "-> Building docker image..."
-	@$(DOCKER) build -t $(DOCKER_IMAGE):$(VERSION) -f ./build/docker/Dockerfile.dev .
+	@$(DOCKER) build \
+		--build-arg WAYBACK_IPFS_APIKEY=$(shell echo ${WAYBACK_IPFS_APIKEY}) \
+		-t $(DOCKER_IMAGE):$(VERSION) \
+		-f ./build/docker/Dockerfile.dev .
 
 rpm: ## Build RPM package
 	@echo "-> Building rpm package..."
 	@$(DOCKER) build \
+		--build-arg WAYBACK_IPFS_APIKEY=$(shell echo ${WAYBACK_IPFS_APIKEY}) \
 		-t wayback-rpm-builder \
 		-f build/redhat/Dockerfile .
 	@$(DOCKER) run --rm \
@@ -168,6 +172,7 @@ debian: ## Build Debian packages
 		--build-arg IMAGE_ARCH=$(DEB_IMG_ARCH) \
 		--build-arg PKG_VERSION=$(VERSION) \
 		--build-arg PKG_ARCH=$(PKG_ARCH) \
+		--build-arg WAYBACK_IPFS_APIKEY=$(shell echo ${WAYBACK_IPFS_APIKEY}) \
 		-t $(DEB_IMG_ARCH)/wayback-deb-builder \
 		-f build/debian/Dockerfile .
 	@$(DOCKER) run --rm \

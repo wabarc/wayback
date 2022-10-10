@@ -4,9 +4,13 @@
 #
 FROM golang:1.19-alpine AS builder
 
+ARG WAYBACK_IPFS_APIKEY
+
 RUN apk update && apk add --no-cache build-base ca-certificates git
 # Required by statically linked binary with OpenSSL
 # RUN apk add linux-headers
+
+ENV WAYBACK_IPFS_APIKEY ${WAYBACK_IPFS_APIKEY}
 
 WORKDIR /go/src/app
 COPY . .
