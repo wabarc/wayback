@@ -14,7 +14,7 @@ Fixes #(issue_number)
 - [ ] This change requires a documentation update
 
 ---
-# Checklist:
+# Checklist
 - [ ] I have followed the contributing guidelines of this project as mentioned in [CONTRIBUTING.md](/CONTRIBUTING.md)
 - [ ] I have checked to ensure there aren't other open [Pull Requests](https://github.com/wabarc/wayback/pulls) for the same update/change?
 - [ ] I have performed a self-review of my own code
