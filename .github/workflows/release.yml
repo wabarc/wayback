@@ -105,7 +105,7 @@ jobs:
           ARGS="${ARGS}-${GOMIPSLE}"
         fi
         make ${ARGS}
-        echo "::set-output name=args::${ARGS}"
+        echo "args=${ARGS}" >> $GITHUB_OUTPUT
 
     - name: Archive binary
       run: make TARGET=${{ steps.builder.outputs.args }} releases
@@ -225,7 +225,7 @@ jobs:
       run: |
         version=$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
         sed -i "s/version: 'git'/version: '${version}'/g" snapcraft.yaml
-        echo "::set-output name=version::${version}"
+        echo "version=${version}" >> $GITHUB_OUTPUT
 
     - id: build
       name: Build Snap
@@ -302,7 +302,7 @@ jobs:
         digest=$(find *${{ env.PRODUCT }}* -type f -exec sha256sum {} +)
         output="${digest//$'%'/%25}"
         output="${output//$'\n'/%0A}"
-        echo "::set-output name=result::$output"
+        echo "result=${output}" >> $GITHUB_OUTPUT
         # Write digest to file
         version=${{ needs.snapcraft.outputs.version }}
         echo "${digest}" > "${{ env.PRODUCT }}-${version}-checksums.txt"

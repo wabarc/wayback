@@ -145,7 +145,7 @@ jobs:
           ARGS="${ARGS}-${GOMIPSLE}"
         fi
         make ${ARGS}
-        echo "::set-output name=filename::${{ env.PRODUCT }}-${ARGS}"
+        echo "filename=${{ env.PRODUCT }}-${ARGS}" >> $GITHUB_OUTPUT
 
     - name: Upload binary artifacts
       uses: actions/upload-artifact@v3
@@ -200,7 +200,7 @@ jobs:
         PKG_ARCH="${TARGET//v8}"
         PKG_ARCH="${PKG_ARCH//32}"
         make debian DEB_IMG_ARCH=${TARGET} PKG_ARCH=${PKG_ARCH}
-        echo "::set-output name=filename::${{ env.PRODUCT }}-deb-${PKG_ARCH}"
+        echo "filename=${{ env.PRODUCT }}-deb-${PKG_ARCH}" >> $GITHUB_OUTPUT
 
     - name: Upload archived binary
       uses: actions/upload-artifact@v3
