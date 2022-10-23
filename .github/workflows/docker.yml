@@ -9,12 +9,12 @@ on:
     - cron: '0 0 * * *'
   push:
     tags:
-      - 'v*'
+      - "v*"
     branches:
       - 'main'
       - 'develop'
     paths-ignore:
-      - '**.md'
+      - "**.md"
       - 'snapcraft.yaml'
       - '.github/**'
       - '!.github/workflows/docker.yml'
@@ -22,7 +22,7 @@ on:
     branches:
       - 'main'
     paths-ignore:
-      - '**.md'
+      - "**.md"
       - 'snapcraft.yaml'
       - '.github/**'
       - '!.github/workflows/docker.yml'
