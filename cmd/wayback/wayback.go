@@ -30,6 +30,7 @@ func assets(art reduxer.Artifact) []reduxer.Asset {
 }
 
 func archive(cmd *cobra.Command, args []string) {
+	// TODO: clean the auto-created temporary directory.
 	archiving := func(ctx context.Context, urls []*url.URL) error {
 		g, ctx := errgroup.WithContext(ctx)
 		rdx, err := reduxer.Do(ctx, urls...)
