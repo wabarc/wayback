@@ -151,6 +151,8 @@ jobs:
 
       - name: Run url checker
         uses: urlstechie/urlchecker-action@816b328eb5bd2b35a1f72230bf2ff4b7ca0680fe # 0.0.33
+        with:
+          exclude_patterns: ".onion,https://github.com/,https://repo.wabarc.eu.org/"
 
   goreportcard:
     if: ${{ github.ref == 'refs/heads/main' }}
