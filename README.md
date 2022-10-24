@@ -304,7 +304,7 @@ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANN
 
 - [wabarc/on-heroku](https://github.com/wabarc/on-heroku)
 - [wabarc/on-github](https://github.com/wabarc/on-github)
-- [wabarc/on-rebder](https://github.com/wabarc/on-rebder)
+- [wabarc/on-render](https://github.com/wabarc/on-render)
 
 ## TODO
 
