@@ -1,0 +1,27 @@
+# Copyright 2022 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the GNU GPL v3
+# license that can be found in the LICENSE file.
+#
+# syntax=docker/dockerfile:1.2
+ARG WAYBACK_IMAGE_TAG=latest-bundle
+
+FROM ghcr.io/wabarc/wayback:${WAYBACK_IMAGE_TAG}
+
+ENV BASE_DIR /wayback
+ENV WAYBACK_TOR_LOCAL_PORT 80
+
+WORKDIR ${BASE_DIR}
+
+RUN set -ex; \
+    chown wayback:nogroup /var/log/tor; \
+    chown wayback:nogroup /var/lib/tor; \
+    \
+    setcap 'cap_net_bind_service=+ep' /usr/local/bin/wayback; \
+    \
+    sed -i 's/User/#User/g' /etc/tor/torrc
+
+USER wayback
+
+EXPOSE 80
+
+CMD ["/usr/local/bin/wayback", "-d", "web"]
