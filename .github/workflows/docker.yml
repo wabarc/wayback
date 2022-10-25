@@ -24,7 +24,9 @@ on:
       - 'snapcraft.yaml'
   workflow_dispatch:
 
-permissions: write-all
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   publish:
@@ -35,6 +37,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b # v2.8.1
+        with:
+          cosign-release: 'v1.13.1'
 
       - name: Prepare
         id: prep
@@ -112,6 +119,14 @@ jobs:
             *.cache-from=type=local,src=/tmp/.image-cache/image
             *.cache-to=type=local,dest=/tmp/.image-cache-new/image
 
+      - name: Sign image with a key
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
+          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSPHARSE}}
+        run: |
+          cosign sign --key env://COSIGN_PRIVATE_KEY ${TAGS}
+
       - name: Check manifest
         if: github.event_name != 'pull_request'
         run: |
@@ -141,6 +156,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b # v2.8.1
+        with:
+          cosign-release: 'v1.13.1'
 
       - name: Prepare
         id: prep
@@ -210,6 +230,14 @@ jobs:
           set: |
             *.cache-from=type=local,src=/tmp/.image-cache/image
             *.cache-to=type=local,dest=/tmp/.image-cache-new/image
+
+      - name: Sign image with a key
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
+          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSPHARSE}}
+        run: |
+          cosign sign --key env://COSIGN_PRIVATE_KEY ${TAGS}
 
       - name: Check manifest
         if: github.event_name != 'pull_request'
