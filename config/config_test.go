@@ -1370,20 +1370,36 @@ func TestBoltPath(t *testing.T) {
 }
 
 func TestStorageDir(t *testing.T) {
-	dir := os.TempDir()
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_STORAGE_DIR", dir)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	var tests = []struct {
+		dir string
+		exp string
+	}{
+		{
+			dir: "",
+			exp: defStorageDir,
+		},
+		{
+			dir: "/path/to/storage",
+			exp: "/path/to/storage",
+		},
 	}
 
-	got := opts.StorageDir()
-	if got != dir {
-		t.Fatalf(`Unexpected storage binary directory got %s instead of %s`, got, dir)
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_STORAGE_DIR", test.dir)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.StorageDir()
+			if got != test.exp {
+				t.Errorf(`Unexpected storage binary directory got %s instead of %s`, got, test.dir)
+			}
+		})
 	}
 }
 
@@ -1394,7 +1410,7 @@ func TestEnabledReduxer(t *testing.T) {
 	}{
 		{
 			dir: "",
-			exp: false,
+			exp: true,
 		},
 		{
 			dir: "/path/to/storage",

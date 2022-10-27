@@ -6,6 +6,8 @@ package config // import "github.com/wabarc/wayback/config"
 
 import (
 	"net/url"
+	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -76,7 +78,6 @@ const (
 	defEnabledChromeRemote = false
 	defBoltPathname        = "wayback.db"
 	defPoolingSize         = 3
-	defStorageDir          = ""
 	defMaxMediaSize        = "512MB"
 	defWaybackTimeout      = 300
 	defWaybackMaxRetries   = 2
@@ -96,6 +97,7 @@ var (
 	IPFSToken  = ""
 	IPFSTarget = "web3storage"
 
+	defStorageDir     = path.Join(os.TempDir(), "reduxer")
 	defTorRemotePorts = []int{80}
 )
 
@@ -690,7 +692,7 @@ func (o *Options) StorageDir() string {
 
 // EnabledReduxer returns whether enable store binary file locally.
 func (o *Options) EnabledReduxer() bool {
-	return o.storageDir != ""
+	return o.StorageDir() != ""
 }
 
 // MaxMediaSize returns max size to limit download stream media.
