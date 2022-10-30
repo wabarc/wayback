@@ -3,10 +3,8 @@ variable "GO_VERSION" {
   default = "1.19"
 }
 
-target "go-version" {
-  args = {
-    GO_VERSION = GO_VERSION
-  }
+variable "WAYBACK_IPFS_APIKEY" {
+  default = ""
 }
 
 // GitHub reference as defined in GitHub Actions (eg. refs/head/master))
@@ -14,9 +12,10 @@ variable "GITHUB_REF" {
   default = ""
 }
 
-target "git-ref" {
+target "_common" {
   args = {
-    GIT_REF = GITHUB_REF
+    GO_VERSION = GO_VERSION
+    WAYBACK_IPFS_APIKEY = WAYBACK_IPFS_APIKEY
   }
 }
 
@@ -30,6 +29,7 @@ target "docker-metadata-action" {
 }
 
 target "artifact" {
+  inherits = ["_common"]
   output = ["./dist"]
 }
 
@@ -47,7 +47,7 @@ target "artifact-all" {
 }
 
 target "image" {
-  inherits = ["docker-metadata-action"]
+  inherits = ["_common", "docker-metadata-action"]
 }
 
 target "image-local" {
@@ -56,7 +56,7 @@ target "image-local" {
 }
 
 target "release" {
-  inherits = ["docker-metadata-action"]
+  inherits = ["image"]
   context = "./"
   platforms = [
     "linux/386",
@@ -70,7 +70,7 @@ target "release" {
 }
 
 target "bundle" {
-  inherits = ["docker-metadata-action"]
+  inherits = ["image"]
   context = "./"
   dockerfile = "./build/docker/Dockerfile.all"
   platforms = [
