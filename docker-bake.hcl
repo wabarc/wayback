@@ -28,8 +28,17 @@ target "docker-metadata-action" {
   tags = ["wabarc/wayback:local"]
 }
 
+target "image" {
+  inherits = ["_common", "docker-metadata-action"]
+}
+
+target "image-local" {
+  inherits = ["image"]
+  output = ["type=docker"]
+}
+
 target "artifact" {
-  inherits = ["_common"]
+  inherits = ["image"]
   output = ["./dist"]
 }
 
@@ -44,15 +53,6 @@ target "artifact-all" {
     "linux/ppc64le",
     "linux/s390x"
   ]
-}
-
-target "image" {
-  inherits = ["_common", "docker-metadata-action"]
-}
-
-target "image-local" {
-  inherits = ["image"]
-  output = ["type=docker"]
 }
 
 target "release" {
