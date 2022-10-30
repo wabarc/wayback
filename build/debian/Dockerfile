@@ -6,6 +6,7 @@ FROM ${IMAGE_ARCH}/golang:buster AS build
 
 ARG PKG_ARCH
 ARG PKG_VERSION
+ARG WAYBACK_IPFS_APIKEY
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update -q && \
@@ -15,6 +16,8 @@ RUN apt-get update -q && \
 RUN mkdir -p /build/debian /pkg
 COPY . /src
 WORKDIR /src/build/debian
+
+ENV WAYBACK_IPFS_APIKEY ${WAYBACK_IPFS_APIKEY}
 ENV PKG_VERSION ${PKG_VERSION}
 ENV PKG_ARCH ${PKG_ARCH}
 
