@@ -57,7 +57,7 @@ Using [Snapcraft](https://snapcraft.io/wayback) (on GNU/Linux)
 sudo snap install wayback
 ```
 
-Via [APT](https://github.com/wabarc/apt-repo):
+Via [APT](https://repo.wabarc.eu.org/deb:wayback):
 
 ```bash
 curl -fsSL https://repo.wabarc.eu.org/apt/gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/packages.wabarc.gpg
@@ -66,7 +66,7 @@ sudo apt update
 sudo apt install wayback
 ```
 
-Via [RPM](https://github.com/wabarc/rpm-repo):
+Via [RPM](https://repo.wabarc.eu.org/rpm:wayback):
 
 ```bash
 sudo rpm --import https://repo.wabarc.eu.org/yum/gpg.key
