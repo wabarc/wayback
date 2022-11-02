@@ -100,6 +100,8 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        env:
+          WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
         with:
           files: |
             ./docker-bake.hcl
@@ -197,6 +199,8 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        env:
+          WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
         with:
           files: |
             ./docker-bake.hcl
