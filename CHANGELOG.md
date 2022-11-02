@@ -7,15 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.18.1] - 2022-10-30
+
+### Fixed
+- Fix ipfs credential assignment ([#231](https://github.com/wabarc/wayback/pull/231),[#242](https://github.com/wabarc/wayback/pull/242))
+
+### Changed
+- Update repo url ([#241](https://github.com/wabarc/wayback/pull/241))
+- Set the default path for the reduxer ([#235](https://github.com/wabarc/wayback/pull/235))
+- Create pull_request_template.md ([#230](https://github.com/wabarc/wayback/pull/230))
+
 ## [0.18.0] - 2022-10-06
 
 ### Added
 - Add support for placing a managed IPFS credential
-- Add renovate.json (#180)
+- Add renovate.json ([#180](https://github.com/wabarc/wayback/pull/180))
 - Add semgrep scan
 - Add context cancellation for publish
-- Add support for storing a page as a single file (#184)
-- Add support for push documents to Meilisearch (#174)
+- Add support for storing a page as a single file ([#184](https://github.com/wabarc/wayback/pull/181))
+- Add support for push documents to Meilisearch ([#174](https://github.com/wabarc/wayback/pull/174))
 - Add support for publishing to notion
 - Add support for retrying wayback requests
 - Add retry strategy for publish
@@ -24,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Improve reduxer calls
 - Enable all wayback slot
-- Upload packages to Gemfury (#223)
+- Upload packages to Gemfury ([#223](https://github.com/wabarc/wayback/pull/223))
 - Add testing for config
 - Set go version to 1.19 for build binary
 - Upgrade dependencies
@@ -35,8 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Set up the Meilisearch server for testing workflow
 - Minor improvements to the service goroutine
 - Context leak detection
-- Meilisearch endpoint version compatible (#185)
-- skywalking-eyes now has a dedicated header checker path (#181)
+- Meilisearch endpoint version compatible ([#185](https://github.com/wabarc/wayback/pull/185))
+- skywalking-eyes now has a dedicated header checker path ([#181](https://github.com/wabarc/wayback/pull/181))
 - Minor enhancements to the worker pool
 - Pin non-official workflow dependencies
 - Upload coverage to Codecov
