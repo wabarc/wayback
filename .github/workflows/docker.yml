@@ -88,7 +88,7 @@ jobs:
             type=raw,${{ steps.prep.outputs.version }}
 
       - name: Build artifacts
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@33fe53ec171c0364a7841e8a52c83519a4039bd1 # v2.0.0
         env:
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
         with:
@@ -99,7 +99,7 @@ jobs:
             *.cache-to=type=local,dest=/tmp/.image-cache-new/artifacts
 
       - name: Build and push Docker image
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@33fe53ec171c0364a7841e8a52c83519a4039bd1 # v2.0.0
         env:
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
         with:
@@ -187,7 +187,7 @@ jobs:
             type=raw,${{ steps.prep.outputs.version }}
 
       - name: Build artifacts
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@33fe53ec171c0364a7841e8a52c83519a4039bd1 # v2.0.0
         env:
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
         with:
@@ -198,7 +198,7 @@ jobs:
             *.cache-to=type=local,dest=/tmp/.image-cache-new/artifacts
 
       - name: Build and push Docker image
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@33fe53ec171c0364a7841e8a52c83519a4039bd1 # v2.0.0
         env:
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
         with:
