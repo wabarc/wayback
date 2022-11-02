@@ -18,6 +18,7 @@ Source4: CHANGELOG.md
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}
 BuildArch: x86_64
 Requires(pre): shadow-utils
+Recommends: chromium, youtube-dl, tor
 
 %{?systemd_requires}
 BuildRequires: systemd

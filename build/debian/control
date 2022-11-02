@@ -10,3 +10,7 @@ Description: The wayback is a toolkit for snapshot webpage to
  Internet Archive, archive.today, IPFS and beyond.
 Homepage: https://github.com/wabarc/wayback
 Depends: ${misc:Depends}, ${shlibs:Depends}, adduser
+Recommends:
+  chromium,
+  youtube-dl,
+  tor
