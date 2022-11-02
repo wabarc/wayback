@@ -12,5 +12,11 @@ Homepage: https://github.com/wabarc/wayback
 Depends: ${misc:Depends}, ${shlibs:Depends}, adduser
 Recommends:
   chromium,
+  libwebp-dev,
   youtube-dl,
+  wget,
+  nss,
   tor
+Suggests:
+  ffmpeg,
+  you-get
