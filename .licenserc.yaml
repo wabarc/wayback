@@ -29,6 +29,7 @@ header:
     - '**/go.mod'
     - '**/go.sum'
     - 'LICENSE'
+    - 'reduxer/sites'
     - 'template/assets/**'
     - 'template/views/*.html'
     - 'wayback.1'
