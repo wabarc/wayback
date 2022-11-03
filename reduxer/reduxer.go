@@ -226,8 +226,10 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 			if err := helper.SetField(&artifact.WARC, "Local", craft(u)); err != nil {
 				logger.Error("assign field WARC to path struct failed: %v", err)
 			}
-			if err := helper.SetField(&artifact.Media, "Local", media(ctx, dir, shot.URL)); err != nil {
-				logger.Error("assign field Media to path struct failed: %v", err)
+			if supportedMediaSite(u) {
+				if err := helper.SetField(&artifact.Media, "Local", media(ctx, dir, shot.URL)); err != nil {
+					logger.Error("assign field Media to path struct failed: %v", err)
+				}
 			}
 			// Attach single file
 			singleFilePath := singleFile(ctx, bytes.NewReader(shot.HTML), dir, shot.URL)
