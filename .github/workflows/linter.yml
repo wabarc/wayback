@@ -133,6 +133,27 @@ jobs:
       - name: Run alex with reviewdog
         uses: reviewdog/action-alex@ba00276838ef57db30fc418f906a09ea79f25efc # v1.5.0
 
+  urlcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code base
+        if: github.event_name == 'push'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Run url checker
+        uses: urlstechie/urlchecker-action@816b328eb5bd2b35a1f72230bf2ff4b7ca0680fe # 0.0.33
+        with:
+          exclude_patterns: ".onion,https://github.com/,https://repo.wabarc.eu.org/"
+
   goreportcard:
     if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
