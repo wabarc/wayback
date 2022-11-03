@@ -102,7 +102,7 @@ func pretty(cols []wayback.Collect, rdx reduxer.Reduxer) string {
 			}
 		}
 		if hasArtifact {
-			items = append(items, "Artifacts")
+			items = append(items, "artifacts")
 		}
 		writer.AppendItems(items)
 		if hasArtifact {
