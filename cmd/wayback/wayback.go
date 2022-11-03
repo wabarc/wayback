@@ -86,7 +86,7 @@ func pretty(cols []wayback.Collect, rdx reduxer.Reduxer) string {
 		writer.Indent()
 		items := make([]interface{}, 0)
 		for _, col := range grouped[src] {
-			item := fmt.Sprintf("%s: %s", col.Arc, col.Dst)
+			item := fmt.Sprintf("%s: %s", strings.ToUpper(col.Arc), col.Dst)
 			items = append(items, item)
 		}
 
@@ -102,7 +102,7 @@ func pretty(cols []wayback.Collect, rdx reduxer.Reduxer) string {
 			}
 		}
 		if hasArtifact {
-			items = append(items, "artifacts")
+			items = append(items, "Artifacts")
 		}
 		writer.AppendItems(items)
 		if hasArtifact {
