@@ -46,9 +46,8 @@ func archive(cmd *cobra.Command, args []string) {
 
 		content := pretty(cols, rdx)
 		for _, line := range strings.Split(content, "\n") {
-			cmd.Printf("%s\n", line)
+			cmd.Println(line)
 		}
-		cmd.Println()
 
 		if err := g.Wait(); err != nil {
 			return err
@@ -72,16 +71,14 @@ func archive(cmd *cobra.Command, args []string) {
 
 func pretty(cols []wayback.Collect, rdx reduxer.Reduxer) string {
 	writer := list.NewWriter()
-	lTemp := list.List{}
-	lTemp.Render() // just to avoid the compile error of not using the object
 	defer writer.Reset()
 
 	type uri string
 	type collects []wayback.Collect
 	grouped := make(map[uri]collects, len(cols)/4)
 	for _, col := range cols {
-		i := uri(col.Src)
-		grouped[i] = append(grouped[i], col)
+		src := uri(col.Src)
+		grouped[src] = append(grouped[src], col)
 	}
 
 	for src := range grouped {
@@ -108,7 +105,6 @@ func pretty(cols []wayback.Collect, rdx reduxer.Reduxer) string {
 			items = append(items, "Artifacts")
 		}
 		writer.AppendItems(items)
-		// Append artifacts
 		if hasArtifact {
 			writer.Indent()
 			writer.AppendItems(artifacts)
