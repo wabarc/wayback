@@ -141,6 +141,13 @@ jobs:
           docker pull ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
           docker image inspect ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
 
+      - name: Cosign verify
+        if: github.event_name != 'pull_request'
+        run: |
+          IMAGE_NAME=${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+          cat cosign.pub
+          cosign verify --key cosign.pub $IMAGE_NAME
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -249,6 +256,20 @@ jobs:
         run: |
           docker pull ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
           docker image inspect ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+
+      - name: Cosign verify
+        if: github.event_name != 'pull_request'
+        run: |
+          IMAGE_NAME=${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+          cat cosign.pub
+          cosign verify --key cosign.pub $IMAGE_NAME
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wayback
+          path: ./dist/*
+          if-no-files-found: error
 
   dispatch:
     if: github.repository == 'wabarc/wayback'
