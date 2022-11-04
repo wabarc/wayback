@@ -45,10 +45,10 @@ From GitHub Releases:
 curl -fsSL https://github.com/wabarc/wayback/raw/main/install.sh | sh
 ```
 
-or via [Bina](https://bina.egoist.sh/):
+or via [Bina](https://bina.egoist.dev/):
 
 ```sh
-curl -fsSL https://bina.egoist.sh/wabarc/wayback | sh
+curl -fsSL https://bina.egoist.dev/wabarc/wayback | sh
 ```
 
 Using [Snapcraft](https://snapcraft.io/wayback) (on GNU/Linux)
