@@ -27,11 +27,68 @@ on:
   schedule:
     - cron: '33 23 * * 4'
 
-permissions: write-all
+# Declare default permissions as read only.
+permissions: read-all
 
 jobs:
-  analyze:
-    name: Analyze
+  analysis:
+    name: Scorecards
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      github.head_ref == '${{ github.event.repository.default_branch }}'
+    permissions:
+      # Needed to upload the results to code-scanning dashboard.
+      security-events: write
+      # Used to receive a badge. (Upcoming feature)
+      id-token: write
+      actions: read
+      contents: read
+
+    steps:
+    - name: Check out code base
+      if: github.event_name == 'push' || github.event_name == 'schedule'
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Check out code base
+      if: github.event_name == 'pull_request'
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Run analysis
+      uses: ossf/scorecard-action@99c53751e09b9529366343771cc321ec74e9bd3d # v2.0.6
+      with:
+        results_file: results.sarif
+        results_format: sarif
+        # (Optional) Read-only PAT token. Uncomment the `repo_token` line below if:
+        # - you want to enable the Branch-Protection check on a *public* repository, or
+        # - you are installing Scorecards on a *private* repository
+        # To create the PAT, follow the steps in https://github.com/ossf/scorecard-action#authentication-with-pat.
+        # repo_token: ${{ secrets.SCORECARD_READ_TOKEN }}
+
+        # Publish the results for public repositories to enable scorecard badges. For more details, see
+        # https://github.com/ossf/scorecard-action#publishing-results.
+        # For private repositories, `publish_results` will automatically be set to `false`, regardless
+        # of the value entered here.
+        publish_results: true
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: SARIF file
+        path: results.sarif
+
+    - name: Upload to code-scanning
+      uses: github/codeql-action/upload-sarif@c3b6fce4ee2ca25bc1066aa3bf73962fda0e8898 # v2.1.31
+      with:
+        sarif_file: results.sarif
+
+  codeql:
+    name: CodeQL
     runs-on: ubuntu-latest
 
     permissions:
