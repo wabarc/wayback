@@ -243,3 +243,37 @@ jobs:
       uses: fossas/fossa-action@f61a4c0c263690f2ddb54b9822a719c25a7b608f # v1.3.1
       with:
         api-key: ${{ secrets.FOSSA_APIKEY }}
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Check out code base
+      if: github.event_name == 'push' || github.event_name == 'schedule'
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Check out code base
+      if: github.event_name == 'pull_request'
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Dependency Review
+      if: github.event_name == 'pull_request'
+      uses: actions/dependency-review-action@v2
+      with:
+        base-ref: ${{ github.event.repository.default_branch }}
+        head-ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Dependency Review
+      if: github.event_name == 'push' || github.event_name == 'schedule'
+      uses: actions/dependency-review-action@v2
+      with:
+        base-ref: ${{ github.event.repository.default_branch }}
+        head-ref: ${{ github.sha }}
