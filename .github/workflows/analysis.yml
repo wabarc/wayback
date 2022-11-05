@@ -1,0 +1,68 @@
+# Copyright 2020 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the GNU GPL v3
+# license that can be found in the LICENSE file.
+
+name: "Analysis"
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '33 23 * * 4'
+
+# Declare default permissions as read only.
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecards
+    uses: wabarc/.github/.github/workflows/reusable-scorecards.yml@main
+    permissions:
+      # Needed to upload the results to code-scanning dashboard.
+      security-events: write
+      # Used to receive a badge. (Upcoming feature)
+      id-token: write
+      actions: read
+      contents: read
+
+  codeql:
+    name: CodeQL
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'go' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python' ]
+        # Learn more:
+        # https://docs.github.com/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#changing-the-languages-that-are-analyzed
+    uses: wabarc/.github/.github/workflows/reusable-codeql.yml@main
+    with:
+      language: ${{ matrix.language }}
+      config-file: './.github/codeql/codeql-config.yml'
+
+  nancy:
+    name: Sonatype Nancy
+    uses: wabarc/.github/.github/workflows/reusable-nancy.yml@main
+
+  semgrep:
+    name: Semgrep Scan
+    if: github.actor != 'dependabot[bot]'
+    uses: wabarc/.github/.github/workflows/reusable-semgrep.yml@main
+
+  fossa:
+    if: github.repository == 'wabarc/wayback'
+    name: FOSSA
+    uses: wabarc/.github/.github/workflows/reusable-fossa.yml@main
+    secrets:
+      fossa-apikey: ${{ secrets.FOSSA_APIKEY }}
+
+  dependency-review:
+    name: Dependency Review
+    uses: wabarc/.github/.github/workflows/reusable-dependency-review.yml@main
