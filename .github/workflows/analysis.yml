@@ -14,7 +14,7 @@
 # supported CodeQL languages.
 # ******** NOTE ********
 
-name: "CodeQL"
+name: "Analysis"
 
 on:
   push:
