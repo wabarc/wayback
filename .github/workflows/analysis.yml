@@ -247,6 +247,3 @@ jobs:
   dependency-review:
     name: Dependency Review
     uses: wabarc/.github/.github/workflows/reusable-dependency-review.yml@main
-    with:
-      base-ref: ${{ github.event.repository.default_branch }}
-      head-ref: ${{ github.sha }}
