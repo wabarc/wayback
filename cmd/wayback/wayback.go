@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/jedib0t/go-pretty/v6/list"
 	"github.com/spf13/cobra"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/errors"
@@ -42,16 +44,9 @@ func archive(cmd *cobra.Command, args []string) {
 			return err
 		}
 
-		for _, col := range cols {
-			cmd.Println(col.Src, "=>", col.Dst)
-			if bundle, ok := rdx.Load(reduxer.Src(col.Src)); ok {
-				for _, asset := range assets(bundle.Artifact()) {
-					if asset.Local == "" {
-						continue
-					}
-					cmd.Println(col.Src, "=>", asset.Local)
-				}
-			}
+		content := pretty(cols, rdx)
+		for _, line := range strings.Split(content, "\n") {
+			cmd.Println(line)
 		}
 
 		if err := g.Wait(); err != nil {
@@ -72,6 +67,54 @@ func archive(cmd *cobra.Command, args []string) {
 	if err := archiving(ctx, urls); err != nil {
 		cmd.PrintErrln(err)
 	}
+}
+
+func pretty(cols []wayback.Collect, rdx reduxer.Reduxer) string {
+	writer := list.NewWriter()
+	defer writer.Reset()
+
+	type uri string
+	type collects []wayback.Collect
+	grouped := make(map[uri]collects, len(cols)/4)
+	for _, col := range cols {
+		src := uri(col.Src)
+		grouped[src] = append(grouped[src], col)
+	}
+
+	for src := range grouped {
+		writer.AppendItem(src)
+		writer.Indent()
+		items := make([]interface{}, 0)
+		for _, col := range grouped[src] {
+			item := fmt.Sprintf("%s: %s", strings.ToUpper(col.Arc), col.Dst)
+			items = append(items, item)
+		}
+
+		hasArtifact := false
+		artifacts := make([]interface{}, 0)
+		if bundle, ok := rdx.Load(reduxer.Src(src)); ok {
+			for _, asset := range assets(bundle.Artifact()) {
+				hasArtifact = true
+				if asset.Local == "" {
+					continue
+				}
+				artifacts = append(artifacts, asset.Local)
+			}
+		}
+		if hasArtifact {
+			items = append(items, "Artifacts")
+		}
+		writer.AppendItems(items)
+		if hasArtifact {
+			writer.Indent()
+			writer.AppendItems(artifacts)
+			writer.UnIndent()
+		}
+		writer.UnIndent()
+	}
+	writer.SetStyle(list.StyleConnectedRounded)
+
+	return writer.Render()
 }
 
 func unmarshalArgs(args []string) (urls []*url.URL, err error) {
