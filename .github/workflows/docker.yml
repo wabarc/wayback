@@ -16,12 +16,16 @@ on:
     paths-ignore:
       - '**.md'
       - 'snapcraft.yaml'
+      - '.github/**'
+      - '!.github/workflows/docker.yml'
   pull_request:
     branches:
       - 'main'
     paths-ignore:
       - '**.md'
       - 'snapcraft.yaml'
+      - '.github/**'
+      - '!.github/workflows/docker.yml'
   workflow_dispatch:
 
 permissions:
