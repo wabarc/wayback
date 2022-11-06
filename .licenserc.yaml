@@ -37,5 +37,6 @@ header:
     - 'install.sh'
     - 'Makefile'
     - 'Procfile'
+    - 'cosign.pub'
 
   comment: on-failure

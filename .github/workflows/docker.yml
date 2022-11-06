@@ -16,15 +16,22 @@ on:
     paths-ignore:
       - '**.md'
       - 'snapcraft.yaml'
+      - '.github/**'
+      - '!.github/workflows/docker.yml'
   pull_request:
     branches:
       - 'main'
     paths-ignore:
       - '**.md'
       - 'snapcraft.yaml'
+      - '.github/**'
+      - '!.github/workflows/docker.yml'
   workflow_dispatch:
 
-permissions: write-all
+permissions:
+  contents: read
+  packages: write
+  id-token: write
 
 jobs:
   publish:
@@ -35,6 +42,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Install Cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b # v2.8.1
+        with:
+          cosign-release: 'v1.13.1'
 
       - name: Prepare
         id: prep
@@ -112,6 +125,15 @@ jobs:
             *.cache-from=type=local,src=/tmp/.image-cache/image
             *.cache-to=type=local,dest=/tmp/.image-cache-new/image
 
+      - name: Sign image with a key
+        if: github.event_name != 'pull_request'
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
+          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSPHARSE}}
+        run: |
+          cosign sign --key env://COSIGN_PRIVATE_KEY ${TAGS}
+
       - name: Check manifest
         if: github.event_name != 'pull_request'
         run: |
@@ -125,6 +147,13 @@ jobs:
           docker image inspect ${{ steps.prep.outputs.docker }}:${{ steps.meta.outputs.version }}
           docker pull ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
           docker image inspect ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+
+      - name: Cosign verify
+        if: github.event_name != 'pull_request'
+        run: |
+          IMAGE_NAME=${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+          cat cosign.pub
+          cosign verify --key cosign.pub $IMAGE_NAME
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -141,6 +170,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Install Cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b # v2.8.1
+        with:
+          cosign-release: 'v1.13.1'
 
       - name: Prepare
         id: prep
@@ -211,6 +246,15 @@ jobs:
             *.cache-from=type=local,src=/tmp/.image-cache/image
             *.cache-to=type=local,dest=/tmp/.image-cache-new/image
 
+      - name: Sign image with a key
+        if: github.event_name != 'pull_request'
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
+          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSPHARSE}}
+        run: |
+          cosign sign --key env://COSIGN_PRIVATE_KEY ${TAGS}
+
       - name: Check manifest
         if: github.event_name != 'pull_request'
         run: |
@@ -221,6 +265,20 @@ jobs:
         run: |
           docker pull ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
           docker image inspect ${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+
+      - name: Cosign verify
+        if: github.event_name != 'pull_request'
+        run: |
+          IMAGE_NAME=${{ steps.prep.outputs.ghcr }}:${{ steps.meta.outputs.version }}
+          cat cosign.pub
+          cosign verify --key cosign.pub $IMAGE_NAME
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wayback
+          path: ./dist/*
+          if-no-files-found: error
 
   dispatch:
     if: github.repository == 'wabarc/wayback'
