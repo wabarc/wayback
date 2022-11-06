@@ -25,6 +25,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  id-token: read
   contents: read
   packages: write
 
