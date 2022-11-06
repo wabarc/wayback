@@ -246,4 +246,4 @@ jobs:
 
   dependency-review:
     name: Dependency Review
-    uses: wabarc/.github/.github/workflows/reusable-dependency-review.yml@main
+    uses: wabarc/.github/.github/workflows/reusable-dependency-review.yml@step-security
