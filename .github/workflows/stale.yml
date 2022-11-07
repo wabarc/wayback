@@ -7,6 +7,7 @@ name: Stale
 on:
   schedule:
     - cron: "0 3 * * 6"
+  workflow_dispatch:
 
 permissions:
   issues: write
@@ -15,15 +16,4 @@ permissions:
 jobs:
   stale:
     name: Stale
-    runs-on: ubuntu-latest
-    steps:
-      - name: Mark stale issues and pull requests
-        uses: actions/stale@v5
-        with:
-          repo-token: ${{ github.token }}
-          exempt-issue-labels: "enhancement,question,help wanted,bug"
-          exempt-pr-labels: "need-help,WIP"
-          stale-issue-message: "This issue is stale because it has been open 120 days with no activity. Remove stale label or comment or this will be closed in 5 days"
-          stale-pr-message: 'It has been open 120 days with no activity. Remove stale label or comment or this will be closed in 5 days'
-          days-before-stale: 120
-          days-before-close: 5
+    uses: wabarc/.github/.github/workflows/reusable-stale.yml@main
