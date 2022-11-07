@@ -13,23 +13,10 @@ on:
       - '**'
     types: [ opened, synchronize, reopened ]
 
+permissions:
+  contents: read
+
 jobs:
   license:
     name: License Checker
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code base
-        if: github.event_name == 'push'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Check out code base
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Check License Header
-        uses: apache/skywalking-eyes/header@501a28d2fb4a9b962661987e50cf0219631b32ff
+    uses: wabarc/.github/.github/workflows/reusable-license.yml@main
