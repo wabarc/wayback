@@ -9,12 +9,12 @@ on:
     - cron: '0 0 * * *'
   push:
     tags:
-      - 'v*'
+      - "v*"
     branches:
       - 'main'
       - 'develop'
     paths-ignore:
-      - '**.md'
+      - "**.md"
       - 'snapcraft.yaml'
       - '.github/**'
       - '!.github/workflows/docker.yml'
@@ -22,7 +22,7 @@ on:
     branches:
       - 'main'
     paths-ignore:
-      - '**.md'
+      - "**.md"
       - 'snapcraft.yaml'
       - '.github/**'
       - '!.github/workflows/docker.yml'
@@ -64,11 +64,11 @@ jobs:
             DOCKER_IMAGE_VERSION=edge
           fi
           TAGS="${TAGS},${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE}:${DOCKER_IMAGE_VERSION},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}:${DOCKER_IMAGE_VERSION}"
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=version::${DOCKER_IMAGE_VERSION}
-          echo ::set-output name=docker::${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE}
-          echo ::set-output name=ghcr::${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}
-          echo ::set-output name=images::${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "version=${DOCKER_IMAGE_VERSION}" >> $GITHUB_OUTPUT
+          echo "docker=${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE}" >> $GITHUB_OUTPUT
+          echo "ghcr=${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}" >> $GITHUB_OUTPUT
+          echo "images=${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
@@ -191,10 +191,10 @@ jobs:
             DOCKER_IMAGE_VERSION=edge
           fi
           TAGS="${TAGS},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}:${DOCKER_IMAGE_VERSION}"
-          echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=version::${DOCKER_IMAGE_VERSION}
-          echo ::set-output name=ghcr::${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}
-          echo ::set-output name=images::${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "version=${DOCKER_IMAGE_VERSION}" >> $GITHUB_OUTPUT
+          echo "ghcr=${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}" >> $GITHUB_OUTPUT
+          echo "images=${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
