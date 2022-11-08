@@ -271,6 +271,11 @@ jobs:
           build/aur/${{ env.PRODUCT }}*.pkg.tar.zst
         if-no-files-found: error
 
+    - name: Clean up
+      run: |
+        cd build/aur
+        make clean
+
   snapcraft:
     name: Build Snap
     runs-on: ubuntu-latest

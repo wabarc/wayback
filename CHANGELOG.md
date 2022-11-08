@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Sign images using cosign
 - Replace set-output with recommended env output ([#234](https://github.com/wabarc/wayback/pull/234))
+- Specify dependencies for the distribution package ([#243](https://github.com/wabarc/wayback/pull/243))
 
 ## [0.18.1] - 2022-10-30
 
