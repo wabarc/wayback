@@ -12,15 +12,44 @@ import (
 	"github.com/wabarc/helper"
 )
 
+const (
+	host   = `https://example.org`
+	domain = `example.org`
+)
+
+var (
+	validURL, _ = url.Parse(host)
+	invalidURL  = &url.URL{Host: `invalid-tld`}
+)
+
+func TestBaseHost(t *testing.T) {
+	var tests = []struct {
+		url *url.URL
+		exp string
+	}{
+		{validURL, domain},
+		{invalidURL, ``},
+	}
+
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			dom, _ := baseHost(test.url)
+			if dom != test.exp {
+				t.Errorf(`Unexpected extract base host, got %v instead of %v`, dom, test.exp)
+			}
+		})
+	}
+}
+
 func TestSupportedMediaSite(t *testing.T) {
-	exist, _ := url.Parse("https://youtube.com")
 	missing, _ := url.Parse("https://missing.com")
 
 	var tests = []struct {
 		url *url.URL
 		exp bool
 	}{
-		{exist, true},
+		{validURL, true},
+		{invalidURL, false},
 		{missing, false},
 	}
 
