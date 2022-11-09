@@ -8,12 +8,10 @@ import (
 	"net/url"
 	"os"
 	"testing"
-
-	"github.com/wabarc/helper"
 )
 
 const (
-	host   = `https://example.org`
+	host   = `https://www.youtube.com`
 	domain = `example.org`
 )
 
@@ -42,47 +40,32 @@ func TestBaseHost(t *testing.T) {
 }
 
 func TestSupportedMediaSite(t *testing.T) {
+	extraDomain := "https://extra-domain.com"
 	missing, _ := url.Parse("https://missing.com")
+	extraURL, _ := url.Parse(extraDomain)
 
 	var tests = []struct {
-		url *url.URL
-		exp bool
+		url       *url.URL
+		testname  string
+		filename  string
+		extra     string
+		supported bool
 	}{
-		{validURL, true},
-		{invalidURL, false},
-		{missing, false},
+		{validURL, `test with valid url`, filename, ``, true},
+		{invalidURL, `test with invalid url`, filename, ``, false},
+		{missing, `test not found`, filename, ``, false},
+		{extraURL, `test extra sites`, filename, extraDomain, true},
+		{invalidURL, `test extra invalid sites`, filename, extraDomain, false},
+		{invalidURL, `test sites configuration file not exists`, `/path/not/exists`, extraDomain, false},
 	}
 
 	for _, test := range tests {
-		t.Run("", func(t *testing.T) {
+		t.Run(test.testname, func(t *testing.T) {
+			os.Setenv("WAYBACK_MEDIA_SITES", test.extra)
+			parseMediaSites(test.filename)
 			supported := supportedMediaSite(test.url)
-			if supported != test.exp {
-				t.Errorf(`Unexpected check download media supported, got %v instead of %v`, supported, test.exp)
-			}
-		})
-	}
-}
-
-func TestSupportedMediaSiteWithExtra(t *testing.T) {
-	extra := "https://missing.com"
-	u, _ := url.Parse(extra)
-
-	var tests = []struct {
-		url string
-		exp bool
-	}{
-		{"", false},
-		{extra, true},
-	}
-
-	for _, test := range tests {
-		t.Run("", func(t *testing.T) {
-			helper.Unsetenv("WAYBACK_MEDIA_SITES")
-			os.Setenv("WAYBACK_MEDIA_SITES", test.url)
-			parseMediaSites()
-			supported := supportedMediaSite(u)
-			if supported != test.exp {
-				t.Errorf(`Unexpected check download media supported, got %v instead of %v`, supported, test.exp)
+			if supported != test.supported {
+				t.Errorf(`Unexpected check download media supported, got %v instead of %v`, supported, test.supported)
 			}
 		})
 	}

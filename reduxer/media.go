@@ -61,7 +61,7 @@ var sites embed.FS
 var managedMediaSites = make(map[string]struct{})
 
 func init() {
-	parseMediaSites()
+	parseMediaSites(filename)
 }
 
 func baseHost(u *url.URL) (string, error) {
@@ -72,8 +72,8 @@ func baseHost(u *url.URL) (string, error) {
 	return dom, nil
 }
 
-func parseMediaSites() {
-	file, err := sites.Open(filename)
+func parseMediaSites(fn string) {
+	file, err := sites.Open(fn)
 	if err != nil {
 		return
 	}
