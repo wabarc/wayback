@@ -12,7 +12,7 @@ import (
 
 const (
 	host   = `https://www.youtube.com`
-	domain = `example.org`
+	domain = `youtube.com`
 )
 
 var (
