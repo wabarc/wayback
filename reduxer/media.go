@@ -13,10 +13,8 @@ import (
 
 	"github.com/wabarc/logger"
 	"golang.org/x/net/publicsuffix"
-)
 
-// Copied from https://github.com/iawia002/lux/blob/f1baf46e/app/register.go#L3-L40
-import (
+	// Copied from https://github.com/iawia002/lux/blob/f1baf46e/app/register.go#L3-L40
 	_ "github.com/iawia002/lux/extractors/acfun"
 	_ "github.com/iawia002/lux/extractors/bcy"
 	_ "github.com/iawia002/lux/extractors/bilibili"
