@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"os"
 	"testing"
+
+	"github.com/wabarc/helper"
 )
 
 func TestSupportedMediaSite(t *testing.T) {
@@ -46,7 +48,7 @@ func TestSupportedMediaSiteWithExtra(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run("", func(t *testing.T) {
-			os.Clearenv()
+			helper.Unsetenv("WAYBACK_MEDIA_SITES")
 			os.Setenv("WAYBACK_MEDIA_SITES", test.url)
 			parseMediaSites()
 			supported := supportedMediaSite(u)
