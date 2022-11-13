@@ -11,9 +11,9 @@ on:
 
 env:
   PRODUCT: wayback
-  WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
-permissions: write-all
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -72,49 +72,20 @@ jobs:
           - os: dragonfly
             arch: 386
       fail-fast: false
-    runs-on: ubuntu-latest
-    env:
-      GOOS: ${{ matrix.os }}
-      GOARCH: ${{ matrix.arch }}
-      GOARM: ${{ matrix.arm }}
-      GOMIPS: ${{ matrix.mips }}
-      GOMIPS64: ${{ matrix.mips64 }}
-      GOMIPSLE: ${{ matrix.mipsle }}
-    steps:
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v3
-      with:
-        go-version: ^1.18
-
-    - name: Build fat binary
-      id: builder
-      run: |
-        ARGS="${GOOS}-${GOARCH}"
-        if [[ -n "${GOARM}" ]]; then
-          ARGS="${ARGS}v${GOARM}"
-        elif [[ -n "${GOMIPS}" ]]; then
-          ARGS="${ARGS}-${GOMIPS}"
-        elif [[ -n "${GOMIPS64}" ]]; then
-          ARGS="${ARGS}-${GOMIPS64}"
-        elif [[ -n "${GOMIPSLE}" ]]; then
-          ARGS="${ARGS}-${GOMIPSLE}"
-        fi
-        make ${ARGS}
-        echo "args=${ARGS}" >> $GITHUB_OUTPUT
-
-    - name: Archive binary
-      run: make TARGET=${{ steps.builder.outputs.args }} releases
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.PRODUCT }}
-        path: build/package/${{ env.PRODUCT }}*
+    uses: wabarc/.github/.github/workflows/reusable-builder-go.yml@main
+    with:
+      product: wayback
+      release: true
+      go-version: '^1.19'
+      go-os: ${{ matrix.os }}
+      go-arch: ${{ matrix.arch }}
+      go-arm: ${{ matrix.arm }}
+      go-mips: ${{ matrix.mips }}
+      go-mips64: ${{ matrix.mips64 }}
+      go-mipsle: ${{ matrix.mipsle }}
+      artifact-path: build/package/wayback*
+    secrets:
+      wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
   debpkg:
     name: Build DEB
@@ -124,348 +95,148 @@ jobs:
           - os: linux
             arch: amd64
           - os: linux
-            arch: arm
+            arch: arm32
             arm: 7
           - os: linux
             arch: arm64
-    runs-on: ubuntu-latest
-    env:
-      GOOS: ${{ matrix.os }}
-      GOARCH: ${{ matrix.arch }}
-      GOARM: ${{ matrix.arm }}
-    steps:
-    - name: Check out codebase
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
-
-    - name: Build Debian package
-      run: |
-        OS_ARCH="${GOARCH}"
-        PKG_ARCH="${GOARCH}"
-        if [[ -n "${GOARM}" ]]; then
-          PKG_ARCH="${PKG_ARCH}v${GOARM}"
-          OS_ARCH="arm32v${GOARM}"
-        fi
-        if [[ "${OS_ARCH}" == "arm64" ]]; then
-          OS_ARCH=arm64v8
-        fi
-        make debian DEB_IMG_ARCH=${OS_ARCH} PKG_ARCH=${PKG_ARCH}
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.PRODUCT }}
-        path: build/package/${{ env.PRODUCT }}*.deb
+            arm: 8
+      fail-fast: false
+    uses: wabarc/.github/.github/workflows/reusable-builder-debian.yml@main
+    with:
+      product: wayback
+      go-arch: ${{ matrix.arch }}
+      go-arm: ${{ matrix.arm }}
+      artifact-path: build/package/wayback*.deb
+    secrets:
+      wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
   rpmpkg:
     name: Build RPM
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out codebase
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Build RPM package
-      run: make rpm
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.PRODUCT }}
-        path: build/package/${{ env.PRODUCT }}*.rpm
+    uses: wabarc/.github/.github/workflows/reusable-builder-rpm.yml@main
+    with:
+      product: wayback
+      params: 'make rpm'
+      artifact-path: build/package/wayback*.rpm
+    secrets:
+      wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
   aurpkg:
     name: Build AUR
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out code base
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        submodules: true
-
-    - name: Build AUR package
-      run: |
-        make submodule
-        cd build/aur
-        make volume
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.PRODUCT }}
-        path: |
-          build/aur/.SRCINFO
-          build/aur/PKGBUILD
-          build/aur/${{ env.PRODUCT }}*.pkg.tar.zst
-        if-no-files-found: error
-
-    - name: Clean up
-      run: |
-        cd build/aur
-        make clean
+    uses: wabarc/.github/.github/workflows/reusable-builder-aur.yml@main
+    with:
+      product: wayback
+      params: 'make submodule && cd build/aur && make volume'
+      artifact-path: |
+        build/aur/.SRCINFO
+        build/aur/PKGBUILD
+        build/aur/wayback*.pkg.tar.zst
+    secrets:
+      wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
   snapcraft:
     name: Build Snap
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.env.outputs.version }}
-    steps:
-    - name: Check out code base
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
-
-    - name: Set env & Print wayback version
-      shell: bash
-      id: env
-      run: |
-        version=$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
-        sed -i "s/version: 'git'/version: '${version}'/g" snapcraft.yaml
-        echo "version=${version}" >> $GITHUB_OUTPUT
-
-    - id: build
-      name: Build Snap
-      uses: snapcore/action-build@ea14cdeb353272f75977040488ca191880509a8c # v1.1.0
-      with:
-        snapcraft-channel: stable
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.PRODUCT }}
-        path: ${{ steps.build.outputs.snap }}
+    uses: wabarc/.github/.github/workflows/reusable-builder-snap.yml@main
+    with:
+      product: wayback
+      channel: stable
+      release: true
+      publish: true
+    secrets:
+      wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+      snapcraft-token: ${{ secrets.SNAPCRAFT_TOKEN }}
 
   flatpak:
     name: Build Flatpak
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check out code base
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v3
-      with:
-        go-version: ^1.18
-
-    - name: Setup Flatpak
-      run: |
-        sudo apt-get -y -qq update
-        sudo apt-get install -y flatpak flatpak-builder
-
-    - name: Packaging flatpak
-      run: |
-        VERSION=$(git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
-        BUNDLE="org.wabarc.wayback_${VERSION}_x86_64.flatpak"
-        MANIFEST_PATH=$GITHUB_WORKSPACE/build/flatpak/org.wabarc.wayback.yml
-        RUNTIME_REPO="https://flathub.org/repo/flathub.flatpakrepo"
-        APP_ID="org.wabarc.wayback"
-        BRANCH="master"
-
-        flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-        flatpak install -y --noninteractive flathub org.freedesktop.Platform//20.08 org.freedesktop.Sdk//20.08
-
-        make build
-        mv build/binary/wayback build/flatpak/wayback
-
-        flatpak-builder --user --disable-rofiles-fuse --repo=repo --force-clean flatpak_app ${MANIFEST_PATH} --install-deps-from=flathub
-        flatpak build-bundle repo ${BUNDLE} --runtime-repo=${RUNTIME_REPO} ${APP_ID} ${BRANCH}
-        mv $GITHUB_WORKSPACE/org.wabarc.wayback_${VERSION}_x86_64.flatpak $GITHUB_WORKSPACE/org.wabarc.wayback-${VERSION}.x86_64.flatpak
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.PRODUCT }}
-        path: org.wabarc.wayback-*.x86_64.flatpak
-
-  checksum:
-    name: Get archived packages checksum
-    runs-on: ubuntu-latest
-    needs: [ build, debpkg, rpmpkg, aurpkg, snapcraft, flatpak ]
-    outputs:
-      digest: ${{ steps.digest.outputs.result }}
-    steps:
-    - name: Download math result from build job
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ env.PRODUCT }}
-        path: .
-
-    - name: Create all binary digest
-      id: digest
-      run: |
-        digest=$(find *${{ env.PRODUCT }}* -type f -exec sha256sum {} +)
-        output="${digest//$'%'/%25}"
-        output="${output//$'\n'/%0A}"
-        echo "result=${output}" >> $GITHUB_OUTPUT
-        # Write digest to file
-        version=${{ needs.snapcraft.outputs.version }}
-        echo "${digest}" > "${{ env.PRODUCT }}-${version}-checksums.txt"
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.PRODUCT }}
-        path: ${{ env.PRODUCT }}-*-checksums.txt
+    uses: wabarc/.github/.github/workflows/reusable-builder-flatpak.yml@main
+    with:
+      product: wayback
+      params: 'make build'
+      artifact-path: org.wabarc.wayback-*.x86_64.flatpak
+    secrets:
+      wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
   release:
     name: Create and upload release
-    runs-on: ubuntu-latest
-    needs: [build, checksum]
-    steps:
-    - name: Check out code base
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: Generate Git log
-      run: |
-        git fetch origin +refs/tags/*:refs/tags/*
-        echo "Current Tag: ${GITHUB_REF}"
-        git checkout ${GITHUB_REF} -b release-log
-        GITVER=$(git describe --tags)
-        PREVVER=$(git describe --tags --abbrev=0 ${GITVER}~1)
-        git log --oneline ${PREVVER}..${GITVER} > gittaglogs.txt
-        MORE=$(echo "See full [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/CHANGELOG.md)")
-        echo -e "*Release ${GITVER}* #wayback\n" > release-note.md
-        cut -c9- gittaglogs.txt | sed -e 's/^/- /' | sed -e 's/\"/\\"/g' >> release-note.md
-        echo -e "\n${MORE}" | tee -a release-note.md gittaglogs.txt > /dev/null
-        # Append digests
-        echo '
-        **Digests in this release:**
-
-        ```
-        ${{ needs.checksum.outputs.digest }}
-        ```
-        ' >> gittaglogs.txt
-
-    - name: Update bina.jon
-      run: |
-        make bina
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: release-note
-        path: |
-          release-note.md
-          bina.json
-
-    - name: Download math result from build and checksum jobs
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ env.PRODUCT }}
-        path: ${{ env.PRODUCT }}
-
-    - name: Create Release
-      uses: softprops/action-gh-release@50195ba7f6f93d1ac97ba8332a178e008ad176aa
-      if: startsWith(github.ref, 'refs/tags/')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-      with:
-        body_path: gittaglogs.txt
-        files: |
-          ${{ env.PRODUCT }}/*${{ env.PRODUCT }}*
-          bina.json
-        prerelease: true
-        draft: false
+    needs: [ build, debpkg, rpmpkg, aurpkg, snapcraft, flatpak ]
+    permissions:
+      contents: write
+    uses: wabarc/.github/.github/workflows/reusable-releaser-go.yml@main
+    with:
+      product: wayback
+      generate-bina: true
 
   release-apt:
     if: github.repository == 'wabarc/wayback'
     name: Release APT Repository
-    runs-on: ubuntu-latest
-    needs: [debpkg]
-    steps:
-    - name: Check out code base
-      uses: actions/checkout@v3
-
-    - name: Download artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ env.PRODUCT }}
-        path: ${{ env.PRODUCT }}
-
-    - name: List generated files
-      run: ls -l ./${{ env.PRODUCT }}/*.deb
-
-    - name: Publish APT Repository
-      env:
-        FURY_TOKEN: ${{ secrets.FURY_TOKEN }}
-      run: for f in ./${{ env.PRODUCT }}/*.deb; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/wabarc/; done
+    needs: [ release ]
+    uses: wabarc/.github/.github/workflows/reusable-releaser-gemfury.yml@main
+    with:
+      product: wayback
+      type: deb
+    secrets:
+      fury-token: ${{ secrets.FURY_TOKEN }}
 
   release-rpm:
     if: github.repository == 'wabarc/wayback'
     name: Release RPM Repository
-    runs-on: ubuntu-latest
-    needs: [rpmpkg]
-    steps:
-    - name: Check out code base
-      uses: actions/checkout@v3
-
-    - name: Download artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ env.PRODUCT }}
-        path: ${{ env.PRODUCT }}
-
-    - name: List generated files
-      run: ls -l ./${{ env.PRODUCT }}/*.rpm
-
-    - name: Publish RPM Repository
-      env:
-        FURY_TOKEN: ${{ secrets.FURY_TOKEN }}
-      run: for f in ./${{ env.PRODUCT }}/*.rpm; do curl --fail -F package=@$f https://$FURY_TOKEN@push.fury.io/wabarc/; done
+    needs: [ release ]
+    uses: wabarc/.github/.github/workflows/reusable-releaser-gemfury.yml@main
+    with:
+      product: wayback
+      type: rpm
+    secrets:
+      fury-token: ${{ secrets.FURY_TOKEN }}
 
   notification:
     if: github.repository == 'wabarc/wayback'
     name: Send Notification
     runs-on: ubuntu-latest
-    needs: [release]
+    needs: [ release ]
     steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: release-note
-        path: .
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            api.telegram.org:443
 
-    - name: Send release note to Telegram channel
-      continue-on-error: true
-      run: |
-        TEXT="$(cat release-note.md)"
-        echo -e "${TEXT}"
-        curl --silent --output /dev/null --show-error --fail -X POST \
-             -H 'Content-Type: application/json' \
-             -d '{"chat_id": "${{ secrets.TELEGRAM_TO }}", "text": "'"${TEXT}"'", "parse_mode": "markdown"}' \
-             "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage"
+      - name: Send release note to Telegram channel
+        continue-on-error: true
+        run: |
+          TEXT="${{ needs.release.outputs.release-note }}"
+          echo -e "${TEXT}"
+          curl --silent --output /dev/null --show-error --fail -X POST \
+               -H 'Content-Type: application/json' \
+               -d '{"chat_id": "${{ secrets.TELEGRAM_TO }}", "text": "'"${TEXT}"'", "parse_mode": "markdown"}' \
+               "https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage"
 
   dispatch:
     if: github.repository == 'wabarc/wayback'
     name: Repository Dispatch
     runs-on: ubuntu-latest
-    needs: [release]
+    needs: [ release ]
     steps:
-    - name: Dispatch repository in wabarc/aur
-      uses: peter-evans/repository-dispatch@11ba7d3f32dc7cc919d1c43f1fec1c05260c26b5 # v2.0.0
-      with:
-        repository: wabarc/aur
-        event-type: publish
-        token: ${{ secrets.PAT_WORKFLOW }}
-        client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
+      - name: Harden Runner
+        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            api.github.com:443
 
-    - name: Dispatch repository in wabarc/homebrew-wayback
-      uses: peter-evans/repository-dispatch@11ba7d3f32dc7cc919d1c43f1fec1c05260c26b5 # v2.0.0
-      with:
-        repository: wabarc/homebrew-wayback
-        event-type: publish
-        token: ${{ secrets.PAT_WORKFLOW }}
-        client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
+      - name: Dispatch repository in wabarc/aur
+        uses: peter-evans/repository-dispatch@11ba7d3f32dc7cc919d1c43f1fec1c05260c26b5 # v2.0.0
+        with:
+          repository: wabarc/aur
+          event-type: publish
+          token: ${{ secrets.PAT_WORKFLOW }}
+          client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
+
+      - name: Dispatch repository in wabarc/homebrew-wayback
+        uses: peter-evans/repository-dispatch@11ba7d3f32dc7cc919d1c43f1fec1c05260c26b5 # v2.0.0
+        with:
+          repository: wabarc/homebrew-wayback
+          event-type: publish
+          token: ${{ secrets.PAT_WORKFLOW }}
+          client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
