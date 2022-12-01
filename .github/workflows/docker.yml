@@ -53,6 +53,7 @@ jobs:
             registry-1.docker.io:443
             production.cloudflare.docker.com:443
             dl-cdn.alpinelinux.org:443
+            storage.googleapis.com:443
             proxy.golang.org:443
             sum.golang.org:443
 
@@ -199,6 +200,7 @@ jobs:
             registry-1.docker.io:443
             production.cloudflare.docker.com:443
             dl-cdn.alpinelinux.org:443
+            storage.googleapis.com:443
             proxy.golang.org:443
             sum.golang.org:443
 
