@@ -47,10 +47,14 @@ jobs:
             ghcr.io:443
             github.com:443
             api.github.com:443
+            docker.io:443
             pkg-containers.githubusercontent.com:443
             auth.docker.io:443
             registry-1.docker.io:443
             production.cloudflare.docker.com:443
+            dl-cdn.alpinelinux.org:443
+            proxy.golang.org:443
+            sum.golang.org:443
 
       - name: Checkout default branch
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
@@ -189,10 +193,14 @@ jobs:
             ghcr.io:443
             github.com:443
             api.github.com:443
+            docker.io:443
             pkg-containers.githubusercontent.com:443
             auth.docker.io:443
             registry-1.docker.io:443
             production.cloudflare.docker.com:443
+            dl-cdn.alpinelinux.org:443
+            proxy.golang.org:443
+            sum.golang.org:443
 
       - name: Checkout default branch
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
