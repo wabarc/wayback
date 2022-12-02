@@ -29,13 +29,18 @@ import (
 )
 
 type web struct {
+	ctx context.Context
+
+	pool     *pooling.Pool
 	router   *mux.Router
 	template *template.Template
 }
 
-func newWeb() *web {
+func newWeb(ctx context.Context, pool *pooling.Pool) *web {
 	router := mux.NewRouter()
 	web := &web{
+		ctx:      ctx,
+		pool:     pool,
 		router:   router,
 		template: template.New(router),
 	}
@@ -48,7 +53,7 @@ func newWeb() *web {
 	return web
 }
 
-func (web *web) handle(pool *pooling.Pool) http.Handler {
+func (web *web) handle() http.Handler {
 	web.router.HandleFunc("/", web.home)
 	web.router.HandleFunc("/{name}.js", web.showJavascript).Name("javascript").Methods(http.MethodGet)
 	web.router.HandleFunc("/favicon.ico", web.showFavicon).Name("favicon").Methods(http.MethodGet)
@@ -57,22 +62,14 @@ func (web *web) handle(pool *pooling.Pool) http.Handler {
 	web.router.HandleFunc("/offline.html", web.showOfflinePage).Methods(http.MethodGet)
 
 	web.router.HandleFunc("/wayback", func(w http.ResponseWriter, r *http.Request) {
-		bucket := pooling.Bucket{
-			Request: func(ctx context.Context) error {
-				if err := web.process(ctx, w, r); err != nil {
-					logger.Error("httpd: process retrying: %v", err)
-					return err
-				}
-				return nil
-			},
-			Fallback: func(_ context.Context) error {
-				// TODO: find a better way to response
-				metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusFailure)
-				return nil
-			},
+		ctx, cancel := context.WithTimeout(web.ctx, config.Opts.WaybackTimeout())
+		defer cancel()
+
+		if err := web.process(ctx, w, r); err != nil {
+			logger.Error("httpd: process retrying: %v", err)
+			return
 		}
-		// TODO: duplicate request caching
-		pool.Put(bucket)
+		return
 	}).Methods(http.MethodPost)
 
 	web.router.HandleFunc("/playback", web.playback).Methods(http.MethodPost)
@@ -207,6 +204,7 @@ func (web *web) showJavascript(w http.ResponseWriter, r *http.Request) {
 }
 
 func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	// TODO: rate limit https://pkg.go.dev/golang.org/x/time/rate
 	logger.Info("process request start...")
 	metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusRequest)
 

@@ -66,7 +66,7 @@ func (t *Tor) Serve() error {
 	// Start tor with some defaults + elevated verbosity
 	logger.Info("starting and registering onion service, please wait a bit...")
 
-	handler := newWeb().handle(t.pool)
+	handler := newWeb(t.ctx, t.pool).handle()
 	server := &http.Server{
 		ReadTimeout:  5 * time.Minute,
 		WriteTimeout: 5 * time.Minute,

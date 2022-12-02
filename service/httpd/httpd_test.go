@@ -50,8 +50,14 @@ func TestTransform(t *testing.T) {
 func TestProcessRespStatus(t *testing.T) {
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
+
+	ctx := context.Background()
+	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	go pool.Roll()
+	defer pool.Close()
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		newWeb().process(context.Background(), w, r)
+		newWeb(ctx, pool).process(context.Background(), w, r)
 	})
 
 	var tests = []struct {
@@ -100,13 +106,13 @@ func TestProcessContentType(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	web := newWeb()
 	ctx := context.Background()
 	pool := pooling.New(ctx, config.Opts.PoolingSize())
 	go pool.Roll()
 	defer pool.Close()
+	web := newWeb(ctx, pool)
 
-	web.handle(pool)
+	web.handle()
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
