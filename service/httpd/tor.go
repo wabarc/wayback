@@ -75,7 +75,7 @@ func (t *Tor) Serve() error {
 	}
 
 	switch {
-	case torExist():
+	case torExist() && t.torrc() != "":
 		logger.Info("start a tor hidden server")
 		t.startTorServer(server)
 	default:
