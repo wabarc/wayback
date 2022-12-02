@@ -87,22 +87,6 @@ func New(ctx context.Context, capacity int) *Pool {
 }
 
 // Roll process wayback requests from the resource pool for execution.
-//
-//	// Stream generates values with DoSomething and sends them to out
-//	// until DoSomething returns an error or ctx.Done is closed.
-//	func Stream(ctx context.Context, out chan<- Value) error {
-//		for {
-//			v, err := DoSomething(ctx)
-//			if err != nil {
-//				return err
-//			}
-//			select {
-//			case <-ctx.Done():
-//				return ctx.Err()
-//			case out <- v:
-//			}
-//		}
-//	}
 func (p *Pool) Roll() {
 	// Blocks until closed
 	for {
@@ -232,4 +216,19 @@ func (p *Pool) bucket() (b Bucket, ok bool) {
 	}
 
 	return
+}
+
+type status int
+
+const (
+	StatusIdle status = iota
+	StatusBusy
+)
+
+// Status returns status of worker pool.
+func (p *Pool) Status() status {
+	if atomic.LoadInt32(&p.waiting)+atomic.LoadInt32(&p.processing) < int32(cap(p.resource)) {
+		return StatusIdle
+	}
+	return StatusBusy
 }

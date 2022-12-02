@@ -203,3 +203,57 @@ func TestClose(t *testing.T) {
 		t.Fatalf("Unexpected close pooling")
 	}
 }
+
+func TestStatus(t *testing.T) {
+	defer helper.CheckTest(t)
+
+	var err error
+	parser := config.NewParser()
+	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
+	}
+	logger.SetLogLevel(logger.LevelFatal)
+
+	tests := []struct {
+		run    func(*Pool)
+		name   string
+		status status
+	}{
+		{
+			func(_ *Pool) {},
+			"idle",
+			StatusIdle,
+		},
+		{
+			func(p *Pool) {
+				bucket := Bucket{Request: func(_ context.Context) error { return nil }}
+				p.Put(bucket)
+			},
+			"busy",
+			StatusBusy,
+		},
+		{
+			func(p *Pool) {
+				bucket := Bucket{Request: func(_ context.Context) error { time.Sleep(time.Second); return nil }}
+				p.Put(bucket)
+			},
+			"busy",
+			StatusBusy,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			p := New(context.Background(), 1)
+			p.timeout = time.Microsecond
+			go p.Roll()
+			defer p.Close()
+
+			test.run(p)
+			status := p.Status()
+			if status != test.status {
+				t.Errorf(`Unexpected pooling status, got %v instead of %v`, status, test.status)
+			}
+		})
+	}
+}
