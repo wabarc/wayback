@@ -67,9 +67,7 @@ func (web *web) handle() http.Handler {
 
 		if err := web.process(ctx, w, r); err != nil {
 			logger.Error("httpd: process retrying: %v", err)
-			return
 		}
-		return
 	}).Methods(http.MethodPost)
 
 	web.router.HandleFunc("/playback", web.playback).Methods(http.MethodPost)

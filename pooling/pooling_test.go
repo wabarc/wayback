@@ -217,7 +217,7 @@ func TestStatus(t *testing.T) {
 	tests := []struct {
 		run    func(*Pool)
 		name   string
-		status status
+		status Status
 	}{
 		{
 			func(_ *Pool) {},

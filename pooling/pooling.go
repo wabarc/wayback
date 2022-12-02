@@ -218,17 +218,29 @@ func (p *Pool) bucket() (b Bucket, ok bool) {
 	return
 }
 
-type status int
+type Status int
 
 const (
-	StatusIdle status = iota
+	StatusIdle Status = iota
 	StatusBusy
 )
 
 // Status returns status of worker pool.
-func (p *Pool) Status() status {
+func (p *Pool) Status() Status {
 	if atomic.LoadInt32(&p.waiting)+atomic.LoadInt32(&p.processing) < int32(cap(p.resource)) {
 		return StatusIdle
 	}
 	return StatusBusy
+}
+
+// String returns description of status.
+func (s Status) String() string {
+	switch s {
+	case StatusIdle:
+		return "idle"
+	case StatusBusy:
+		return "busy"
+	}
+
+	return "unknown"
 }
