@@ -111,7 +111,7 @@ jobs:
             arch: arm64
             arm: 8
       fail-fast: false
-    uses: wabarc/.github/.github/workflows/reusable-builder-debian.yml@main
+    uses: wabarc/.github/.github/workflows/reusable-builder-deb.yml@main
     with:
       product: wayback
       go-arch: ${{ matrix.arch }}
