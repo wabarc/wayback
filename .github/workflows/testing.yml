@@ -79,7 +79,7 @@ jobs:
 
       - name: Set up Meilisearch
         if: matrix.os == 'ubuntu-latest'
-        uses: moy2010/meilisearch-github-action@fcc5ef714af0596633665032d459bfb279d3c730 # 0.1.4
+        uses: moy2010/meilisearch-github-action@3050cbc5ffa666739da4e3138c678caa146cb314 # 0.1.4
         with:
           meilisearch-version: v0.28.0
           meilisearch-port: 7700
