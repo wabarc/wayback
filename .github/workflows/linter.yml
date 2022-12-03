@@ -18,147 +18,29 @@ permissions:
 
 jobs:
   super-linter:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code base
-        if: github.event_name == 'push'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Check out code base
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Lint Code Base
-        uses: github/super-linter@v4
-        env:
-          DEFAULT_BRANCH: 'main'
-          VALIDATE_MARKDOWN: true
-          VALIDATE_DOCKERFILE: true
-          VALIDATE_BASH: true
-          VALIDATE_BASH_EXEC: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    name: Super Linter
+    uses: wabarc/.github/.github/workflows/reusable-super-linter.yml@main
 
   golangci:
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Check out code base
-        if: github.event_name == 'push'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Check out code base
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Set up Go 1.x
-        uses: actions/setup-go@v3
-        with:
-          go-version: ^1.18
-
-      - name: Golang linter
-        uses: golangci/golangci-lint-action@537aa1903e5d359d0b27dbc19ddd22c5087f3fbc # v3.2.0
-        with:
-          version: v1.49
-          # Optional: golangci-lint command line arguments.
-          args: --timeout=5m
-          # Optional: show only new issues if it's a pull request. The default value is `false`.
-          only-new-issues: true
+    name: golangci-lint
+    uses: wabarc/.github/.github/workflows/reusable-golangci.yml@main
 
   shellcheck:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code base
-        if: github.event_name == 'push'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Check out code base
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Run shellcheck with reviewdog
-        uses: reviewdog/action-shellcheck@66c9a47bf02255b250284a82251cb4cadf5043f5 # v1.15.0
+    name: ShellCheck
+    uses: wabarc/.github/.github/workflows/reusable-shellcheck.yml@main
 
   misspell:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code base
-        if: github.event_name == 'push'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Check out code base
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Run misspell with reviewdog
-        uses: reviewdog/action-misspell@811b1e15f531430be3a5784e3d591bd657df18b0 # v1.12.2
+    name: Misspell
+    uses: wabarc/.github/.github/workflows/reusable-misspell.yml@main
 
   alex:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code base
-        if: github.event_name == 'push'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Check out code base
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Run alex with reviewdog
-        uses: reviewdog/action-alex@ba00276838ef57db30fc418f906a09ea79f25efc # v1.5.0
+    name: Alex
+    uses: wabarc/.github/.github/workflows/reusable-alex.yml@main
 
   urlcheck:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out code base
-        if: github.event_name == 'push'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Check out code base
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Run url checker
-        uses: urlstechie/urlchecker-action@816b328eb5bd2b35a1f72230bf2ff4b7ca0680fe # 0.0.33
-        with:
-          exclude_patterns: ".onion,https://github.com/,https://repo.wabarc.eu.org/"
+    name: URLCheck
+    uses: wabarc/.github/.github/workflows/reusable-urlcheck.yml@main
 
   goreportcard:
-    if: ${{ github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run Go report card
-        run: |
-          path=$(curl -sf -X POST -F "repo=github.com/$GITHUB_REPOSITORY" https://goreportcard.com/checks | jq -r '.redirect')
-          echo -e "\nSee report for https://goreportcard.com${path}"
+    name: Go Report Card
+    uses: wabarc/.github/.github/workflows/reusable-goreportcard.yml@main
