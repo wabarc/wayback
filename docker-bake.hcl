@@ -1,8 +1,3 @@
-// Go version
-variable "GO_VERSION" {
-  default = "1.19"
-}
-
 variable "WAYBACK_IPFS_APIKEY" {
   default = ""
 }
@@ -14,7 +9,6 @@ variable "GITHUB_REF" {
 
 target "_common" {
   args = {
-    GO_VERSION = GO_VERSION
     WAYBACK_IPFS_APIKEY = WAYBACK_IPFS_APIKEY
   }
 }

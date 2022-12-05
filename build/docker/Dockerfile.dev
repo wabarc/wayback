@@ -1,7 +1,5 @@
 # syntax=docker/dockerfile:1.2
-ARG GO_VERSION=1.19
-
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang@sha256:8e0cab3057642c2e4cbbbc6d02dd5dbcd23eec5fdc5f106bce3a2869abdd2a47 AS buildera # golang:1.19-alpine
 
 RUN apk add --no-cache -U build-base ca-certificates linux-headers musl-dev git tar
 
@@ -19,7 +17,7 @@ RUN set -eu && \
     && mv ./build/binary/wayback-* /wayback
 
 # Application layer
-FROM alpine:3.15
+FROM alpine@sha256:7a38a4540724813e4190d086e955a8e757a7302551cc7555012fa63b57f1cf87 # alpine:3.15.6
 
 LABEL org.wabarc.homepage="http://github.com/wabarc" \
       org.wabarc.repository="http://github.com/wabarc/wayback" \
