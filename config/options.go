@@ -70,7 +70,7 @@ const (
 	defMatrixPassword   = ""
 
 	defTorPrivateKey = ""
-	defListenAddr    = "127.0.0.1:8964"
+	defListenAddr    = "0.0.0.0:8964"
 	defTorLocalPort  = 8964
 	defTorrcFile     = "/etc/tor/torrc"
 
@@ -645,6 +645,7 @@ func (o *Options) TorPrivKey() string {
 }
 
 // TorLocalPort returns the local port to a TCP listener on.
+// This is ignored if `WAYBACK_LISTEN_ADDR` is set.
 func (o *Options) TorLocalPort() int {
 	return o.tor.localPort
 }

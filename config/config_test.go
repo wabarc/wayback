@@ -645,7 +645,7 @@ func TestListenAddr(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.address, func(t *testing.T) {
 			os.Clearenv()
-			os.Setenv("HTTP_LISTEN_ADDR", test.address)
+			os.Setenv("WAYBACK_LISTEN_ADDR", test.address)
 
 			parser := NewParser()
 			opts, err := parser.ParseEnvironmentVariables()

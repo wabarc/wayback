@@ -123,8 +123,8 @@ Log level, supported level are "debug", "info", "warn", "error", "fatal", defaul
 .B ENABLE_METRICS
 Enable metrics collector\&.
 .TP
-.B HTTP_LISTEN_ADDR
-The listen address for the HTTP server. default "127.0.0.1:8964"\&.
+.B WAYBACK_LISTEN_ADDR
+The listen address for the HTTP server. default "0.0.0.0:8964"\&.
 .TP
 .B CHROME_REMOTE_ADDR
 Chrome/Chromium remote debugging address, for screenshot\&.
@@ -265,7 +265,7 @@ Notion integration token\&.
 Notion database ID for archiving results\&.
 .TP
 .B WAYBACK_TOR_LOCAL_PORT
-Local port of Tor service\&.
+Local port of Tor service. This is ignored if `WAYBACK_LISTEN_ADDR` is set.\&.
 .TP
 .B WAYBACK_TOR_REMOTE_PORTS
 Remote ports of Tor hidden service, e.g. WAYBACK_TOR_REMOTE_PORTS=80,81\&.

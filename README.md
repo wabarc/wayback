@@ -222,7 +222,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `LOG_TIME`                        | `true`                  | Display the date and time in log messages                    |
 | -                   | `LOG_LEVEL`                       | `info`                  | Log level, supported level are `debug`, `info`, `warn`, `error`, `fatal`, defaults to `info` |
 | -                   | `ENABLE_METRICS`                  | `false`                 | Enable metrics collector                                     |
-| -                   | `HTTP_LISTEN_ADDR`                | `127.0.0.1:8964`        | The listen address for the HTTP server                       |
+| -                   | `WAYBACK_LISTEN_ADDR`             | `0.0.0.0:8964`        | The listen address for the HTTP server                       |
 | -                   | `CHROME_REMOTE_ADDR`              | -                       | Chrome/Chromium remote debugging address, for screenshot     |
 | -                   | `WAYBACK_POOLING_SIZE`            | `3`                     | Number of worker pool for wayback at once                    |
 | -                   | `WAYBACK_BOLT_PATH`               | `./wayback.db`          | File path of bolt database                                   |
@@ -280,7 +280,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_SLACK_HELPTEXT`          | -                       | The help text for Slack slash command                        |
 | `--tor`             | `WAYBACK_USE_TOR`                 | `false`                 | Snapshot webpage via Tor anonymity network                   |
 | `--tor-key`         | `WAYBACK_TOR_PRIVKEY`             | -                       | The private key for Tor Hidden Service                       |
-| -                   | `WAYBACK_TOR_LOCAL_PORT`          | `8964`                  | Local port for Tor Hidden Service, also support for a **reverse proxy** |
+| -                   | `WAYBACK_TOR_LOCAL_PORT`          | `8964`                  | Local port for Tor Hidden Service, also support for a **reverse proxy**. This is ignored if `WAYBACK_LISTEN_ADDR` is set. |
 | -                   | `WAYBACK_TOR_REMOTE_PORTS`        | `80`                    | Remote ports for Tor Hidden Service, e.g. `WAYBACK_TOR_REMOTE_PORTS=80,81` |
 | -                   | `WAYBACK_TORRC`                   | `/etc/tor/torrc`        | Using `torrc` for Tor Hidden Service                         |
 | -                   | `WAYBACK_SLOT`                    | -                       | Pinning service for IPFS mode of pinner, see [ipfs-pinner](https://github.com/wabarc/ipfs-pinner#supported-pinning-services) |
