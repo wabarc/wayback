@@ -57,7 +57,7 @@ jobs:
     uses: wabarc/.github/.github/workflows/reusable-semgrep.yml@main
 
   fossa:
-    if: github.repository == 'wabarc/wayback'
+    if: github.event_name != 'pull_request'
     name: FOSSA
     uses: wabarc/.github/.github/workflows/reusable-fossa.yml@main
     secrets:
