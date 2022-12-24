@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"os"
 	"sync"
 
 	"github.com/wabarc/logger"
@@ -121,7 +122,10 @@ func (i IP) Wayback(rdx reduxer.Reduxer) string {
 	// archiving and is sent to obelisk to crawl the rest of the page.
 	if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
 		shot := bundle.Shots()
-		ctx = arc.WithInput(ctx, shot.HTML)
+		buf, err := os.ReadFile(fmt.Sprint(shot.HTML))
+		if err == nil {
+			ctx = arc.WithInput(ctx, buf)
+		}
 	}
 
 	dst, err := arc.Wayback(ctx, i.URL)

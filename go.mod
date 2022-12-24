@@ -2,7 +2,7 @@ module github.com/wabarc/wayback
 
 // +heroku goVersion go1.19
 
-go 1.17
+go 1.18
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.0
@@ -16,7 +16,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/gabriel-vasile/mimetype v1.4.1
 	github.com/go-shiori/go-readability v0.0.0-20220215145315-dd6828d2f09b
-	github.com/go-shiori/obelisk v0.0.0-20220524135250-3d6752a59bd7
+	github.com/go-shiori/obelisk v0.0.0-20221119111008-23c015a8fad7
 	github.com/google/go-github/v40 v40.0.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
@@ -36,7 +36,7 @@ require (
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/go-anonfile v0.1.0
 	github.com/wabarc/go-catbox v0.1.0
-	github.com/wabarc/helper v0.0.0-20220717024606-0f088ee08afa
+	github.com/wabarc/helper v0.0.0-20220717051347-689fdde4c868
 	github.com/wabarc/imgbb v1.0.0
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20220126131044-16299c0dd43d
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
@@ -63,8 +63,8 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.8 // indirect
-	github.com/chromedp/cdproto v0.0.0-20220426083054-c58585551e6c // indirect
-	github.com/chromedp/chromedp v0.8.0 // indirect
+	github.com/chromedp/cdproto v0.0.0-20220924210414-0e3390be1777 // indirect
+	github.com/chromedp/chromedp v0.8.6 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
 	github.com/dghubble/sling v1.3.0 // indirect
@@ -136,7 +136,7 @@ require (
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	github.com/ybbus/httpretry v1.0.1 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
+	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
@@ -144,3 +144,7 @@ require (
 	lukechampine.com/blake3 v1.1.7 // indirect
 	mvdan.cc/xurls/v2 v2.4.0 // indirect
 )
+
+replace github.com/wabarc/screenshot => github.com/wabarc/screenshot v1.5.3-0.20221224102607-bc2110451443
+
+replace github.com/wabarc/telegra.ph => github.com/wabarc/telegra.ph v0.0.0-20221224154239-626662b99250
