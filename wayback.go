@@ -97,6 +97,7 @@ func (i IS) Wayback(_ reduxer.Reduxer) string {
 func (i IP) Wayback(rdx reduxer.Reduxer) string {
 	opts := []ipfs.PinningOption{
 		ipfs.Mode(ipfs.Remote),
+		ipfs.Backoff(false),
 	}
 	if config.Opts.IPFSMode() == "daemon" {
 		opts = []ipfs.PinningOption{
