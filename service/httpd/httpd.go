@@ -78,7 +78,7 @@ func (web *web) handle(pool *pooling.Pool) http.Handler {
 	web.router.HandleFunc("/playback", web.playback).Methods(http.MethodPost)
 
 	web.router.HandleFunc("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
-		w.Write(helper.String2Byte("ok")) // nolint:errcheck
+		w.Write(helper.String2Byte("OK")) // nolint:errcheck
 	}).Name("healthcheck")
 
 	web.router.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
