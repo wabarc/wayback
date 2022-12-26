@@ -23,7 +23,7 @@ jobs:
     uses: wabarc/.github/.github/workflows/reusable-scorecards.yml@main
     if: |
       github.event_name == 'pull_request' ||
-      github.ref == 'refs/heads/${{ github.event.repository.default_branch }}'
+      github.ref == 'refs/heads/main'
     permissions:
       # Needed to upload the results to code-scanning dashboard.
       security-events: write
