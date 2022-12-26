@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Specify dependencies for the distribution package ([#243](https://github.com/wabarc/wayback/pull/243))
 - Make media downloads are domain-specific ([#247](https://github.com/wabarc/wayback/pull/247))
 - Response uppercase letter for health check ([#292](https://github.com/wabarc/wayback/pull/292))
+- Stores artifacts via screenshot ([#293](https://github.com/wabarc/wayback/pull/293))
 
 ## [0.18.1] - 2022-10-30
 
