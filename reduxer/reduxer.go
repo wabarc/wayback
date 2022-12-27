@@ -65,7 +65,7 @@ type Reduxer interface {
 type bundle struct {
 	artifact Artifact
 	article  readability.Article
-	shots    *screenshot.Screenshots
+	shots    *screenshot.Screenshots[screenshot.Path]
 }
 
 // Artifact represents the file paths stored on the local disk.
@@ -131,7 +131,7 @@ func (bs *bundles) Flush() {
 }
 
 // Shots returns a screenshot.Screenshots from bundle.
-func (b *bundle) Shots() *screenshot.Screenshots {
+func (b *bundle) Shots() *screenshot.Screenshots[screenshot.Path] {
 	return b.shots
 }
 
@@ -151,14 +151,10 @@ func (b *bundle) Article() readability.Article {
 func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 	// Returns an initialized Reduxer for safe.
 	var bs = NewReduxer()
+	var err error
 
 	if !config.Opts.EnabledReduxer() {
 		return bs, errors.New("Specify directory to environment `WAYBACK_STORAGE_DIR` to enable reduxer")
-	}
-
-	shots, err := capture(ctx, urls...)
-	if err != nil {
-		return bs, err
 	}
 
 	dir, err := createDir(config.Opts.StorageDir())
@@ -166,10 +162,9 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 		return bs, errors.Wrap(err, "create storage directory failed")
 	}
 
-	var wg sync.WaitGroup
 	var warc = &warcraft.Warcraft{BasePath: dir, UserAgent: config.Opts.WaybackUserAgent()}
-	var craft = func(in *url.URL) string {
-		path, err := warc.Download(ctx, in)
+	var craft = func(in *url.URL) (path string) {
+		path, err = warc.Download(ctx, in)
 		if err != nil {
 			logger.Debug("create warc for %s failed: %v", in.String(), err)
 			return ""
@@ -177,140 +172,101 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 		return path
 	}
 
-	assign := func(key *Asset, buf []byte, uri string) error {
-		if buf == nil {
-			return errors.New("file empty, skipped")
-		}
-		mt := mimetype.Detect(buf)
-		ft := mt.String()
-		fp := filepath.Join(dir, helper.FileName(uri, ft))
-		// Replace json with har
-		if strings.HasSuffix(fp, ".json") {
-			fp = strings.TrimSuffix(fp, ".json") + mt.Extension()
-		}
-		logger.Debug("writing file: %s", fp)
-		if err := os.WriteFile(fp, buf, filePerm); err != nil {
-			return errors.Wrap(err, fmt.Sprintf("write %s file failed", ft))
-		}
-		if err := helper.SetField(key, "Local", fp); err != nil {
-			return errors.Wrap(err, fmt.Sprintf("assign field %s to path struct failed", key))
-		}
-		return nil
-	}
-
-	for _, shot := range shots {
-		wg.Add(1)
-		go func(shot *screenshot.Screenshots) {
-			defer wg.Done()
-
-			var artifact Artifact
-			u, _ := url.Parse(shot.URL) // nolint:errcheck
-
-			basename := strings.TrimRight(helper.FileName(shot.URL, ""), ".html")
-			basename = strings.TrimRight(basename, ".htm")
+	g, ctx := errgroup.WithContext(ctx)
+	for _, uri := range urls {
+		uri := uri
+		g.Go(func() error {
+			basename := strings.TrimSuffix(helper.FileName(uri.String(), ""), ".html")
+			basename = strings.TrimSuffix(basename, ".htm")
 			ctx = context.WithValue(ctx, ctxBasenameKey, basename)
 
-			if err := assign(&artifact.Img, shot.Image, shot.URL); err != nil {
-				logger.Error("assign field Img to path struct failed: %v", err)
+			shot, er := capture(ctx, uri, dir)
+			if er != nil {
+				return errors.Wrap(er, "capture failed")
 			}
-			if err := assign(&artifact.PDF, shot.PDF, shot.URL); err != nil {
-				logger.Error("assign field PDF to path struct failed: %v", err)
+
+			artifact := &Artifact{
+				Img:  Asset{Local: fmt.Sprint(shot.Image)},
+				Raw:  Asset{Local: fmt.Sprint(shot.HTML)},
+				PDF:  Asset{Local: fmt.Sprint(shot.PDF)},
+				HAR:  Asset{Local: fmt.Sprint(shot.HAR)},
+				WARC: Asset{Local: craft(uri)},
 			}
-			if err := assign(&artifact.Raw, shot.HTML, shot.URL); err != nil {
-				logger.Error("assign field HTML to path struct failed: %v", err)
-			}
-			if err := assign(&artifact.HAR, shot.HAR, shot.URL); err != nil {
-				logger.Error("assign field HAR to path struct failed: %v", err)
-			}
-			// Set path of WARC file directly to avoid read file as buffer
-			if err := helper.SetField(&artifact.WARC, "Local", craft(u)); err != nil {
-				logger.Error("assign field WARC to path struct failed: %v", err)
-			}
-			if supportedMediaSite(u) {
-				if err := helper.SetField(&artifact.Media, "Local", media(ctx, dir, shot.URL)); err != nil {
-					logger.Error("assign field Media to path struct failed: %v", err)
-				}
+
+			if supportedMediaSite(uri) {
+				artifact.Media.Local = media(ctx, dir, shot.URL)
 			}
 			// Attach single file
-			singleFilePath := singleFile(ctx, bytes.NewReader(shot.HTML), dir, shot.URL)
-			if err := helper.SetField(&artifact.HTM, "Local", singleFilePath); err != nil {
-				logger.Error("assign field HTM to path struct failed: %v", err)
+			var buf []byte
+			var article readability.Article
+			buf, err = os.ReadFile(fmt.Sprint(shot.HTML))
+			if err == nil {
+				singleFilePath := singleFile(ctx, bytes.NewReader(buf), dir, shot.URL)
+				artifact.HTM.Local = singleFilePath
 			}
-			article, err := readability.FromReader(bytes.NewReader(shot.HTML), u)
+			article, err = readability.FromReader(bytes.NewReader(buf), uri)
 			if err != nil {
 				logger.Error("parse html failed: %v", err)
 			}
 			txtName := basename + ".txt"
 			fp := filepath.Join(dir, txtName)
 			if err = os.WriteFile(fp, helper.String2Byte(article.TextContent), filePerm); err == nil && article.TextContent != "" {
-				if err = helper.SetField(&artifact.Txt, "Local", fp); err != nil {
-					logger.Error("assign field Txt to artifact struct failed: %v", err)
-				}
+				artifact.Txt.Local = fp
 			}
 			// Upload files to third-party server
-			if err = remotely(ctx, &artifact); err != nil {
+			if err = remotely(ctx, artifact); err != nil {
 				logger.Error("upload files to remote server failed: %v", err)
 			}
-			bundle := &bundle{shots: shot, artifact: artifact, article: article}
+			bundle := &bundle{shots: shot, artifact: *artifact, article: article}
 			bs.Store(Src(shot.URL), bundle)
-		}(shot)
+			return nil
+		})
 	}
-	wg.Wait()
+	if err = g.Wait(); err != nil {
+		return bs, errors.Wrap(err, "reduxer failed")
+	}
 
-	return bs, nil
+	return bs, err
 }
 
 // capture returns screenshot.Screenshots of given URLs
-func capture(ctx context.Context, urls ...*url.URL) (shots []*screenshot.Screenshots, err error) {
+func capture(ctx context.Context, uri *url.URL, dir string) (shot *screenshot.Screenshots[screenshot.Path], err error) {
+	filename := basename(ctx)
+	files := screenshot.Files{
+		Image: filepath.Join(dir, filename+".png"),
+		HTML:  filepath.Join(dir, filename+".html"),
+		PDF:   filepath.Join(dir, filename+".pdf"),
+		HAR:   filepath.Join(dir, filename+".har"),
+	}
 	opts := []screenshot.ScreenshotOption{
+		screenshot.AppendToFile(files),
 		screenshot.ScaleFactor(1),
 		screenshot.PrintPDF(true), // print pdf
 		screenshot.DumpHAR(true),  // export har
 		screenshot.RawHTML(true),  // export html
 		screenshot.Quality(100),   // image quality
 	}
-	var mu sync.Mutex
-	var wg sync.WaitGroup
-	shots = make([]*screenshot.Screenshots, 0, len(urls))
-	for _, input := range urls {
-		wg.Add(1)
-		go func(input *url.URL) {
-			mu.Lock()
-			defer mu.Unlock()
-			defer wg.Done()
 
-			var serr error
-			var shot *screenshot.Screenshots
-			if remote := remoteHeadless(config.Opts.ChromeRemoteAddr()); remote != nil {
-				logger.Debug("reduxer using remote browser")
-				addr := remote.(*net.TCPAddr)
-				browser, er := screenshot.NewChromeRemoteScreenshoter(addr.String())
-				if er != nil {
-					// nolint:errcheck
-					errors.Wrap(err, fmt.Sprintf("screenshot failed: %v", er))
-					return
-				}
-				shot, serr = browser.Screenshot(ctx, input, opts...)
-			} else {
-				logger.Debug("reduxer using local browser")
-				shot, serr = screenshot.Screenshot(ctx, input, opts...)
-			}
-			if serr != nil {
-				if serr == context.DeadlineExceeded {
-					// nolint:errcheck
-					errors.Wrap(err, fmt.Sprintf("screenshot deadline: %v", serr))
-					return
-				}
-				// nolint:errcheck
-				errors.Wrap(err, fmt.Sprintf("screenshot error: %v", serr))
-				return
-			}
-			shots = append(shots, shot)
-		}(input)
+	if remote := remoteHeadless(config.Opts.ChromeRemoteAddr()); remote != nil {
+		logger.Debug("reduxer using remote browser")
+		addr := remote.(*net.TCPAddr)
+		browser, er := screenshot.NewChromeRemoteScreenshoter[screenshot.Path](addr.String())
+		if er != nil {
+			return shot, errors.Wrap(er, "dial screenshoter failed")
+		}
+		shot, err = browser.Screenshot(ctx, uri, opts...)
+	} else {
+		logger.Debug("reduxer using local browser")
+		shot, err = screenshot.Screenshot[screenshot.Path](ctx, uri, opts...)
 	}
-	wg.Wait()
+	if err != nil {
+		if err == context.DeadlineExceeded {
+			return shot, errors.Wrap(err, "screenshot deadline")
+		}
+		return shot, errors.Wrap(err, "screenshot error")
+	}
 
-	return shots, err
+	return shot, err
 }
 
 func remoteHeadless(addr string) net.Addr {
@@ -522,7 +478,7 @@ func sortStreams(streams map[string]*extractors.Stream) []*extractors.Stream {
 	return sortedStreams
 }
 
-func remotely(ctx context.Context, artifact *Artifact) error {
+func remotely(ctx context.Context, artifact *Artifact) (err error) {
 	v := []*Asset{
 		&artifact.Img,
 		&artifact.PDF,
@@ -544,7 +500,6 @@ func remotely(ctx context.Context, artifact *Artifact) error {
 		g.Go(func() error {
 			mu.Lock()
 			defer mu.Unlock()
-			var err error
 
 			if asset.Local == "" {
 				return nil
@@ -555,20 +510,20 @@ func remotely(ctx context.Context, artifact *Artifact) error {
 			}
 			r, e := anon.Upload(asset.Local)
 			if e != nil {
-				err = errors.Wrap(err, fmt.Sprintf("upload %s to anonfiles failed: %s", asset.Local, e.Error()))
+				err = errors.Wrap(e, fmt.Sprintf("upload %s to anonfiles failed", asset.Local))
 			} else {
 				asset.Remote.Anonfile = r.Short()
 			}
 			c, e := cat.Upload(asset.Local)
 			if e != nil {
-				err = errors.Wrap(err, fmt.Sprintf("upload %s to catbox failed: %s", asset.Local, e.Error()))
+				err = errors.Wrap(e, fmt.Sprintf("upload %s to catbox failed", asset.Local))
 			} else {
 				asset.Remote.Catbox = c
 			}
 			return err
 		})
 	}
-	if err := g.Wait(); err != nil {
+	if err = g.Wait(); err != nil {
 		return err
 	}
 
@@ -607,7 +562,7 @@ func readOutput(rc io.ReadCloser) {
 	for {
 		out := make([]byte, 1024)
 		_, err := rc.Read(out)
-		fmt.Print(string(out))
+		logger.Info(string(out))
 		if err != nil {
 			break
 		}

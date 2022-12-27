@@ -70,7 +70,7 @@ func BundleExample() Reduxer {
 				},
 			},
 		},
-		shots: &screenshot.Screenshots{
+		shots: &screenshot.Screenshots[screenshot.Path]{
 			Title: "Example",
 		},
 		article: readability.Article{
