@@ -7,7 +7,6 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -26,6 +25,9 @@ import (
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/systemd"
 )
+
+// Create channel to listen for signals.
+var signalChan chan (os.Signal) = make(chan os.Signal, 1)
 
 type target struct {
 	call func()
@@ -178,8 +180,8 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 }
 
 func (srv *services) stop(pool *pooling.Pool, cancel context.CancelFunc) {
-	signalChan := make(chan os.Signal, 1)
-
+	// SIGINT handles Ctrl+C locally.
+	// SIGTERM handles termination signal from cloud service.
 	signal.Notify(
 		signalChan,
 		syscall.SIGHUP,
@@ -189,24 +191,21 @@ func (srv *services) stop(pool *pooling.Pool, cancel context.CancelFunc) {
 		os.Interrupt,
 	)
 
-	var once sync.Once
-	for {
-		sig := <-signalChan
-		if sig == os.Interrupt {
-			logger.Info("Signal SIGINT is received, probably due to `Ctrl-C`, exiting...")
-			once.Do(func() {
-				srv.shutdown()
-				pool.Close() // Gracefully closes the worker pool
-				cancel()
-			})
-			return
-		}
-	}
+	// Receive output from signalChan.
+	sig := <-signalChan
+	logger.Info("signal %s is received, exiting...", sig)
+
+	// Gracefully shutdown the server
+	srv.shutdown()
+	// Gracefully closes the worker pool
+	pool.Close()
+	cancel()
 }
 
 func (srv *services) shutdown() {
 	for _, target := range srv.targets {
 		logger.Info("stopping %s service...", target.name)
 		target.call()
+		logger.Info("stopped %s service.", target.name)
 	}
 }
