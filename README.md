@@ -193,6 +193,16 @@ Both serve on Telegram and Tor hidden service:
 wayback -d telegram -t YOUT-BOT-TOKEN -d web
 ```
 
+URLs from file:
+
+```sh
+wayback url.txt
+```
+
+```sh
+cat url.txt | wayback
+```
+
 #### Configuration Parameters
 
 By default, `wayback` looks for configuration options from this files, the following are parsed:

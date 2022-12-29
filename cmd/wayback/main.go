@@ -4,6 +4,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"runtime"
@@ -195,6 +196,11 @@ func handle(cmd *cobra.Command, args []string) {
 	if print {
 		cmd.Println(spew.Sdump(config.Opts))
 		return
+	}
+
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		args = append(args, scanner.Text())
 	}
 
 	hasDaemon := len(daemon) > 0
