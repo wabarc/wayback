@@ -122,9 +122,9 @@ func pretty(cols []wayback.Collect, rdx reduxer.Reduxer) string {
 func unmarshalArgs(args []string) (urls []*url.URL, err error) {
 	for _, s := range args {
 		if helper.IsURL(s) {
-			uri, err := url.Parse(s)
-			if err != nil {
-				err = errors.Wrap(err, "parse url failed")
+			uri, er := url.Parse(s)
+			if er != nil {
+				err = errors.Wrap(er, "parse url failed")
 				continue
 			}
 			urls = append(urls, uri)
