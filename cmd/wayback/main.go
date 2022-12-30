@@ -11,6 +11,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/spf13/cobra"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
@@ -197,6 +198,8 @@ func handle(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	args = append(args, split(helper.ReadStdin())...)
+
 	hasDaemon := len(daemon) > 0
 	hasArgs := len(args) > 0
 	switch {
@@ -219,4 +222,12 @@ func showInfo(cmd *cobra.Command) {
 	cmd.Println("Compiler:", runtime.Compiler)
 	cmd.Println("Arch:", runtime.GOARCH)
 	cmd.Println("OS:", runtime.GOOS)
+}
+
+func split(s []string) (ss []string) {
+	const space = ` `
+	for _, str := range s {
+		ss = append(ss, strings.Split(str, space)...)
+	}
+	return
 }

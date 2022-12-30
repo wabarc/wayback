@@ -4,6 +4,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"net/url"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/list"
 	"github.com/spf13/cobra"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/reduxer"
@@ -119,12 +121,33 @@ func pretty(cols []wayback.Collect, rdx reduxer.Reduxer) string {
 
 func unmarshalArgs(args []string) (urls []*url.URL, err error) {
 	for _, s := range args {
-		uri, er := url.Parse(s)
-		if er != nil {
-			err = fmt.Errorf("%w: unexpect url: %s", err, s)
-			continue
+		if helper.IsURL(s) {
+			uri, er := url.Parse(s)
+			if er != nil {
+				err = errors.Wrap(er, "parse url failed")
+				continue
+			}
+			urls = append(urls, uri)
+		} else {
+			urls = append(urls, readFromFile(s)...)
 		}
-		urls = append(urls, uri)
+	}
+	return
+}
+
+func readFromFile(s string) (urls []*url.URL) {
+	if helper.Exists(s) {
+		file, err := os.Open(s)
+		if err != nil {
+			return
+		}
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			uri, err := url.Parse(scanner.Text())
+			if err == nil {
+				urls = append(urls, uri)
+			}
+		}
 	}
 	return
 }

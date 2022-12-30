@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+### Added
+- Add support for reads from stdin and files ([#301](https://github.com/wabarc/wayback/pull/301))
+
 ### Changed
 - Sign images using cosign
 - Replace set-output with recommended env output ([#234](https://github.com/wabarc/wayback/pull/234))
