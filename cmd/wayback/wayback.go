@@ -129,10 +129,7 @@ func unmarshalArgs(args []string) (urls []*url.URL, err error) {
 			}
 			urls = append(urls, uri)
 		} else {
-			uris := readFromFile(s)
-			if len(uris) > 0 {
-				urls = append(urls, uris...)
-			}
+			urls = append(urls, readFromFile(s)...)
 		}
 	}
 	return
