@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Response uppercase letter for health check ([#292](https://github.com/wabarc/wayback/pull/292))
 - Stores artifacts via screenshot ([#293](https://github.com/wabarc/wayback/pull/293))
 - Improve signal handling ([#294](https://github.com/wabarc/wayback/pull/294))
+- Add support for reads from stdin and files ([#301](https://github.com/wabarc/wayback/pull/301))
 
 ## [0.18.1] - 2022-10-30
 
