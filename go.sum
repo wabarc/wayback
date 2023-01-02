@@ -722,6 +722,8 @@ github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae h1:7TLEQYM7GxeysDd6
 github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae/go.mod h1:qP6GisnqoSDc5Ivj34yV+Qar3B6tYyLDKx42oCDX1zY=
 github.com/wabarc/playback v0.0.0-20220715111526-90d0327d3f04 h1:D1XXhpIu2DO0LEvqnVYYdH7x5cEdADDEk6GIZoW4eow=
 github.com/wabarc/playback v0.0.0-20220715111526-90d0327d3f04/go.mod h1:rxvBzfzci+rMEEsupy1yo58Nbg9KtUmY4WJ67EPzNH8=
+github.com/wabarc/rivet v0.1.3 h1:OZIx06cmG5z1998WfLA6i71rpozUiSUd1yzhq5cMphg=
+github.com/wabarc/rivet v0.1.3/go.mod h1:jdAC1qzW/3ZC1kZpDaKLYWeTZg3P0M/k7pONpwf8CJM=
 github.com/wabarc/rivet v0.1.4-0.20221226142645-ebc8a29d914f h1:fkaTPNIalAj8i51BEPb3dPjxrE3ryzYt/+3yzV1u4nM=
 github.com/wabarc/rivet v0.1.4-0.20221226142645-ebc8a29d914f/go.mod h1:lNEgL14wbyTc+ZNQPM+QtEZcQjB0AifzlWJbRJYQn/A=
 github.com/wabarc/screenshot v1.6.0 h1:9yOZY7pGWpDjZ+ms/p5qQVGydhuqfmoAzuKZHdSJ9JU=
