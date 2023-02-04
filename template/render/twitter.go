@@ -6,8 +6,6 @@ package render // import "github.com/wabarc/wayback/template/render"
 
 import (
 	"bytes"
-	"sort"
-	"strings"
 	"text/template"
 
 	"github.com/wabarc/logger"
@@ -90,51 +88,4 @@ func (t *Twitter) ForPublish() *Render {
 	tmplBytes.WriteString("\n\n#wayback #存档")
 
 	return &Render{buf: tmplBytes}
-}
-
-func original(v interface{}) (o string) {
-	var sm = make(map[string]int)
-	if vv, ok := v.([]wayback.Collect); ok && len(vv) > 0 {
-		for _, col := range vv {
-			sm[col.Src] += 1
-		}
-	} else if vv, ok := v.(*Collects); ok {
-		for _, cols := range *vv {
-			for _, dst := range cols.Dst {
-				for src := range dst {
-					sm[src] += 1
-				}
-			}
-		}
-	} else {
-		return o
-	}
-
-	if len(sm) == 0 {
-		return o
-	}
-
-	type kv struct {
-		Key   string
-		Value int
-	}
-
-	ss := make([]kv, 0, len(sm))
-	for k, v := range sm {
-		ss = append(ss, kv{k, v})
-	}
-	sort.Slice(ss, func(i, j int) bool {
-		return ss[i].Value > ss[j].Value
-	})
-
-	var sb strings.Builder
-	sb.WriteString("source:\n")
-	for _, kv := range ss {
-		sb.WriteString(`• `)
-		sb.WriteString(kv.Key)
-		sb.WriteString("\n")
-	}
-	sb.WriteString("\n————\n\n")
-
-	return sb.String()
 }

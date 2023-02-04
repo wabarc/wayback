@@ -278,6 +278,8 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_SLACK_BOT_TOKEN`         | -                       | `Bot User OAuth Token` for Slack workspace, use `User OAuth Token` if requires create external link |
 | -                   | `WAYBACK_SLACK_CHANNEL`           | -                       | Channel ID of Slack channel                                  |
 | -                   | `WAYBACK_SLACK_HELPTEXT`          | -                       | The help text for Slack slash command                        |
+| -                   | `WAYBACK_NOSTR_RELAY_URL`         | -                       | Nostr relay server url                                       |
+| -                   | `WAYBACK_NOSTR_PRIVATE_KEY`       | -                       | The private key of a Nostr account                             |
 | `--tor`             | `WAYBACK_USE_TOR`                 | `false`                 | Snapshot webpage via Tor anonymity network                   |
 | `--tor-key`         | `WAYBACK_TOR_PRIVKEY`             | -                       | The private key for Tor Hidden Service                       |
 | -                   | `WAYBACK_TOR_LOCAL_PORT`          | `8964`                  | Local port for Tor Hidden Service, also support for a **reverse proxy**. This is ignored if `WAYBACK_LISTEN_ADDR` is set. |
