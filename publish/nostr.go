@@ -92,8 +92,8 @@ func (n *nostrBot) publish(ctx context.Context, note string) error {
 		Kind:      1,
 		Content:   note,
 		CreatedAt: time.Now(),
+		PubKey:    pk,
 		// Tags:      nostr.Tags{[]string{"foo", "bar"}},
-		PubKey: pk,
 	}
 	if err := ev.Sign(sk); err != nil {
 		return fmt.Errorf("calling sign err: %v", err)

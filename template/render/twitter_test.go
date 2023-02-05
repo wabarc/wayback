@@ -10,7 +10,7 @@ import (
 )
 
 func TestRenderTwitterForReply(t *testing.T) {
-    const tweet = `• Internet Archive
+	const tweet = `• Internet Archive
 > https://web.archive.org/123/https://example.com/
 > https://web.archive.org/123/https://example.org/
 
@@ -27,7 +27,7 @@ func TestRenderTwitterForReply(t *testing.T) {
 }
 
 func TestRenderTwitterForPublish(t *testing.T) {
-    const tweet = `‹ Example ›
+	const tweet = `‹ Example ›
 
 • source
 > https://example.com/
