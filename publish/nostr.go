@@ -68,19 +68,21 @@ func (n *nostrBot) publish(ctx context.Context, note string) error {
 		return fmt.Errorf("publish to nostr abort")
 	}
 	if n.client.Connection == nil {
-		return fmt.Errorf("publish to nostr failed: connection nil")
+		return fmt.Errorf("publish to nostr failed: %v", <-n.client.ConnectionError)
 	}
 
 	if note == "" {
 		return fmt.Errorf("nostr validation failed: note can't be blank")
 	}
-	logger.Debug("send to nostr, body:\n%s", note)
+	logger.Debug("send to nostr, note:\n%s", note)
 
-	var sk string
-	if _, s, e := nip19.Decode(config.Opts.NostrPrivateKey()); e == nil {
-		sk = s.(string)
-	} else {
-		return fmt.Errorf("decode private key failed")
+	sk := config.Opts.NostrPrivateKey()
+	if strings.HasPrefix(sk, "nsec") {
+		if _, s, e := nip19.Decode(sk); e == nil {
+			sk = s.(string)
+		} else {
+			return fmt.Errorf("decode private key failed")
+		}
 	}
 	pk, err := nostr.GetPublicKey(sk)
 	if err != nil {
@@ -96,10 +98,10 @@ func (n *nostrBot) publish(ctx context.Context, note string) error {
 	if err := ev.Sign(sk); err != nil {
 		return fmt.Errorf("calling sign err: %v", err)
 	}
-	// connect a client and send the text note
+	// send the text note
 	status := n.client.Publish(ctx, ev)
 	if status != nostr.PublishStatusSucceeded {
-		return fmt.Errorf("published status is %d, not %d", status, nostr.PublishStatusSucceeded)
+		return fmt.Errorf("published status is %s, not %s", status, nostr.PublishStatusSucceeded)
 	}
 
 	return nil
