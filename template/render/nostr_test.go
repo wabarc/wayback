@@ -15,19 +15,22 @@ func TestRenderNostrForReply(t *testing.T) {
 func TestRenderNostrForPublish(t *testing.T) {
 	expected := `‹ Example ›
 
-source:
-• https://example.com/
+• source
+> https://example.com/
 
 ————
 
-Internet Archive:
-• https://web.archive.org/web/20211000000001/https://example.com/
-archive.today:
-• http://archive.today/abcdE
-IPFS:
-• https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
-Telegraph:
-• http://telegra.ph/title-01-01`
+• Internet Archive
+> https://web.archive.org/web/20211000000001/https://example.com/
+
+• archive.today
+> http://archive.today/abcdE
+
+• IPFS
+> https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
+
+• Telegraph
+> http://telegra.ph/title-01-01`
 
 	got := ForPublish(&Nostr{Cols: collects, Data: bundleExample}).String()
 	if got != expected {

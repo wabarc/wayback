@@ -26,12 +26,12 @@ type Twitter struct {
 func (t *Twitter) ForReply() *Render {
 	var tmplBytes bytes.Buffer
 
-	const tmpl = `{{range $ := .}}{{ if not $.Arc "ph" }}{{ $.Arc | name }}:
+	const tmpl = `{{range $ := .}}{{ if not $.Arc "ph" }}
+• {{ $.Arc | name }}
 {{ range $map := $.Dst -}}
 {{ range $src, $dst := $map -}}
-• {{ $dst }}
-{{end}}{{end}}
-{{end}}{{end}}`
+> {{ $dst }}
+{{end}}{{end}}{{end}}{{end}}`
 
 	tpl, err := template.New("twitter").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
@@ -68,10 +68,10 @@ func (t *Twitter) ForPublish() *Render {
 		tmplBytes.WriteString(" ›\n\n")
 	}
 
-	const tmpl = `{{range $ := .}}{{ if not $.Arc "ph" }}{{ $.Arc | name }}:
-• {{ $.Dst }}
-{{end}}
-{{end}}`
+	const tmpl = `{{range $ := .}}{{ if not $.Arc "ph" }}
+• {{ $.Arc | name }}
+> {{ $.Dst }}
+{{end}}{{end}}`
 
 	tpl, err := template.New("twitter").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {

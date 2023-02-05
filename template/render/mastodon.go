@@ -39,9 +39,9 @@ func (m *Mastodon) ForPublish() *Render {
 		tmplBytes.WriteString(" ›\n\n")
 	}
 
-	const tmpl = `{{range $ := .}}{{ $.Arc | name }}:
-• {{ $.Dst }}
-
+	const tmpl = `{{range $ := .}}
+• {{ $.Arc | name }}
+> {{ $.Dst }}
 {{end}}`
 
 	tpl, err := template.New("mastodon").Funcs(funcMap()).Parse(tmpl)
@@ -56,7 +56,7 @@ func (m *Mastodon) ForPublish() *Render {
 		logger.Error("[masatodon] execute Mastodon template failed, %v", err)
 		return new(Render)
 	}
-	tmplBytes.WriteString("#wayback #存档")
+	tmplBytes.WriteString("\n#wayback #存档")
 	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
 
 	return &Render{buf: tmplBytes}

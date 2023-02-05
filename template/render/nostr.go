@@ -42,8 +42,9 @@ func (n *Nostr) ForPublish() *Render {
 		tmplBytes.WriteString(" ›\n\n")
 	}
 
-	const tmpl = `{{range $ := .}}{{ $.Arc | name }}:
-• {{ $.Dst }}
+	const tmpl = `{{range $ := .}}
+• {{ $.Arc | name }}
+> {{ $.Dst }}
 {{end}}`
 
 	tpl, err := template.New("nostr").Funcs(funcMap()).Parse(tmpl)

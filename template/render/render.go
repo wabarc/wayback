@@ -226,13 +226,13 @@ func original(v interface{}) (o string) {
 	})
 
 	var sb strings.Builder
-	sb.WriteString("source:\n")
+	sb.WriteString("• source\n")
 	for _, kv := range ss {
-		sb.WriteString(`• `)
+		sb.WriteString(`> `)
 		sb.WriteString(kv.Key)
 		sb.WriteString("\n")
 	}
-	sb.WriteString("\n————\n\n")
+	sb.WriteString("\n————\n")
 
 	return sb.String()
 }
