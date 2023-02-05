@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -137,7 +138,7 @@ func unmarshalArgs(args []string) (urls []*url.URL, err error) {
 
 func readFromFile(s string) (urls []*url.URL) {
 	if helper.Exists(s) {
-		file, err := os.Open(s)
+		file, err := os.Open(filepath.Clean(s))
 		if err != nil {
 			return
 		}

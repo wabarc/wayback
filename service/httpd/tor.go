@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 
 	// "github.com/ipsn/go-libtor"
@@ -115,7 +116,7 @@ func (t *Tor) torrc() string {
 	if torPortBusy() {
 		return ""
 	}
-	if _, err := os.Open(config.Opts.TorrcFile()); err != nil {
+	if _, err := os.Open(filepath.Clean(config.Opts.TorrcFile())); err != nil {
 		return ""
 	}
 	return config.Opts.TorrcFile()

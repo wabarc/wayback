@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"sync"
 
@@ -116,7 +117,7 @@ func UploadToDiscord(art reduxer.Artifact) (files []*discord.File) {
 	upper := config.Opts.MaxAttachSize("discord")
 	for _, fp := range filterArtifact(art, upper) {
 		logger.Debug("open file: %s", fp)
-		rd, err := os.Open(fp)
+		rd, err := os.Open(filepath.Clean(fp))
 		if err != nil {
 			logger.Error("open file failed: %v", err)
 			continue
@@ -135,7 +136,7 @@ func UploadToSlack(client *slack.Client, art reduxer.Artifact, channel, timestam
 
 	upper := config.Opts.MaxAttachSize("slack")
 	for _, fp := range filterArtifact(art, upper) {
-		rd, e := os.Open(fp)
+		rd, e := os.Open(filepath.Clean(fp))
 		if e != nil {
 			err = errors.Wrap(err, e.Error())
 			continue
