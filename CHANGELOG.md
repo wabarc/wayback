@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Response uppercase letter for health check ([#292](https://github.com/wabarc/wayback/pull/292))
 - Stores artifacts via screenshot ([#293](https://github.com/wabarc/wayback/pull/293))
 - Improve signal handling ([#294](https://github.com/wabarc/wayback/pull/294))
+- Improve httpd service ([#278](https://github.com/wabarc/wayback/pull/278))
+  - Do not using pooling for http service
+  - Only serve onion service with a valid torrc
+  - Rename `HTTP_LISTEN_ADDR` to `WAYBACK_LISTEN_ADDR`
+  - Support for `WAYBACK_LISTEN_ADDR` override `WAYBACK_TOR_LOCAL_PORT`
+  - Defaults to listen `0.0.0.0` for httpd service
 
 ## [0.18.1] - 2022-10-30
 

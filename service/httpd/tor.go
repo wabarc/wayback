@@ -66,7 +66,7 @@ func (t *Tor) Serve() error {
 	// Start tor with some defaults + elevated verbosity
 	logger.Info("starting and registering onion service, please wait a bit...")
 
-	handler := newWeb().handle(t.pool)
+	handler := newWeb(t.ctx, t.pool).handle()
 	server := &http.Server{
 		ReadTimeout:  5 * time.Minute,
 		WriteTimeout: 5 * time.Minute,
@@ -75,7 +75,7 @@ func (t *Tor) Serve() error {
 	}
 
 	switch {
-	case torExist():
+	case torExist() && t.torrc() != "":
 		logger.Info("start a tor hidden server")
 		t.startTorServer(server)
 	default:
@@ -156,9 +156,20 @@ func (t *Tor) startTorServer(server *http.Server) {
 	// Assign e to Tor.tor
 	t.tor = e
 
+	listener, err := net.Listen("tcp", config.Opts.ListenAddr())
+	if err != nil {
+		logger.Warn("failed to create local network listener: %v", err)
+	}
+
 	// Create an onion service to listen on any port but show as local port,
 	// specify the local port using the `WAYBACK_TOR_LOCAL_PORT` environment variable.
-	onion, err := e.Listen(t.ctx, &tor.ListenConf{LocalPort: config.Opts.TorLocalPort(), RemotePorts: config.Opts.TorRemotePorts(), Version3: true, Key: pvk})
+	onion, err := e.Listen(t.ctx, &tor.ListenConf{
+		LocalPort:     config.Opts.TorLocalPort(),
+		LocalListener: listener,
+		RemotePorts:   config.Opts.TorRemotePorts(),
+		Version3:      true,
+		Key:           pvk,
+	})
 	if err != nil {
 		logger.Fatal("failed to create onion service: %v", err)
 	}
