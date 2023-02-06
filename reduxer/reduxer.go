@@ -287,7 +287,8 @@ func createDir(baseDir string) (dir string, err error) {
 	if helper.Exists(dir) {
 		return
 	}
-	if err := os.MkdirAll(dir, filePerm); err != nil {
+	// nosemgrep
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return "", errors.Wrap(err, "mkdir failed: "+dir)
 	}
 	return dir, nil
