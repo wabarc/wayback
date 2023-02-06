@@ -1,1 +1,5 @@
+# Common large paths
 template/views/
+
+# Common test paths
+*_test.go

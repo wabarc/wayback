@@ -287,8 +287,7 @@ func createDir(baseDir string) (dir string, err error) {
 	if helper.Exists(dir) {
 		return
 	}
-	// nosemgrep
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	if err := os.MkdirAll(dir, filePerm); err != nil {
 		return "", errors.Wrap(err, "mkdir failed: "+dir)
 	}
 	return dir, nil
@@ -372,7 +371,7 @@ func media(ctx context.Context, dir, in string) string {
 			args = append(args, "--verbose", "--print-traffic")
 		}
 
-		cmd := exec.CommandContext(ctx, ytdl, args...)
+		cmd := exec.CommandContext(ctx, ytdl, args...) // nosemgrep: gitlab.gosec.G204-1
 		logger.Debug("youtube-dl args: %s", cmd.String())
 
 		if err := run(cmd); err != nil {
@@ -391,7 +390,7 @@ func media(ctx context.Context, dir, in string) string {
 		args := []string{
 			"--output-filename=" + fp, in,
 		}
-		cmd := exec.CommandContext(ctx, youget, args...)
+		cmd := exec.CommandContext(ctx, youget, args...) // nosemgrep: gitlab.gosec.G204-1
 		logger.Debug("youget args: %s", cmd.String())
 
 		if err := run(cmd); err != nil {
