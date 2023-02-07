@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Support for `WAYBACK_LISTEN_ADDR` override `WAYBACK_TOR_LOCAL_PORT`
   - Defaults to listen `0.0.0.0` for httpd service
 
+### Fixed
+- Fix semgrep scan workflow ([#312](https://github.com/wabarc/wayback/pull/312))
+
 ## [0.18.1] - 2022-10-30
 
 ### Fixed
