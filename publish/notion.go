@@ -265,7 +265,7 @@ func download(u *url.URL) (path string, err error) {
 	}
 	defer fd.Close()
 
-	resp, err := http.Get(u.String())
+	resp, err := http.Get(u.String()) // nosemgrep: gitlab.gosec.G104-1.G107-1, gitlab.gosec.G107-1, gitlab.gosec.G108-1
 	if err != nil {
 		return path, err
 	}

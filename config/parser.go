@@ -37,7 +37,7 @@ func (p *Parser) ParseEnvironmentVariables() (*Options, error) {
 func (p *Parser) ParseFile(filename string) (*Options, error) {
 	if filename == "" {
 		for _, path := range defaultFilenames() {
-			_, err := os.Open(path)
+			_, err := os.Open(filepath.Clean(path))
 			if err != nil {
 				continue
 			}
@@ -46,7 +46,7 @@ func (p *Parser) ParseFile(filename string) (*Options, error) {
 		}
 	}
 
-	fp, err := os.Open(filename)
+	fp, err := os.Open(filepath.Clean(filename))
 	if err != nil {
 		return nil, err
 	}

@@ -58,6 +58,11 @@ jobs:
     name: Semgrep Scan
     if: github.actor != 'dependabot[bot]'
     uses: wabarc/.github/.github/workflows/reusable-semgrep.yml@main
+    permissions:
+      # Needed to upload the results to code-scanning dashboard.
+      security-events: write
+      actions: read
+      contents: read
 
   fossa:
     if: github.event_name != 'pull_request'

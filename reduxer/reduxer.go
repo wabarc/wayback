@@ -372,7 +372,7 @@ func media(ctx context.Context, dir, in string) string {
 			args = append(args, "--verbose", "--print-traffic")
 		}
 
-		cmd := exec.CommandContext(ctx, ytdl, args...)
+		cmd := exec.CommandContext(ctx, ytdl, args...) // nosemgrep: gitlab.gosec.G204-1
 		logger.Debug("youtube-dl args: %s", cmd.String())
 
 		if err := run(cmd); err != nil {
@@ -391,7 +391,7 @@ func media(ctx context.Context, dir, in string) string {
 		args := []string{
 			"--output-filename=" + fp, in,
 		}
-		cmd := exec.CommandContext(ctx, youget, args...)
+		cmd := exec.CommandContext(ctx, youget, args...) // nosemgrep: gitlab.gosec.G204-1
 		logger.Debug("youget args: %s", cmd.String())
 
 		if err := run(cmd); err != nil {

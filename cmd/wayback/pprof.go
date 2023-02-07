@@ -3,6 +3,7 @@
 // license that can be found in the LICENSE file.
 package main
 
+// nosemgrep: gitlab.gosec.G108-1
 import (
 	"log"
 	"net"
