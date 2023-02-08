@@ -486,6 +486,8 @@ github.com/mattn/go-isatty v0.0.12/go.mod h1:cbi8OIDigv2wuxKPP5vlRcQ1OAZbq2CE4Ky
 github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27kJ6hsGG94=
 github.com/mattn/go-isatty v0.0.16 h1:bq3VjFmv/sOjHtdEhmkEV4x1AJtvUvOJ2PFAZ5+peKQ=
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
+github.com/mattn/go-isatty v0.0.17 h1:BTarxUcIeDqL27Mc+vyvdWYSL28zpIhv3RoTdsLMPng=
+github.com/mattn/go-isatty v0.0.17/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635 h1:SX3lH+1XhJ8bUKhSVve0vIpz1YXICbPAQAwLO7EeX7w=
 github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635/go.mod h1:CZ3bPYRNGgvMZr4d/SNMvCObyCQvTgCXdIOrW040z5U=
 github.com/mattn/go-pointer v0.0.1 h1:n+XhsuGeVO6MEAp7xyEukFINEa+Quek5psIR/ylA6o0=
@@ -722,6 +724,8 @@ github.com/wabarc/helper v0.0.0-20210718171053-59c70d0b20c2/go.mod h1:uS6mimKlWk
 github.com/wabarc/helper v0.0.0-20220320101038-dbb2ea36249b/go.mod h1:JGo6GZ+m/xGV63ZiNH0apOrWczV/f8w2JzjoTOg8u58=
 github.com/wabarc/helper v0.0.0-20221230030543-2081c1b21c80 h1:gcAIPZ3OfVmZNsNEhTjcov1RVWy86mFHFLm39ewXW1g=
 github.com/wabarc/helper v0.0.0-20221230030543-2081c1b21c80/go.mod h1:mj9V7uYtodKm/R+lW45QpsKLJMxnYLPuLf09SRutB34=
+github.com/wabarc/helper v0.0.0-20230208134049-b5ec418536b7 h1:21OZxc9IDVylgxqxbgQ5Y/HvTOTK3bQxWoFkBzQJrNI=
+github.com/wabarc/helper v0.0.0-20230208134049-b5ec418536b7/go.mod h1:WJnhSylU+4XgPC4X+GT6ABWlxe5lnxXz7OvngypjBtc=
 github.com/wabarc/imgbb v1.0.0 h1:vNud9qY4dRGp1nikb+GHIrc/sE3WOdNq5gfT/vhWEUQ=
 github.com/wabarc/imgbb v1.0.0/go.mod h1:piz6QXkVfFpQbaQHx70/rPDwaICkW5Ew3lShTzbnVt0=
 github.com/wabarc/ipfs-pinner v1.1.1-0.20220126131044-16299c0dd43d h1:rSjZNYtr/5ep62nmcAF31v8zUGb0scD3bov/vAzYUpc=
