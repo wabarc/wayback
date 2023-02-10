@@ -34,6 +34,7 @@ const (
 	PublishTwitter = "twitter"
 	PublishMatrix  = "matrix"
 	PublishSlack   = "slack"
+	PublishNostr   = "nostr"
 
 	StatusRequest = "request"
 	StatusSuccess = "success"

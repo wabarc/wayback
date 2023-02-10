@@ -69,6 +69,9 @@ const (
 	defMatrixRoomID     = ""
 	defMatrixPassword   = ""
 
+	defNostrRelayURL   = "wss://nostr.developer.li"
+	defNostrPrivateKey = ""
+
 	defTorPrivateKey = ""
 	defListenAddr    = "0.0.0.0:8964"
 	defTorLocalPort  = 8964
@@ -119,6 +122,7 @@ type Options struct {
 	notion   *notion
 	matrix   *matrix
 	slack    *slack
+	nostr    *nostr
 	irc      *irc
 	tor      *tor
 
@@ -199,6 +203,11 @@ type slack struct {
 	botToken string
 	channel  string
 	helptext string
+}
+
+type nostr struct {
+	url        string
+	privateKey string
 }
 
 type irc struct {
@@ -295,6 +304,10 @@ func NewOptions() *Options {
 		notion: &notion{
 			token:      defNotionToken,
 			databaseID: defNotionDatabaseID,
+		},
+		nostr: &nostr{
+			url:        defNostrRelayURL,
+			privateKey: defNostrPrivateKey,
 		},
 		irc: &irc{
 			nick:     defIRCNick,
@@ -637,6 +650,21 @@ func (o *Options) NotionDatabaseID() string {
 // PublishToNotion determines whether the results should be published on Notion.
 func (o *Options) PublishToNotion() bool {
 	return o.NotionToken() != "" && o.NotionDatabaseID() != ""
+}
+
+// NostrRelayURL returns the relay url of Nostr server.
+func (o *Options) NostrRelayURL() string {
+	return o.nostr.url
+}
+
+// NostrPrivateKey returns the private key of Nostr account.
+func (o *Options) NostrPrivateKey() string {
+	return o.nostr.privateKey
+}
+
+// PublishToNostr determines whether the results should be published on Nostr.
+func (o *Options) PublishToNostr() bool {
+	return o.NostrRelayURL() != "" && o.NostrPrivateKey() != ""
 }
 
 // TorPrivKey returns the private key of Tor service.

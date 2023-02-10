@@ -1282,6 +1282,121 @@ func TestPublishToSlackChannel(t *testing.T) {
 	}
 }
 
+func TestNostrRelayURL(t *testing.T) {
+	var tests = []struct {
+		url string
+		exp string
+	}{
+		{
+			url: "",
+			exp: defNostrRelayURL,
+		},
+		{
+			url: "wss://example.com",
+			exp: "wss://example.com",
+		},
+		{
+			url: "example.com",
+			exp: "example.com",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_NOSTR_RELAY_URL", test.url)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.NostrRelayURL()
+			if got != test.exp {
+				t.Fatalf(`Unexpected set nostr relay url, got %v instead of %v`, got, test.exp)
+			}
+		})
+	}
+}
+
+func TestNostrPrivateKey(t *testing.T) {
+	var tests = []struct {
+		sk  string
+		exp string
+	}{
+		{
+			sk:  "",
+			exp: defNostrPrivateKey,
+		},
+		{
+			sk:  "nsecba",
+			exp: "nsecba",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_NOSTR_PRIVATE_KEY", test.sk)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.NostrPrivateKey()
+			if got != test.exp {
+				t.Fatalf(`Unexpected set nostr private key, got %v instead of %v`, got, test.exp)
+			}
+		})
+	}
+}
+
+func TestPublishToNostr(t *testing.T) {
+	var tests = []struct {
+		sk  string
+		url string
+		exp bool
+	}{
+		{
+			sk:  "",
+			url: "",
+			exp: false,
+		},
+		{
+			sk:  "nsecba",
+			url: "",
+			exp: true,
+		},
+		{
+			sk:  "",
+			url: "example.com",
+			exp: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run("", func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_NOSTR_RELAY_URL", test.url)
+			os.Setenv("WAYBACK_NOSTR_PRIVATE_KEY", test.sk)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.PublishToNostr()
+			if got != test.exp {
+				t.Fatalf(`Unexpected set nostr private key, got %v instead of %v`, got, test.exp)
+			}
+		})
+	}
+}
+
 func TestEnabledChromeRemote(t *testing.T) {
 	addr := "127.0.0.1:1234"
 

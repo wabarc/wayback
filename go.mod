@@ -24,6 +24,7 @@ require (
 	github.com/iawia002/lux v0.14.0
 	github.com/jedib0t/go-pretty/v6 v6.4.0
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
+	github.com/nbd-wtf/go-nostr v0.13.1-0.20230205201056-ab2db2dfc5d9
 	github.com/phf/go-queue v0.0.0-20170504031614-9abe38d0371d
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.14.0
@@ -36,7 +37,7 @@ require (
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/go-anonfile v0.1.0
 	github.com/wabarc/go-catbox v0.1.0
-	github.com/wabarc/helper v0.0.0-20221230030543-2081c1b21c80
+	github.com/wabarc/helper v0.0.0-20230209075818-96584f1ebf9d
 	github.com/wabarc/imgbb v1.0.0
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20220126131044-16299c0dd43d
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
@@ -46,7 +47,7 @@ require (
 	github.com/wabarc/telegra.ph v0.0.0-20221226141851-edf1cc14c076
 	github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5
 	go.etcd.io/bbolt v1.3.6
-	golang.org/x/net v0.4.0
+	golang.org/x/net v0.6.0
 	golang.org/x/sync v0.1.0
 	gopkg.in/telebot.v3 v3.0.0-20220130115853-f0291132d3c3
 	maunium.net/go/mautrix v0.12.0
@@ -54,11 +55,14 @@ require (
 
 require (
 	github.com/MercuryEngineering/CookieMonster v0.0.0-20180304172713-1584578b3403 // indirect
+	github.com/SaveTheRbtz/generic-sync-map-go v0.0.0-20220414055132-a37292614db8 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
+	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.2 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -67,6 +71,7 @@ require (
 	github.com/chromedp/chromedp v0.8.6 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
+	github.com/decred/dcrd/crypto/blake256 v1.0.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/dghubble/sling v1.3.0 // indirect
 	github.com/dlclark/regexp2 v1.4.1-0.20201116162257-a2a8dda75c91 // indirect
@@ -103,7 +108,7 @@ require (
 	github.com/libp2p/go-openssl v0.1.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.16 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mattn/go-pointer v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
@@ -135,12 +140,14 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tidwall/sjson v1.2.4 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
+	github.com/valyala/fastjson v1.6.3 // indirect
 	github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae // indirect
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	github.com/ybbus/httpretry v1.0.1 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/exp v0.0.0-20221205204356-47842c84f3db // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

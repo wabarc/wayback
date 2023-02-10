@@ -21,6 +21,7 @@ import (
 
 	discord "github.com/bwmarrin/discordgo"
 	mstdn "github.com/mattn/go-mastodon"
+	nostr "github.com/nbd-wtf/go-nostr"
 	slack "github.com/slack-go/slack"
 	irc "github.com/thoj/go-ircevent"
 	telegram "gopkg.in/telebot.v3"
@@ -38,6 +39,7 @@ const (
 	FlagDiscord              // FlagDiscord publish from discord service
 	FlagMatrix               // FlagMatrix publish from matrix service
 	FlagSlack                // FlagSlack publish from slack service
+	FlagNostr                // FlagSlack publish from nostr
 	FlagIRC                  // FlagIRC publish from relaychat service
 )
 
@@ -71,6 +73,8 @@ func (f Flag) String() string {
 		return "matrix"
 	case FlagSlack:
 		return "slack"
+	case FlagNostr:
+		return "nostr"
 	case FlagIRC:
 		return "irc"
 	default:
@@ -212,6 +216,17 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 			process(ctx, pub, cols, args...)
 		}
 	}
+	nostr := func(ctx context.Context, cols []wayback.Collect, args ...string) {
+		if config.Opts.PublishToNostr() {
+			logger.Debug("[%s] publishing to Nostr...", f)
+			var client *nostr.Relay
+			if rev, ok := ctx.Value(FlagNostr).(*nostr.Relay); ok {
+				client = rev
+			}
+			pub := NewNostr(client)
+			process(ctx, pub, cols, args...)
+		}
+	}
 	irc := func(ctx context.Context, cols []wayback.Collect, args ...string) {
 		if config.Opts.PublishToIRCChannel() {
 			logger.Debug("[%s] publishing to IRC channel...", f)
@@ -232,6 +247,7 @@ func To(ctx context.Context, cols []wayback.Collect, args ...string) {
 		"matrix":   matrix,
 		"twitter":  twitter,
 		"slack":    slack,
+		"nostr":    nostr,
 		"irc":      irc,
 	}
 

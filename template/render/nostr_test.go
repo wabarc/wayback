@@ -2,18 +2,18 @@
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
-/*
-Package render handles template parsing and execution for services.
-*/
-
 package render // import "github.com/wabarc/wayback/template/render"
 
 import (
 	"testing"
 )
 
-func TestRenderMastodon(t *testing.T) {
-	const toot = `‹ Example ›
+func TestRenderNostrForReply(t *testing.T) {
+	TestRenderNostrForPublish(t)
+}
+
+func TestRenderNostrForPublish(t *testing.T) {
+	expected := `‹ Example ›
 
 • source
 > https://example.com/
@@ -30,12 +30,10 @@ func TestRenderMastodon(t *testing.T) {
 > https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
 
 • Telegraph
-> http://telegra.ph/title-01-01
+> http://telegra.ph/title-01-01`
 
-#wayback #存档`
-
-	got := ForPublish(&Mastodon{Cols: collects, Data: bundleExample}).String()
-	if got != toot {
-		t.Fatalf("Unexpected render template for Mastodon, got \n%s\ninstead of \n%s", got, toot)
+	got := ForPublish(&Nostr{Cols: collects, Data: bundleExample}).String()
+	if got != expected {
+		t.Errorf("Unexpected render template for IRC, got \n%s\ninstead of \n%s", got, expected)
 	}
 }

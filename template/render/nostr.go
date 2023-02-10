@@ -1,4 +1,4 @@
-// Copyright 2021 Wayback Archiver. All rights reserved.
+// Copyright 2021 Wayback Archiver. All ritts reserved.
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
@@ -13,27 +13,30 @@ import (
 	"github.com/wabarc/wayback/reduxer"
 )
 
-var _ Renderer = (*Mastodon)(nil)
+var _ Renderer = (*Nostr)(nil)
 
-// Mastodon represents a Mastodon template data for render.
-type Mastodon struct {
+// Nostr represents a Nostr template data for render.
+type Nostr struct {
 	Cols []wayback.Collect
 	Data reduxer.Reduxer
 }
 
 // ForReply implements the standard Renderer interface:
-// it returns a Render from the ForPublish.
-func (m *Mastodon) ForReply() *Render {
-	return m.ForPublish()
+// it reads `[]wayback.Collect` from the Nostr and returns a *Render.
+func (n *Nostr) ForReply() *Render {
+	return n.ForPublish()
 }
 
 // ForPublish implements the standard Renderer interface:
 // it reads `[]wayback.Collect` and `reduxer.Reduxer` from
-// the Mastodon and returns a *Render.
-func (m *Mastodon) ForPublish() *Render {
+// the Nostr and returns a *Render.
+//
+// ForPublish generate tweet of given wayback collects in Nostr struct.
+// It excluded telegra.ph, because this link has been identified by Nostr.
+func (n *Nostr) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
 
-	if title := Title(m.Cols, m.Data); title != "" {
+	if title := Title(n.Cols, n.Data); title != "" {
 		tmplBytes.WriteString(`‹ `)
 		tmplBytes.WriteString(title)
 		tmplBytes.WriteString(" ›\n\n")
@@ -44,20 +47,17 @@ func (m *Mastodon) ForPublish() *Render {
 > {{ $.Dst }}
 {{end}}`
 
-	tpl, err := template.New("mastodon").Funcs(funcMap()).Parse(tmpl)
+	tpl, err := template.New("nostr").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
-		logger.Error("[masatodon] parse Mastodon template failed, %v", err)
+		logger.Error("parse Nostr template failed: %v", err)
 		return new(Render)
 	}
 
-	tmplBytes.WriteString(original(m.Cols))
-	err = tpl.Execute(&tmplBytes, m.Cols)
-	if err != nil {
-		logger.Error("[masatodon] execute Mastodon template failed, %v", err)
+	tmplBytes.WriteString(original(n.Cols))
+	if err := tpl.Execute(&tmplBytes, n.Cols); err != nil {
+		logger.Error("execute Nostr template failed: %v", err)
 		return new(Render)
 	}
-	tmplBytes.WriteString("\n#wayback #存档")
-	tmplBytes = *bytes.NewBuffer(bytes.TrimSpace(tmplBytes.Bytes()))
 
 	return &Render{buf: tmplBytes}
 }
