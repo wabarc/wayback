@@ -3,7 +3,7 @@
 # license that can be found in the LICENSE file.
 #
 # syntax=docker/dockerfile:1.2
-ARG GO_VERSION=1.19
+ARG GO_VERSION=1.20
 
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS builder
 COPY --from=tonistiigi/xx:golang / /
@@ -26,7 +26,7 @@ RUN --mount=type=bind,target=/src,rw \
     && mv ./build/binary/wayback-* /wayback
 
 # Application layer
-FROM alpine:3.15
+FROM alpine:3.17
 
 LABEL org.wabarc.homepage="http://github.com/wabarc" \
       org.wabarc.repository="http://github.com/wabarc/wayback" \
@@ -77,17 +77,15 @@ EXPOSE 8964
 # add flag `--format=docker` if using podman.
 # Ref: https://wiki.alpinelinux.org/wiki/Fonts
 ONBUILD RUN set -o pipefail; \
-    echo @v3.15 https://dl-cdn.alpinelinux.org/alpine/v3.15/community >> /etc/apk/repositories; \
-    echo @v3.15 https://dl-cdn.alpinelinux.org/alpine/v3.15/main >> /etc/apk/repositories; \
     apk add --no-cache -U \
-    chromium@v3.15 \
+    chromium \
     dbus \
     dumb-init \
-    ffmpeg@v3.15 \
-    freetype@v3.15 \
+    ffmpeg \
+    freetype \
     libstdc++ \
-    harfbuzz@v3.15 \
-    nss@v3.15 \
+    harfbuzz \
+    nss \
     you-get \
     rtmpdump \
     youtube-dl \
