@@ -98,6 +98,12 @@ func (n *nostrBot) publish(ctx context.Context, note string) error {
 		logger.Debug(`publish note to relay: %s`, r)
 		r := r
 		g.Go(func() error {
+			defer func() {
+				// recover from upstream panic
+				if r := recover(); r != nil {
+					logger.Error("publish to nostr failed: %v", r)
+				}
+			}()
 			client := relayConnect(ctx, r)
 			if client.Connection == nil {
 				return fmt.Errorf("publish to nostr failed: %v", <-client.ConnectionError)
