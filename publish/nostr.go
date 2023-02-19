@@ -94,24 +94,24 @@ func (n *nostrBot) publish(ctx context.Context, note string) error {
 	}
 
 	g, ctx := errgroup.WithContext(ctx)
-	for _, r := range config.Opts.NostrRelayURL() {
-		logger.Debug(`publish note to relay: %s`, r)
-		r := r
+	for _, relay := range config.Opts.NostrRelayURL() {
+		logger.Debug(`publish note to relay: %s`, relay)
+		relay := relay
 		g.Go(func() error {
 			defer func() {
 				// recover from upstream panic
 				if r := recover(); r != nil {
-					logger.Error("publish to nostr failed: %v", r)
+					logger.Error("publish to %s failed: %v", relay, r)
 				}
 			}()
-			client := relayConnect(ctx, r)
+			client := relayConnect(ctx, relay)
 			if client.Connection == nil {
-				return fmt.Errorf("publish to nostr failed: %v", <-client.ConnectionError)
+				return fmt.Errorf("publish to %s failed: %v", relay, <-client.ConnectionError)
 			}
 			// send the text note
 			status := client.Publish(ctx, ev)
 			if status != nostr.PublishStatusSucceeded {
-				return fmt.Errorf("published status is %s, not %s", status, nostr.PublishStatusSucceeded)
+				return fmt.Errorf("published to %s status is %s, not %s", relay, status, nostr.PublishStatusSucceeded)
 			}
 			return nil
 		})
@@ -124,7 +124,7 @@ func (n *nostrBot) publish(ctx context.Context, note string) error {
 }
 
 func relayConnect(ctx context.Context, url string) *nostr.Relay {
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	relay, err := nostr.RelayConnect(ctx, url)
 	if err != nil {
