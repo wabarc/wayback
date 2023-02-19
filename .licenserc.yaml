@@ -39,5 +39,6 @@ header:
     - 'Makefile'
     - 'Procfile'
     - 'cosign.pub'
+    - 'codecov.yml'
 
   comment: on-failure
