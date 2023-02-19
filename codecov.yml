@@ -1,0 +1,8 @@
+coverage:
+  status:
+    project:
+      default:
+        informational: true  # non-blocking status checks
+    patch:
+      default:
+        informational: true  # non-blocking status checks
