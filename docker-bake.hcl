@@ -50,8 +50,7 @@ target "artifact-all" {
     "linux/arm/v6",
     "linux/arm/v7",
     "linux/arm64",
-    "linux/ppc64le",
-    "linux/s390x"
+    "linux/ppc64le"
   ]
 }
 
@@ -64,8 +63,7 @@ target "release" {
     "linux/arm/v6",
     "linux/arm/v7",
     "linux/arm64",
-    "linux/ppc64le",
-    "linux/s390x"
+    "linux/ppc64le"
   ]
 }
 
@@ -79,7 +77,6 @@ target "bundle" {
     "linux/arm/v6",
     "linux/arm/v7",
     "linux/arm64",
-    "linux/ppc64le",
-    "linux/s390x"
+    "linux/ppc64le"
   ]
 }
