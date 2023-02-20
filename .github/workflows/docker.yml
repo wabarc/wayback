@@ -58,7 +58,7 @@ jobs:
             sum.golang.org:443
 
       - name: Checkout default branch
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
         with:
           fetch-depth: 0
 
@@ -90,21 +90,21 @@ jobs:
           echo "images=${DOCKER_HOST}/${DOCKER_IMAGE_SCOPE},${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
+        uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18 # v2.1.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@dc7b9719a96d48369863986a06765841d7ea23f6 # v2.0.0
+        uses: docker/setup-buildx-action@f03ac48505955848960e80bbb68046aa35c7b9e7 # v2.4.1
 
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b # v2.0.0
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b # v2.0.0
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -112,7 +112,7 @@ jobs:
 
       - name: Generate meta
         id: meta
-        uses: docker/metadata-action@69f6fc9d46f2f8bf0d5491e4aabe0bb8c6a4678a # v4.0.1
+        uses: docker/metadata-action@507c2f2dc502c992ad446e3d7a5dfbe311567a96 # v4.3.0
         with:
           images: ${{ steps.prep.outputs.images }}
           tags: |
@@ -120,7 +120,7 @@ jobs:
             type=raw,${{ steps.prep.outputs.version }}
 
       - name: Build artifacts
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
         env:
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
         with:
@@ -131,7 +131,7 @@ jobs:
             *.cache-to=type=local,dest=/tmp/.image-cache-new/artifacts
 
       - name: Build and push Docker image
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
         env:
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
         with:
@@ -201,7 +201,7 @@ jobs:
             sum.golang.org:443
 
       - name: Checkout default branch
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
         with:
           fetch-depth: 0
 
@@ -231,14 +231,14 @@ jobs:
           echo "images=${GHCR_HOST}/${DOCKER_IMAGE_SCOPE}" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@8b122486cedac8393e77aa9734c3528886e4a1a8 # v2.0.0
+        uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18 # v2.1.0
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@dc7b9719a96d48369863986a06765841d7ea23f6 # v2.0.0
+        uses: docker/setup-buildx-action@f03ac48505955848960e80bbb68046aa35c7b9e7 # v2.4.1
 
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b # v2.0.0
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -246,7 +246,7 @@ jobs:
 
       - name: Generate meta
         id: meta
-        uses: docker/metadata-action@69f6fc9d46f2f8bf0d5491e4aabe0bb8c6a4678a # v4.0.1
+        uses: docker/metadata-action@507c2f2dc502c992ad446e3d7a5dfbe311567a96 # v4.3.0
         with:
           images: ${{ steps.prep.outputs.images }}
           flavor: |
@@ -256,7 +256,7 @@ jobs:
             type=raw,${{ steps.prep.outputs.version }}
 
       - name: Build artifacts
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
         env:
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
         with:
@@ -267,7 +267,7 @@ jobs:
             *.cache-to=type=local,dest=/tmp/.image-cache-new/artifacts
 
       - name: Build and push Docker image
-        uses: docker/bake-action@fb56172975f3a7f62d2defb5d32d735a2eaa41eb # v2.0.0
+        uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
         env:
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
         with:
