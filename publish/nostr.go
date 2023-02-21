@@ -18,6 +18,7 @@ import (
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/template/render"
+	"golang.org/x/sync/errgroup"
 )
 
 var _ Publisher = (*nostrBot)(nil)
@@ -31,10 +32,6 @@ func NewNostr(client *nostr.Relay) *nostrBot {
 	if !config.Opts.PublishToNostr() {
 		logger.Error("Missing required environment variable, abort.")
 		return new(nostrBot)
-	}
-
-	if client == nil {
-		client = relayConnect(config.Opts.NostrRelayURL())
 	}
 
 	return &nostrBot{client: client}
@@ -64,11 +61,8 @@ func (n *nostrBot) Publish(ctx context.Context, cols []wayback.Collect, args ...
 }
 
 func (n *nostrBot) publish(ctx context.Context, note string) error {
-	if !config.Opts.PublishToNostr() || n.client == nil {
+	if !config.Opts.PublishToNostr() {
 		return fmt.Errorf("publish to nostr abort")
-	}
-	if n.client.Connection == nil {
-		return fmt.Errorf("publish to nostr failed: %v", <-n.client.ConnectionError)
 	}
 
 	if note == "" {
@@ -98,17 +92,39 @@ func (n *nostrBot) publish(ctx context.Context, note string) error {
 	if err := ev.Sign(sk); err != nil {
 		return fmt.Errorf("calling sign err: %v", err)
 	}
-	// send the text note
-	status := n.client.Publish(ctx, ev)
-	if status != nostr.PublishStatusSucceeded {
-		return fmt.Errorf("published status is %s, not %s", status, nostr.PublishStatusSucceeded)
+
+	g, ctx := errgroup.WithContext(ctx)
+	for _, relay := range config.Opts.NostrRelayURL() {
+		logger.Debug(`publish note to relay: %s`, relay)
+		relay := relay
+		g.Go(func() error {
+			defer func() {
+				// recover from upstream panic
+				if r := recover(); r != nil {
+					logger.Error("publish to %s failed: %v", relay, r)
+				}
+			}()
+			client := relayConnect(ctx, relay)
+			if client.Connection == nil {
+				return fmt.Errorf("publish to %s failed: %v", relay, <-client.ConnectionError)
+			}
+			// send the text note
+			status := client.Publish(ctx, ev)
+			if status != nostr.PublishStatusSucceeded {
+				return fmt.Errorf("published to %s status is %s, not %s", relay, status, nostr.PublishStatusSucceeded)
+			}
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func relayConnect(url string) *nostr.Relay {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+func relayConnect(ctx context.Context, url string) *nostr.Relay {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	relay, err := nostr.RelayConnect(ctx, url)
 	if err != nil {

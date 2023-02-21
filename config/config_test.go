@@ -1285,19 +1285,19 @@ func TestPublishToSlackChannel(t *testing.T) {
 func TestNostrRelayURL(t *testing.T) {
 	var tests = []struct {
 		url string
-		exp string
+		exp []string
 	}{
 		{
 			url: "",
-			exp: defNostrRelayURL,
+			exp: []string{defNostrRelayURL},
 		},
 		{
 			url: "wss://example.com",
-			exp: "wss://example.com",
+			exp: []string{"wss://example.com"},
 		},
 		{
 			url: "example.com",
-			exp: "example.com",
+			exp: []string{"example.com"},
 		},
 	}
 
@@ -1313,7 +1313,10 @@ func TestNostrRelayURL(t *testing.T) {
 			}
 
 			got := opts.NostrRelayURL()
-			if got != test.exp {
+			if len(got) < 1 {
+				t.Fatalf(`Unexpected set nostr relay url, got %v instead of %v`, got, test.exp)
+			}
+			if got[0] != test.exp[0] {
 				t.Fatalf(`Unexpected set nostr relay url, got %v instead of %v`, got, test.exp)
 			}
 		})

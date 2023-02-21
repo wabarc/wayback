@@ -653,8 +653,8 @@ func (o *Options) PublishToNotion() bool {
 }
 
 // NostrRelayURL returns the relay url of Nostr server.
-func (o *Options) NostrRelayURL() string {
-	return o.nostr.url
+func (o *Options) NostrRelayURL() []string {
+	return strings.Split(o.nostr.url, ",")
 }
 
 // NostrPrivateKey returns the private key of Nostr account.
@@ -664,7 +664,7 @@ func (o *Options) NostrPrivateKey() string {
 
 // PublishToNostr determines whether the results should be published on Nostr.
 func (o *Options) PublishToNostr() bool {
-	return o.NostrRelayURL() != "" && o.NostrPrivateKey() != ""
+	return len(o.NostrRelayURL()) > 0 && o.NostrPrivateKey() != ""
 }
 
 // TorPrivKey returns the private key of Tor service.
