@@ -216,7 +216,6 @@ Use the `-c` / `--config` option to specify the build definition file to use.
 
 You can also specify configuration options either via command flags or via environment variables, an overview of all options below.
 
-<<<<<<< HEAD
 | Flags               | Environment Variable              | Default                    | Description                                                  |
 | ------------------- | --------------------------------- | -------------------------- | ------------------------------------------------------------ |
 | `--debug`           | `DEBUG`                           | `false`                    | Enable debug mode, override `LOG_LEVEL`                      |
