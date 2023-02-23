@@ -16,6 +16,7 @@ import (
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 )
 
@@ -74,7 +75,8 @@ func TestProcess(t *testing.T) {
 	pub := publish.New(ctx, opts)
 	defer pub.Stop()
 
-	m := New(ctx, &storage.Storage{}, opts, pool, pub)
+	o := service.ParseOptions(service.Config(opts), service.Storage(&storage.Storage{}), service.Pool(pool), service.Publish(pub))
+	m := New(ctx, o)
 	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)
@@ -146,7 +148,8 @@ func TestPlayback(t *testing.T) {
 	pub := publish.New(ctx, opts)
 	defer pub.Stop()
 
-	m := New(ctx, &storage.Storage{}, opts, pool, pub)
+	o := service.ParseOptions(service.Config(opts), service.Storage(&storage.Storage{}), service.Pool(pool), service.Publish(pub))
+	m := New(ctx, o)
 	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)

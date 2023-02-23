@@ -68,26 +68,14 @@ type event struct {
 }
 
 // New Slack struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Slack {
-	if opts.SlackBotToken() == "" {
+func New(ctx context.Context, opts service.Options) *Slack {
+	if opts.Config.SlackBotToken() == "" {
 		logger.Fatal("missing required environment variable")
 	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if opts == nil {
-		logger.Fatal("must initialize options")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
-	}
-	if pub == nil {
-		logger.Fatal("must initialize publish")
-	}
 	bot := slack.New(
-		opts.SlackBotToken(),
-		// slack.OptionDebug(opts.HasDebugMode()),
-		slack.OptionAppLevelToken(opts.SlackAppToken()),
+		opts.Config.SlackBotToken(),
+		// slack.Config.OptionDebug(opts.Config.HasDebugMode()),
+		slack.OptionAppLevelToken(opts.Config.SlackAppToken()),
 	)
 	if bot == nil {
 		logger.Fatal("create slack bot instance failed")
@@ -95,7 +83,7 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 
 	client := socketmode.New(
 		bot,
-		// socketmode.OptionDebug(opts.HasDebugMode()),
+		// socketmode.OptionDebug(opts.Config.HasDebugMode()),
 		// socketmode.OptionLog(log.New(os.Stdout, "socketmode: ", log.Lshortfile|log.LstdFlags)),
 	)
 
@@ -106,11 +94,11 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 	return &Slack{
 		ctx:    ctx,
 		bot:    bot,
-		pub:    pub,
 		client: client,
-		store:  store,
-		opts:   opts,
-		pool:   pool,
+		store:  opts.Storage,
+		opts:   opts.Config,
+		pool:   opts.Pool,
+		pub:    opts.Publish,
 	}
 }
 

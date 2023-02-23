@@ -40,41 +40,29 @@ type IRC struct {
 }
 
 // New IRC struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *IRC {
-	if opts.IRCNick() == "" {
+func New(ctx context.Context, opts service.Options) *IRC {
+	if opts.Config.IRCNick() == "" {
 		logger.Fatal("missing required environment variable")
-	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if opts == nil {
-		logger.Fatal("must initialize options")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
-	}
-	if pub == nil {
-		logger.Fatal("must initialize publish")
 	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
 	// TODO: support SASL authenticate
-	conn := irc.IRC(opts.IRCNick(), opts.IRCNick())
-	conn.Password = opts.IRCPassword()
-	conn.VerboseCallbackHandler = opts.HasDebugMode()
-	conn.Debug = opts.HasDebugMode()
+	conn := irc.IRC(opts.Config.IRCNick(), opts.Config.IRCNick())
+	conn.Password = opts.Config.IRCPassword()
+	conn.VerboseCallbackHandler = opts.Config.HasDebugMode()
+	conn.Debug = opts.Config.HasDebugMode()
 	conn.UseTLS = true
 	conn.TLSConfig = &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12}
 
 	return &IRC{
 		ctx:   ctx,
-		pub:   pub,
-		opts:  opts,
-		pool:  pool,
 		conn:  conn,
-		store: store,
+		store: opts.Storage,
+		opts:  opts.Config,
+		pool:  opts.Pool,
+		pub:   opts.Publish,
 	}
 }
 

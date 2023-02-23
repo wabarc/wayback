@@ -14,6 +14,7 @@ import (
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/service/discord"
 	"github.com/wabarc/wayback/service/httpd"
 	"github.com/wabarc/wayback/service/mastodon"
@@ -59,8 +60,16 @@ func serve(_ *cobra.Command, opts *config.Options, _ []string) {
 	pub := publish.New(ctx, opts)
 	go pub.Start()
 
+	opt := []service.Option{
+		service.Config(opts),
+		service.Storage(store),
+		service.Pool(pool),
+		service.Publish(pub),
+	}
+	options := service.ParseOptions(opt...)
+
 	srv := &services{}
-	_ = srv.run(ctx, store, opts, pool, pub)
+	_ = srv.run(ctx, options)
 
 	if systemd.HasNotifySocket() {
 		logger.Info("sending readiness notification to Systemd")
@@ -77,14 +86,14 @@ func serve(_ *cobra.Command, opts *config.Options, _ []string) {
 }
 
 // nolint:gocyclo
-func (srv *services) run(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *services {
+func (srv *services) run(ctx context.Context, opts service.Options) *services {
 	size := len(daemon)
 	srv.targets = make([]target, 0, size)
 	for _, s := range daemon {
 		s := s
 		switch s {
 		case "irc":
-			irc := relaychat.New(ctx, store, opts, pool, pub)
+			irc := relaychat.New(ctx, opts)
 			go func() {
 				if err := irc.Serve(); err != relaychat.ErrServiceClosed {
 					logger.Error("start %s service failed: %v", s, err)
@@ -95,7 +104,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "slack":
-			sl := slack.New(ctx, store, opts, pool, pub)
+			sl := slack.New(ctx, opts)
 			go func() {
 				if err := sl.Serve(); err != slack.ErrServiceClosed {
 					logger.Error("start %s service failed: %v", s, err)
@@ -106,7 +115,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "discord":
-			d := discord.New(ctx, store, opts, pool, pub)
+			d := discord.New(ctx, opts)
 			go func() {
 				if err := d.Serve(); err != discord.ErrServiceClosed {
 					logger.Error("start %s service failed: %v", s, err)
@@ -117,7 +126,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "mastodon", "mstdn":
-			m := mastodon.New(ctx, store, opts, pool, pub)
+			m := mastodon.New(ctx, opts)
 			go func() {
 				if err := m.Serve(); err != mastodon.ErrServiceClosed {
 					logger.Error("start %s service failed: %v", s, err)
@@ -128,7 +137,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "telegram":
-			t := telegram.New(ctx, store, opts, pool, pub)
+			t := telegram.New(ctx, opts)
 			go func() {
 				if err := t.Serve(); err != telegram.ErrServiceClosed {
 					logger.Error("start %s service failed: %v", s, err)
@@ -139,7 +148,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "twitter":
-			t := twitter.New(ctx, store, opts, pool, pub)
+			t := twitter.New(ctx, opts)
 			go func() {
 				if err := t.Serve(); err != twitter.ErrServiceClosed {
 					logger.Error("start %s service failed: %v", s, err)
@@ -150,7 +159,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "matrix":
-			m := matrix.New(ctx, store, opts, pool, pub)
+			m := matrix.New(ctx, opts)
 			go func() {
 				if err := m.Serve(); err != matrix.ErrServiceClosed {
 					logger.Error("start %s service failed: %v", s, err)
@@ -161,7 +170,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "web", "httpd":
-			h := httpd.New(ctx, store, opts, pool, pub)
+			h := httpd.New(ctx, opts)
 			go func() {
 				if err := h.Serve(); err != httpd.ErrServiceClosed {
 					logger.Error("start %s service failed: %v", s, err)

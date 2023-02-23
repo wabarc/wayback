@@ -52,25 +52,13 @@ type Telegram struct {
 }
 
 // New Telegram struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Telegram {
-	if opts.TelegramToken() == "" {
+func New(ctx context.Context, opts service.Options) *Telegram {
+	if opts.Config.TelegramToken() == "" {
 		logger.Fatal("missing required environment variable")
 	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if opts == nil {
-		logger.Fatal("must initialize options")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
-	}
-	if pub == nil {
-		logger.Fatal("must initialize publish")
-	}
 	bot, err := telegram.NewBot(telegram.Settings{
-		Token: opts.TelegramToken(),
-		// Verbose:   opts.HasDebugMode(),
+		Token: opts.Config.TelegramToken(),
+		// Verbose:   opts.Config.HasDebugMode(),
 		ParseMode: telegram.ModeHTML,
 		Poller:    &telegram.LongPoller{Timeout: pollTick},
 		OnError: func(err error, _ telegram.Context) {
@@ -90,10 +78,10 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 	return &Telegram{
 		ctx:   ctx,
 		bot:   bot,
-		store: store,
-		opts:  opts,
-		pool:  pool,
-		pub:   pub,
+		store: opts.Storage,
+		opts:  opts.Config,
+		pool:  opts.Pool,
+		pub:   opts.Publish,
 	}
 }
 

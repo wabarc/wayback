@@ -42,34 +42,22 @@ type Matrix struct {
 }
 
 // New Matrix struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Matrix {
-	if opts.MatrixUserID() == "" || opts.MatrixPassword() == "" || opts.MatrixHomeserver() == "" {
+func New(ctx context.Context, opts service.Options) *Matrix {
+	if opts.Config.MatrixUserID() == "" || opts.Config.MatrixPassword() == "" || opts.Config.MatrixHomeserver() == "" {
 		logger.Fatal("missing required environment variable")
-	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if opts == nil {
-		logger.Fatal("must initialize options")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
-	}
-	if pub == nil {
-		logger.Fatal("must initialize publish")
 	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	client, err := matrix.NewClient(opts.MatrixHomeserver(), "", "")
+	client, err := matrix.NewClient(opts.Config.MatrixHomeserver(), "", "")
 	if err != nil {
 		logger.Fatal("Dial Matrix client got unpredictable error: %v", err)
 	}
 	_, err = client.Login(&matrix.ReqLogin{
 		Type:             matrix.AuthTypePassword,
-		Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: opts.MatrixUserID()},
-		Password:         opts.MatrixPassword(),
+		Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: opts.Config.MatrixUserID()},
+		Password:         opts.Config.MatrixPassword(),
 		StoreCredentials: true,
 	})
 	if err != nil {
@@ -78,11 +66,11 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 
 	return &Matrix{
 		ctx:    ctx,
-		pub:    pub,
-		opts:   opts,
-		pool:   pool,
 		client: client,
-		store:  store,
+		store:  opts.Storage,
+		opts:   opts.Config,
+		pool:   opts.Pool,
+		pub:    opts.Publish,
 	}
 }
 

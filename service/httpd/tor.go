@@ -24,6 +24,7 @@ import (
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 )
 
@@ -43,29 +44,17 @@ type Tor struct {
 }
 
 // New tor struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Tor {
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if opts == nil {
-		logger.Fatal("must initialize options")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
-	}
-	if pub == nil {
-		logger.Fatal("must initialize publish")
-	}
+func New(ctx context.Context, opts service.Options) *Tor {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
 	return &Tor{
 		ctx:   ctx,
-		pub:   pub,
-		opts:  opts,
-		pool:  pool,
-		store: store,
+		store: opts.Storage,
+		opts:  opts.Config,
+		pool:  opts.Pool,
+		pub:   opts.Publish,
 	}
 }
 

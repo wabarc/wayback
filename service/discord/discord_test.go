@@ -23,6 +23,7 @@ import (
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 
 	discord "github.com/bwmarrin/discordgo"
@@ -176,15 +177,9 @@ func TestServe(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	bot, err := discord.New("Bot " + opts.DiscordBotToken())
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	handle(mux, strings.Replace(server.URL, "http", "ws", 1))
-	bot.Client = httpClient
 
 	cfg := []pooling.Option{
 		pooling.Capacity(opts.PoolingSize()),
@@ -205,7 +200,9 @@ func TestServe(t *testing.T) {
 	pub := publish.New(ctx, opts)
 	defer pub.Stop()
 
-	d := New(ctx, store, opts, pool, pub)
+	o := service.ParseOptions(service.Config(opts), service.Storage(store), service.Pool(pool), service.Publish(pub))
+	d := New(ctx, o)
+	d.bot.Client = httpClient
 	time.AfterFunc(3*time.Second, func() {
 		// TODO: find a better way to avoid deadlock
 		go d.Shutdown()
@@ -268,7 +265,8 @@ func TestProcess(t *testing.T) {
 	pub := publish.New(ctx, opts)
 	defer pub.Stop()
 
-	d := New(ctx, store, opts, pool, pub)
+	o := service.ParseOptions(service.Config(opts), service.Storage(store), service.Pool(pool), service.Publish(pub))
+	d := New(ctx, o)
 	d.bot.Client = httpClient
 
 	// if err := d.bot.Open(); err != nil {

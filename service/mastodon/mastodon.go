@@ -47,39 +47,27 @@ type Mastodon struct {
 }
 
 // New mastodon struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Mastodon {
-	if !opts.PublishToMastodon() {
+func New(ctx context.Context, opts service.Options) *Mastodon {
+	if !opts.Config.PublishToMastodon() {
 		logger.Fatal("missing required environment variable")
-	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if opts == nil {
-		logger.Fatal("must initialize options")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
-	}
-	if pub == nil {
-		logger.Fatal("must initialize publish")
 	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
 	client := mastodon.NewClient(&mastodon.Config{
-		Server:       opts.MastodonServer(),
-		ClientID:     opts.MastodonClientKey(),
-		ClientSecret: opts.MastodonClientSecret(),
-		AccessToken:  opts.MastodonAccessToken(),
+		Server:       opts.Config.MastodonServer(),
+		ClientID:     opts.Config.MastodonClientKey(),
+		ClientSecret: opts.Config.MastodonClientSecret(),
+		AccessToken:  opts.Config.MastodonAccessToken(),
 	})
 	return &Mastodon{
 		ctx:    ctx,
-		pub:    pub,
-		opts:   opts,
-		pool:   pool,
 		client: client,
-		store:  store,
+		store:  opts.Storage,
+		opts:   opts.Config,
+		pool:   opts.Pool,
+		pub:    opts.Publish,
 	}
 }
 

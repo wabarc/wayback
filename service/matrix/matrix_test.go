@@ -18,6 +18,7 @@ import (
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
@@ -133,7 +134,8 @@ func senderClient(t *testing.T) *Matrix {
 	pub := publish.New(ctx, opts)
 	defer pub.Stop()
 
-	return New(ctx, &storage.Storage{}, opts, pool, pub)
+	o := service.ParseOptions(service.Config(opts), service.Storage(&storage.Storage{}), service.Pool(pool), service.Publish(pub))
+	return New(ctx, o)
 }
 
 func recverClient(t *testing.T) *Matrix {
@@ -158,7 +160,8 @@ func recverClient(t *testing.T) *Matrix {
 	pub := publish.New(ctx, opts)
 	defer pub.Stop()
 
-	return New(ctx, &storage.Storage{}, opts, pool, pub)
+	o := service.ParseOptions(service.Config(opts), service.Storage(&storage.Storage{}), service.Pool(pool), service.Publish(pub))
+	return New(ctx, o)
 }
 
 // nolint:gocyclo

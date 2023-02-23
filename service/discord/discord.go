@@ -44,28 +44,16 @@ type Discord struct {
 }
 
 // New returns a Discord struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Discord {
-	if opts.DiscordBotToken() == "" {
+func New(ctx context.Context, opts service.Options) *Discord {
+	if opts.Config.DiscordBotToken() == "" {
 		logger.Fatal("missing required environment variable")
 	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if opts == nil {
-		logger.Fatal("must initialize options")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
-	}
-	if pub == nil {
-		logger.Fatal("must initialize publish")
-	}
-	bot, err := discord.New("Bot " + opts.DiscordBotToken())
+	bot, err := discord.New("Bot " + opts.Config.DiscordBotToken())
 	if err != nil {
 		logger.Fatal("create discord bot instance failed: %v", err)
 	}
 	// Debug mode for bwmarrin/discordgo will print the bot token, should not apply it on production
-	// if opts.HasDebugMode() {
+	// if opts.Config.HasDebugMode() {
 	//     bot.LogLevel = discord.LogDebug
 	// }
 
@@ -76,10 +64,10 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 	return &Discord{
 		ctx:   ctx,
 		bot:   bot,
-		store: store,
-		opts:  opts,
-		pool:  pool,
-		pub:   pub,
+		store: opts.Storage,
+		opts:  opts.Config,
+		pool:  opts.Pool,
+		pub:   opts.Publish,
 	}
 }
 

@@ -45,38 +45,26 @@ type Twitter struct {
 }
 
 // New returns Twitter struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Twitter {
-	if !opts.PublishToTwitter() {
+func New(ctx context.Context, opts service.Options) *Twitter {
+	if !opts.Config.PublishToTwitter() {
 		logger.Fatal("missing required environment variable")
-	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if opts == nil {
-		logger.Fatal("must initialize options")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
-	}
-	if pub == nil {
-		logger.Fatal("must initialize publish")
 	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	oauth := oauth1.NewConfig(opts.TwitterConsumerKey(), opts.TwitterConsumerSecret())
-	token := oauth1.NewToken(opts.TwitterAccessToken(), opts.TwitterAccessSecret())
+	oauth := oauth1.NewConfig(opts.Config.TwitterConsumerKey(), opts.Config.TwitterConsumerSecret())
+	token := oauth1.NewToken(opts.Config.TwitterAccessToken(), opts.Config.TwitterAccessSecret())
 	httpClient := oauth.Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
 
 	return &Twitter{
 		ctx:    ctx,
-		pub:    pub,
-		opts:   opts,
-		pool:   pool,
 		client: client,
-		store:  store,
+		store:  opts.Storage,
+		opts:   opts.Config,
+		pool:   opts.Pool,
+		pub:    opts.Publish,
 	}
 }
 
