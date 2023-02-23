@@ -66,6 +66,7 @@ jobs:
         uses: ibnesayeed/setup-ipfs@3e5452e358dfa43a0fb92496e96c82cf756be94a
         with:
           run_daemon: true
+          ipfs_version: ${{ vars.IPFS_VERSION }}
 
       - name: Set up Tor
         uses: tor-actions/setup-tor@462b4eef22eecc86cc4abdedafc95a38667e2557
@@ -81,9 +82,9 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: moy2010/meilisearch-github-action@fcc5ef714af0596633665032d459bfb279d3c730 # 0.1.4
         with:
-          meilisearch-version: v0.28.0
-          meilisearch-port: 7700
-          meilisearch-api-key: foobar
+          meilisearch-version: ${{ vars.MEILISEARCH_VERSION }}
+          meilisearch-port: ${{ vars.MEILISEARCH_PORT }}
+          meilisearch-api-key: ${{ vars.MEILISEARCH_APIKEY }}
 
       - name: Set up Chocolatey
         if: matrix.os == 'windows-latest'
@@ -141,10 +142,10 @@ jobs:
         shell: bash
         run: |
           # Set env to enable reduxer
-          echo "WAYBACK_MEILI_ENDPOINT=http://localhost:7700" >> $GITHUB_ENV
-          echo "PLAYBACK_MEILI_ENDPOINT=http://localhost:7700" >> $GITHUB_ENV
-          echo "WAYBACK_MEILI_APIKEY=foobar" >> $GITHUB_ENV
-          echo "PLAYBACK_MEILI_APIKEY=foobar" >> $GITHUB_ENV
+          echo "WAYBACK_MEILI_ENDPOINT=${{ vars.WAYBACK_MEILI_ENDPOINT }}" >> $GITHUB_ENV
+          echo "PLAYBACK_MEILI_ENDPOINT=${{ vars.WAYBACK_MEILI_ENDPOINT }}" >> $GITHUB_ENV
+          echo "WAYBACK_MEILI_APIKEY=${{ vars.MEILISEARCH_APIKEY }}" >> $GITHUB_ENV
+          echo "PLAYBACK_MEILI_APIKEY=${{ vars.MEILISEARCH_APIKEY }}" >> $GITHUB_ENV
 
       - name: Check out code base
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
