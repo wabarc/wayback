@@ -21,23 +21,24 @@ var _ Publisher = (*twitterBot)(nil)
 
 type twitterBot struct {
 	client *twitter.Client
+	opts   *config.Options
 }
 
 // NewTwitter returns a twitterBot client.
-func NewTwitter(client *twitter.Client) *twitterBot {
-	if !config.Opts.PublishToTwitter() {
+func NewTwitter(client *twitter.Client, opts *config.Options) *twitterBot {
+	if !opts.PublishToTwitter() {
 		logger.Error("Missing required environment variable")
 		return new(twitterBot)
 	}
 
 	if client == nil {
-		oauth := oauth1.NewConfig(config.Opts.TwitterConsumerKey(), config.Opts.TwitterConsumerSecret())
-		token := oauth1.NewToken(config.Opts.TwitterAccessToken(), config.Opts.TwitterAccessSecret())
+		oauth := oauth1.NewConfig(opts.TwitterConsumerKey(), opts.TwitterConsumerSecret())
+		token := oauth1.NewToken(opts.TwitterAccessToken(), opts.TwitterAccessSecret())
 		httpClient := oauth.Client(oauth1.NoContext, token)
 		client = twitter.NewClient(httpClient)
 	}
 
-	return &twitterBot{client: client}
+	return &twitterBot{client: client, opts: opts}
 }
 
 // Publish publish tweet to Twitter of given cols and args.
@@ -64,7 +65,7 @@ func (t *twitterBot) Publish(ctx context.Context, cols []wayback.Collect, args .
 }
 
 func (t *twitterBot) ToTwitter(ctx context.Context, body string) bool {
-	if !config.Opts.PublishToTwitter() || t.client == nil {
+	if !t.opts.PublishToTwitter() || t.client == nil {
 		logger.Warn("Do not publish to Twitter.")
 		return false
 	}

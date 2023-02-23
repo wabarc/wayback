@@ -40,24 +40,28 @@ type Collect struct {
 // IA represents the Internet Archive slot.
 type IA struct {
 	ctx context.Context
+	cfg *config.Options
 	URL *url.URL
 }
 
 // IS represents the archive.today slot.
 type IS struct {
 	ctx context.Context
+	cfg *config.Options
 	URL *url.URL
 }
 
 // IP represents the IPFS slot.
 type IP struct {
 	ctx context.Context
+	cfg *config.Options
 	URL *url.URL
 }
 
 // PH represents the Telegra.ph slot.
 type PH struct {
 	ctx context.Context
+	cfg *config.Options
 	URL *url.URL
 }
 
@@ -99,19 +103,19 @@ func (i IP) Wayback(rdx reduxer.Reduxer) string {
 	opts := []ipfs.PinningOption{
 		ipfs.Mode(ipfs.Remote),
 	}
-	if config.Opts.IPFSMode() == "daemon" {
+	if i.cfg.IPFSMode() == "daemon" {
 		opts = []ipfs.PinningOption{
 			ipfs.Mode(ipfs.Local),
-			ipfs.Host(config.Opts.IPFSHost()),
-			ipfs.Port(config.Opts.IPFSPort()),
+			ipfs.Host(i.cfg.IPFSHost()),
+			ipfs.Port(i.cfg.IPFSPort()),
 		}
 	}
 
-	target := config.Opts.IPFSTarget()
+	target := i.cfg.IPFSTarget()
 	switch target {
 	case pinner.Infura, pinner.Pinata, pinner.NFTStorage, pinner.Web3Storage:
-		apikey := config.Opts.IPFSApikey()
-		secret := config.Opts.IPFSSecret()
+		apikey := i.cfg.IPFSApikey()
+		secret := i.cfg.IPFSSecret()
 		opts = append(opts, ipfs.Uses(target), ipfs.Apikey(apikey), ipfs.Secret(secret))
 	}
 	arc := &ip.Shaft{Hold: ipfs.Options(opts...)}
@@ -143,8 +147,8 @@ func (i PH) Wayback(rdx reduxer.Reduxer) string {
 	uri := i.URL.String()
 	ctx := i.ctx
 
-	if config.Opts.EnabledChromeRemote() {
-		arc.ByRemote(config.Opts.ChromeRemoteAddr())
+	if i.cfg.EnabledChromeRemote() {
+		arc.ByRemote(i.cfg.ChromeRemoteAddr())
 	}
 	if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
 		ctx = arc.WithShot(ctx, bundle.Shots())
@@ -164,12 +168,12 @@ func wayback(w Waybacker, r reduxer.Reduxer) string {
 }
 
 // Wayback returns URLs archived to the time capsules of given URLs.
-func Wayback(ctx context.Context, rdx reduxer.Reduxer, urls ...*url.URL) ([]Collect, error) {
+func Wayback(ctx context.Context, rdx reduxer.Reduxer, cfg *config.Options, urls ...*url.URL) ([]Collect, error) {
 	logger.Debug("start...")
 
 	if _, ok := ctx.Deadline(); !ok {
 		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, config.Opts.WaybackTimeout())
+		ctx, cancel = context.WithTimeout(ctx, cfg.WaybackTimeout())
 		defer cancel()
 	}
 
@@ -177,7 +181,7 @@ func Wayback(ctx context.Context, rdx reduxer.Reduxer, urls ...*url.URL) ([]Coll
 	cols := []Collect{}
 	g, ctx := errgroup.WithContext(ctx)
 	for _, input := range urls {
-		for slot, arc := range config.Opts.Slots() {
+		for slot, arc := range cfg.Slots() {
 			if !arc {
 				logger.Warn("skipped %s", config.SlotName(slot))
 				continue
@@ -190,13 +194,13 @@ func Wayback(ctx context.Context, rdx reduxer.Reduxer, urls ...*url.URL) ([]Coll
 				var col Collect
 				switch slot {
 				case config.SLOT_IA:
-					col.Dst = wayback(IA{URL: input, ctx: ctx}, rdx)
+					col.Dst = wayback(IA{URL: input, cfg: cfg, ctx: ctx}, rdx)
 				case config.SLOT_IS:
-					col.Dst = wayback(IS{URL: input, ctx: ctx}, rdx)
+					col.Dst = wayback(IS{URL: input, cfg: cfg, ctx: ctx}, rdx)
 				case config.SLOT_IP:
-					col.Dst = wayback(IP{URL: input, ctx: ctx}, rdx)
+					col.Dst = wayback(IP{URL: input, cfg: cfg, ctx: ctx}, rdx)
 				case config.SLOT_PH:
-					col.Dst = wayback(PH{URL: input, ctx: ctx}, rdx)
+					col.Dst = wayback(PH{URL: input, cfg: cfg, ctx: ctx}, rdx)
 				}
 				col.Src = uri
 				col.Arc = slot
@@ -220,10 +224,10 @@ func Wayback(ctx context.Context, rdx reduxer.Reduxer, urls ...*url.URL) ([]Coll
 }
 
 // Playback returns URLs archived from the time capsules.
-func Playback(ctx context.Context, urls ...*url.URL) (cols []Collect, err error) {
+func Playback(ctx context.Context, cfg *config.Options, urls ...*url.URL) (cols []Collect, err error) {
 	logger.Debug("start...")
 
-	ctx, cancel := context.WithTimeout(ctx, config.Opts.WaybackTimeout())
+	ctx, cancel := context.WithTimeout(ctx, cfg.WaybackTimeout())
 	defer cancel()
 
 	mu := sync.Mutex{}

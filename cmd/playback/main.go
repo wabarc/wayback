@@ -10,18 +10,25 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/playback"
 	"github.com/wabarc/wayback"
+	"github.com/wabarc/wayback/config"
 )
 
 func main() {
+	opts, err := config.NewParser().ParseEnvironmentVariables()
+	if err != nil {
+		logger.Fatal("Parse environment variables or flags failed, error: %v", err)
+	}
+
 	var rootCmd = &cobra.Command{
 		Use:     "playback",
 		Short:   "A toolkit to playback archived webpage from time capsules.",
 		Example: `  playback https://example.com https://example.org`,
 		Version: playback.Version,
 		Run: func(cmd *cobra.Command, args []string) {
-			handle(cmd, args)
+			handle(cmd, opts, args)
 		},
 	}
 
@@ -29,7 +36,7 @@ func main() {
 	rootCmd.Execute()
 }
 
-func handle(cmd *cobra.Command, args []string) {
+func handle(cmd *cobra.Command, opts *config.Options, args []string) {
 	if len(args) < 1 {
 		// nolint:errcheck
 		cmd.Usage()
@@ -42,7 +49,7 @@ func handle(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	collects, err := wayback.Playback(context.TODO(), urls...)
+	collects, err := wayback.Playback(context.TODO(), opts, urls...)
 	if err != nil {
 		cmd.Println(err)
 		os.Exit(1)

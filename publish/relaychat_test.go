@@ -7,15 +7,11 @@ package publish // import "github.com/wabarc/wayback/publish"
 import (
 	"os"
 	"testing"
-
-	"github.com/wabarc/wayback/config"
 )
 
 func setIRCEnv() {
 	os.Setenv("WAYBACK_IRC_NICK", "foo")
 	os.Setenv("WAYBACK_IRC_CHANNEL", "bar")
-
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
 }
 func TestToIRCChannel(t *testing.T) {
 }

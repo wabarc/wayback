@@ -21,9 +21,9 @@ type Storage struct {
 
 // Open a bolt database on current directory in given path.
 // It is the caller's responsibility to close it.
-func Open(path string) (*Storage, error) {
+func Open(opts *config.Options, path string) (*Storage, error) {
 	if path == "" {
-		path = config.Opts.BoltPathname()
+		path = opts.BoltPathname()
 	}
 	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {

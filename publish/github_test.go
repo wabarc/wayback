@@ -18,15 +18,12 @@ import (
 	"github.com/wabarc/wayback/template/render"
 )
 
-func init() {
+func TestToIssues(t *testing.T) {
 	os.Setenv("WAYBACK_GITHUB_TOKEN", "foo")
 	os.Setenv("WAYBACK_GITHUB_OWNER", "bar")
 	os.Setenv("WAYBACK_GITHUB_REPO", "zoo")
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
-}
-
-func TestToIssues(t *testing.T) {
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 
@@ -46,7 +43,7 @@ func TestToIssues(t *testing.T) {
 		}
 	})
 
-	gh := NewGitHub(httpClient)
+	gh := NewGitHub(httpClient, opts)
 	txt := render.ForPublish(&render.GitHub{Cols: collects, Data: bundleExample}).String()
 	got := gh.toIssues(context.Background(), "", txt)
 	if !got {

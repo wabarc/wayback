@@ -162,7 +162,7 @@ const (
 func TestToNotion(t *testing.T) {
 	os.Setenv("WAYBACK_NOTION_TOKEN", "foo")
 	os.Setenv("WAYBACK_NOTION_DATABASE_ID", "bar")
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
@@ -182,7 +182,7 @@ func TestToNotion(t *testing.T) {
 		}
 	})
 
-	no := NewNotion(httpClient)
+	no := NewNotion(httpClient, opts)
 	ctx := context.WithValue(context.Background(), PubBundle{}, bundleExample)
 	got := no.Publish(ctx, collects)
 	if got != nil {

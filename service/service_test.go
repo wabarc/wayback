@@ -29,8 +29,8 @@ func TestWayback(t *testing.T) {
 	os.Setenv("WAYBACK_ENABLE_PH", "false")
 
 	parser := config.NewParser()
-	var err error
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	logger.SetLogLevel(logger.LevelFatal)
@@ -45,7 +45,7 @@ func TestWayback(t *testing.T) {
 		time.Sleep(3 * time.Second)
 		return nil
 	}
-	w := Wayback(ctx, urls, do)
+	w := Wayback(ctx, opts, urls, do)
 
 	if w == nil {
 		t.Fatal("Unexpected wayback exceeded")
@@ -64,8 +64,8 @@ func TestWaybackWithoutReduxer(t *testing.T) {
 	os.Setenv("WAYBACK_STORAGE_DIR", "")
 
 	parser := config.NewParser()
-	var err error
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	logger.SetLogLevel(logger.LevelFatal)
@@ -80,7 +80,7 @@ func TestWaybackWithoutReduxer(t *testing.T) {
 		time.Sleep(3 * time.Second)
 		return nil
 	}
-	w := Wayback(ctx, urls, do)
+	w := Wayback(ctx, opts, urls, do)
 
 	if w == nil {
 		t.Fatal("Unexpected wayback exceeded")

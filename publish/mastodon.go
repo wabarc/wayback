@@ -21,25 +21,26 @@ var _ Publisher = (*mastodon)(nil)
 
 type mastodon struct {
 	client *mstdn.Client
+	opts   *config.Options
 }
 
 // NewMastodon returns a mastodon client.
-func NewMastodon(client *mstdn.Client) *mastodon {
-	if !config.Opts.PublishToMastodon() {
+func NewMastodon(client *mstdn.Client, opts *config.Options) *mastodon {
+	if !opts.PublishToMastodon() {
 		logger.Error("Missing required environment variable")
 		return new(mastodon)
 	}
 
 	if client == nil {
 		client = mstdn.NewClient(&mstdn.Config{
-			Server:       config.Opts.MastodonServer(),
-			ClientID:     config.Opts.MastodonClientKey(),
-			ClientSecret: config.Opts.MastodonClientSecret(),
-			AccessToken:  config.Opts.MastodonAccessToken(),
+			Server:       opts.MastodonServer(),
+			ClientID:     opts.MastodonClientKey(),
+			ClientSecret: opts.MastodonClientSecret(),
+			AccessToken:  opts.MastodonAccessToken(),
 		})
 	}
 
-	return &mastodon{client: client}
+	return &mastodon{client: client, opts: opts}
 }
 
 // Publish publish toot to the Mastodon of given cols and args.
@@ -70,7 +71,7 @@ func (m *mastodon) Publish(ctx context.Context, cols []wayback.Collect, args ...
 }
 
 func (m *mastodon) ToMastodon(ctx context.Context, text, id string) bool {
-	if !config.Opts.PublishToMastodon() || m.client == nil {
+	if !m.opts.PublishToMastodon() || m.client == nil {
 		logger.Warn("Do not publish to Mastodon.")
 		return false
 	}

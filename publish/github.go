@@ -22,11 +22,12 @@ var _ Publisher = (*gitHub)(nil)
 
 type gitHub struct {
 	client *github.Client
+	opts   *config.Options
 }
 
 // NewGitHub returns a gitHub client.
-func NewGitHub(httpClient *http.Client) *gitHub {
-	if config.Opts.GitHubToken() == "" || config.Opts.GitHubOwner() == "" {
+func NewGitHub(httpClient *http.Client, opts *config.Options) *gitHub {
+	if opts.GitHubToken() == "" || opts.GitHubOwner() == "" {
 		logger.Error("GitHub personal access token is required")
 		return new(gitHub)
 	}
@@ -35,14 +36,14 @@ func NewGitHub(httpClient *http.Client) *gitHub {
 		// Authenticated user must grant repo:public_repo scope,
 		// private repository need whole repo scope.
 		auth := github.BasicAuthTransport{
-			Username: config.Opts.GitHubOwner(),
-			Password: config.Opts.GitHubToken(),
+			Username: opts.GitHubOwner(),
+			Password: opts.GitHubToken(),
 		}
 		httpClient = auth.Client()
 	}
 	client := github.NewClient(httpClient)
 
-	return &gitHub{client: client}
+	return &gitHub{client: client, opts: opts}
 }
 
 // Publish publish markdown text to the GitHub issues of given cols and args.
@@ -83,14 +84,14 @@ func (gh *gitHub) toIssues(ctx context.Context, head, body string) bool {
 		return false
 	}
 
-	if config.Opts.HasDebugMode() {
+	if gh.opts.HasDebugMode() {
 		user, _, _ := gh.client.Users.Get(ctx, "") // nolint:errcheck
 		logger.Debug("authorized GitHub user: %v", user)
 	}
 
 	// Create an issue to GitHub
 	ir := &github.IssueRequest{Title: github.String(head), Body: github.String(body)}
-	issue, _, err := gh.client.Issues.Create(ctx, config.Opts.GitHubOwner(), config.Opts.GitHubRepo(), ir)
+	issue, _, err := gh.client.Issues.Create(ctx, gh.opts.GitHubOwner(), gh.opts.GitHubRepo(), ir)
 	if err != nil {
 		logger.Error("create issue failed: %v", err)
 		return false

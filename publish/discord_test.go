@@ -149,27 +149,28 @@ func handle(mux *http.ServeMux, gateway string) {
 	})
 }
 
-func setDiscordEnv() {
+func setDiscordEnv() *config.Options {
 	os.Setenv("WAYBACK_DISCORD_BOT_TOKEN", token)
 	os.Setenv("WAYBACK_DISCORD_CHANNEL", channelID)
 	os.Setenv("WAYBACK_ENABLE_IP", "true")
 
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+	return opts
 }
 
 func TestToDiscordChannel(t *testing.T) {
-	setDiscordEnv()
+	opts := setDiscordEnv()
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	handle(mux, strings.Replace(server.URL, "http", "ws", 1))
 
-	bot, err := discord.New("Bot " + config.Opts.DiscordBotToken())
+	bot, err := discord.New("Bot " + opts.DiscordBotToken())
 	if err != nil {
 		t.Fatal(err)
 	}
 	bot.Client = httpClient
-	d := NewDiscord(bot)
+	d := NewDiscord(bot, opts)
 	txt := render.ForPublish(&render.Discord{Cols: collects, Data: bundleExample}).String()
 	ctx := context.WithValue(context.Background(), PubBundle{}, bundleExample)
 

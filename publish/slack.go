@@ -22,27 +22,28 @@ import (
 var _ Publisher = (*slackBot)(nil)
 
 type slackBot struct {
-	bot *slack.Client
+	bot  *slack.Client
+	opts *config.Options
 }
 
 // NewSlack returns Slack bot client
-func NewSlack(bot *slack.Client) *slackBot {
-	if !config.Opts.PublishToSlackChannel() {
+func NewSlack(bot *slack.Client, opts *config.Options) *slackBot {
+	if !opts.PublishToSlackChannel() {
 		logger.Error("Missing required environment variable, abort.")
 		return new(slackBot)
 	}
 
 	if bot == nil {
 		bot = slack.New(
-			config.Opts.SlackBotToken(),
-			slack.OptionDebug(config.Opts.HasDebugMode()),
+			opts.SlackBotToken(),
+			slack.OptionDebug(opts.HasDebugMode()),
 		)
 		if bot == nil {
 			logger.Error("create slack bot instance failed")
 		}
 	}
 
-	return &slackBot{bot: bot}
+	return &slackBot{bot: bot, opts: opts}
 }
 
 // Publish publish text to the Slack channel of given cols and args.
@@ -77,19 +78,19 @@ func (s *slackBot) toChannel(art reduxer.Artifact, head, body string) (ok bool) 
 		return ok
 	}
 	if s.bot == nil {
-		s.bot = slack.New(config.Opts.SlackBotToken())
+		s.bot = slack.New(s.opts.SlackBotToken())
 	}
 
 	msgOpts := []slack.MsgOption{
 		slack.MsgOptionText(body, false),
 		slack.MsgOptionDisableMarkdown(),
 	}
-	_, tstamp, err := s.bot.PostMessage(config.Opts.SlackChannel(), msgOpts...)
+	_, tstamp, err := s.bot.PostMessage(s.opts.SlackChannel(), msgOpts...)
 	if err != nil {
 		logger.Error("post message failed: %v", err)
 		return false
 	}
-	if err := service.UploadToSlack(s.bot, art, config.Opts.SlackChannel(), tstamp, head); err != nil {
+	if err := service.UploadToSlack(s.bot, s.opts, art, s.opts.SlackChannel(), tstamp, head); err != nil {
 		logger.Error("upload files to slack failed: %v", err)
 	}
 

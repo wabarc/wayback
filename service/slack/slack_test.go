@@ -126,9 +126,9 @@ func TestServe(t *testing.T) {
 	os.Setenv("WAYBACK_SLACK_BOT_TOKEN", botToken)
 	os.Setenv("WAYBACK_SLACK_CHANNEL", channel)
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
@@ -147,12 +147,12 @@ func TestServe(t *testing.T) {
 	handle(mux, fmt.Sprintf(connOpenJSON, s.GetWSURL()))
 
 	bot := slack.New(
-		config.Opts.SlackBotToken(),
+		opts.SlackBotToken(),
 		slack.OptionAPIURL(s.GetAPIURL()),
 		// slack.OptionAPIURL(server.URL+"/"),
 		// slack.OptionHTTPClient(httpClient),
-		slack.OptionDebug(config.Opts.HasDebugMode()),
-		slack.OptionAppLevelToken(config.Opts.SlackAppToken()),
+		slack.OptionDebug(opts.HasDebugMode()),
+		slack.OptionAppLevelToken(opts.SlackAppToken()),
 	)
 	if bot == nil {
 		t.Fatal("create slack bot instance failed")
@@ -160,17 +160,17 @@ func TestServe(t *testing.T) {
 
 	client := socketmode.New(
 		bot,
-		// socketmode.OptionDebug(config.Opts.HasDebugMode()),
+		// socketmode.OptionDebug(opts.HasDebugMode()),
 		// socketmode.OptionLog(log.New(os.Stdout, "socketmode: ", log.Lshortfile|log.LstdFlags)),
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 	defer pool.Close()
 
-	sl := &Slack{ctx: ctx, bot: bot, pool: pool, client: client}
+	sl := &Slack{ctx: ctx, bot: bot, opts: opts, pool: pool, client: client}
 	time.AfterFunc(3*time.Second, func() {
 		sl.Shutdown()
 		cancel()

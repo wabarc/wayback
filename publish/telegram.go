@@ -22,12 +22,13 @@ import (
 var _ Publisher = (*telegramBot)(nil)
 
 type telegramBot struct {
-	bot *telegram.Bot
+	bot  *telegram.Bot
+	opts *config.Options
 }
 
 // NewTelegram returns Telegram bot client
-func NewTelegram(bot *telegram.Bot) *telegramBot {
-	if !config.Opts.PublishToChannel() {
+func NewTelegram(bot *telegram.Bot, opts *config.Options) *telegramBot {
+	if !opts.PublishToChannel() {
 		logger.Error("Missing required environment variable, abort.")
 		return new(telegramBot)
 	}
@@ -35,15 +36,15 @@ func NewTelegram(bot *telegram.Bot) *telegramBot {
 	if bot == nil {
 		var err error
 		if bot, err = telegram.NewBot(telegram.Settings{
-			Token:     config.Opts.TelegramToken(),
-			Verbose:   config.Opts.HasDebugMode(),
+			Token:     opts.TelegramToken(),
+			Verbose:   opts.HasDebugMode(),
 			ParseMode: telegram.ModeHTML,
 		}); err != nil {
 			logger.Error("create telegram bot instance failed: %v", err)
 		}
 	}
 
-	return &telegramBot{bot: bot}
+	return &telegramBot{bot: bot, opts: opts}
 }
 
 // Publish publish text to the Telegram channel of given cols and args.
@@ -80,8 +81,8 @@ func (t *telegramBot) toChannel(art reduxer.Artifact, head, body string) (ok boo
 	if t.bot == nil {
 		var err error
 		if t.bot, err = telegram.NewBot(telegram.Settings{
-			Token:     config.Opts.TelegramToken(),
-			Verbose:   config.Opts.HasDebugMode(),
+			Token:     t.opts.TelegramToken(),
+			Verbose:   t.opts.HasDebugMode(),
 			ParseMode: telegram.ModeHTML,
 		}); err != nil {
 			logger.Error("post to channel failed, %v", err)
@@ -89,7 +90,7 @@ func (t *telegramBot) toChannel(art reduxer.Artifact, head, body string) (ok boo
 		}
 	}
 
-	chat, err := t.bot.ChatByUsername(config.Opts.TelegramChannel())
+	chat, err := t.bot.ChatByUsername(t.opts.TelegramChannel())
 	if err != nil {
 		logger.Error("open a chat failed: %v", err)
 		return ok
@@ -101,7 +102,7 @@ func (t *telegramBot) toChannel(art reduxer.Artifact, head, body string) (ok boo
 		return ok
 	}
 
-	album := service.UploadToTelegram(art, head)
+	album := service.UploadToTelegram(t.opts, art, head)
 	if len(album) == 0 {
 		return true
 	}

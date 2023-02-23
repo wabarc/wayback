@@ -56,17 +56,17 @@ func TestProcess(t *testing.T) {
 	os.Setenv("WAYBACK_MASTODON_TOKEN", "zoo")
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	ctx := context.Background()
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 
-	m := New(ctx, &storage.Storage{}, pool)
+	m := New(ctx, &storage.Storage{}, opts, pool)
 	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)
@@ -120,15 +120,15 @@ func TestPlayback(t *testing.T) {
 	os.Setenv("WAYBACK_MASTODON_TOKEN", "zoo")
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
-	if config.Opts.EnabledMeilisearch() {
-		endpoint := config.Opts.WaybackMeiliEndpoint()
-		indexing := config.Opts.WaybackMeiliIndexing()
-		apikey := config.Opts.WaybackMeiliApikey()
+	if opts.EnabledMeilisearch() {
+		endpoint := opts.WaybackMeiliEndpoint()
+		indexing := opts.WaybackMeiliIndexing()
+		apikey := opts.WaybackMeiliApikey()
 		meili := service.NewMeili(endpoint, apikey, indexing)
 		if err := meili.Setup(); err != nil {
 			t.Errorf("setup meilisearch failed: %v", err)
@@ -136,10 +136,10 @@ func TestPlayback(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 
-	m := New(ctx, &storage.Storage{}, pool)
+	m := New(ctx, &storage.Storage{}, opts, pool)
 	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)

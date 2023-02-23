@@ -25,16 +25,17 @@ var _ Publisher = (*nostrBot)(nil)
 
 type nostrBot struct {
 	client *nostr.Relay
+	opts   *config.Options
 }
 
 // NewNostr returns a Nostr client.
-func NewNostr(client *nostr.Relay) *nostrBot {
-	if !config.Opts.PublishToNostr() {
+func NewNostr(client *nostr.Relay, opts *config.Options) *nostrBot {
+	if !opts.PublishToNostr() {
 		logger.Error("Missing required environment variable, abort.")
 		return new(nostrBot)
 	}
 
-	return &nostrBot{client: client}
+	return &nostrBot{client: client, opts: opts}
 }
 
 // Publish publish text to the Nostr of given cols and args.
@@ -61,7 +62,7 @@ func (n *nostrBot) Publish(ctx context.Context, cols []wayback.Collect, args ...
 }
 
 func (n *nostrBot) publish(ctx context.Context, note string) error {
-	if !config.Opts.PublishToNostr() {
+	if !n.opts.PublishToNostr() {
 		return fmt.Errorf("publish to nostr abort")
 	}
 
@@ -70,7 +71,7 @@ func (n *nostrBot) publish(ctx context.Context, note string) error {
 	}
 	logger.Debug("send to nostr, note:\n%s", note)
 
-	sk := config.Opts.NostrPrivateKey()
+	sk := n.opts.NostrPrivateKey()
 	if strings.HasPrefix(sk, "nsec") {
 		if _, s, e := nip19.Decode(sk); e == nil {
 			sk = s.(string)
@@ -94,7 +95,7 @@ func (n *nostrBot) publish(ctx context.Context, note string) error {
 	}
 
 	g, ctx := errgroup.WithContext(ctx)
-	for _, relay := range config.Opts.NostrRelayURL() {
+	for _, relay := range n.opts.NostrRelayURL() {
 		logger.Debug(`publish note to relay: %s`, relay)
 		relay := relay
 		g.Go(func() error {

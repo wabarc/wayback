@@ -25,9 +25,9 @@ import (
 )
 
 // MatchURL returns a slice string contains URLs extracted from the given string.
-func MatchURL(s string) (urls []*url.URL) {
+func MatchURL(opts *config.Options, s string) (urls []*url.URL) {
 	matches := helper.MatchURL(s)
-	if config.Opts.WaybackFallback() {
+	if opts.WaybackFallback() {
 		matches = helper.MatchURLFallback(s)
 	}
 
@@ -113,8 +113,8 @@ func filterArtifact(art reduxer.Artifact, upper int64) (paths []string) {
 }
 
 // UploadToDiscord composes files that share with Discord by a given artifact.
-func UploadToDiscord(art reduxer.Artifact) (files []*discord.File) {
-	upper := config.Opts.MaxAttachSize("discord")
+func UploadToDiscord(opts *config.Options, art reduxer.Artifact) (files []*discord.File) {
+	upper := opts.MaxAttachSize("discord")
 	for _, fp := range filterArtifact(art, upper) {
 		logger.Debug("open file: %s", fp)
 		rd, err := os.Open(filepath.Clean(fp))
@@ -129,12 +129,12 @@ func UploadToDiscord(art reduxer.Artifact) (files []*discord.File) {
 }
 
 // UploadToSlack upload files to channel and attach as a reply by the given artifact
-func UploadToSlack(client *slack.Client, art reduxer.Artifact, channel, timestamp, caption string) (err error) {
+func UploadToSlack(client *slack.Client, opts *config.Options, art reduxer.Artifact, channel, timestamp, caption string) (err error) {
 	if client == nil {
 		return errors.New("client invalid")
 	}
 
-	upper := config.Opts.MaxAttachSize("slack")
+	upper := opts.MaxAttachSize("slack")
 	for _, fp := range filterArtifact(art, upper) {
 		rd, e := os.Open(filepath.Clean(fp))
 		if e != nil {
@@ -165,8 +165,8 @@ func UploadToSlack(client *slack.Client, art reduxer.Artifact, channel, timestam
 }
 
 // UploadToTelegram composes files into an album by the given artifact.
-func UploadToTelegram(art reduxer.Artifact, caption string) telegram.Album {
-	upper := config.Opts.MaxAttachSize("telegram")
+func UploadToTelegram(opts *config.Options, art reduxer.Artifact, caption string) telegram.Album {
+	upper := opts.MaxAttachSize("telegram")
 	var album telegram.Album
 	for _, fp := range filterArtifact(art, upper) {
 		logger.Debug("append document: %s", fp)

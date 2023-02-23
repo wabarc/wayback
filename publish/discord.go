@@ -22,25 +22,26 @@ import (
 var _ Publisher = (*discordBot)(nil)
 
 type discordBot struct {
-	bot *discord.Session
+	bot  *discord.Session
+	opts *config.Options
 }
 
 // NewDiscord returns Discord bot client
-func NewDiscord(bot *discord.Session) *discordBot {
-	if !config.Opts.PublishToDiscordChannel() {
+func NewDiscord(bot *discord.Session, opts *config.Options) *discordBot {
+	if !opts.PublishToDiscordChannel() {
 		logger.Error("Missing required environment variable, abort.")
 		return new(discordBot)
 	}
 
 	if bot == nil {
 		var err error
-		bot, err = discord.New("Bot " + config.Opts.DiscordBotToken())
+		bot, err = discord.New("Bot " + opts.DiscordBotToken())
 		if err != nil {
 			logger.Error("create discord bot instance failed: %v", err)
 		}
 	}
 
-	return &discordBot{bot: bot}
+	return &discordBot{bot: bot, opts: opts}
 }
 
 // Publish publish text to the Discord channel of given cols and args.
@@ -75,27 +76,27 @@ func (d *discordBot) toChannel(art reduxer.Artifact, body string) (ok bool) {
 	}
 	if d.bot == nil {
 		var err error
-		d.bot, err = discord.New("Bot " + config.Opts.DiscordBotToken())
+		d.bot, err = discord.New("Bot " + d.opts.DiscordBotToken())
 		if err != nil {
 			logger.Error("create discord bot instance failed: %v", err)
 			return ok
 		}
 	}
 
-	msg, err := d.bot.ChannelMessageSendComplex(config.Opts.DiscordChannel(), &discord.MessageSend{Content: body})
+	msg, err := d.bot.ChannelMessageSendComplex(d.opts.DiscordChannel(), &discord.MessageSend{Content: body})
 	if err != nil {
 		logger.Error("post message to channel failed, %v", err)
 		return ok
 	}
 
 	// Send files as reference
-	files := service.UploadToDiscord(art)
+	files := service.UploadToDiscord(d.opts, art)
 	if len(files) == 0 {
 		logger.Debug("without files, complete.")
 		return true
 	}
 	ms := &discord.MessageSend{Files: files, Reference: msg.Reference()}
-	if _, err := d.bot.ChannelMessageSendComplex(config.Opts.DiscordChannel(), ms); err != nil {
+	if _, err := d.bot.ChannelMessageSendComplex(d.opts.DiscordChannel(), ms); err != nil {
 		logger.Error("upload files failed, %v", err)
 	}
 

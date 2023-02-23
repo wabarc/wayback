@@ -47,8 +47,6 @@ var (
 func setTelegramEnv() {
 	os.Setenv("WAYBACK_TELEGRAM_TOKEN", "foo")
 	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
-
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
 }
 
 func TestToChannel(t *testing.T) {
@@ -93,7 +91,8 @@ func TestToChannel(t *testing.T) {
 		t.Fatalf(`New Telegram bot API client failed: %v`, err)
 	}
 
-	tel := &telegramBot{bot: bot}
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+	tel := &telegramBot{bot: bot, opts: opts}
 	txt := render.ForPublish(&render.Telegram{Cols: collects}).String()
 	got := tel.toChannel(reduxer.Artifact{}, "", txt)
 	if !got {

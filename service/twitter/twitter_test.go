@@ -81,19 +81,19 @@ func TestProcess(t *testing.T) {
 	os.Setenv("WAYBACK_TWITTER_ACCESS_SECRET", "foo")
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	ctx := context.Background()
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 	defer pool.Close()
 
 	client := twitter.NewClient(httpClient)
-	tw := &Twitter{ctx: ctx, pool: pool, client: client}
+	tw := &Twitter{ctx: ctx, pool: pool, opts: opts, client: client}
 	if err := tw.process(ctx, testDMEvent); err != nil {
 		t.Fatalf("should not be fail: %v", err)
 	}

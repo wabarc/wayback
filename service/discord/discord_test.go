@@ -169,13 +169,13 @@ func TestServe(t *testing.T) {
 
 	os.Setenv("WAYBACK_DISCORD_BOT_TOKEN", token)
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	bot, err := discord.New("Bot " + config.Opts.DiscordBotToken())
+	bot, err := discord.New("Bot " + opts.DiscordBotToken())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -186,10 +186,17 @@ func TestServe(t *testing.T) {
 	bot.Client = httpClient
 
 	ctx, cancel := context.WithCancel(context.Background())
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 
-	d := &Discord{ctx: ctx, bot: bot, pool: pool}
+	dbpath := filepath.Join(t.TempDir(), "testing.db")
+	store, err := storage.Open(opts, dbpath)
+	if err != nil {
+		t.Fatalf("open storage failed: %v", err)
+	}
+	defer store.Close()
+
+	d := New(ctx, store, opts, pool)
 	time.AfterFunc(3*time.Second, func() {
 		// TODO: find a better way to avoid deadlock
 		go d.Shutdown()
@@ -213,9 +220,9 @@ func TestProcess(t *testing.T) {
 	os.Setenv("WAYBACK_DISCORD_CHANNEL", channelID)
 	os.Setenv("WAYBACK_ENABLE_IP", "true")
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
@@ -228,7 +235,7 @@ func TestProcess(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	dbpath := filepath.Join(dir, "testing.db")
-	store, err := storage.Open(dbpath)
+	store, err := storage.Open(opts, dbpath)
 	if err != nil {
 		t.Fatalf("open storage failed: %v", err)
 	}
@@ -237,14 +244,14 @@ func TestProcess(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	handle(mux, strings.Replace(server.URL, "http", "ws", 1))
 
-	d := New(ctx, store, pool)
+	d := New(ctx, store, opts, pool)
 	d.bot.Client = httpClient
 
 	// if err := d.bot.Open(); err != nil {

@@ -32,18 +32,22 @@ type IRC struct {
 	sync.RWMutex
 
 	ctx   context.Context
+	opts  *config.Options
 	pool  *pooling.Pool
 	conn  *irc.Connection
 	store *storage.Storage
 }
 
 // New IRC struct.
-func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *IRC {
-	if config.Opts.IRCNick() == "" {
+func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *IRC {
+	if opts.IRCNick() == "" {
 		logger.Fatal("missing required environment variable")
 	}
 	if store == nil {
 		logger.Fatal("must initialize storage")
+	}
+	if opts == nil {
+		logger.Fatal("must initialize options")
 	}
 	if pool == nil {
 		logger.Fatal("must initialize pooling")
@@ -53,15 +57,16 @@ func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *IRC {
 	}
 
 	// TODO: support SASL authenticate
-	conn := irc.IRC(config.Opts.IRCNick(), config.Opts.IRCNick())
-	conn.Password = config.Opts.IRCPassword()
-	conn.VerboseCallbackHandler = config.Opts.HasDebugMode()
-	conn.Debug = config.Opts.HasDebugMode()
+	conn := irc.IRC(opts.IRCNick(), opts.IRCNick())
+	conn.Password = opts.IRCPassword()
+	conn.VerboseCallbackHandler = opts.HasDebugMode()
+	conn.Debug = opts.HasDebugMode()
 	conn.UseTLS = true
 	conn.TLSConfig = &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12}
 
 	return &IRC{
 		ctx:   ctx,
+		opts:  opts,
 		pool:  pool,
 		conn:  conn,
 		store: store,
@@ -74,10 +79,10 @@ func (i *IRC) Serve() error {
 	if i.conn == nil {
 		return errors.New("Must initialize IRC connection.")
 	}
-	logger.Info("Serving IRC instance: %s", config.Opts.IRCServer())
+	logger.Info("Serving IRC instance: %s", i.opts.IRCServer())
 
-	if config.Opts.IRCChannel() != "" {
-		i.conn.AddCallback("001", func(ev *irc.Event) { i.conn.Join(config.Opts.IRCChannel()) })
+	if i.opts.IRCChannel() != "" {
+		i.conn.AddCallback("001", func(ev *irc.Event) { i.conn.Join(i.opts.IRCChannel()) })
 	}
 	i.conn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		go func(ev *irc.Event) {
@@ -100,7 +105,7 @@ func (i *IRC) Serve() error {
 			i.pool.Put(bucket)
 		}(ev)
 	})
-	err := i.conn.Connect(config.Opts.IRCServer())
+	err := i.conn.Connect(i.opts.IRCServer())
 	if err != nil {
 		logger.Error("Get conversations failure, error: %v", err)
 		return err
@@ -134,7 +139,7 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 	text := ev.MessageWithoutFormat()
 	logger.Debug("from: %s message: %s", ev.Nick, text)
 
-	urls := service.MatchURL(text)
+	urls := service.MatchURL(i.opts, text)
 	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
 		return errors.New("IRC: URL no found")
@@ -151,9 +156,9 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 		// Reply and publish toot as public
 		ctx = context.WithValue(ctx, publish.FlagIRC, i.conn)
 		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		publish.To(ctx, cols, publish.FlagIRC.String())
+		publish.To(ctx, i.opts, cols, publish.FlagIRC.String())
 		return nil
 	}
 
-	return service.Wayback(ctx, urls, do)
+	return service.Wayback(ctx, i.opts, urls, do)
 }

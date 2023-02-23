@@ -34,6 +34,7 @@ type Mastodon struct {
 	sync.RWMutex
 
 	ctx    context.Context
+	opts   *config.Options
 	pool   *pooling.Pool
 	client *mastodon.Client
 	store  *storage.Storage
@@ -45,12 +46,15 @@ type Mastodon struct {
 }
 
 // New mastodon struct.
-func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Mastodon {
-	if !config.Opts.PublishToMastodon() {
+func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *Mastodon {
+	if !opts.PublishToMastodon() {
 		logger.Fatal("missing required environment variable")
 	}
 	if store == nil {
 		logger.Fatal("must initialize storage")
+	}
+	if opts == nil {
+		logger.Fatal("must initialize options")
 	}
 	if pool == nil {
 		logger.Fatal("must initialize pooling")
@@ -60,13 +64,14 @@ func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Masto
 	}
 
 	client := mastodon.NewClient(&mastodon.Config{
-		Server:       config.Opts.MastodonServer(),
-		ClientID:     config.Opts.MastodonClientKey(),
-		ClientSecret: config.Opts.MastodonClientSecret(),
-		AccessToken:  config.Opts.MastodonAccessToken(),
+		Server:       opts.MastodonServer(),
+		ClientID:     opts.MastodonClientKey(),
+		ClientSecret: opts.MastodonClientSecret(),
+		AccessToken:  opts.MastodonAccessToken(),
 	})
 	return &Mastodon{
 		ctx:    ctx,
+		opts:   opts,
 		pool:   pool,
 		client: client,
 		store:  store,
@@ -79,7 +84,7 @@ func (m *Mastodon) Serve() error {
 	if m.client == nil {
 		return errors.New("Must initialize Mastodon client.")
 	}
-	logger.Info("Serving Mastodon instance: %s", config.Opts.MastodonServer())
+	logger.Info("Serving Mastodon instance: %s", m.opts.MastodonServer())
 
 	// rcv, err := m.client.StreamingUser(m.ctx)
 	// if err != nil {
@@ -146,7 +151,7 @@ func (m *Mastodon) Serve() error {
 								return nil
 							},
 							Fallback: func(ctx context.Context) error {
-								pub := publish.NewMastodon(m.client)
+								pub := publish.NewMastodon(m.client, m.opts)
 								pub.ToMastodon(ctx, service.MsgWaybackTimeout, string(n.Status.ID))
 								metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusFailure)
 								return nil
@@ -203,8 +208,8 @@ func (m *Mastodon) process(ctx context.Context, id mastodon.ID, status *mastodon
 		return m.playback(status)
 	}
 
-	urls := service.MatchURL(text)
-	pub := publish.NewMastodon(m.client)
+	urls := service.MatchURL(m.opts, text)
+	pub := publish.NewMastodon(m.client, m.opts)
 	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
 		pub.ToMastodon(ctx, "URL no found", string(status.ID))
@@ -217,28 +222,28 @@ func (m *Mastodon) process(ctx context.Context, id mastodon.ID, status *mastodon
 		// Reply and publish toot as public
 		ctx = context.WithValue(ctx, publish.FlagMastodon, m.client)
 		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		publish.To(ctx, cols, publish.FlagMastodon.String(), string(status.ID))
+		publish.To(ctx, m.opts, cols, publish.FlagMastodon.String(), string(status.ID))
 		return nil
 	}
 
-	return service.Wayback(ctx, urls, do)
+	return service.Wayback(ctx, m.opts, urls, do)
 }
 
 func (m *Mastodon) playback(status *mastodon.Status) error {
 	text := textContent(status.Content)
-	urls := service.MatchURL(text)
+	urls := service.MatchURL(m.opts, text)
 	if len(urls) == 0 {
 		logger.Warn("playback failure, URL no found.")
 		return errors.New("Mastodon: URL no found")
 	}
 
-	cols, err := wayback.Playback(m.ctx, urls...)
+	cols, err := wayback.Playback(m.ctx, m.opts, urls...)
 	if err != nil {
 		return errors.Wrap(err, "mastodon: playback failed")
 	}
 
 	// Reply toot as public
-	pub := publish.NewMastodon(m.client)
+	pub := publish.NewMastodon(m.client, m.opts)
 	txt := render.ForReply(&render.Mastodon{Cols: cols}).String()
 	pub.ToMastodon(m.ctx, txt, string(status.ID))
 

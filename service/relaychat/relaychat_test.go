@@ -51,9 +51,9 @@ func TestProcess(t *testing.T) {
 	os.Setenv("WAYBACK_IRC_CHANNEL", channel)
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
@@ -85,7 +85,7 @@ func TestProcess(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 	defer pool.Close()
 
@@ -93,7 +93,7 @@ func TestProcess(t *testing.T) {
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
 			done <- true
-			i := New(context.Background(), &storage.Storage{}, pool)
+			i := New(context.Background(), &storage.Storage{}, opts, pool)
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
 			if err = i.process(context.Background(), ev); err != nil {
@@ -145,9 +145,9 @@ func TestToIRCChannel(t *testing.T) {
 	os.Setenv("WAYBACK_IRC_CHANNEL", channel)
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
@@ -182,7 +182,7 @@ func TestToIRCChannel(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 	defer pool.Close()
 
@@ -191,7 +191,7 @@ func TestToIRCChannel(t *testing.T) {
 		if ev.Nick == sender {
 			done <- true
 			ctx := context.Background()
-			i := New(ctx, &storage.Storage{}, pool)
+			i := New(ctx, &storage.Storage{}, opts, pool)
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
 			if err = i.process(ctx, ev); err != nil {

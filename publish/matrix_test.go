@@ -21,8 +21,6 @@ func setMatrixEnv() {
 	os.Setenv("WAYBACK_MATRIX_USERID", "@foo:example.com")
 	os.Setenv("WAYBACK_MATRIX_ROOMID", "!bar:example.com")
 	os.Setenv("WAYBACK_MATRIX_PASSWORD", "zoo")
-
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
 }
 
 func TestToMatrixRoom(t *testing.T) {
@@ -48,9 +46,9 @@ func TestToMatrixRoom(t *testing.T) {
 	})
 
 	os.Setenv("WAYBACK_MATRIX_HOMESERVER", server.URL)
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
-	mat := NewMatrix(nil)
+	mat := NewMatrix(nil, opts)
 	txt := render.ForPublish(&render.Mastodon{Cols: collects}).String()
 	got := mat.toRoom(txt)
 	if !got {

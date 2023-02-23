@@ -97,8 +97,9 @@ func TestDo(t *testing.T) {
 	helper.Unsetenv("WAYBACK_STORAGE_DIR")
 	os.Setenv("WAYBACK_STORAGE_DIR", dir)
 
+	var opts *config.Options
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	if opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
@@ -106,7 +107,7 @@ func TestDo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unexpected parse url: %v", err)
 	}
-	res, err := Do(context.Background(), inp)
+	res, err := Do(context.Background(), opts, inp)
 	if err != nil {
 		t.Fatalf("Unexpected execute do: %v", err)
 	}
@@ -127,14 +128,6 @@ func TestCreateDir(t *testing.T) {
 		t.Fatalf(`Unexpected create temp dir: %v`, err)
 	}
 	defer os.RemoveAll(dir)
-
-	helper.Unsetenv("WAYBACK_STORAGE_DIR")
-	os.Setenv("WAYBACK_STORAGE_DIR", dir)
-
-	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
-	}
 
 	dir, err = createDir(dir)
 	if err != nil {

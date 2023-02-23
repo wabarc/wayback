@@ -134,107 +134,107 @@ func from(args ...string) (f string) {
 
 // To publish to specific destination services
 // nolint:gocyclo
-func To(ctx context.Context, cols []wayback.Collect, args ...string) {
+func To(ctx context.Context, opts *config.Options, cols []wayback.Collect, args ...string) {
 	f := from(args...)
 	channel := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if config.Opts.PublishToChannel() {
+		if opts.PublishToChannel() {
 			logger.Debug("[%s] publishing to telegram channel...", f)
 			var bot *telegram.Bot
 			if rev, ok := ctx.Value(FlagTelegram).(*telegram.Bot); ok {
 				bot = rev
 			}
-			pub := NewTelegram(bot)
+			pub := NewTelegram(bot, opts)
 			process(ctx, pub, cols, args...)
 		}
 	}
 	notion := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if config.Opts.PublishToNotion() {
+		if opts.PublishToNotion() {
 			logger.Debug("[%s] publishing to Notion...", f)
-			pub := NewNotion(nil)
+			pub := NewNotion(nil, opts)
 			process(ctx, pub, cols, args...)
 		}
 	}
 	issue := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if config.Opts.PublishToIssues() {
+		if opts.PublishToIssues() {
 			logger.Debug("[%s] publishing to GitHub issues...", f)
-			pub := NewGitHub(nil)
+			pub := NewGitHub(nil, opts)
 			process(ctx, pub, cols, args...)
 		}
 	}
 	mastodon := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if config.Opts.PublishToMastodon() {
+		if opts.PublishToMastodon() {
 			logger.Debug("[%s] publishing to Mastodon...", f)
 			var client *mstdn.Client
 			if rev, ok := ctx.Value(FlagMastodon).(*mstdn.Client); ok {
 				client = rev
 			}
-			pub := NewMastodon(client)
+			pub := NewMastodon(client, opts)
 			process(ctx, pub, cols, args...)
 		}
 	}
 	discord := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if config.Opts.PublishToDiscordChannel() {
+		if opts.PublishToDiscordChannel() {
 			logger.Debug("[%s] publishing to Discord channel...", f)
 			var s *discord.Session
 			if rev, ok := ctx.Value(FlagDiscord).(*discord.Session); ok {
 				s = rev
 			}
-			pub := NewDiscord(s)
+			pub := NewDiscord(s, opts)
 			process(ctx, pub, cols, args...)
 		}
 	}
 	matrix := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if config.Opts.PublishToMatrixRoom() {
+		if opts.PublishToMatrixRoom() {
 			logger.Debug("[%s] publishing to Matrix room...", f)
 			var client *matrix.Client
 			if rev, ok := ctx.Value(FlagMatrix).(*matrix.Client); ok {
 				client = rev
 			}
-			pub := NewMatrix(client)
+			pub := NewMatrix(client, opts)
 			process(ctx, pub, cols, args...)
 		}
 	}
 	twitter := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if config.Opts.PublishToTwitter() {
+		if opts.PublishToTwitter() {
 			logger.Debug("[%s] publishing to Twitter...", f)
 			var client *twitter.Client
 			if rev, ok := ctx.Value(FlagTwitter).(*twitter.Client); ok {
 				client = rev
 			}
-			pub := NewTwitter(client)
+			pub := NewTwitter(client, opts)
 			process(ctx, pub, cols, args...)
 		}
 	}
 	slack := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if config.Opts.PublishToSlackChannel() {
+		if opts.PublishToSlackChannel() {
 			logger.Debug("[%s] publishing to Slack...", f)
 			var client *slack.Client
 			if rev, ok := ctx.Value(FlagTwitter).(*slack.Client); ok {
 				client = rev
 			}
-			pub := NewSlack(client)
+			pub := NewSlack(client, opts)
 			process(ctx, pub, cols, args...)
 		}
 	}
 	nostr := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if config.Opts.PublishToNostr() {
+		if opts.PublishToNostr() {
 			logger.Debug("[%s] publishing to Nostr...", f)
 			var client *nostr.Relay
 			if rev, ok := ctx.Value(FlagNostr).(*nostr.Relay); ok {
 				client = rev
 			}
-			pub := NewNostr(client)
+			pub := NewNostr(client, opts)
 			process(ctx, pub, cols, args...)
 		}
 	}
 	irc := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if config.Opts.PublishToIRCChannel() {
+		if opts.PublishToIRCChannel() {
 			logger.Debug("[%s] publishing to IRC channel...", f)
 			var conn *irc.Connection
 			if rev, ok := ctx.Value(FlagIRC).(*irc.Connection); ok {
 				conn = rev
 			}
-			pub := NewIRC(conn)
+			pub := NewIRC(conn, opts)
 			process(ctx, pub, cols, args...)
 		}
 	}

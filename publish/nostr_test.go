@@ -59,12 +59,12 @@ func TestToNostr(t *testing.T) {
 
 	os.Setenv("WAYBACK_NOSTR_RELAY_URL", ws.URL)
 	os.Setenv("WAYBACK_NOSTR_PRIVATE_KEY", nsec)
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	nos := NewNostr(nil)
+	nos := NewNostr(nil, opts)
 	txt := render.ForPublish(&render.Nostr{Cols: collects}).String()
 	err = nos.publish(ctx, txt)
 	if err != nil {

@@ -31,15 +31,17 @@ import (
 type web struct {
 	ctx context.Context
 
+	opts     *config.Options
 	pool     *pooling.Pool
 	router   *mux.Router
 	template *template.Template
 }
 
-func newWeb(ctx context.Context, pool *pooling.Pool) *web {
+func newWeb(ctx context.Context, opts *config.Options, pool *pooling.Pool) *web {
 	router := mux.NewRouter()
 	web := &web{
 		ctx:      ctx,
+		opts:     opts,
 		pool:     pool,
 		router:   router,
 		template: template.New(router),
@@ -62,7 +64,7 @@ func (web *web) handle() http.Handler {
 	web.router.HandleFunc("/offline.html", web.showOfflinePage).Methods(http.MethodGet)
 
 	web.router.HandleFunc("/wayback", func(w http.ResponseWriter, r *http.Request) {
-		ctx, cancel := context.WithTimeout(web.ctx, config.Opts.WaybackTimeout())
+		ctx, cancel := context.WithTimeout(web.ctx, web.opts.WaybackTimeout())
 		defer cancel()
 
 		if err := web.process(ctx, w, r); err != nil {
@@ -80,11 +82,11 @@ func (web *web) handle() http.Handler {
 		w.Write(helper.String2Byte(version.Version)) // nolint:errcheck
 	}).Name("version")
 
-	if config.Opts.EnabledMetrics() {
+	if web.opts.EnabledMetrics() {
 		web.router.Handle("/metrics", promhttp.Handler()).Methods(http.MethodGet)
 	}
 
-	if config.Opts.HasDebugMode() {
+	if web.opts.HasDebugMode() {
 		web.router.PathPrefix("/debug/").Handler(http.DefaultServeMux)
 	}
 
@@ -224,7 +226,7 @@ func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	}
 	logger.Debug("text: %s", text)
 
-	urls := service.MatchURL(text)
+	urls := service.MatchURL(web.opts, text)
 	if len(urls) == 0 {
 		logger.Warn("url no found.")
 	}
@@ -242,7 +244,7 @@ func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Requ
 			} else {
 				if len(urls) > 0 {
 					metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-					go publish.To(context.Background(), cols, "web")
+					go publish.To(context.Background(), web.opts, cols, "web")
 				}
 				w.Write(data) // nolint:errcheck
 			}
@@ -252,7 +254,7 @@ func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Requ
 			if html, ok := web.template.Render("layout", collector); ok {
 				if len(urls) > 0 {
 					metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-					go publish.To(context.Background(), cols, "web")
+					go publish.To(context.Background(), web.opts, cols, "web")
 				}
 				w.Write(html) // nolint:errcheck
 			} else {
@@ -263,7 +265,7 @@ func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Requ
 		return nil
 	}
 
-	return service.Wayback(ctx, urls, do)
+	return service.Wayback(ctx, web.opts, urls, do)
 }
 
 func (web *web) playback(w http.ResponseWriter, r *http.Request) {
@@ -284,11 +286,11 @@ func (web *web) playback(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Debug("text: %s", text)
 
-	urls := service.MatchURL(text)
+	urls := service.MatchURL(web.opts, text)
 	if len(urls) == 0 {
 		logger.Warn("url no found.")
 	}
-	col, err := wayback.Playback(context.Background(), urls...)
+	col, err := wayback.Playback(context.Background(), web.opts, urls...)
 	if err != nil {
 		logger.Error("web: playback failed: %v", err)
 		return

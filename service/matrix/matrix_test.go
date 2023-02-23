@@ -84,7 +84,7 @@ func (m *Matrix) destroyRoom(roomID id.RoomID) {
 	if roomID == "" || m.client == nil {
 		return
 	}
-	if id.RoomID(config.Opts.MatrixRoomID()) == roomID {
+	if id.RoomID(m.opts.MatrixRoomID()) == roomID {
 		return
 	}
 
@@ -114,32 +114,34 @@ func senderClient(t *testing.T) *Matrix {
 	os.Setenv("WAYBACK_MATRIX_USERID", senderUID)
 	os.Setenv("WAYBACK_MATRIX_PASSWORD", senderPwd)
 	parser = config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	ctx := context.Background()
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 	defer pool.Close()
 
-	return New(ctx, &storage.Storage{}, pool)
+	return New(ctx, &storage.Storage{}, opts, pool)
 }
 
 func recverClient(t *testing.T) *Matrix {
 	os.Setenv("WAYBACK_MATRIX_USERID", recverUID)
 	os.Setenv("WAYBACK_MATRIX_PASSWORD", recverPwd)
 	parser = config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	ctx := context.Background()
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 	defer pool.Close()
 
-	return New(ctx, &storage.Storage{}, pool)
+	return New(ctx, &storage.Storage{}, opts, pool)
 }
 
 // nolint:gocyclo
@@ -151,6 +153,11 @@ func TestProcess(t *testing.T) {
 		t.Skip("Define RECVER_UID and RECVER_PWD environment variables to test Matrix")
 	}
 	done := make(chan bool, 1)
+
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
+	}
 
 	sender := senderClient(t)
 	recver := recverClient(t)
@@ -178,7 +185,7 @@ func TestProcess(t *testing.T) {
 
 	// Create a room and invite recver
 	resp, err := sender.client.CreateRoom(&matrix.ReqCreateRoom{
-		Invite:     []id.UserID{id.UserID(config.Opts.MatrixUserID())},
+		Invite:     []id.UserID{id.UserID(opts.MatrixUserID())},
 		Preset:     "trusted_private_chat",
 		Visibility: "private",
 		IsDirect:   true,

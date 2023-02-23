@@ -9,6 +9,7 @@ import (
 	"net/url"
 
 	"github.com/wabarc/wayback"
+	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/reduxer"
 )
@@ -21,20 +22,20 @@ const (
 type doFunc func(cols []wayback.Collect, rdx reduxer.Reduxer) error
 
 // Wayback in a separate goroutine.
-func Wayback(ctx context.Context, urls []*url.URL, do doFunc) error {
+func Wayback(ctx context.Context, opts *config.Options, urls []*url.URL, do doFunc) error {
 	var done = make(chan error, 1)
 	var cols []wayback.Collect
 	var rdx reduxer.Reduxer
 	var err error
 
 	go func() {
-		rdx, err = reduxer.Do(ctx, urls...)
+		rdx, err = reduxer.Do(ctx, opts, urls...)
 		if err != nil {
 			done <- errors.Wrap(err, "reduxer unexpected")
 			return
 		}
 
-		cols, err = wayback.Wayback(ctx, rdx, urls...)
+		cols, err = wayback.Wayback(ctx, rdx, opts, urls...)
 		if err != nil {
 			done <- errors.Wrap(err, "wayback failed")
 			return

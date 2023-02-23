@@ -7,6 +7,7 @@ package pooling // import "github.com/wabarc/wayback/pooling"
 import (
 	"context"
 	"errors"
+	"os"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -19,15 +20,15 @@ import (
 func TestRoll(t *testing.T) {
 	defer helper.CheckTest(t)
 
-	var err error
-	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	os.Setenv("WAYBACK_POOLING_SIZE", "2")
+	opts, err := config.NewParser().ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	logger.SetLogLevel(logger.LevelFatal)
 
-	c := 2
-	p := New(context.Background(), c)
+	c := opts.PoolingSize()
+	p := New(context.Background(), opts)
 	p.timeout = 10 * time.Millisecond
 	defer helper.CheckContext(p.context, t)
 
@@ -68,15 +69,15 @@ func TestRoll(t *testing.T) {
 func TestTimeout(t *testing.T) {
 	defer helper.CheckTest(t)
 
-	var err error
-	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	os.Setenv("WAYBACK_POOLING_SIZE", "2")
+	opts, err := config.NewParser().ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	logger.SetLogLevel(logger.LevelFatal)
 
-	c := 2
-	p := New(context.Background(), c)
+	c := opts.PoolingSize()
+	p := New(context.Background(), opts)
 	p.timeout = time.Millisecond
 
 	if l := len(p.resource); l != c {
@@ -116,9 +117,9 @@ func TestTimeout(t *testing.T) {
 func TestMaxRetries(t *testing.T) {
 	defer helper.CheckTest(t)
 
-	var err error
-	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	os.Setenv("WAYBACK_POOLING_SIZE", "1")
+	opts, err := config.NewParser().ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	logger.SetLogLevel(logger.LevelFatal)
@@ -135,7 +136,7 @@ func TestMaxRetries(t *testing.T) {
 	}
 
 	maxRetries := uint64(3)
-	p := New(context.Background(), 1)
+	p := New(context.Background(), opts)
 	p.timeout = time.Second
 	p.maxRetries = maxRetries
 	go p.Roll()
@@ -149,9 +150,9 @@ func TestMaxRetries(t *testing.T) {
 func TestFallback(t *testing.T) {
 	defer helper.CheckTest(t)
 
-	var err error
-	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	os.Setenv("WAYBACK_POOLING_SIZE", "1")
+	opts, err := config.NewParser().ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	logger.SetLogLevel(logger.LevelFatal)
@@ -168,7 +169,7 @@ func TestFallback(t *testing.T) {
 		},
 	}
 
-	p := New(context.Background(), 1)
+	p := New(context.Background(), opts)
 	p.timeout = time.Microsecond
 	p.maxRetries = 1
 	go p.Roll()
@@ -183,14 +184,14 @@ func TestFallback(t *testing.T) {
 func TestClose(t *testing.T) {
 	defer helper.CheckTest(t)
 
-	var err error
-	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	os.Setenv("WAYBACK_POOLING_SIZE", "1")
+	opts, err := config.NewParser().ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	logger.SetLogLevel(logger.LevelFatal)
 
-	p := New(context.Background(), 1)
+	p := New(context.Background(), opts)
 	p.timeout = time.Microsecond
 	go p.Roll()
 
@@ -207,9 +208,9 @@ func TestClose(t *testing.T) {
 func TestStatus(t *testing.T) {
 	defer helper.CheckTest(t)
 
-	var err error
-	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	os.Setenv("WAYBACK_POOLING_SIZE", "1")
+	opts, err := config.NewParser().ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 	logger.SetLogLevel(logger.LevelFatal)
@@ -244,7 +245,7 @@ func TestStatus(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			p := New(context.Background(), 1)
+			p := New(context.Background(), opts)
 			p.timeout = time.Microsecond
 			go p.Roll()
 			defer p.Close()

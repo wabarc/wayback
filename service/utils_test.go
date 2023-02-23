@@ -18,8 +18,8 @@ func TestMatchURL(t *testing.T) {
 	defer helper.CheckTest(t)
 
 	parser := config.NewParser()
-	var err error
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
@@ -58,7 +58,7 @@ func TestMatchURL(t *testing.T) {
 
 	for i, test := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			got := len(MatchURL(test.text))
+			got := len(MatchURL(opts, test.text))
 			if got != test.leng {
 				t.Fatalf(`Unexpected extract URLs number from text got %d instead of %d`, got, test.leng)
 			}
@@ -68,12 +68,6 @@ func TestMatchURL(t *testing.T) {
 
 func TestExcludeURL(t *testing.T) {
 	defer helper.CheckTest(t)
-
-	parser := config.NewParser()
-	var err error
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
-	}
 
 	var (
 		u, _ = url.Parse("http://example.org")

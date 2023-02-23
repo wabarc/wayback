@@ -38,21 +38,21 @@ type services struct {
 	targets []target
 }
 
-func serve(_ *cobra.Command, _ []string) {
-	store, err := storage.Open("")
+func serve(_ *cobra.Command, opts *config.Options, _ []string) {
+	store, err := storage.Open(opts, "")
 	if err != nil {
 		logger.Fatal("open storage failed: %v", err)
 	}
 	defer store.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 
-	if config.Opts.EnabledMeilisearch() {
-		endpoint := config.Opts.WaybackMeiliEndpoint()
-		indexing := config.Opts.WaybackMeiliIndexing()
-		apikey := config.Opts.WaybackMeiliApikey()
+	if opts.EnabledMeilisearch() {
+		endpoint := opts.WaybackMeiliEndpoint()
+		indexing := opts.WaybackMeiliIndexing()
+		apikey := opts.WaybackMeiliApikey()
 		meili := service.NewMeili(endpoint, apikey, indexing)
 		if err := meili.Setup(); err != nil {
 			logger.Error("setup meilisearch failed: %v", err)
@@ -61,7 +61,7 @@ func serve(_ *cobra.Command, _ []string) {
 	}
 
 	srv := &services{}
-	_ = srv.run(ctx, store, pool)
+	_ = srv.run(ctx, store, opts, pool)
 
 	if systemd.HasNotifySocket() {
 		logger.Info("sending readiness notification to Systemd")
@@ -71,20 +71,20 @@ func serve(_ *cobra.Command, _ []string) {
 		}
 	}
 
-	go srv.stop(pool, cancel)
+	go srv.daemon(pool, cancel)
 	<-ctx.Done()
 
 	logger.Info("wayback service stopped.")
 }
 
 // nolint:gocyclo
-func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *services {
+func (srv *services) run(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *services {
 	size := len(daemon)
 	srv.targets = make([]target, 0, size)
 	for _, s := range daemon {
 		switch s {
 		case "irc":
-			irc := relaychat.New(ctx, store, pool)
+			irc := relaychat.New(ctx, store, opts, pool)
 			go func() {
 				if err := irc.Serve(); err != relaychat.ErrServiceClosed {
 					logger.Error("%v", err)
@@ -95,7 +95,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				name: s,
 			})
 		case "slack":
-			sl := slack.New(ctx, store, pool)
+			sl := slack.New(ctx, store, opts, pool)
 			go func() {
 				if err := sl.Serve(); err != slack.ErrServiceClosed {
 					logger.Error("%v", err)
@@ -106,7 +106,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				name: s,
 			})
 		case "discord":
-			d := discord.New(ctx, store, pool)
+			d := discord.New(ctx, store, opts, pool)
 			go func() {
 				if err := d.Serve(); err != discord.ErrServiceClosed {
 					logger.Error("%v", err)
@@ -117,7 +117,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				name: s,
 			})
 		case "mastodon", "mstdn":
-			m := mastodon.New(ctx, store, pool)
+			m := mastodon.New(ctx, store, opts, pool)
 			go func() {
 				if err := m.Serve(); err != mastodon.ErrServiceClosed {
 					logger.Error("%v", err)
@@ -128,7 +128,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				name: s,
 			})
 		case "telegram":
-			t := telegram.New(ctx, store, pool)
+			t := telegram.New(ctx, store, opts, pool)
 			go func() {
 				if err := t.Serve(); err != telegram.ErrServiceClosed {
 					logger.Error("%v", err)
@@ -139,7 +139,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				name: s,
 			})
 		case "twitter":
-			t := twitter.New(ctx, store, pool)
+			t := twitter.New(ctx, store, opts, pool)
 			go func() {
 				if err := t.Serve(); err != twitter.ErrServiceClosed {
 					logger.Error("%v", err)
@@ -150,7 +150,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				name: s,
 			})
 		case "matrix":
-			m := matrix.New(ctx, store, pool)
+			m := matrix.New(ctx, store, opts, pool)
 			go func() {
 				if err := m.Serve(); err != matrix.ErrServiceClosed {
 					logger.Error("%v", err)
@@ -161,7 +161,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 				name: s,
 			})
 		case "web", "httpd":
-			h := httpd.New(ctx, store, pool)
+			h := httpd.New(ctx, store, opts, pool)
 			go func() {
 				if err := h.Serve(); err != httpd.ErrServiceClosed {
 					logger.Error("%v", err)
@@ -179,7 +179,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, pool *pool
 	return srv
 }
 
-func (srv *services) stop(pool *pooling.Pool, cancel context.CancelFunc) {
+func (srv *services) daemon(pool *pooling.Pool, cancel context.CancelFunc) {
 	// SIGINT handles Ctrl+C locally.
 	// SIGTERM handles termination signal from cloud service.
 	signal.Notify(

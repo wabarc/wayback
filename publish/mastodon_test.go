@@ -21,8 +21,6 @@ func setMastodonEnv() {
 	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
 	os.Setenv("WAYBACK_MASTODON_SECRET", "bar")
 	os.Setenv("WAYBACK_MASTODON_TOKEN", "zoo")
-
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
 }
 
 func TestToMastodon(t *testing.T) {
@@ -54,10 +52,9 @@ func TestToMastodon(t *testing.T) {
 	})
 
 	os.Setenv("WAYBACK_MASTODON_SERVER", server.URL)
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
-
-	mstdn := NewMastodon(nil)
+	mstdn := NewMastodon(nil, opts)
 	txt := render.ForPublish(&render.Telegram{Cols: collects}).String()
 	got := mstdn.ToMastodon(context.Background(), txt, "")
 	if !got {

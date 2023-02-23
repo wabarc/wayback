@@ -26,15 +26,15 @@ func TestTransform(t *testing.T) {
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 	os.Setenv("WAYBACK_STORAGE_DIR", path.Join(os.TempDir(), "reduxer"))
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	text := "some text https://example.com"
-	urls := service.MatchURL(text)
-	col, _ := wayback.Wayback(context.Background(), reduxer.BundleExample(), urls...)
+	urls := service.MatchURL(opts, text)
+	col, _ := wayback.Wayback(context.Background(), reduxer.BundleExample(), opts, urls...)
 	collector := transform(col)
 
 	bytes, err := json.Marshal(collector)
@@ -51,13 +51,18 @@ func TestProcessRespStatus(t *testing.T) {
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 
+	opts, err := config.NewParser().ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
+	}
+
 	ctx := context.Background()
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 	defer pool.Close()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		newWeb(ctx, pool).process(context.Background(), w, r)
+		newWeb(ctx, opts, pool).process(context.Background(), w, r)
 	})
 
 	var tests = []struct {
@@ -100,17 +105,16 @@ func TestProcessContentType(t *testing.T) {
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 	os.Setenv("WAYBACK_STORAGE_DIR", path.Join(os.TempDir(), "reduxer"))
 
-	var err error
-	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := config.NewParser().ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	ctx := context.Background()
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 	defer pool.Close()
-	web := newWeb(ctx, pool)
+	web := newWeb(ctx, opts, pool)
 
 	web.handle()
 	httpClient, mux, server := helper.MockServer()

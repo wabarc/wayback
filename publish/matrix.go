@@ -23,26 +23,27 @@ var _ Publisher = (*matrixBot)(nil)
 
 type matrixBot struct {
 	client *matrix.Client
+	opts   *config.Options
 }
 
 // NewMatrix returns a matrixBot client.
-func NewMatrix(client *matrix.Client) *matrixBot {
-	if !config.Opts.PublishToMatrixRoom() {
+func NewMatrix(client *matrix.Client, opts *config.Options) *matrixBot {
+	if !opts.PublishToMatrixRoom() {
 		logger.Error("Missing required environment variable, abort.")
 		return new(matrixBot)
 	}
 
 	if client == nil {
 		var err error
-		client, err = matrix.NewClient(config.Opts.MatrixHomeserver(), "", "")
+		client, err = matrix.NewClient(opts.MatrixHomeserver(), "", "")
 		if err != nil {
 			logger.Error("Dial Matrix client got unpredictable error: %v", err)
 			return new(matrixBot)
 		}
 		_, err = client.Login(&matrix.ReqLogin{
 			Type:             matrix.AuthTypePassword,
-			Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: config.Opts.MatrixUserID()},
-			Password:         config.Opts.MatrixPassword(),
+			Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: opts.MatrixUserID()},
+			Password:         opts.MatrixPassword(),
 			StoreCredentials: true,
 		})
 		if err != nil {
@@ -50,7 +51,7 @@ func NewMatrix(client *matrix.Client) *matrixBot {
 		}
 	}
 
-	return &matrixBot{client: client}
+	return &matrixBot{client: client, opts: opts}
 }
 
 // Publish publish text to the Matrix room of given cols and args.
@@ -77,7 +78,7 @@ func (m *matrixBot) Publish(ctx context.Context, cols []wayback.Collect, args ..
 }
 
 func (m *matrixBot) toRoom(body string) bool {
-	if !config.Opts.PublishToMatrixRoom() || m.client == nil {
+	if !m.opts.PublishToMatrixRoom() || m.client == nil {
 		logger.Warn("publish to Matrix room abort.")
 		return false
 	}
@@ -93,7 +94,7 @@ func (m *matrixBot) toRoom(body string) bool {
 		MsgType:       event.MsgText,
 	}
 	logger.Debug("send to Matrix room, body:\n%s", body)
-	if _, err := m.client.SendMessageEvent(id.RoomID(config.Opts.MatrixRoomID()), event.EventMessage, content); err != nil {
+	if _, err := m.client.SendMessageEvent(id.RoomID(m.opts.MatrixRoomID()), event.EventMessage, content); err != nil {
 		logger.Error("send to Matrix room failure: %v", err)
 		return false
 	}

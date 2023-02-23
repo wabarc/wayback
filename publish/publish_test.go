@@ -67,7 +67,7 @@ func TestPublishToChannelFromTelegram(t *testing.T) {
 
 	unsetAllEnv()
 	setTelegramEnv()
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
@@ -106,7 +106,7 @@ func TestPublishToChannelFromTelegram(t *testing.T) {
 	ctx := context.WithValue(context.Background(), FlagTelegram, bot)
 	ctx = context.WithValue(ctx, PubBundle{}, bundleExample)
 	defer helper.CheckContext(ctx, t)
-	To(ctx, collects, FlagTelegram.String())
+	To(ctx, opts, collects, FlagTelegram.String())
 }
 
 func TestPublishTootFromMastodon(t *testing.T) {
@@ -141,15 +141,14 @@ func TestPublishTootFromMastodon(t *testing.T) {
 	})
 
 	os.Setenv("WAYBACK_MASTODON_SERVER", server.URL)
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
-
-	mstdn := NewMastodon(nil)
+	mstdn := NewMastodon(nil, opts)
 
 	ctx := context.WithValue(context.Background(), FlagMastodon, mstdn.client)
 	ctx = context.WithValue(ctx, PubBundle{}, bundleExample)
 	defer helper.CheckContext(ctx, t)
-	To(ctx, collects, FlagMastodon.String())
+	To(ctx, opts, collects, FlagMastodon.String())
 }
 
 func TestPublishTweetFromTwitter(t *testing.T) {
@@ -157,7 +156,7 @@ func TestPublishTweetFromTwitter(t *testing.T) {
 
 	unsetAllEnv()
 	setTwitterEnv()
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
@@ -177,11 +176,11 @@ func TestPublishTweetFromTwitter(t *testing.T) {
 		}
 	})
 
-	twi := NewTwitter(twitter.NewClient(httpClient))
+	twi := NewTwitter(twitter.NewClient(httpClient), opts)
 	ctx := context.WithValue(context.Background(), FlagTwitter, twi.client)
 	ctx = context.WithValue(ctx, PubBundle{}, bundleExample)
 	defer helper.CheckContext(ctx, t)
-	To(ctx, collects, FlagTwitter.String())
+	To(ctx, opts, collects, FlagTwitter.String())
 }
 
 func TestPublishToIRCChannelFromIRC(t *testing.T) {
@@ -213,11 +212,11 @@ func TestPublishToMatrixRoomFromMatrix(t *testing.T) {
 	})
 
 	os.Setenv("WAYBACK_MATRIX_HOMESERVER", server.URL)
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
-	mat := NewMatrix(nil)
+	mat := NewMatrix(nil, opts)
 	ctx := context.WithValue(context.Background(), "matrix", mat.client)
 	ctx = context.WithValue(ctx, PubBundle{}, bundleExample)
 	defer helper.CheckContext(ctx, t)
-	To(ctx, collects, "matrix")
+	To(ctx, opts, collects, "matrix")
 }

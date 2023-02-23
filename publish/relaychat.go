@@ -22,25 +22,26 @@ var _ Publisher = (*ircBot)(nil)
 
 type ircBot struct {
 	conn *irc.Connection
+	opts *config.Options
 }
 
 // NewIRC returns a ircBot struct
-func NewIRC(conn *irc.Connection) *ircBot {
-	if !config.Opts.PublishToIRCChannel() {
+func NewIRC(conn *irc.Connection, opts *config.Options) *ircBot {
+	if !opts.PublishToIRCChannel() {
 		logger.Error("Missing required environment variable, abort.")
 		return new(ircBot)
 	}
 
 	if conn == nil {
-		conn = irc.IRC(config.Opts.IRCNick(), config.Opts.IRCNick())
-		conn.Password = config.Opts.IRCPassword()
-		conn.VerboseCallbackHandler = config.Opts.HasDebugMode()
-		conn.Debug = config.Opts.HasDebugMode()
+		conn = irc.IRC(opts.IRCNick(), opts.IRCNick())
+		conn.Password = opts.IRCPassword()
+		conn.VerboseCallbackHandler = opts.HasDebugMode()
+		conn.Debug = opts.HasDebugMode()
 		conn.UseTLS = true
 		conn.TLSConfig = &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12}
 	}
 
-	return &ircBot{conn: conn}
+	return &ircBot{conn: conn, opts: opts}
 }
 
 // Publish publish text to IRC channel of given cols and args.
@@ -62,7 +63,7 @@ func (i *ircBot) Publish(ctx context.Context, cols []wayback.Collect, args ...st
 }
 
 func (i *ircBot) toChannel(_ context.Context, text string) bool {
-	if !config.Opts.PublishToIRCChannel() || i.conn == nil {
+	if !i.opts.PublishToIRCChannel() || i.conn == nil {
 		logger.Warn("Do not publish to IRC channel.")
 		return false
 	}
@@ -72,8 +73,8 @@ func (i *ircBot) toChannel(_ context.Context, text string) bool {
 	}
 
 	go func() {
-		// i.conn.Join(config.Opts.IRCChannel())
-		i.conn.Privmsg(config.Opts.IRCChannel(), text)
+		// i.conn.Join(o.opts.IRCChannel())
+		i.conn.Privmsg(i.opts.IRCChannel(), text)
 	}()
 
 	return true

@@ -64,8 +64,9 @@ func newResource(id int) *resource {
 
 // New a resource pool of the specified capacity
 // Resources are created concurrently to save resource initialization time
-func New(ctx context.Context, capacity int) *Pool {
+func New(ctx context.Context, opts *config.Options) *Pool {
 	p := new(Pool)
+	capacity := opts.PoolingSize()
 	p.resource = make(chan *resource, capacity)
 	wg := new(sync.WaitGroup)
 	wg.Add(capacity)
@@ -78,8 +79,8 @@ func New(ctx context.Context, capacity int) *Pool {
 	wg.Wait()
 
 	p.closed = make(chan bool, 1)
-	p.timeout = config.Opts.WaybackTimeout()
-	p.maxRetries = config.Opts.WaybackMaxRetries() + 1
+	p.timeout = opts.WaybackTimeout()
+	p.maxRetries = opts.WaybackMaxRetries() + 1
 	p.multiplier = 0.75
 	p.context = ctx
 

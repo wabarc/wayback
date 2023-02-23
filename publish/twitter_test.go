@@ -23,8 +23,6 @@ func setTwitterEnv() {
 	os.Setenv("WAYBACK_TWITTER_CONSUMER_SECRET", "foo")
 	os.Setenv("WAYBACK_TWITTER_ACCESS_TOKEN", "foo")
 	os.Setenv("WAYBACK_TWITTER_ACCESS_SECRET", "foo")
-
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
 }
 
 func TestToTwitter(t *testing.T) {
@@ -48,7 +46,8 @@ func TestToTwitter(t *testing.T) {
 		}
 	})
 
-	twitt := NewTwitter(twitter.NewClient(httpClient))
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+	twitt := NewTwitter(twitter.NewClient(httpClient), opts)
 	txt := render.ForPublish(&render.Twitter{Cols: collects}).String()
 	got := twitt.ToTwitter(context.Background(), txt)
 	if !got {

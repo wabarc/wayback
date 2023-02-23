@@ -179,7 +179,7 @@ func handle(mux *http.ServeMux, updatesJSON string) {
 	})
 }
 
-func newTelegram(client *http.Client, endpoint string) (tg *Telegram, cancel context.CancelFunc, err error) {
+func newTelegram(client *http.Client, opts *config.Options, endpoint string) (tg *Telegram, cancel context.CancelFunc, err error) {
 	bot, err := telegram.NewBot(telegram.Settings{
 		URL:    endpoint,
 		Token:  token,
@@ -190,15 +190,15 @@ func newTelegram(client *http.Client, endpoint string) (tg *Telegram, cancel con
 		return tg, nil, err
 	}
 
-	store, e := storage.Open("")
+	store, e := storage.Open(opts, "")
 	if e != nil {
 		return tg, nil, e
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 
-	tg = &Telegram{ctx: ctx, bot: bot, pool: pool, store: store}
+    tg = &Telegram{ctx: ctx, bot: bot, opts: opts, pool: pool, store: store}
 
 	return tg, cancel, nil
 }
@@ -212,9 +212,9 @@ func TestServe(t *testing.T) {
 	os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
 	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
@@ -223,10 +223,10 @@ func TestServe(t *testing.T) {
 	handle(mux, `{"ok":true, "result":[]}`)
 
 	ctx := context.Background()
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, opts)
 	go pool.Roll()
 
-	tg, cancel, err := newTelegram(httpClient, server.URL)
+	tg, cancel, err := newTelegram(httpClient, opts, server.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -259,9 +259,9 @@ func TestWayback(t *testing.T) {
 	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
@@ -269,7 +269,7 @@ func TestWayback(t *testing.T) {
 	defer server.Close()
 	handle(mux, getUpdatesJSON)
 
-	tg, cancel, err := newTelegram(httpClient, server.URL)
+	tg, cancel, err := newTelegram(httpClient, opts, server.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -324,15 +324,15 @@ func TestPlayback(t *testing.T) {
 	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
-	if config.Opts.EnabledMeilisearch() {
-		endpoint := config.Opts.WaybackMeiliEndpoint()
-		indexing := config.Opts.WaybackMeiliIndexing()
-		apikey := config.Opts.WaybackMeiliApikey()
+	if opts.EnabledMeilisearch() {
+		endpoint := opts.WaybackMeiliEndpoint()
+		indexing := opts.WaybackMeiliIndexing()
+		apikey := opts.WaybackMeiliApikey()
 		meili := service.NewMeili(endpoint, apikey, indexing)
 		if err := meili.Setup(); err != nil {
 			t.Errorf("setup meilisearch failed: %v", err)
@@ -372,7 +372,7 @@ func TestPlayback(t *testing.T) {
 	defer server.Close()
 	handle(mux, getUpdatesJSON)
 
-	tg, cancel, err := newTelegram(httpClient, server.URL)
+	tg, cancel, err := newTelegram(httpClient, opts, server.URL)
 	if err != nil {
 		t.Fatal(err)
 	}

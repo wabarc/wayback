@@ -32,6 +32,7 @@ var ErrServiceClosed = errors.New("httpd: Service closed")
 // Tor represents a Tor service in the application.
 type Tor struct {
 	ctx   context.Context
+	opts  *config.Options
 	pool  *pooling.Pool
 	store *storage.Storage
 
@@ -40,9 +41,12 @@ type Tor struct {
 }
 
 // New tor struct.
-func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Tor {
+func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *Tor {
 	if store == nil {
 		logger.Fatal("must initialize storage")
+	}
+	if opts == nil {
+		logger.Fatal("must initialize options")
 	}
 	if pool == nil {
 		logger.Fatal("must initialize pooling")
@@ -53,6 +57,7 @@ func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Tor {
 
 	return &Tor{
 		ctx:   ctx,
+		opts:  opts,
 		pool:  pool,
 		store: store,
 	}
@@ -67,7 +72,7 @@ func (t *Tor) Serve() error {
 	// Start tor with some defaults + elevated verbosity
 	logger.Info("starting and registering onion service, please wait a bit...")
 
-	handler := newWeb(t.ctx, t.pool).handle()
+	handler := newWeb(t.ctx, t.opts, t.pool).handle()
 	server := &http.Server{
 		ReadTimeout:  5 * time.Minute,
 		WriteTimeout: 5 * time.Minute,
@@ -81,7 +86,7 @@ func (t *Tor) Serve() error {
 		t.startTorServer(server)
 	default:
 		logger.Info("start a clear web server")
-		server.Addr = config.Opts.ListenAddr()
+		server.Addr = t.opts.ListenAddr()
 		go startHTTPServer(server)
 		t.server = server
 	}
@@ -110,21 +115,21 @@ func (t *Tor) Shutdown() error {
 }
 
 func (t *Tor) torrc() string {
-	if config.Opts.TorrcFile() == "" {
+	if t.opts.TorrcFile() == "" {
 		return ""
 	}
 	if torPortBusy() {
 		return ""
 	}
-	if _, err := os.Open(filepath.Clean(config.Opts.TorrcFile())); err != nil {
+	if _, err := os.Open(filepath.Clean(t.opts.TorrcFile())); err != nil {
 		return ""
 	}
-	return config.Opts.TorrcFile()
+	return t.opts.TorrcFile()
 }
 
 func (t *Tor) startTorServer(server *http.Server) {
 	var pvk ed25519.PrivateKey
-	if config.Opts.TorPrivKey() == "" {
+	if t.opts.TorPrivKey() == "" {
 		if keypair, err := ed25519.GenerateKey(rand.Reader); err != nil {
 			logger.Fatal("generate key failed: %v", err)
 		} else {
@@ -132,14 +137,14 @@ func (t *Tor) startTorServer(server *http.Server) {
 		}
 		logger.Info("important to keep the private key: %s", color.BlueString(hex.EncodeToString(pvk)))
 	} else {
-		privb, err := hex.DecodeString(config.Opts.TorPrivKey())
+		privb, err := hex.DecodeString(t.opts.TorPrivKey())
 		if err != nil {
 			logger.Fatal("the key %s is not specific", err)
 		}
 		pvk = ed25519.PrivateKey(privb)
 	}
 
-	verbose := config.Opts.HasDebugMode()
+	verbose := t.opts.HasDebugMode()
 	// startConf := &tor.StartConf{ProcessCreator: libtor.Creator, DataDir: "tor-data"}
 	startConf := &tor.StartConf{TorrcFile: t.torrc(), TempDataDirBase: os.TempDir()}
 	if verbose {
@@ -157,7 +162,7 @@ func (t *Tor) startTorServer(server *http.Server) {
 	// Assign e to Tor.tor
 	t.tor = e
 
-	listener, err := net.Listen("tcp", config.Opts.ListenAddr())
+	listener, err := net.Listen("tcp", t.opts.ListenAddr())
 	if err != nil {
 		logger.Warn("failed to create local network listener: %v", err)
 	}
@@ -165,9 +170,9 @@ func (t *Tor) startTorServer(server *http.Server) {
 	// Create an onion service to listen on any port but show as local port,
 	// specify the local port using the `WAYBACK_TOR_LOCAL_PORT` environment variable.
 	onion, err := e.Listen(t.ctx, &tor.ListenConf{
-		LocalPort:     config.Opts.TorLocalPort(),
+		LocalPort:     t.opts.TorLocalPort(),
 		LocalListener: listener,
-		RemotePorts:   config.Opts.TorRemotePorts(),
+		RemotePorts:   t.opts.TorRemotePorts(),
 		Version3:      true,
 		Key:           pvk,
 	})

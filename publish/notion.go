@@ -32,22 +32,23 @@ var _ Publisher = (*notion)(nil)
 
 type notion struct {
 	client *notionapi.Client
+	opts   *config.Options
 }
 
 // NewNotion returns a notion client.
-func NewNotion(httpClient *http.Client) *notion {
-	if config.Opts.NotionToken() == "" {
+func NewNotion(httpClient *http.Client, opts *config.Options) *notion {
+	if opts.NotionToken() == "" {
 		logger.Error("Notion integration access token is required")
 		return new(notion)
 	}
 
-	client := notionapi.NewClient(config.Opts.NotionToken())
+	client := notionapi.NewClient(opts.NotionToken())
 	if httpClient != nil {
-		opts := notionapi.WithHTTPClient(httpClient)
-		client = notionapi.NewClient(config.Opts.NotionToken(), opts)
+		newcli := notionapi.WithHTTPClient(httpClient)
+		client = notionapi.NewClient(opts.NotionToken(), newcli)
 	}
 
-	return &notion{client: client}
+	return &notion{client: client, opts: opts}
 }
 
 // Publish publish text to the Notion block of the given cols and args.
@@ -169,7 +170,7 @@ func (no *notion) params(cols []wayback.Collect, head, body string) notionapi.Cr
 
 	params := notionapi.CreatePageParams{
 		ParentType: notionapi.ParentTypeDatabase,
-		ParentID:   config.Opts.NotionDatabaseID(),
+		ParentID:   no.opts.NotionDatabaseID(),
 		DatabasePageProperties: &notionapi.DatabasePageProperties{
 			"Name": notionapi.DatabasePageProperty{
 				Title: []notionapi.RichText{
