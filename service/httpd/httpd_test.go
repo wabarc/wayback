@@ -18,6 +18,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
+	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/service"
 )
@@ -56,13 +57,21 @@ func TestProcessRespStatus(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx := context.Background()
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 	defer pool.Close()
 
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		newWeb(ctx, opts, pool).process(context.Background(), w, r)
+		newWeb(ctx, opts, pool, pub).process(context.Background(), w, r)
 	})
 
 	var tests = []struct {
@@ -110,11 +119,20 @@ func TestProcessContentType(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx := context.Background()
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 	defer pool.Close()
-	web := newWeb(ctx, opts, pool)
+
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
+
+	web := newWeb(ctx, opts, pool, pub)
 
 	web.handle()
 	httpClient, mux, server := helper.MockServer()

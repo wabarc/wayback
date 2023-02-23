@@ -23,6 +23,7 @@ import (
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/pooling"
+	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/storage"
 )
 
@@ -32,6 +33,7 @@ var ErrServiceClosed = errors.New("httpd: Service closed")
 // Tor represents a Tor service in the application.
 type Tor struct {
 	ctx   context.Context
+	pub   *publish.Publish
 	opts  *config.Options
 	pool  *pooling.Pool
 	store *storage.Storage
@@ -41,7 +43,7 @@ type Tor struct {
 }
 
 // New tor struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *Tor {
+func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Tor {
 	if store == nil {
 		logger.Fatal("must initialize storage")
 	}
@@ -51,12 +53,16 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 	if pool == nil {
 		logger.Fatal("must initialize pooling")
 	}
+	if pub == nil {
+		logger.Fatal("must initialize publish")
+	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
 	return &Tor{
 		ctx:   ctx,
+		pub:   pub,
 		opts:  opts,
 		pool:  pool,
 		store: store,
@@ -72,7 +78,7 @@ func (t *Tor) Serve() error {
 	// Start tor with some defaults + elevated verbosity
 	logger.Info("starting and registering onion service, please wait a bit...")
 
-	handler := newWeb(t.ctx, t.opts, t.pool).handle()
+	handler := newWeb(t.ctx, t.opts, t.pool, t.pub).handle()
 	server := &http.Server{
 		ReadTimeout:  5 * time.Minute,
 		WriteTimeout: 5 * time.Minute,

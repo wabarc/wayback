@@ -27,8 +27,14 @@ func TestRoll(t *testing.T) {
 	}
 	logger.SetLogLevel(logger.LevelFatal)
 
+	cfg := []Option{
+		Capacity(opts.PoolingSize()),
+		Timeout(opts.WaybackTimeout()),
+		MaxRetries(opts.WaybackMaxRetries()),
+	}
+
 	c := opts.PoolingSize()
-	p := New(context.Background(), opts)
+	p := New(context.Background(), cfg...)
 	p.timeout = 10 * time.Millisecond
 	defer helper.CheckContext(p.context, t)
 
@@ -76,8 +82,14 @@ func TestTimeout(t *testing.T) {
 	}
 	logger.SetLogLevel(logger.LevelFatal)
 
+	cfg := []Option{
+		Capacity(opts.PoolingSize()),
+		Timeout(opts.WaybackTimeout()),
+		MaxRetries(opts.WaybackMaxRetries()),
+	}
+
 	c := opts.PoolingSize()
-	p := New(context.Background(), opts)
+	p := New(context.Background(), cfg...)
 	p.timeout = time.Millisecond
 
 	if l := len(p.resource); l != c {
@@ -136,14 +148,20 @@ func TestMaxRetries(t *testing.T) {
 	}
 
 	maxRetries := uint64(3)
-	p := New(context.Background(), opts)
-	p.timeout = time.Second
-	p.maxRetries = maxRetries
+	cfg := []Option{
+		Capacity(opts.PoolingSize()),
+		Timeout(time.Second),
+		MaxRetries(maxRetries),
+	}
+
+	p := New(context.Background(), cfg...)
 	go p.Roll()
 	p.Put(bucket)
 	p.Close()
-	if elapsed != maxRetries {
-		t.Fatalf("Unexpected max retries got %d instead of %d", elapsed, maxRetries)
+
+	expected := maxRetries + 1
+	if elapsed != expected {
+		t.Fatalf("Unexpected max retries got %d instead of %d", elapsed, expected)
 	}
 }
 
@@ -169,9 +187,13 @@ func TestFallback(t *testing.T) {
 		},
 	}
 
-	p := New(context.Background(), opts)
-	p.timeout = time.Microsecond
-	p.maxRetries = 1
+	cfg := []Option{
+		Capacity(opts.PoolingSize()),
+		Timeout(time.Microsecond),
+		MaxRetries(1),
+	}
+
+	p := New(context.Background(), cfg...)
 	go p.Roll()
 	p.Put(bucket)
 	p.Close()
@@ -191,8 +213,12 @@ func TestClose(t *testing.T) {
 	}
 	logger.SetLogLevel(logger.LevelFatal)
 
-	p := New(context.Background(), opts)
-	p.timeout = time.Microsecond
+	cfg := []Option{
+		Capacity(opts.PoolingSize()),
+		Timeout(time.Microsecond),
+	}
+
+	p := New(context.Background(), cfg...)
 	go p.Roll()
 
 	if p.resource == nil {
@@ -202,6 +228,59 @@ func TestClose(t *testing.T) {
 	_, ok := (<-p.resource)
 	if !ok {
 		t.Fatalf("Unexpected close pooling")
+	}
+}
+
+func TestClosed(t *testing.T) {
+	defer helper.CheckTest(t)
+
+	os.Setenv("WAYBACK_POOLING_SIZE", "1")
+	opts, err := config.NewParser().ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
+	}
+	logger.SetLogLevel(logger.LevelFatal)
+
+	tests := []struct {
+		run    func(*Pool)
+		name   string
+		expect bool
+	}{
+		{
+			run:    func(p *Pool) {},
+			name:   "false",
+			expect: false,
+		},
+		{
+			run: func(p *Pool) {
+				p.Close()
+			},
+			name:   "true",
+			expect: true,
+		},
+	}
+
+	cfg := []Option{
+		Capacity(opts.PoolingSize()),
+		Timeout(time.Microsecond),
+		MaxRetries(1),
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			p := New(context.Background(), cfg...)
+
+			if p.resource == nil {
+				t.Fatalf("Unexpected pooling resource, got <nil>")
+			}
+
+			test.run(p)
+
+			closed := p.Closed()
+			if closed != test.expect {
+				t.Errorf("Unexpected close pooling")
+			}
+		})
 	}
 }
 
@@ -243,10 +322,14 @@ func TestStatus(t *testing.T) {
 		},
 	}
 
+	cfg := []Option{
+		Capacity(opts.PoolingSize()),
+		Timeout(time.Microsecond),
+	}
+
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			p := New(context.Background(), opts)
-			p.timeout = time.Microsecond
+			p := New(context.Background(), cfg...)
 			go p.Roll()
 			defer p.Close()
 

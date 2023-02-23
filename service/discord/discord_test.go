@@ -22,6 +22,7 @@ import (
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
+	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/storage"
 
 	discord "github.com/bwmarrin/discordgo"
@@ -185,8 +186,13 @@ func TestServe(t *testing.T) {
 	handle(mux, strings.Replace(server.URL, "http", "ws", 1))
 	bot.Client = httpClient
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx, cancel := context.WithCancel(context.Background())
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 
 	dbpath := filepath.Join(t.TempDir(), "testing.db")
@@ -196,7 +202,10 @@ func TestServe(t *testing.T) {
 	}
 	defer store.Close()
 
-	d := New(ctx, store, opts, pool)
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
+
+	d := New(ctx, store, opts, pool, pub)
 	time.AfterFunc(3*time.Second, func() {
 		// TODO: find a better way to avoid deadlock
 		go d.Shutdown()
@@ -244,14 +253,22 @@ func TestProcess(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
-	pool := pooling.New(ctx, opts)
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	handle(mux, strings.Replace(server.URL, "http", "ws", 1))
 
-	d := New(ctx, store, opts, pool)
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
+
+	d := New(ctx, store, opts, pool, pub)
 	d.bot.Client = httpClient
 
 	// if err := d.bot.Open(); err != nil {

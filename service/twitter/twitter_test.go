@@ -87,8 +87,13 @@ func TestProcess(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx := context.Background()
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 	defer pool.Close()
 

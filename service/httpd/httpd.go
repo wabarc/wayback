@@ -31,16 +31,18 @@ import (
 type web struct {
 	ctx context.Context
 
+	pub      *publish.Publish
 	opts     *config.Options
 	pool     *pooling.Pool
 	router   *mux.Router
 	template *template.Template
 }
 
-func newWeb(ctx context.Context, opts *config.Options, pool *pooling.Pool) *web {
+func newWeb(ctx context.Context, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *web {
 	router := mux.NewRouter()
 	web := &web{
 		ctx:      ctx,
+		pub:      pub,
 		opts:     opts,
 		pool:     pool,
 		router:   router,
@@ -233,7 +235,6 @@ func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Requ
 
 	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
 		collector := transform(cols)
-		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
 		switch r.PostFormValue("data-type") {
 		case "json":
 			w.Header().Set("Content-Type", "application/json")
@@ -244,7 +245,7 @@ func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Requ
 			} else {
 				if len(urls) > 0 {
 					metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-					go publish.To(context.Background(), web.opts, cols, "web")
+					web.pub.Spread(context.Background(), rdx, cols, publish.FlagWeb)
 				}
 				w.Write(data) // nolint:errcheck
 			}
@@ -254,7 +255,7 @@ func (web *web) process(ctx context.Context, w http.ResponseWriter, r *http.Requ
 			if html, ok := web.template.Render("layout", collector); ok {
 				if len(urls) > 0 {
 					metrics.IncrementWayback(metrics.ServiceWeb, metrics.StatusSuccess)
-					go publish.To(context.Background(), web.opts, cols, "web")
+					web.pub.Spread(context.Background(), rdx, cols, publish.FlagWeb)
 				}
 				w.Write(html) // nolint:errcheck
 			} else {

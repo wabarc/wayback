@@ -15,7 +15,7 @@ import (
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
-	"github.com/wabarc/wayback/service"
+	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/storage"
 )
 
@@ -62,11 +62,19 @@ func TestProcess(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx := context.Background()
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 
-	m := New(ctx, &storage.Storage{}, opts, pool)
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
+
+	m := New(ctx, &storage.Storage{}, opts, pool, pub)
 	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)
@@ -125,21 +133,20 @@ func TestPlayback(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
-	if opts.EnabledMeilisearch() {
-		endpoint := opts.WaybackMeiliEndpoint()
-		indexing := opts.WaybackMeiliIndexing()
-		apikey := opts.WaybackMeiliApikey()
-		meili := service.NewMeili(endpoint, apikey, indexing)
-		if err := meili.Setup(); err != nil {
-			t.Errorf("setup meilisearch failed: %v", err)
-		}
-	}
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx := context.Background()
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 
-	m := New(ctx, &storage.Storage{}, opts, pool)
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
+
+	m := New(ctx, &storage.Storage{}, opts, pool, pub)
 	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)

@@ -36,10 +36,11 @@ type IRC struct {
 	pool  *pooling.Pool
 	conn  *irc.Connection
 	store *storage.Storage
+	pub   *publish.Publish
 }
 
 // New IRC struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *IRC {
+func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *IRC {
 	if opts.IRCNick() == "" {
 		logger.Fatal("missing required environment variable")
 	}
@@ -51,6 +52,9 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 	}
 	if pool == nil {
 		logger.Fatal("must initialize pooling")
+	}
+	if pub == nil {
+		logger.Fatal("must initialize publish")
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -66,6 +70,7 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 
 	return &IRC{
 		ctx:   ctx,
+		pub:   pub,
 		opts:  opts,
 		pool:  pool,
 		conn:  conn,
@@ -154,9 +159,7 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 		i.conn.Privmsg(ev.Nick, replyText)
 
 		// Reply and publish toot as public
-		ctx = context.WithValue(ctx, publish.FlagIRC, i.conn)
-		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		publish.To(ctx, i.opts, cols, publish.FlagIRC.String())
+		i.pub.Spread(ctx, rdx, cols, publish.FlagIRC)
 		return nil
 	}
 

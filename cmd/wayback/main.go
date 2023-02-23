@@ -166,7 +166,7 @@ func handle(cmd *cobra.Command, args []string) {
 	var opts *config.Options
 	if len(daemon) > 0 {
 		logger.Info("Run wayback using configuration file")
-		if opts, err = parser.ParseFile(configFile); err != nil {
+		if _, err = parser.ParseFile(configFile); err != nil {
 			logger.Fatal("Parse configuration file failed, error: %v", err)
 		}
 	}

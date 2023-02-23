@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/phf/go-queue/queue"
-	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 )
 
@@ -64,9 +63,14 @@ func newResource(id int) *resource {
 
 // New a resource pool of the specified capacity
 // Resources are created concurrently to save resource initialization time
-func New(ctx context.Context, opts *config.Options) *Pool {
+func New(ctx context.Context, options ...Option) *Pool {
+	var opts Options
+	for _, fn := range options {
+		fn(&opts)
+	}
+
 	p := new(Pool)
-	capacity := opts.PoolingSize()
+	capacity := opts.Capacity
 	p.resource = make(chan *resource, capacity)
 	wg := new(sync.WaitGroup)
 	wg.Add(capacity)
@@ -79,8 +83,8 @@ func New(ctx context.Context, opts *config.Options) *Pool {
 	wg.Wait()
 
 	p.closed = make(chan bool, 1)
-	p.timeout = opts.WaybackTimeout()
-	p.maxRetries = opts.WaybackMaxRetries() + 1
+	p.timeout = opts.Timeout
+	p.maxRetries = opts.MaxRetries + 1
 	p.multiplier = 0.75
 	p.context = ctx
 
@@ -133,6 +137,17 @@ func (p *Pool) Close() {
 			})
 			return
 		}
+	}
+}
+
+// Closed returns whether the pooling is closed. It uses a select with a
+// timeout of 3 seconds to check if the p.closed channel has been closed.
+func (p *Pool) Closed() bool {
+	select {
+	case <-p.closed:
+		return true
+	case <-time.After(3 * time.Second):
+		return false
 	}
 }
 
@@ -228,9 +243,15 @@ const (
 
 // Status returns status of worker pool.
 func (p *Pool) Status() Status {
-	if atomic.LoadInt32(&p.waiting)+atomic.LoadInt32(&p.processing) < int32(cap(p.resource)) {
+	total := atomic.LoadInt32(&p.waiting) + atomic.LoadInt32(&p.processing)
+	if total == 0 {
 		return StatusIdle
 	}
+
+	if total < int32(cap(p.resource)) {
+		return StatusIdle
+	}
+
 	return StatusBusy
 }
 

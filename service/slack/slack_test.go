@@ -164,9 +164,13 @@ func TestServe(t *testing.T) {
 		// socketmode.OptionLog(log.New(os.Stdout, "socketmode: ", log.Lshortfile|log.LstdFlags)),
 	)
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx, cancel := context.WithCancel(context.Background())
-
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 	defer pool.Close()
 

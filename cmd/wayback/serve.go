@@ -13,7 +13,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
-	"github.com/wabarc/wayback/service"
+	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/service/discord"
 	"github.com/wabarc/wayback/service/httpd"
 	"github.com/wabarc/wayback/service/mastodon"
@@ -24,6 +24,8 @@ import (
 	"github.com/wabarc/wayback/service/twitter"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/systemd"
+
+	_ "github.com/wabarc/wayback/publish/register"
 )
 
 // Create channel to listen for signals.
@@ -45,23 +47,20 @@ func serve(_ *cobra.Command, opts *config.Options, _ []string) {
 	}
 	defer store.Close()
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx, cancel := context.WithCancel(context.Background())
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 
-	if opts.EnabledMeilisearch() {
-		endpoint := opts.WaybackMeiliEndpoint()
-		indexing := opts.WaybackMeiliIndexing()
-		apikey := opts.WaybackMeiliApikey()
-		meili := service.NewMeili(endpoint, apikey, indexing)
-		if err := meili.Setup(); err != nil {
-			logger.Error("setup meilisearch failed: %v", err)
-		}
-		logger.Debug("setup meilisearch success")
-	}
+	pub := publish.New(ctx, opts)
+	go pub.Start()
 
 	srv := &services{}
-	_ = srv.run(ctx, store, opts, pool)
+	_ = srv.run(ctx, store, opts, pool, pub)
 
 	if systemd.HasNotifySocket() {
 		logger.Info("sending readiness notification to Systemd")
@@ -71,23 +70,24 @@ func serve(_ *cobra.Command, opts *config.Options, _ []string) {
 		}
 	}
 
-	go srv.daemon(pool, cancel)
+	go srv.daemon(pool, pub, cancel)
 	<-ctx.Done()
 
 	logger.Info("wayback service stopped.")
 }
 
 // nolint:gocyclo
-func (srv *services) run(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *services {
+func (srv *services) run(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *services {
 	size := len(daemon)
 	srv.targets = make([]target, 0, size)
 	for _, s := range daemon {
+		s := s
 		switch s {
 		case "irc":
-			irc := relaychat.New(ctx, store, opts, pool)
+			irc := relaychat.New(ctx, store, opts, pool, pub)
 			go func() {
 				if err := irc.Serve(); err != relaychat.ErrServiceClosed {
-					logger.Error("%v", err)
+					logger.Error("start %s service failed: %v", s, err)
 				}
 			}()
 			srv.targets = append(srv.targets, target{
@@ -95,10 +95,10 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "slack":
-			sl := slack.New(ctx, store, opts, pool)
+			sl := slack.New(ctx, store, opts, pool, pub)
 			go func() {
 				if err := sl.Serve(); err != slack.ErrServiceClosed {
-					logger.Error("%v", err)
+					logger.Error("start %s service failed: %v", s, err)
 				}
 			}()
 			srv.targets = append(srv.targets, target{
@@ -106,10 +106,10 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "discord":
-			d := discord.New(ctx, store, opts, pool)
+			d := discord.New(ctx, store, opts, pool, pub)
 			go func() {
 				if err := d.Serve(); err != discord.ErrServiceClosed {
-					logger.Error("%v", err)
+					logger.Error("start %s service failed: %v", s, err)
 				}
 			}()
 			srv.targets = append(srv.targets, target{
@@ -117,10 +117,10 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "mastodon", "mstdn":
-			m := mastodon.New(ctx, store, opts, pool)
+			m := mastodon.New(ctx, store, opts, pool, pub)
 			go func() {
 				if err := m.Serve(); err != mastodon.ErrServiceClosed {
-					logger.Error("%v", err)
+					logger.Error("start %s service failed: %v", s, err)
 				}
 			}()
 			srv.targets = append(srv.targets, target{
@@ -128,10 +128,10 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "telegram":
-			t := telegram.New(ctx, store, opts, pool)
+			t := telegram.New(ctx, store, opts, pool, pub)
 			go func() {
 				if err := t.Serve(); err != telegram.ErrServiceClosed {
-					logger.Error("%v", err)
+					logger.Error("start %s service failed: %v", s, err)
 				}
 			}()
 			srv.targets = append(srv.targets, target{
@@ -139,10 +139,10 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "twitter":
-			t := twitter.New(ctx, store, opts, pool)
+			t := twitter.New(ctx, store, opts, pool, pub)
 			go func() {
 				if err := t.Serve(); err != twitter.ErrServiceClosed {
-					logger.Error("%v", err)
+					logger.Error("start %s service failed: %v", s, err)
 				}
 			}()
 			srv.targets = append(srv.targets, target{
@@ -150,10 +150,10 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "matrix":
-			m := matrix.New(ctx, store, opts, pool)
+			m := matrix.New(ctx, store, opts, pool, pub)
 			go func() {
 				if err := m.Serve(); err != matrix.ErrServiceClosed {
-					logger.Error("%v", err)
+					logger.Error("start %s service failed: %v", s, err)
 				}
 			}()
 			srv.targets = append(srv.targets, target{
@@ -161,10 +161,10 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 				name: s,
 			})
 		case "web", "httpd":
-			h := httpd.New(ctx, store, opts, pool)
+			h := httpd.New(ctx, store, opts, pool, pub)
 			go func() {
 				if err := h.Serve(); err != httpd.ErrServiceClosed {
-					logger.Error("%v", err)
+					logger.Error("start %s service failed: %v", s, err)
 				}
 			}()
 			srv.targets = append(srv.targets, target{
@@ -179,7 +179,7 @@ func (srv *services) run(ctx context.Context, store *storage.Storage, opts *conf
 	return srv
 }
 
-func (srv *services) daemon(pool *pooling.Pool, cancel context.CancelFunc) {
+func (srv *services) daemon(pool *pooling.Pool, pub *publish.Publish, cancel context.CancelFunc) {
 	// SIGINT handles Ctrl+C locally.
 	// SIGTERM handles termination signal from cloud service.
 	signal.Notify(
@@ -199,6 +199,8 @@ func (srv *services) daemon(pool *pooling.Pool, cancel context.CancelFunc) {
 	srv.shutdown()
 	// Gracefully closes the worker pool
 	pool.Close()
+	// Stop publish service
+	pub.Stop()
 	cancel()
 }
 

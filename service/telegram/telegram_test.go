@@ -19,7 +19,6 @@ import (
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
-	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	telegram "gopkg.in/telebot.v3"
 )
@@ -194,11 +193,16 @@ func newTelegram(client *http.Client, opts *config.Options, endpoint string) (tg
 	if e != nil {
 		return tg, nil, e
 	}
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx, cancel := context.WithCancel(context.Background())
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 
-    tg = &Telegram{ctx: ctx, bot: bot, opts: opts, pool: pool, store: store}
+	tg = &Telegram{ctx: ctx, bot: bot, opts: opts, pool: pool, store: store}
 
 	return tg, cancel, nil
 }
@@ -222,8 +226,13 @@ func TestServe(t *testing.T) {
 	defer server.Close()
 	handle(mux, `{"ok":true, "result":[]}`)
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx := context.Background()
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 
 	tg, cancel, err := newTelegram(httpClient, opts, server.URL)
@@ -328,15 +337,6 @@ func TestPlayback(t *testing.T) {
 	opts, err := parser.ParseEnvironmentVariables()
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
-	}
-	if opts.EnabledMeilisearch() {
-		endpoint := opts.WaybackMeiliEndpoint()
-		indexing := opts.WaybackMeiliIndexing()
-		apikey := opts.WaybackMeiliApikey()
-		meili := service.NewMeili(endpoint, apikey, indexing)
-		if err := meili.Setup(); err != nil {
-			t.Errorf("setup meilisearch failed: %v", err)
-		}
 	}
 
 	getUpdatesJSON = `{

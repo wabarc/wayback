@@ -6,26 +6,13 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"context"
-	"math/rand"
-	"os"
-	"strings"
-	"time"
+	"sync"
 
-	"github.com/dghubble/go-twitter/twitter"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/reduxer"
-	"golang.org/x/sync/errgroup"
-
-	discord "github.com/bwmarrin/discordgo"
-	mstdn "github.com/mattn/go-mastodon"
-	nostr "github.com/nbd-wtf/go-nostr"
-	slack "github.com/slack-go/slack"
-	irc "github.com/thoj/go-ircevent"
-	telegram "gopkg.in/telebot.v3"
-	matrix "maunium.net/go/mautrix"
 )
 
 // Flag represents a type of uint8
@@ -41,19 +28,17 @@ const (
 	FlagSlack                // FlagSlack publish from slack service
 	FlagNostr                // FlagSlack publish from nostr
 	FlagIRC                  // FlagIRC publish from relaychat service
+	FlagNotion               // FlagNotion is a flag for notion publish service
+	FlagGitHub               // FlagGitHub is a flag for github publish service
+	FlagMeili                // FlagMeili is a flag for meilisearch publish service
 )
-
-var maxDelayTime = 10
-
-// PubBundle represents a context key with value of `reduxer.Reduxer`.
-type PubBundle struct{}
 
 // Publisher is the interface that wraps the basic Publish method.
 //
 // Publish publish message to serveral media platforms, e.g. Telegram channel, GitHub Issues, etc.
 // The cols must either be a []wayback.Collect, args use for specific service.
 type Publisher interface {
-	Publish(ctx context.Context, cols []wayback.Collect, args ...string) error
+	Publish(context.Context, reduxer.Reduxer, []wayback.Collect, ...string) error
 }
 
 // String returns the flag as a string.
@@ -77,206 +62,91 @@ func (f Flag) String() string {
 		return "nostr"
 	case FlagIRC:
 		return "irc"
+	case FlagNotion:
+		return "notion"
+	case FlagGitHub:
+		return "github"
+	case FlagMeili:
+		return "meilisearch"
 	default:
 		return "unknown"
 	}
 }
 
-func process(ctx context.Context, pub Publisher, cols []wayback.Collect, args ...string) {
-	// Compose the collects into multiple parts by URI
-	var parts = make(map[string][]wayback.Collect)
-	for _, col := range cols {
-		parts[col.Src] = append(parts[col.Src], col)
+// Publish handles options for publish service.
+type Publish struct {
+	opts *config.Options
+	pool *pooling.Pool
+}
+
+// New creates a Publish struct with the given context and configuration
+// options. It initializes a new pooling with the context and options, and
+// parses all available modules.
+//
+// Returns a new Publish with the provided options and pooling.
+func New(ctx context.Context, opts *config.Options) *Publish {
+	// parse all modules
+	parseModule(opts)
+
+	cfg := []pooling.Option{
+		pooling.Capacity(len(publishers)),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
 	}
+	pool := pooling.New(ctx, cfg...)
 
-	f := from(args...)
-	g, ctx := errgroup.WithContext(ctx)
-	for _, part := range parts {
-		logger.Debug("[%s] produce part: %#v", f, part)
+	return &Publish{opts: opts, pool: pool}
+}
 
-		part := part
-		g.Go(func() error {
-			// Nice for target server. It should be skipped on the testing mode.
-			if !strings.HasSuffix(os.Args[0], ".test") {
-				rand.Seed(time.Now().UnixNano())
-				r := rand.Intn(maxDelayTime) //nolint:gosec,goimports
-				w := time.Duration(r) * time.Second
-				logger.Debug("[%s] produce sleep %d second", f, r)
-				time.Sleep(w)
-			}
+// Start starts the publish service on the underlying pooling service. It is
+// blocking and should be handled in a separate goroutine.
+func (p *Publish) Start() {
+	p.pool.Roll()
+}
 
-			ch := make(chan error, 1)
-			go func() {
-				ch <- pub.Publish(ctx, part, args...)
-			}()
+// Stop stop the Publish pooling. It waits until the pool status
+// is idle and then calls Stop on the pool.
+//
+// Stop uses a sync.Once to ensure that Stop is only called once.
+func (p *Publish) Stop() {
+	var once sync.Once
+	for {
+		if p.pool.Status() == pooling.StatusIdle {
+			once.Do(func() {
+				p.pool.Close()
+			})
+			return
+		}
+	}
+}
 
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			case err := <-ch:
-				close(ch)
+// Spread accepts calls from services that with collections and various parameters.
+// It prepare all available publishers and put them into pooling.
+func (p *Publish) Spread(ctx context.Context, rdx reduxer.Reduxer, cols []wayback.Collect, from Flag, args ...string) {
+	for flag := range publishers {
+		flag := flag
+		mod, err := loadPublisher(flag)
+		if err != nil {
+			logger.Warn("load publisher failed: %v", err)
+			continue
+		}
+		if mod == nil {
+			logger.Error("module %s is nil", flag)
+			continue
+		}
+		bucket := pooling.Bucket{
+			Request: func(_ context.Context) error {
+				logger.Info("requesting publishing from [%s] to [%s]...", from, flag)
+				err := mod.Publish(ctx, rdx, cols, args...)
+				if err != nil {
+					logger.Error("requesting publishing from [%s] to [%s] failed: %v", from, flag, err)
+				}
 				return err
-			}
-		})
-	}
-	if err := g.Wait(); err != nil {
-		logger.Error("[%s] produce failed: %v", f, err)
-		return
-	}
-}
-
-func from(args ...string) (f string) {
-	if len(args) > 0 {
-		f = args[0]
-	}
-	return f
-}
-
-// To publish to specific destination services
-// nolint:gocyclo
-func To(ctx context.Context, opts *config.Options, cols []wayback.Collect, args ...string) {
-	f := from(args...)
-	channel := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if opts.PublishToChannel() {
-			logger.Debug("[%s] publishing to telegram channel...", f)
-			var bot *telegram.Bot
-			if rev, ok := ctx.Value(FlagTelegram).(*telegram.Bot); ok {
-				bot = rev
-			}
-			pub := NewTelegram(bot, opts)
-			process(ctx, pub, cols, args...)
+			},
+			Fallback: func(_ context.Context) error {
+				return nil
+			},
 		}
+		p.pool.Put(bucket)
 	}
-	notion := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if opts.PublishToNotion() {
-			logger.Debug("[%s] publishing to Notion...", f)
-			pub := NewNotion(nil, opts)
-			process(ctx, pub, cols, args...)
-		}
-	}
-	issue := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if opts.PublishToIssues() {
-			logger.Debug("[%s] publishing to GitHub issues...", f)
-			pub := NewGitHub(nil, opts)
-			process(ctx, pub, cols, args...)
-		}
-	}
-	mastodon := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if opts.PublishToMastodon() {
-			logger.Debug("[%s] publishing to Mastodon...", f)
-			var client *mstdn.Client
-			if rev, ok := ctx.Value(FlagMastodon).(*mstdn.Client); ok {
-				client = rev
-			}
-			pub := NewMastodon(client, opts)
-			process(ctx, pub, cols, args...)
-		}
-	}
-	discord := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if opts.PublishToDiscordChannel() {
-			logger.Debug("[%s] publishing to Discord channel...", f)
-			var s *discord.Session
-			if rev, ok := ctx.Value(FlagDiscord).(*discord.Session); ok {
-				s = rev
-			}
-			pub := NewDiscord(s, opts)
-			process(ctx, pub, cols, args...)
-		}
-	}
-	matrix := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if opts.PublishToMatrixRoom() {
-			logger.Debug("[%s] publishing to Matrix room...", f)
-			var client *matrix.Client
-			if rev, ok := ctx.Value(FlagMatrix).(*matrix.Client); ok {
-				client = rev
-			}
-			pub := NewMatrix(client, opts)
-			process(ctx, pub, cols, args...)
-		}
-	}
-	twitter := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if opts.PublishToTwitter() {
-			logger.Debug("[%s] publishing to Twitter...", f)
-			var client *twitter.Client
-			if rev, ok := ctx.Value(FlagTwitter).(*twitter.Client); ok {
-				client = rev
-			}
-			pub := NewTwitter(client, opts)
-			process(ctx, pub, cols, args...)
-		}
-	}
-	slack := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if opts.PublishToSlackChannel() {
-			logger.Debug("[%s] publishing to Slack...", f)
-			var client *slack.Client
-			if rev, ok := ctx.Value(FlagTwitter).(*slack.Client); ok {
-				client = rev
-			}
-			pub := NewSlack(client, opts)
-			process(ctx, pub, cols, args...)
-		}
-	}
-	nostr := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if opts.PublishToNostr() {
-			logger.Debug("[%s] publishing to Nostr...", f)
-			var client *nostr.Relay
-			if rev, ok := ctx.Value(FlagNostr).(*nostr.Relay); ok {
-				client = rev
-			}
-			pub := NewNostr(client, opts)
-			process(ctx, pub, cols, args...)
-		}
-	}
-	irc := func(ctx context.Context, cols []wayback.Collect, args ...string) {
-		if opts.PublishToIRCChannel() {
-			logger.Debug("[%s] publishing to IRC channel...", f)
-			var conn *irc.Connection
-			if rev, ok := ctx.Value(FlagIRC).(*irc.Connection); ok {
-				conn = rev
-			}
-			pub := NewIRC(conn, opts)
-			process(ctx, pub, cols, args...)
-		}
-	}
-	funcs := map[string]func(context.Context, []wayback.Collect, ...string){
-		"channel":  channel,
-		"notion":   notion,
-		"issue":    issue,
-		"mastodon": mastodon,
-		"discord":  discord,
-		"matrix":   matrix,
-		"twitter":  twitter,
-		"slack":    slack,
-		"nostr":    nostr,
-		"irc":      irc,
-	}
-
-	g, ctx := errgroup.WithContext(ctx)
-	for k, fn := range funcs {
-		logger.Debug(`[%s] processing func %s`, f, k)
-		fn := fn
-		g.Go(func() error {
-			fn(ctx, cols, args...)
-			return nil
-		})
-	}
-	if err := g.Wait(); err != nil {
-		logger.Error("[%s] process failed: %v", f, err)
-	}
-}
-
-func extract(ctx context.Context, cols []wayback.Collect) (rdx reduxer.Reduxer, art reduxer.Artifact, err error) {
-	if len(cols) == 0 {
-		return rdx, art, errors.New("no collect")
-	}
-
-	var ok bool
-	var uri = cols[0].Src
-	if rdx, ok = ctx.Value(PubBundle{}).(reduxer.Reduxer); ok {
-		if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
-			return rdx, bundle.Artifact(), nil
-		}
-		return rdx, art, errors.New("reduxer data not found")
-	}
-	return rdx, art, errors.New("invalid reduxer")
 }

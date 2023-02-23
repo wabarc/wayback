@@ -40,10 +40,11 @@ type Discord struct {
 	store *storage.Storage
 	opts  *config.Options
 	pool  *pooling.Pool
+	pub   *publish.Publish
 }
 
 // New returns a Discord struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *Discord {
+func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Discord {
 	if opts.DiscordBotToken() == "" {
 		logger.Fatal("missing required environment variable")
 	}
@@ -55,6 +56,9 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 	}
 	if pool == nil {
 		logger.Fatal("must initialize pooling")
+	}
+	if pub == nil {
+		logger.Fatal("must initialize publish")
 	}
 	bot, err := discord.New("Bot " + opts.DiscordBotToken())
 	if err != nil {
@@ -75,6 +79,7 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 		store: store,
 		opts:  opts,
 		pool:  pool,
+		pub:   pub,
 	}
 }
 
@@ -305,9 +310,7 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 
 		// Avoid republishing
 		if m.ChannelID != d.opts.DiscordChannel() {
-			ctx = context.WithValue(ctx, publish.FlagDiscord, d.bot)
-			ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-			publish.To(ctx, d.opts, cols, publish.FlagDiscord.String())
+			d.pub.Spread(ctx, rdx, cols, publish.FlagDiscord)
 		}
 
 		msg := &discord.MessageSend{Content: replyText, Reference: stage.Message.Reference()}

@@ -48,10 +48,11 @@ type Telegram struct {
 	store *storage.Storage
 	opts  *config.Options
 	pool  *pooling.Pool
+	pub   *publish.Publish
 }
 
 // New Telegram struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *Telegram {
+func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Telegram {
 	if opts.TelegramToken() == "" {
 		logger.Fatal("missing required environment variable")
 	}
@@ -63,6 +64,9 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 	}
 	if pool == nil {
 		logger.Fatal("must initialize pooling")
+	}
+	if pub == nil {
+		logger.Fatal("must initialize publish")
 	}
 	bot, err := telegram.NewBot(telegram.Settings{
 		Token: opts.TelegramToken(),
@@ -89,6 +93,7 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 		store: store,
 		opts:  opts,
 		pool:  pool,
+		pub:   pub,
 	}
 }
 
@@ -272,9 +277,7 @@ func (t *Telegram) wayback(ctx context.Context, request *telegram.Message, urls 
 			return errors.Wrap(err, "telegram: update message failed")
 		}
 
-		ctx = context.WithValue(ctx, publish.FlagTelegram, t.bot)
-		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		publish.To(ctx, t.opts, cols, publish.FlagTelegram.String())
+		t.pub.Spread(ctx, rdx, cols, publish.FlagTelegram)
 
 		var albums telegram.Album
 		var head = render.Title(cols, rdx)

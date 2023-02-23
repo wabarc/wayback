@@ -19,6 +19,7 @@ import (
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
+	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/storage"
 )
 
@@ -84,16 +85,24 @@ func TestProcess(t *testing.T) {
 		}()
 	})
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx := context.Background()
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 	defer pool.Close()
+
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
 
 	// Receive privmsg from sender
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
 			done <- true
-			i := New(context.Background(), &storage.Storage{}, opts, pool)
+			i := New(context.Background(), &storage.Storage{}, opts, pool, pub)
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
 			if err = i.process(context.Background(), ev); err != nil {
@@ -181,17 +190,25 @@ func TestToIRCChannel(t *testing.T) {
 		}()
 	})
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx := context.Background()
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 	defer pool.Close()
+
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
 
 	// Receive privmsg from sender
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
 			done <- true
 			ctx := context.Background()
-			i := New(ctx, &storage.Storage{}, opts, pool)
+			i := New(ctx, &storage.Storage{}, opts, pool, pub)
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
 			if err = i.process(ctx, ev); err != nil {

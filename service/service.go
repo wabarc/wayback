@@ -51,12 +51,9 @@ func Wayback(ctx context.Context, opts *config.Options, urls []*url.URL, do doFu
 		if err != nil {
 			return err
 		}
-		defer rdx.Flush()
+		// Keep reduxer for publish
+		// defer rdx.Flush()
 
-		// push collects to the Meilisearch
-		if meili != nil {
-			meili.push(cols) // nolint:errcheck
-		}
 		return do(cols, rdx)
 	}
 }

@@ -38,10 +38,11 @@ type Matrix struct {
 	pool   *pooling.Pool
 	client *matrix.Client
 	store  *storage.Storage
+	pub    *publish.Publish
 }
 
 // New Matrix struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *Matrix {
+func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Matrix {
 	if opts.MatrixUserID() == "" || opts.MatrixPassword() == "" || opts.MatrixHomeserver() == "" {
 		logger.Fatal("missing required environment variable")
 	}
@@ -53,6 +54,9 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 	}
 	if pool == nil {
 		logger.Fatal("must initialize pooling")
+	}
+	if pub == nil {
+		logger.Fatal("must initialize publish")
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -74,6 +78,7 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 
 	return &Matrix{
 		ctx:    ctx,
+		pub:    pub,
 		opts:   opts,
 		pool:   pool,
 		client: client,
@@ -206,9 +211,7 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 			logger.Error("mark message as receipt failure: %v", err)
 		}
 
-		ctx = context.WithValue(ctx, publish.FlagMatrix, m.client)
-		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		publish.To(ctx, m.opts, cols, publish.FlagMatrix.String())
+		m.pub.Spread(ctx, rdx, cols, publish.FlagMatrix)
 		return nil
 	}
 

@@ -184,6 +184,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 			if er != nil {
 				return errors.Wrap(er, "capture failed")
 			}
+			logger.Debug("capture results: %#v", shot)
 
 			artifact := &Artifact{
 				Img:  Asset{Local: fmt.Sprint(shot.Image)},

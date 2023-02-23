@@ -60,6 +60,7 @@ type Slack struct {
 	store  *storage.Storage
 	opts   *config.Options
 	pool   *pooling.Pool
+	pub    *publish.Publish
 }
 
 type event struct {
@@ -67,7 +68,7 @@ type event struct {
 }
 
 // New Slack struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *Slack {
+func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Slack {
 	if opts.SlackBotToken() == "" {
 		logger.Fatal("missing required environment variable")
 	}
@@ -79,6 +80,9 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 	}
 	if pool == nil {
 		logger.Fatal("must initialize pooling")
+	}
+	if pub == nil {
+		logger.Fatal("must initialize publish")
 	}
 	bot := slack.New(
 		opts.SlackBotToken(),
@@ -102,6 +106,7 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 	return &Slack{
 		ctx:    ctx,
 		bot:    bot,
+		pub:    pub,
 		client: client,
 		store:  store,
 		opts:   opts,
@@ -323,9 +328,7 @@ func (s *Slack) wayback(ctx context.Context, ev *event, urls []*url.URL) error {
 			return err
 		}
 
-		ctx = context.WithValue(ctx, publish.FlagSlack, s.bot)
-		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		go publish.To(ctx, s.opts, cols, publish.FlagSlack.String())
+		s.pub.Spread(ctx, rdx, cols, publish.FlagSlack)
 
 		var head = render.Title(cols, rdx)
 

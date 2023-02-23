@@ -37,6 +37,7 @@ type Twitter struct {
 	pool   *pooling.Pool
 	client *twitter.Client
 	store  *storage.Storage
+	pub    *publish.Publish
 
 	archiving map[string]bool
 
@@ -44,7 +45,7 @@ type Twitter struct {
 }
 
 // New returns Twitter struct.
-func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool) *Twitter {
+func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool *pooling.Pool, pub *publish.Publish) *Twitter {
 	if !opts.PublishToTwitter() {
 		logger.Fatal("missing required environment variable")
 	}
@@ -57,6 +58,9 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 	if pool == nil {
 		logger.Fatal("must initialize pooling")
 	}
+	if pub == nil {
+		logger.Fatal("must initialize publish")
+	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -68,6 +72,7 @@ func New(ctx context.Context, store *storage.Storage, opts *config.Options, pool
 
 	return &Twitter{
 		ctx:    ctx,
+		pub:    pub,
 		opts:   opts,
 		pool:   pool,
 		client: client,
@@ -201,9 +206,7 @@ func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent)
 			resp.Body.Close()
 		}()
 
-		ctx = context.WithValue(ctx, publish.FlagTwitter, t.client)
-		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		publish.To(ctx, t.opts, cols, publish.FlagTwitter.String())
+		t.pub.Spread(ctx, rdx, cols, publish.FlagTwitter)
 		return nil
 	}
 

@@ -17,6 +17,7 @@ import (
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
+	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/storage"
 	"maunium.net/go/mautrix/event"
 	"maunium.net/go/mautrix/id"
@@ -119,12 +120,20 @@ func senderClient(t *testing.T) *Matrix {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx := context.Background()
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 	defer pool.Close()
 
-	return New(ctx, &storage.Storage{}, opts, pool)
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
+
+	return New(ctx, &storage.Storage{}, opts, pool, pub)
 }
 
 func recverClient(t *testing.T) *Matrix {
@@ -136,12 +145,20 @@ func recverClient(t *testing.T) *Matrix {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx := context.Background()
-	pool := pooling.New(ctx, opts)
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 	defer pool.Close()
 
-	return New(ctx, &storage.Storage{}, opts, pool)
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
+
+	return New(ctx, &storage.Storage{}, opts, pool, pub)
 }
 
 // nolint:gocyclo
