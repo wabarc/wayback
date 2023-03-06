@@ -6,7 +6,7 @@ Welcome to our list of resources about archiving services!
 
 In this collection, we have curated a variety of tools, platforms, and projects that offer archiving solutions for various types of data and content.
 Archiving services are important for preserving information and ensuring its availability for future generations.
-Whether you are a researcher, a historian, or simply interested in preserving your own content, these resources can help you achieve your goals.
+Whether you are a researcher, a historian, or interested in preserving your own content, these resources can help you achieve your goals.
 From the popular Wayback Machine to lesser-known platforms, there is something here for everyone.
 
 ## Organizations

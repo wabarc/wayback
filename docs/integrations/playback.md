@@ -41,9 +41,9 @@ Playback is seamlessly integrated into Wayback to enhance the user experience. I
 ### Instant messaging tools
 
 Instant messaging tools such as Discord, Matrix, Slack and Telegram all have a playback feature that can be accessed using the same command: `/playback`.
-Simply enter `/playback https://example.com` and wait for the response.
+Enter `/playback https://example.com` and wait for the response.
 
 ### Others
 
-To use Playback on Mastodon, simply send a message to the bot with the keyword `/playback` at the beginning and the URI you wish to playback.
+To use Playback on Mastodon, send a message to the bot with the keyword `/playback` at the beginning and the URI you wish to playback.
 Then, wait a moment for the bot to respond.

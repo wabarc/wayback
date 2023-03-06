@@ -1,3 +1,7 @@
+---
+title: Deployment
+---
+
 Wayback can be deployed using Docker/Podman containers, and can also be easily deployed on cloud platforms such as Heroku and Render.
 
 ## Docker/Podman
