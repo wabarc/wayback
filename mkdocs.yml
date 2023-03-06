@@ -1,0 +1,113 @@
+site_name: Wayback Documentation
+site_url: https://wabarc.eu.org/
+site_description: A self-hosted toolkit for archiving webpages to the Internet Archive, archive.today, IPFS, and various file systems.
+site_author: Wayback Archiver
+
+repo_name: wabarc/wayback
+repo_url: https://github.com/wabarc/wayback
+edit_uri: blob/main/docs/
+
+theme:
+  name: material
+  language: en
+  font: false
+  logo: assets/logo.png
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+  features:
+    - header.autohide
+    - navigation.footer
+    - content.code.copy
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+      accent: blue
+      primary: white
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+      accent: blue
+      primary: indigo
+
+nav:
+  - Introduction: 'index.md'
+  - Installation: 'installation.md'
+  - Usage:
+    - 'Command Line': 'command-line.md'
+    - 'Service': 'service.md'
+  - Deployment: 'deployment.md'
+  - Integrations:
+    - Discord: 'integrations/discord.md'
+    - IRC: 'integrations/irc.md'
+    - Mastodon: 'integrations/mastodon.md'
+    - Matrix: 'integrations/matrix.md'
+    - Slack: 'integrations/slack.md'
+    - Telegram: 'integrations/telegram.md'
+    - Twitter: 'integrations/twitter.md'
+    - Web Service: 'integrations/web.md'
+    - XMPP: 'integrations/xmpp.md'
+    - Notion: 'integrations/notion.md'
+    - Nostr: 'integrations/nostr.md'
+    - Meilisearch: 'integrations/meilisearch.md'
+    - Playback: 'integrations/playback.md'
+    - 'Internet Archive': 'integrations/internet-archive.md'
+    - 'Archive.today': 'integrations/archive-today.md'
+    - 'Telegraph': 'integrations/telegraph.md'
+    - 'IPFS': 'integrations/ipfs.md'
+    - Metrics: 'integrations/metrics.md'
+  - Resources: 'resources.md'
+  - Changelog: 'changelog.md'
+  - Contributing: 'contributing.md'
+  - 'Privacy Policy': 'privacy.md'
+  - Troubleshooting: 'troubleshooting.md'
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/wabarc
+      name: Wayback Archver
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/wabarc_bot
+      name: Wayback Archver Bot
+    - icon: fontawesome/brands/discord
+      link: https://discord.com/api/oauth2/authorize?client_id=863324809206169640&permissions=2147796992&scope=bot%20applications.commands
+      name: Wayback Archver Bot
+    - icon: fontawesome/brands/mastodon
+      link: https://mstdn.social/@wabarcbot
+      name: Wayback Archver Bot
+    - icon: fontawesome/solid/globe
+      link: https://wabarc.eu.org/
+      name: Web
+    - icon: fontawesome/solid/circle
+      link: http://wabarcoww2bxmdbixj7sjwggv3fonh2rpflfiildegcydk5udkdckdyd.onion/
+      name: Tor Hidden Service
+    - icon: fontawesome/solid/spinner
+      link: https://wabarcstatus.eu.org/
+      name: Wayback Archver Status
+  generator: false
+
+markdown_extensions:
+  - tables:
+
+copyright: Copyright 2023 Wayback Archiver.
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+      fallback_to_build_date: true
+
+watch:
+  - docs
+
+extra_css:
+  - assets/extra.css

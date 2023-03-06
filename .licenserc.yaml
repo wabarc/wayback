@@ -23,6 +23,7 @@ header:
     - 'build/package'
     - 'build/docker/Dockerfile.*'
     - 'build/systemd/wayback.service'
+    - 'docs/assets/*'
     - '**/*.md'
     - '**/*.out'
     - '**/*.json'
@@ -40,5 +41,6 @@ header:
     - 'Procfile'
     - 'cosign.pub'
     - 'codecov.yml'
+    - 'mkdocs.yml'
 
   comment: on-failure

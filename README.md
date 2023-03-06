@@ -20,15 +20,16 @@ Supported Golang version: See [.github/workflows/testing.yml](./.github/workflow
 
 ## Features
 
-- Cross platform
-- Batch wayback URLs
-- Builtin CLI (`wayback`)
-- Serve as Tor Hidden Service or local web entry
-- Wayback to Internet Archive, archive.today, IPFS and Telegraph easier
-- Interactive with IRC, Martix, Telegram bot, Discord bot, Mastodon and Twitter as daemon service
-- Supports publish wayback results to Telegram channel, Mastodon and GitHub Issues
-- Supports store archived files to disk
-- Download stream media (requires [FFmpeg](https://ffmpeg.org/))
+- Free and open-source
+- Cross-platform compatibility
+- Batch wayback URLs for faster archiving
+- Built-in CLI (`wayback`) for easy use
+- Serve as a Tor Hidden Service or local web entry for added privacy and accessibility
+- Easier wayback to Internet Archive, archive.today, IPFS and Telegraph integration
+- Interactive with IRC, Matrix, Telegram bot, Discord bot, Mastodon, and Twitter as a daemon service for convenient use
+- Supports publishing wayback results to Telegram channel, Mastodon, and GitHub Issues for easy sharing
+- Supports storing archived files to disk for offline use
+- Download streaming media (requires [FFmpeg](https://ffmpeg.org/)) for convenient media archiving.
 
 ## Installation
 
@@ -320,37 +321,9 @@ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANN
 - [wabarc/on-github](https://github.com/wabarc/on-github)
 - [wabarc/on-render](https://github.com/wabarc/on-render)
 
-## TODO
+## Documentation
 
-[Archive.org](https://web.archive.org/) and [Archive.today](https://archive.today/) are currently supported, the next step mind support the followings platform:
-
-- [x] [IPFS](https://ipfs.io/)
-- [ ] ~~[ZeroNet](https://zeronet.io/)~~
-
-## Services
-
-### Telegram bot
-
-- [Bots: An introduction for developers](https://core.telegram.org/bots)
-- [How do I create a bot?](https://core.telegram.org/bots#3-how-do-i-create-a-bot)
-- [An example bot](http://t.me/wabarc_bot)
-- [An example channel](http://t.me/wabarc)
-
-### Mastodon bot
-
-Bot friendly instance:
-
-- [botsin.space](https://botsin.space/about/more)
-
-## F.A.Q
-
-**Q: How to keep the Tor hidden service hostname?**
-
-A: For the first time to run the `wayback` service, keep the key from the output message (the key is the part after `private key:` below)
-and next time to run the `wayback` service to place the key to the `--tor-key` option or the `WAYBACK_TOR_PRIVKEY` environment variable.
-```text
-[INFO] Web: important to keep the private key: d005473a611d2b23e54d6446dfe209cb6c52ddd698818d1233b1d750f790445fcfb5ece556fe5ee3b4724ac6bea7431898ee788c6011febba7f779c85845ae87
-```
+For a comprehensive guide, please refer to the complete [documentation](https://docs.wabarc.eu.org/).
 
 ## Contributing
 
