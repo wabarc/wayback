@@ -1,8 +1,8 @@
-# Copyright 2020 Wayback Archiver. All rights reserved.
+# Copyright 2023 Wayback Archiver. All rights reserved.
 # Use of this source code is governed by the GNU GPL v3
 # license that can be found in the LICENSE file.
 #
-name: Generate Documents
+name: Pages
 
 on:
   push:
@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Pages
+    name: Generate Documents
     runs-on: ubuntu-latest
     permissions:
       pages: write      # to deploy to Pages
