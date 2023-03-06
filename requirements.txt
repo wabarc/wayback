@@ -6,5 +6,5 @@ pygments>=2.14
 pymdown-extensions>=9.9
 
 # MkDocs Plugins
-mkdocs-exclude-search
-mkdocs-git-revision-date-localized-plugin
+mkdocs-exclude-search>=0.6.5
+mkdocs-git-revision-date-localized-plugin>=1.2.0

@@ -102,6 +102,9 @@ copyright: Copyright 2023 Wayback Archiver.
 
 plugins:
   - search
+  - exclude-search:
+      exclude:
+        - assets/*
   - git-revision-date-localized:
       enable_creation_date: true
       fallback_to_build_date: true
