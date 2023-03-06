@@ -9,7 +9,7 @@ Whether you need to archive a single web page or a large collection of websites,
 - Free and open-source
 - Cross-platform compatibility
 - Batch wayback URLs for faster archiving
-- Built-in CLI (`wayback`) for easy use
+- Built-in CLI (`wayback`) for convenient use
 - Serve as a Tor Hidden Service or local web entry for added privacy and accessibility
 - Easier wayback to Internet Archive, archive.today, IPFS and Telegraph integration
 - Interactive with IRC, Matrix, Telegram bot, Discord bot, Mastodon, and Twitter as a daemon service for convenient use
