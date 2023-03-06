@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for reads from stdin and files ([#301](https://github.com/wabarc/wayback/pull/301))
 - Add support for publish to Nostr ([#311](https://github.com/wabarc/wayback/pull/311))
   - Message content styling
+- Add documentation ([#330](https://github.com/wabarc/wayback/pull/330))
 
 ### Changed
 - Sign images using cosign
