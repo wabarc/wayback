@@ -1,0 +1,70 @@
+# Copyright 2023 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the GNU GPL v3
+# license that can be found in the LICENSE file.
+#
+name: Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - docs/**
+      - mkdocs.yml
+      - retuirements.txt
+      - .github/workflows/mkdocs.yml
+  workflow_dispatch:
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Generate Documents
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@c8454efe5d0bdefd25384362fe217428ca277d57 # v2.2.0
+        with:
+          egress-policy: block
+          disable-telemetry: true
+          allowed-endpoints: >
+            api.github.com:443
+
+      - name: Check out code base
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435 # v4.5.0
+        with:
+          python-version: '3.x'
+
+      - name: Install Requirements
+        run: |
+          pip install -r requirements.txt
+
+      - name: Generate Documents
+        run: |
+          mkdocs build
+
+      - name: Upload Pages
+        uses: actions/upload-pages-artifact@253fd476ed429e83b7aae64a92a75b4ceb1a17cf # v1.0.7
+        with:
+          path: 'site'
+
+      - name: Deployment
+        uses: actions/deploy-pages@0243b6c10d06cb8e95ed8ee471231877621202c0 # v1.2.4
+        id: deployment

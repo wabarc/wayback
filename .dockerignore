@@ -3,5 +3,8 @@
 # license that can be found in the LICENSE file.
 #
 #.git
-.github
+.docs/
+.github/
+mkdocs.yml
 snapcraft.yaml
+requirements.txt
