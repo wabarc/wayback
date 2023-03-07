@@ -612,8 +612,10 @@ github.com/wabarc/rivet v0.1.4-0.20221226142645-ebc8a29d914f h1:fkaTPNIalAj8i51B
 github.com/wabarc/rivet v0.1.4-0.20221226142645-ebc8a29d914f/go.mod h1:lNEgL14wbyTc+ZNQPM+QtEZcQjB0AifzlWJbRJYQn/A=
 github.com/wabarc/screenshot v1.6.0 h1:9yOZY7pGWpDjZ+ms/p5qQVGydhuqfmoAzuKZHdSJ9JU=
 github.com/wabarc/screenshot v1.6.0/go.mod h1:At9pHrT/gNDStXkgJgcffBzeeXHDSDQ8ZbnV4D8LsMM=
-github.com/wabarc/telegra.ph v0.0.0-20221226141851-edf1cc14c076 h1:ROaObhmSdKVnqhrxYHxE/AURsNjtdEz12TswRLNPQW4=
-github.com/wabarc/telegra.ph v0.0.0-20221226141851-edf1cc14c076/go.mod h1:5dfqXIK1Hbdv/4YQtf+S8M1GTwkKSITNhoQmOnfNoRE=
+github.com/wabarc/telegra.ph v0.0.0-20230307133216-c32e2918c357 h1:V+WoahcC5nKs7vaIAsDVtFzRuI9ylSnLJRu6n456+Lc=
+github.com/wabarc/telegra.ph v0.0.0-20230307133216-c32e2918c357/go.mod h1:2963vAMhfynk5veYttI91D4yvRUBu4h9GM9rXwD6K/Y=
+github.com/wabarc/telegra.ph v0.0.0-20230307134147-ee933706f1ff h1:NCLfyBVwzwS8ZeUzTHVeLqI/cdUfbTE47yzDZaGFIhs=
+github.com/wabarc/telegra.ph v0.0.0-20230307134147-ee933706f1ff/go.mod h1:2963vAMhfynk5veYttI91D4yvRUBu4h9GM9rXwD6K/Y=
 github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5 h1:jY/jqIy/ddCMWWWuTIeAazE5F4QW8HAIvlI69XMJ1ew=
 github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5/go.mod h1:/BbCwReBjlqHRaw8Yh+7sfAicOesiMYNhiFpuL1x8Rc=
 github.com/whyrusleeping/tar-utils v0.0.0-20180509141711-8c6c8ba81d5c/go.mod h1:xxcJeBb7SIUl/Wzkz1eVKJE/CB34YNrqX2TQI6jY9zs=

@@ -7,9 +7,11 @@ package wayback // import "github.com/wabarc/wayback"
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/playback"
@@ -26,6 +28,9 @@ import (
 
 	pinner "github.com/wabarc/ipfs-pinner"
 )
+
+// TODO: find a better way to handle it
+var client = &http.Client{Timeout: 30 * time.Second}
 
 // Collect results that archived, Arc is name of the archive service,
 // Dst mapping the original URL and archived destination URL,
@@ -143,7 +148,7 @@ func (i IP) Wayback(rdx reduxer.Reduxer) string {
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the PH and returns archived URL as a string.
 func (i PH) Wayback(rdx reduxer.Reduxer) string {
-	arc := &ph.Archiver{}
+	arc := ph.New(client)
 	uri := i.URL.String()
 	ctx := i.ctx
 

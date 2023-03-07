@@ -18,6 +18,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
@@ -157,10 +158,18 @@ func TestSingleFile(t *testing.T) {
 		t.Fatal(`unexpected sample html page`)
 	}
 
+	opts, err := config.NewParser().ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
 	uri := server.URL
 	filename := helper.RandString(5, "")
-	ctx := context.WithValue(context.Background(), ctxBasenameKey, filename)
-	got := singleFile(ctx, strings.NewReader(content), dir, uri)
+	ctx = context.WithValue(ctx, ctxBasenameKey, filename)
+	got := singleFile(ctx, opts, strings.NewReader(content), dir, uri)
 	buf, _ := os.ReadFile(got)
 	if !strings.Contains(string(buf), exp) {
 		t.Fatal(`unexpected archive webpage as a single file`)

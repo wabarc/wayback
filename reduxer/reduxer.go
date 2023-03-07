@@ -153,7 +153,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 	}
 
 	var warc = &warcraft.Warcraft{BasePath: dir, UserAgent: opts.WaybackUserAgent()}
-	var craft = func(in *url.URL) (path string) {
+	var craft = func(ctx context.Context, in *url.URL) (path string) {
 		path, err = warc.Download(ctx, in)
 		if err != nil {
 			logger.Debug("create warc for %s failed: %v", in.String(), err)
@@ -181,7 +181,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 				Raw:  Asset{Local: fmt.Sprint(shot.HTML)},
 				PDF:  Asset{Local: fmt.Sprint(shot.PDF)},
 				HAR:  Asset{Local: fmt.Sprint(shot.HAR)},
-				WARC: Asset{Local: craft(uri)},
+				WARC: Asset{Local: craft(ctx, uri)},
 			}
 
 			fp := filepath.Join(dir, basename)
@@ -200,7 +200,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 			var article readability.Article
 			buf, err = os.ReadFile(fmt.Sprint(shot.HTML))
 			if err == nil {
-				singleFilePath := singleFile(ctx, bytes.NewReader(buf), dir, shot.URL)
+				singleFilePath := singleFile(ctx, opts, bytes.NewReader(buf), dir, shot.URL)
 				artifact.HTM.Local = singleFilePath
 			}
 			article, err = readability.FromReader(bytes.NewReader(buf), uri)
@@ -345,11 +345,12 @@ func remotely(ctx context.Context, artifact *Artifact) (err error) {
 	return nil
 }
 
-func singleFile(ctx context.Context, inp io.Reader, dir, uri string) string {
+func singleFile(ctx context.Context, opts *config.Options, inp io.Reader, dir, uri string) string {
 	req := obelisk.Request{URL: uri, Input: inp}
 	arc := &obelisk.Archiver{
 		SkipResourceURLError: true,
 		RequestTimeout:       3 * time.Second,
+		EnableVerboseLog:     opts.HasDebugMode(),
 	}
 	arc.Validate()
 
