@@ -39,6 +39,7 @@ jobs:
           egress-policy: block
           disable-telemetry: true
           allowed-endpoints: >
+            github.com:443
             api.github.com:443
 
       - name: Check out code base
