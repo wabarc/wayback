@@ -1,5 +1,6 @@
 [Unit]
 Description=Wayback webpage
+Documentation=https://docs.wabarc.eu.org/
 After=network.target
 
 [Service]
