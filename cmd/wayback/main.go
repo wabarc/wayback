@@ -163,28 +163,29 @@ func handle(cmd *cobra.Command, args []string) {
 	setToEnv(cmd)
 	parser := config.NewParser()
 
+	var opts *config.Options
 	if len(daemon) > 0 {
 		logger.Info("Run wayback using configuration file")
-		if config.Opts, err = parser.ParseFile(configFile); err != nil {
+		if _, err = parser.ParseFile(configFile); err != nil {
 			logger.Fatal("Parse configuration file failed, error: %v", err)
 		}
 	}
 
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	if opts, err = parser.ParseEnvironmentVariables(); err != nil {
 		logger.Fatal("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	if !config.Opts.LogTime() {
+	if !opts.LogTime() {
 		logger.DisableTime()
 	}
 
-	logger.SetLogLevel(config.Opts.LogLevel())
-	if debug || config.Opts.HasDebugMode() {
+	logger.SetLogLevel(opts.LogLevel())
+	if debug || opts.HasDebugMode() {
 		profiling()
 		logger.EnableDebug()
 	}
 
-	if config.Opts.EnabledMetrics() {
+	if opts.EnabledMetrics() {
 		metrics.Gather = metrics.NewCollector()
 	}
 
@@ -194,7 +195,7 @@ func handle(cmd *cobra.Command, args []string) {
 	}
 
 	if print {
-		cmd.Println(spew.Sdump(config.Opts))
+		cmd.Println(spew.Sdump(opts))
 		return
 	}
 
@@ -204,9 +205,9 @@ func handle(cmd *cobra.Command, args []string) {
 	hasArgs := len(args) > 0
 	switch {
 	case hasDaemon:
-		serve(cmd, args)
+		serve(cmd, opts, args)
 	case hasArgs:
-		archive(cmd, args)
+		archive(cmd, opts, args)
 	default:
 		// nolint:errcheck
 		cmd.Help()

@@ -35,6 +35,7 @@ const (
 	PublishMatrix  = "matrix"
 	PublishSlack   = "slack"
 	PublishNostr   = "nostr"
+	PublishMeili   = "meili"
 
 	StatusRequest = "request"
 	StatusSuccess = "success"

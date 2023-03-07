@@ -58,7 +58,9 @@ type Slack struct {
 	bot    *slack.Client
 	client *socketmode.Client
 	store  *storage.Storage
+	opts   *config.Options
 	pool   *pooling.Pool
+	pub    *publish.Publish
 }
 
 type event struct {
@@ -66,20 +68,14 @@ type event struct {
 }
 
 // New Slack struct.
-func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Slack {
-	if config.Opts.SlackBotToken() == "" {
+func New(ctx context.Context, opts service.Options) *Slack {
+	if opts.Config.SlackBotToken() == "" {
 		logger.Fatal("missing required environment variable")
 	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
-	}
 	bot := slack.New(
-		config.Opts.SlackBotToken(),
-		// slack.OptionDebug(config.Opts.HasDebugMode()),
-		slack.OptionAppLevelToken(config.Opts.SlackAppToken()),
+		opts.Config.SlackBotToken(),
+		// slack.Config.OptionDebug(opts.Config.HasDebugMode()),
+		slack.OptionAppLevelToken(opts.Config.SlackAppToken()),
 	)
 	if bot == nil {
 		logger.Fatal("create slack bot instance failed")
@@ -87,7 +83,7 @@ func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Slack
 
 	client := socketmode.New(
 		bot,
-		// socketmode.OptionDebug(config.Opts.HasDebugMode()),
+		// socketmode.OptionDebug(opts.Config.HasDebugMode()),
 		// socketmode.OptionLog(log.New(os.Stdout, "socketmode: ", log.Lshortfile|log.LstdFlags)),
 	)
 
@@ -99,8 +95,10 @@ func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Slack
 		ctx:    ctx,
 		bot:    bot,
 		client: client,
-		store:  store,
-		pool:   pool,
+		store:  opts.Storage,
+		opts:   opts.Config,
+		pool:   opts.Pool,
+		pub:    opts.Publish,
 	}
 }
 
@@ -231,14 +229,14 @@ func (s *Slack) handleCommand(evt socketmode.Event) {
 				slack.NewSectionBlock(
 					&slack.TextBlockObject{
 						Type: slack.PlainTextType,
-						Text: config.Opts.SlackHelptext(),
+						Text: s.opts.SlackHelptext(),
 					},
 					nil, nil,
 				),
 			}}
 	case "/metrics":
 		stats := metrics.Gather.Export("wayback")
-		if config.Opts.EnabledMetrics() && stats != "" {
+		if s.opts.EnabledMetrics() && stats != "" {
 			payload = map[string]interface{}{
 				"blocks": []slack.Block{
 					slack.NewSectionBlock(
@@ -262,7 +260,7 @@ func (s *Slack) process(ev *event) (err error) {
 	content := ev.Text
 	logger.Debug("content: %s", content)
 
-	urls := service.MatchURL(content)
+	urls := service.MatchURL(s.opts, content)
 
 	metrics.IncrementWayback(metrics.ServiceSlack, metrics.StatusRequest)
 	if len(urls) == 0 {
@@ -318,15 +316,13 @@ func (s *Slack) wayback(ctx context.Context, ev *event, urls []*url.URL) error {
 			return err
 		}
 
-		ctx = context.WithValue(ctx, publish.FlagSlack, s.bot)
-		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		go publish.To(ctx, cols, publish.FlagSlack.String())
+		s.pub.Spread(ctx, rdx, cols, publish.FlagSlack)
 
 		var head = render.Title(cols, rdx)
 
 		for _, u := range urls {
 			if b, ok := rdx.Load(reduxer.Src(u.String())); ok {
-				if err := service.UploadToSlack(s.bot, b.Artifact(), ev.Channel, ev.TimeStamp, head); err != nil {
+				if err := service.UploadToSlack(s.bot, s.opts, b.Artifact(), ev.Channel, ev.TimeStamp, head); err != nil {
 					logger.Error("upload files to slack failed: %v", err)
 				}
 			}
@@ -334,14 +330,14 @@ func (s *Slack) wayback(ctx context.Context, ev *event, urls []*url.URL) error {
 		return nil
 	}
 
-	return service.Wayback(ctx, urls, do)
+	return service.Wayback(ctx, s.opts, urls, do)
 }
 
 func (s *Slack) playback(channel, text, triggerID string) error {
 	logger.Debug("channel %s, playback text %s, trigger id: %s", channel, text, triggerID)
 	metrics.IncrementPlayback(metrics.ServiceSlack, metrics.StatusRequest)
 
-	urls := service.MatchURL(text)
+	urls := service.MatchURL(s.opts, text)
 	if len(urls) == 0 {
 		// Only the inputs in input blocks will be included in view_submission’s view.state.values: https://slack.dev/java-slack-sdk/guides/modals
 		playbackHint := slack.NewTextBlockObject(slack.PlainTextType, "Playback URLs", false, false)
@@ -386,7 +382,7 @@ func (s *Slack) playback(channel, text, triggerID string) error {
 
 	go func() {
 		// nolint:errcheck
-		cols, _ := wayback.Playback(s.ctx, urls...)
+		cols, _ := wayback.Playback(s.ctx, s.opts, urls...)
 		logger.Debug("playback collections: %#v", cols)
 
 		replyText := render.ForReply(&render.Slack{Cols: cols}).String()

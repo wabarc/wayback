@@ -32,39 +32,37 @@ type IRC struct {
 	sync.RWMutex
 
 	ctx   context.Context
+	opts  *config.Options
 	pool  *pooling.Pool
 	conn  *irc.Connection
 	store *storage.Storage
+	pub   *publish.Publish
 }
 
 // New IRC struct.
-func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *IRC {
-	if config.Opts.IRCNick() == "" {
+func New(ctx context.Context, opts service.Options) *IRC {
+	if opts.Config.IRCNick() == "" {
 		logger.Fatal("missing required environment variable")
-	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
 	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
 	// TODO: support SASL authenticate
-	conn := irc.IRC(config.Opts.IRCNick(), config.Opts.IRCNick())
-	conn.Password = config.Opts.IRCPassword()
-	conn.VerboseCallbackHandler = config.Opts.HasDebugMode()
-	conn.Debug = config.Opts.HasDebugMode()
+	conn := irc.IRC(opts.Config.IRCNick(), opts.Config.IRCNick())
+	conn.Password = opts.Config.IRCPassword()
+	conn.VerboseCallbackHandler = opts.Config.HasDebugMode()
+	conn.Debug = opts.Config.HasDebugMode()
 	conn.UseTLS = true
 	conn.TLSConfig = &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12}
 
 	return &IRC{
 		ctx:   ctx,
-		pool:  pool,
 		conn:  conn,
-		store: store,
+		store: opts.Storage,
+		opts:  opts.Config,
+		pool:  opts.Pool,
+		pub:   opts.Publish,
 	}
 }
 
@@ -74,10 +72,10 @@ func (i *IRC) Serve() error {
 	if i.conn == nil {
 		return errors.New("Must initialize IRC connection.")
 	}
-	logger.Info("Serving IRC instance: %s", config.Opts.IRCServer())
+	logger.Info("Serving IRC instance: %s", i.opts.IRCServer())
 
-	if config.Opts.IRCChannel() != "" {
-		i.conn.AddCallback("001", func(ev *irc.Event) { i.conn.Join(config.Opts.IRCChannel()) })
+	if i.opts.IRCChannel() != "" {
+		i.conn.AddCallback("001", func(ev *irc.Event) { i.conn.Join(i.opts.IRCChannel()) })
 	}
 	i.conn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		go func(ev *irc.Event) {
@@ -100,7 +98,7 @@ func (i *IRC) Serve() error {
 			i.pool.Put(bucket)
 		}(ev)
 	})
-	err := i.conn.Connect(config.Opts.IRCServer())
+	err := i.conn.Connect(i.opts.IRCServer())
 	if err != nil {
 		logger.Error("Get conversations failure, error: %v", err)
 		return err
@@ -134,7 +132,7 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 	text := ev.MessageWithoutFormat()
 	logger.Debug("from: %s message: %s", ev.Nick, text)
 
-	urls := service.MatchURL(text)
+	urls := service.MatchURL(i.opts, text)
 	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
 		return errors.New("IRC: URL no found")
@@ -149,11 +147,9 @@ func (i *IRC) process(ctx context.Context, ev *irc.Event) error {
 		i.conn.Privmsg(ev.Nick, replyText)
 
 		// Reply and publish toot as public
-		ctx = context.WithValue(ctx, publish.FlagIRC, i.conn)
-		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		publish.To(ctx, cols, publish.FlagIRC.String())
+		i.pub.Spread(ctx, rdx, cols, publish.FlagIRC)
 		return nil
 	}
 
-	return service.Wayback(ctx, urls, do)
+	return service.Wayback(ctx, i.opts, urls, do)
 }

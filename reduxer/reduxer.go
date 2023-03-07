@@ -148,21 +148,21 @@ func (b *bundle) Article() readability.Article {
 // Do executes secreenshot, print PDF and export html of given URLs
 // Returns a set of bundle containing screenshot data and file path
 // nolint:gocyclo
-func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
+func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, error) {
 	// Returns an initialized Reduxer for safe.
 	var bs = NewReduxer()
 	var err error
 
-	if !config.Opts.EnabledReduxer() {
+	if !opts.EnabledReduxer() {
 		return bs, errors.New("Specify directory to environment `WAYBACK_STORAGE_DIR` to enable reduxer")
 	}
 
-	dir, err := createDir(config.Opts.StorageDir())
+	dir, err := createDir(opts.StorageDir())
 	if err != nil {
 		return bs, errors.Wrap(err, "create storage directory failed")
 	}
 
-	var warc = &warcraft.Warcraft{BasePath: dir, UserAgent: config.Opts.WaybackUserAgent()}
+	var warc = &warcraft.Warcraft{BasePath: dir, UserAgent: opts.WaybackUserAgent()}
 	var craft = func(in *url.URL) (path string) {
 		path, err = warc.Download(ctx, in)
 		if err != nil {
@@ -180,10 +180,11 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 			basename = strings.TrimSuffix(basename, ".htm")
 			ctx = context.WithValue(ctx, ctxBasenameKey, basename)
 
-			shot, er := capture(ctx, uri, dir)
+			shot, er := capture(ctx, opts, uri, dir)
 			if er != nil {
 				return errors.Wrap(er, "capture failed")
 			}
+			logger.Debug("capture results: %#v", shot)
 
 			artifact := &Artifact{
 				Img:  Asset{Local: fmt.Sprint(shot.Image)},
@@ -194,7 +195,7 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 			}
 
 			if supportedMediaSite(uri) {
-				artifact.Media.Local = media(ctx, dir, shot.URL)
+				artifact.Media.Local = media(ctx, opts, dir, shot.URL)
 			}
 			// Attach single file
 			var buf []byte
@@ -230,7 +231,7 @@ func Do(ctx context.Context, urls ...*url.URL) (Reduxer, error) {
 }
 
 // capture returns screenshot.Screenshots of given URLs
-func capture(ctx context.Context, uri *url.URL, dir string) (shot *screenshot.Screenshots[screenshot.Path], err error) {
+func capture(ctx context.Context, cfg *config.Options, uri *url.URL, dir string) (shot *screenshot.Screenshots[screenshot.Path], err error) {
 	filename := basename(ctx)
 	files := screenshot.Files{
 		Image: filepath.Join(dir, filename+".png"),
@@ -247,7 +248,7 @@ func capture(ctx context.Context, uri *url.URL, dir string) (shot *screenshot.Sc
 		screenshot.Quality(100),   // image quality
 	}
 
-	if remote := remoteHeadless(config.Opts.ChromeRemoteAddr()); remote != nil {
+	if remote := remoteHeadless(cfg.ChromeRemoteAddr()); remote != nil {
 		logger.Debug("reduxer using remote browser")
 		addr := remote.(*net.TCPAddr)
 		browser, er := screenshot.NewChromeRemoteScreenshoter[screenshot.Path](addr.String())
@@ -316,7 +317,7 @@ func exists(tool string) (string, bool) {
 }
 
 // nolint:gocyclo
-func media(ctx context.Context, dir, in string) string {
+func media(ctx context.Context, cfg *config.Options, dir, in string) string {
 	logger.Debug("download media to %s, url: %s", dir, in)
 	fn := basename(ctx)
 	fp := filepath.Join(dir, fn)
@@ -342,7 +343,7 @@ func media(ctx context.Context, dir, in string) string {
 		if err := cmd.Start(); err != nil {
 			return err
 		}
-		if config.Opts.HasDebugMode() {
+		if cfg.HasDebugMode() {
 			readOutput(stdout)
 		}
 
@@ -368,7 +369,7 @@ func media(ctx context.Context, dir, in string) string {
 			"--ignore-errors", "--format=best[ext=mp4]/best", "--merge-output-format=mp4",
 			"--output=" + fp + ".%(ext)s", in,
 		}
-		if config.Opts.HasDebugMode() {
+		if cfg.HasDebugMode() {
 			args = append(args, "--verbose", "--print-traffic")
 		}
 
@@ -420,7 +421,7 @@ func media(ctx context.Context, dir, in string) string {
 			MultiThread:  true,
 			ThreadNumber: 10,
 			ChunkSizeMB:  10,
-			Silent:       !config.Opts.HasDebugMode(),
+			Silent:       !cfg.HasDebugMode(),
 		})
 		sortedStreams := sortStreams(dt.Streams)
 		if len(sortedStreams) == 0 {
@@ -434,8 +435,8 @@ func media(ctx context.Context, dir, in string) string {
 			return ""
 		}
 		logger.Debug("stream size: %s", humanize.Bytes(uint64(stream.Size)))
-		if stream.Size > int64(config.Opts.MaxMediaSize()) {
-			logger.Warn("media size large than %s, skipped", humanize.Bytes(config.Opts.MaxMediaSize()))
+		if stream.Size > int64(cfg.MaxMediaSize()) {
+			logger.Warn("media size large than %s, skipped", humanize.Bytes(cfg.MaxMediaSize()))
 			return ""
 		}
 		if err := dl.Download(dt); err != nil {

@@ -34,34 +34,30 @@ type Matrix struct {
 	sync.RWMutex
 
 	ctx    context.Context
+	opts   *config.Options
 	pool   *pooling.Pool
 	client *matrix.Client
 	store  *storage.Storage
+	pub    *publish.Publish
 }
 
 // New Matrix struct.
-func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Matrix {
-	if config.Opts.MatrixUserID() == "" || config.Opts.MatrixPassword() == "" || config.Opts.MatrixHomeserver() == "" {
+func New(ctx context.Context, opts service.Options) *Matrix {
+	if opts.Config.MatrixUserID() == "" || opts.Config.MatrixPassword() == "" || opts.Config.MatrixHomeserver() == "" {
 		logger.Fatal("missing required environment variable")
-	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
 	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	client, err := matrix.NewClient(config.Opts.MatrixHomeserver(), "", "")
+	client, err := matrix.NewClient(opts.Config.MatrixHomeserver(), "", "")
 	if err != nil {
 		logger.Fatal("Dial Matrix client got unpredictable error: %v", err)
 	}
 	_, err = client.Login(&matrix.ReqLogin{
 		Type:             matrix.AuthTypePassword,
-		Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: config.Opts.MatrixUserID()},
-		Password:         config.Opts.MatrixPassword(),
+		Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: opts.Config.MatrixUserID()},
+		Password:         opts.Config.MatrixPassword(),
 		StoreCredentials: true,
 	})
 	if err != nil {
@@ -70,9 +66,11 @@ func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Matri
 
 	return &Matrix{
 		ctx:    ctx,
-		pool:   pool,
 		client: client,
-		store:  store,
+		store:  opts.Storage,
+		opts:   opts.Config,
+		pool:   opts.Pool,
+		pub:    opts.Publish,
 	}
 }
 
@@ -82,7 +80,7 @@ func (m *Matrix) Serve() error {
 	if m.client == nil {
 		return errors.New("Must initialize Matrix client.")
 	}
-	logger.Warn("Serving Matrix account: %s", config.Opts.MatrixUserID())
+	logger.Warn("Serving Matrix account: %s", m.opts.MatrixUserID())
 
 	syncer := m.client.Syncer.(*matrix.DefaultSyncer)
 	// Listen join room invite event from user
@@ -102,7 +100,7 @@ func (m *Matrix) Serve() error {
 			// Do not handle message event:
 			// 1. Sent by self
 			// 2. Message was deleted (when ev.Unsigned.RedactedBecause not nil)
-			if ev.Sender == id.UserID(config.Opts.MatrixUserID()) || ev.Unsigned.RedactedBecause != nil {
+			if ev.Sender == id.UserID(m.opts.MatrixUserID()) || ev.Unsigned.RedactedBecause != nil {
 				return
 			}
 			metrics.IncrementWayback(metrics.ServiceMatrix, metrics.StatusRequest)
@@ -178,7 +176,7 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 		return m.playback(ev)
 	}
 
-	urls := service.MatchURL(text)
+	urls := service.MatchURL(m.opts, text)
 	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
 		// Redact message
@@ -201,18 +199,16 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 			logger.Error("mark message as receipt failure: %v", err)
 		}
 
-		ctx = context.WithValue(ctx, publish.FlagMatrix, m.client)
-		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		publish.To(ctx, cols, publish.FlagMatrix.String())
+		m.pub.Spread(ctx, rdx, cols, publish.FlagMatrix)
 		return nil
 	}
 
-	return service.Wayback(ctx, urls, do)
+	return service.Wayback(ctx, m.opts, urls, do)
 }
 
 func (m *Matrix) playback(ev *event.Event) error {
 	text := ev.Content.AsMessage().Body
-	urls := service.MatchURL(text)
+	urls := service.MatchURL(m.opts, text)
 	// Redact message
 	defer m.redact(ev, "URL no found. Original message: "+text)
 	if len(urls) == 0 {
@@ -220,7 +216,7 @@ func (m *Matrix) playback(ev *event.Event) error {
 		return errors.New("Matrix: URL no found")
 	}
 
-	cols, err := wayback.Playback(m.ctx, urls...)
+	cols, err := wayback.Playback(m.ctx, m.opts, urls...)
 	if err != nil {
 		return errors.Wrap(err, "matrix: playback failed")
 	}

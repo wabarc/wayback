@@ -5,7 +5,7 @@
 package config // import "github.com/wabarc/wayback/config"
 
 // Opts holds parsed configuration options.
-var Opts *Options
+// var Opts *Options
 
 // nolint:stylecheck
 const (

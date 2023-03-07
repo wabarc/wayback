@@ -22,6 +22,8 @@ import (
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
+	"github.com/wabarc/wayback/publish"
+	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 
 	discord "github.com/bwmarrin/discordgo"
@@ -169,27 +171,38 @@ func TestServe(t *testing.T) {
 
 	os.Setenv("WAYBACK_DISCORD_BOT_TOKEN", token)
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
-		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
-	}
-
-	bot, err := discord.New("Bot " + config.Opts.DiscordBotToken())
+	opts, err := parser.ParseEnvironmentVariables()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	handle(mux, strings.Replace(server.URL, "http", "ws", 1))
-	bot.Client = httpClient
 
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
 	ctx, cancel := context.WithCancel(context.Background())
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 
-	d := &Discord{ctx: ctx, bot: bot, pool: pool}
+	dbpath := filepath.Join(t.TempDir(), "testing.db")
+	store, err := storage.Open(opts, dbpath)
+	if err != nil {
+		t.Fatalf("open storage failed: %v", err)
+	}
+	defer store.Close()
+
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
+
+	o := service.ParseOptions(service.Config(opts), service.Storage(store), service.Pool(pool), service.Publish(pub))
+	d := New(ctx, o)
+	d.bot.Client = httpClient
 	time.AfterFunc(3*time.Second, func() {
 		// TODO: find a better way to avoid deadlock
 		go d.Shutdown()
@@ -213,9 +226,9 @@ func TestProcess(t *testing.T) {
 	os.Setenv("WAYBACK_DISCORD_CHANNEL", channelID)
 	os.Setenv("WAYBACK_ENABLE_IP", "true")
 
-	var err error
 	parser := config.NewParser()
-	if config.Opts, err = parser.ParseEnvironmentVariables(); err != nil {
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
@@ -228,7 +241,7 @@ func TestProcess(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	dbpath := filepath.Join(dir, "testing.db")
-	store, err := storage.Open(dbpath)
+	store, err := storage.Open(opts, dbpath)
 	if err != nil {
 		t.Fatalf("open storage failed: %v", err)
 	}
@@ -237,14 +250,23 @@ func TestProcess(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
-	pool := pooling.New(ctx, config.Opts.PoolingSize())
+	cfg := []pooling.Option{
+		pooling.Capacity(opts.PoolingSize()),
+		pooling.Timeout(opts.WaybackTimeout()),
+		pooling.MaxRetries(opts.WaybackMaxRetries()),
+	}
+	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 	handle(mux, strings.Replace(server.URL, "http", "ws", 1))
 
-	d := New(ctx, store, pool)
+	pub := publish.New(ctx, opts)
+	defer pub.Stop()
+
+	o := service.ParseOptions(service.Config(opts), service.Storage(store), service.Pool(pool), service.Publish(pub))
+	d := New(ctx, o)
 	d.bot.Client = httpClient
 
 	// if err := d.bot.Open(); err != nil {

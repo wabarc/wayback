@@ -38,26 +38,22 @@ type Discord struct {
 
 	bot   *discord.Session
 	store *storage.Storage
+	opts  *config.Options
 	pool  *pooling.Pool
+	pub   *publish.Publish
 }
 
 // New returns a Discord struct.
-func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Discord {
-	if config.Opts.DiscordBotToken() == "" {
+func New(ctx context.Context, opts service.Options) *Discord {
+	if opts.Config.DiscordBotToken() == "" {
 		logger.Fatal("missing required environment variable")
 	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
-	}
-	bot, err := discord.New("Bot " + config.Opts.DiscordBotToken())
+	bot, err := discord.New("Bot " + opts.Config.DiscordBotToken())
 	if err != nil {
 		logger.Fatal("create discord bot instance failed: %v", err)
 	}
 	// Debug mode for bwmarrin/discordgo will print the bot token, should not apply it on production
-	// if config.Opts.HasDebugMode() {
+	// if opts.Config.HasDebugMode() {
 	//     bot.LogLevel = discord.LogDebug
 	// }
 
@@ -68,8 +64,10 @@ func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Disco
 	return &Discord{
 		ctx:   ctx,
 		bot:   bot,
-		store: store,
-		pool:  pool,
+		store: opts.Storage,
+		opts:  opts.Config,
+		pool:  opts.Pool,
+		pub:   opts.Publish,
 	}
 }
 
@@ -83,7 +81,7 @@ func (d *Discord) Serve() (err error) {
 		logger.Info("authorized on account %s", color.BlueString(s.State.User.Username))
 	})
 
-	if channel, err := d.bot.UserChannelCreate(config.Opts.DiscordChannel()); err == nil {
+	if channel, err := d.bot.UserChannelCreate(d.opts.DiscordChannel()); err == nil {
 		logger.Info("channel name: %s, channel id: %s", color.BlueString(channel.Name), color.BlueString(channel.ID))
 	}
 
@@ -170,7 +168,7 @@ func (d *Discord) commandHandlers() map[string]func(*discord.Session, *discord.I
 			s.InteractionRespond(i.Interaction, &discord.InteractionResponse{
 				Type: discord.InteractionResponseChannelMessageWithSource,
 				Data: &discord.InteractionResponseData{
-					Content: config.Opts.DiscordHelptext(),
+					Content: d.opts.DiscordHelptext(),
 				},
 			})
 		},
@@ -179,7 +177,7 @@ func (d *Discord) commandHandlers() map[string]func(*discord.Session, *discord.I
 		},
 		"metrics": func(s *discord.Session, i *discord.InteractionCreate) {
 			stats := metrics.Gather.Export("wayback")
-			if !config.Opts.EnabledMetrics() || stats == "" {
+			if !d.opts.EnabledMetrics() || stats == "" {
 				return
 			}
 			// nolint:errcheck
@@ -242,7 +240,7 @@ func (d *Discord) process(m *discord.MessageCreate) (err error) {
 	content := m.Content
 	logger.Debug("content: %s", content)
 
-	urls := service.MatchURL(content)
+	urls := service.MatchURL(d.opts, content)
 
 	switch {
 	case m.GuildID != "" && !d.isMention(content):
@@ -299,17 +297,15 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 		}
 
 		// Avoid republishing
-		if m.ChannelID != config.Opts.DiscordChannel() {
-			ctx = context.WithValue(ctx, publish.FlagDiscord, d.bot)
-			ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-			publish.To(ctx, cols, publish.FlagDiscord.String())
+		if m.ChannelID != d.opts.DiscordChannel() {
+			d.pub.Spread(ctx, rdx, cols, publish.FlagDiscord)
 		}
 
 		msg := &discord.MessageSend{Content: replyText, Reference: stage.Message.Reference()}
 		var files []*discord.File
 		for _, u := range urls {
 			if bundle, ok := rdx.Load(reduxer.Src(u.String())); ok {
-				files = append(files, service.UploadToDiscord(bundle.Artifact())...)
+				files = append(files, service.UploadToDiscord(d.opts, bundle.Artifact())...)
 			}
 		}
 		if len(files) == 0 {
@@ -325,14 +321,14 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 		return nil
 	}
 
-	return service.Wayback(ctx, urls, do)
+	return service.Wayback(ctx, d.opts, urls, do)
 }
 
 func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) error {
 	metrics.IncrementPlayback(metrics.ServiceDiscord, metrics.StatusRequest)
 
 	text := i.ApplicationCommandData().Options[0].StringValue()
-	urls := service.MatchURL(text)
+	urls := service.MatchURL(d.opts, text)
 	if len(urls) == 0 {
 		return d.bot.InteractionRespond(i.Interaction, &discord.InteractionResponse{
 			Type: discord.InteractionResponseChannelMessageWithSource,
@@ -350,7 +346,7 @@ func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) err
 		},
 	})
 
-	cols, err := wayback.Playback(d.ctx, urls...)
+	cols, err := wayback.Playback(d.ctx, d.opts, urls...)
 	if err != nil {
 		return errors.Wrap(err, "discord: playback failed")
 	}
@@ -420,7 +416,7 @@ func (d *Discord) edit(m *discord.MessageCreate, text string) (*discord.MessageC
 }
 
 func (d *Discord) setCommands(guild string) (err error) {
-	if _, err = d.bot.ApplicationCommandBulkOverwrite(d.bot.State.User.ID, guild, requires()); err != nil {
+	if _, err = d.bot.ApplicationCommandBulkOverwrite(d.bot.State.User.ID, guild, d.requires()); err != nil {
 		logger.Error("overwrite commands failed: %v", err)
 		return err
 	}
@@ -429,14 +425,14 @@ func (d *Discord) setCommands(guild string) (err error) {
 	return nil
 }
 
-func requires() (commands []*discord.ApplicationCommand) {
-	if config.Opts.DiscordHelptext() != "" {
+func (d *Discord) requires() (commands []*discord.ApplicationCommand) {
+	if d.opts.DiscordHelptext() != "" {
 		commands = append(commands, &discord.ApplicationCommand{
 			Name:        "help",
 			Description: "Show help information",
 		})
 	}
-	if config.Opts.EnabledMetrics() {
+	if d.opts.EnabledMetrics() {
 		commands = append(commands, &discord.ApplicationCommand{
 			Name:        "metrics",
 			Description: "Show service metrics",

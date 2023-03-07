@@ -6,20 +6,16 @@ package publish // import "github.com/wabarc/wayback/publish"
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
 	"os"
-	"strings"
+	"reflect"
 	"testing"
+	"time"
 
-	"github.com/dghubble/go-twitter/twitter"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/reduxer"
-	telegram "gopkg.in/telebot.v3"
 )
 
 var collects = []wayback.Collect{
@@ -49,175 +45,171 @@ var collects = []wayback.Collect{
 	},
 }
 
-var bundleExample = reduxer.BundleExample()
-
-func unsetAllEnv() {
-	lines := os.Environ()
-	for _, line := range lines {
-		fields := strings.SplitN(line, "=", 2)
-		key := strings.TrimSpace(fields[0])
-		if strings.HasPrefix(key, "WAYBACK_") {
-			os.Unsetenv(key)
-		}
+func isBlocking(f func()) bool {
+	ch := make(chan struct{})
+	go func() {
+		f()
+		close(ch)
+	}()
+	select {
+	case <-ch:
+		return false
+	case <-time.After(time.Millisecond * 10):
+		return true
 	}
 }
 
-func TestPublishToChannelFromTelegram(t *testing.T) {
+type mockPublisher struct{}
+
+func (m *mockPublisher) Publish(_ context.Context, _ reduxer.Reduxer, _ []wayback.Collect, args ...string) error {
+	return nil
+}
+
+func mockRegister(opts *config.Options) *Module {
+	publisher := &mockPublisher{}
+
+	return &Module{
+		Publisher: publisher,
+		Opts:      opts,
+	}
+}
+
+func TestNew(t *testing.T) {
 	defer helper.CheckTest(t)
 
-	unsetAllEnv()
-	setTelegramEnv()
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
+	ctx := context.Background()
+	opts := &config.Options{}
 
-	httpClient, mux, server := helper.MockServer()
-	defer server.Close()
+	pub := New(ctx, opts)
 
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		slug := strings.TrimPrefix(r.URL.Path, prefix)
-		switch slug {
-		case "getMe":
-			fmt.Fprintln(w, getMeJSON)
-		case "getChat":
-			fmt.Fprintln(w, getChatJSON)
-		case "sendMessage":
-			text, _ := io.ReadAll(r.Body)
-			if !strings.Contains(string(text), config.SlotName(config.SLOT_IA)) {
-				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-				return
-			}
-			fmt.Fprintln(w, `{"ok":true, "result":null}`)
-		}
-	})
+	if pub == nil {
+		t.Error("Expected non-nil publish service")
+	}
 
-	bot, err := telegram.NewBot(telegram.Settings{
-		URL:    server.URL,
-		Token:  token,
-		Client: httpClient,
-	})
+	if pub.opts != opts {
+		t.Error("Expected publish service options to match input options")
+	}
+
+	if pub.pool == nil {
+		t.Error("Expected non-nil publish service pool")
+	}
+}
+
+func TestStart(t *testing.T) {
+	defer helper.CheckTest(t)
+
+	pool := &pooling.Pool{}
+
+	pub := &Publish{opts: &config.Options{}, pool: pool}
+	go pub.Start()
+
+	// Wait for the Start method to block
+	time.Sleep(time.Millisecond * 10)
+
+	// Check if the Start method is blocking
+	if !isBlocking(pub.Start) {
+		t.Error("Start method is not blocking")
+	}
+}
+
+func TestStop(t *testing.T) {
+	defer helper.CheckTest(t)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	pub := New(ctx, &config.Options{})
+	go pub.Start()
+
+	// Wait a short time to ensure that the service has started
+	time.Sleep(time.Millisecond * 100)
+
+	if pub.pool.Closed() {
+		t.Errorf("expected publish service to be running, but got %s", pub.pool.Status())
+	}
+
+	pub.Stop()
+
+	if !pub.pool.Closed() {
+		t.Errorf("expected publish service to be stopped, but got %s", pub.pool.Status())
+	}
+}
+
+func TestSpread(t *testing.T) {
+	defer helper.CheckTest(t)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	os.Setenv("WAYBACK_TELEGRAM_TOKEN", "tg:token")
+	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "tg:channel")
+	os.Setenv("WAYBACK_GITHUB_REPO", "github-repo")
+	os.Setenv("WAYBACK_GITHUB_TOKEN", "github:token")
+	os.Setenv("WAYBACK_GITHUB_OWNER", "github-owner")
+	os.Setenv("WAYBACK_NOTION_TOKEN", "notion:token")
+	os.Setenv("WAYBACK_NOTION_DATABASE_ID", "uuid4")
+	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
+	os.Setenv("WAYBACK_MASTODON_SECRET", "foo")
+	os.Setenv("WAYBACK_MASTODON_TOKEN", "foo")
+	os.Setenv("WAYBACK_TWITTER_CONSUMER_KEY", "foo")
+	os.Setenv("WAYBACK_TWITTER_CONSUMER_SECRET", "foo")
+	os.Setenv("WAYBACK_TWITTER_ACCESS_TOKEN", "foo")
+	os.Setenv("WAYBACK_TWITTER_ACCESS_SECRET", "foo")
+	os.Setenv("WAYBACK_IRC_NICK", "foo")
+	os.Setenv("WAYBACK_IRC_CHANNEL", "bar")
+	os.Setenv("WAYBACK_MATRIX_HOMESERVER", "https://matrix-client.matrix.org")
+	os.Setenv("WAYBACK_MATRIX_USERID", "@foo:matrix.org")
+	os.Setenv("WAYBACK_MATRIX_ROOMID", "!bar:matrix.org")
+	os.Setenv("WAYBACK_MATRIX_PASSWORD", "zoo")
+	os.Setenv("WAYBACK_DISCORD_BOT_TOKEN", "discord-bot-token")
+	os.Setenv("WAYBACK_DISCORD_CHANNEL", "865981235815140000")
+	// os.Setenv("WAYBACK_SLACK_APP_TOKEN", "slack-app-token")
+	os.Setenv("WAYBACK_SLACK_BOT_TOKEN", "slack-bot-token")
+	os.Setenv("WAYBACK_SLACK_CHANNEL", "C123ABCXY89")
+	os.Setenv("WAYBACK_NOSTR_RELAY_URL", "wss://nostr.example.com")
+	os.Setenv("WAYBACK_NOSTR_PRIVATE_KEY", "nprivabc")
+	os.Setenv("WAYBACK_MEILI_ENDPOINT", "https://meilisearch.example.com")
+
+	opts, err := config.NewParser().ParseEnvironmentVariables()
 	if err != nil {
-		t.Fatalf(`New Telegram bot API client failed: %v`, err)
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
 	}
 
-	ctx := context.WithValue(context.Background(), FlagTelegram, bot)
-	ctx = context.WithValue(ctx, PubBundle{}, bundleExample)
-	defer helper.CheckContext(ctx, t)
-	To(ctx, collects, FlagTelegram.String())
-}
+	tests := []struct {
+		pubTo Flag
+	}{
+		{FlagWeb},
+		{FlagTelegram},
+		{FlagTwitter},
+		{FlagMastodon},
+		{FlagDiscord},
+		{FlagMatrix},
+		{FlagSlack},
+		{FlagIRC},
+		{FlagNotion},
+		{FlagMeili},
+	}
 
-func TestPublishTootFromMastodon(t *testing.T) {
-	defer helper.CheckTest(t)
+	pub := New(ctx, opts)
+	// go pub.Start()
+	// defer pub.Stop()
 
-	unsetAllEnv()
-	setMastodonEnv()
-
-	_, mux, server := helper.MockServer()
-	defer server.Close()
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Authorization") != "Bearer zoo" {
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			return
+	for _, test := range tests {
+		// Delete exists module to prevent panic.
+		if _, exists := modules[test.pubTo]; exists {
+			delete(modules, test.pubTo)
 		}
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			return
-		}
-		switch r.URL.Path {
-		case "/api/v1/statuses":
-			status := r.FormValue("status")
-			if !strings.Contains(status, config.SlotName(config.SLOT_IA)) {
-				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-				return
-			}
-			fmt.Fprintln(w, `{"access_token": "zoo"}`)
-		default:
-			fmt.Fprintln(w, `{}`)
-		}
-	})
+		Register(test.pubTo, mockRegister)
+	}
+	parseModule(opts)
 
-	os.Setenv("WAYBACK_MASTODON_SERVER", server.URL)
+	// Request from Telegram
+	pub.Spread(ctx, nil, []wayback.Collect{}, FlagTelegram)
 
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
-
-	mstdn := NewMastodon(nil)
-
-	ctx := context.WithValue(context.Background(), FlagMastodon, mstdn.client)
-	ctx = context.WithValue(ctx, PubBundle{}, bundleExample)
-	defer helper.CheckContext(ctx, t)
-	To(ctx, collects, FlagMastodon.String())
-}
-
-func TestPublishTweetFromTwitter(t *testing.T) {
-	defer helper.CheckTest(t)
-
-	unsetAllEnv()
-	setTwitterEnv()
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
-
-	httpClient, mux, server := helper.MockServer()
-	defer server.Close()
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		switch r.URL.Path {
-		case "/1.1/statuses/update.json":
-			status := r.FormValue("status")
-			if !strings.Contains(status, config.SlotName(config.SLOT_IA)) {
-				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-				return
-			}
-			fmt.Fprintln(w, `{"id": 1}`)
-		default:
-			fmt.Fprintln(w, `{}`)
-		}
-	})
-
-	twi := NewTwitter(twitter.NewClient(httpClient))
-	ctx := context.WithValue(context.Background(), FlagTwitter, twi.client)
-	ctx = context.WithValue(ctx, PubBundle{}, bundleExample)
-	defer helper.CheckContext(ctx, t)
-	To(ctx, collects, FlagTwitter.String())
-}
-
-func TestPublishToIRCChannelFromIRC(t *testing.T) {
-	unsetAllEnv()
-}
-
-func TestPublishToMatrixRoomFromMatrix(t *testing.T) {
-	defer helper.CheckTest(t)
-
-	unsetAllEnv()
-	setMatrixEnv()
-
-	_, mux, server := helper.MockServer()
-	defer server.Close()
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.URL.Path == "/_matrix/client/r0/login", r.URL.Path == "/_matrix/client/v3/login":
-			fmt.Fprintln(w, `{"access_token": "zoo"}`)
-		case strings.Contains(r.URL.Path, "!bar:example.com/send/m.room.message"):
-			body, _ := ioutil.ReadAll(r.Body)
-			if !strings.Contains(string(body), config.SlotName(config.SLOT_IA)) {
-				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-				return
-			}
-			fmt.Fprintln(w, `{"id": 1}`)
-		}
-	})
-
-	os.Setenv("WAYBACK_MATRIX_HOMESERVER", server.URL)
-	config.Opts, _ = config.NewParser().ParseEnvironmentVariables()
-
-	mat := NewMatrix(nil)
-	ctx := context.WithValue(context.Background(), "matrix", mat.client)
-	ctx = context.WithValue(ctx, PubBundle{}, bundleExample)
-	defer helper.CheckContext(ctx, t)
-	To(ctx, collects, "matrix")
+	v := reflect.ValueOf(pub.pool)
+	actual := v.Elem().FieldByName("waiting").Int()
+	expect := int64(len(tests))
+	if actual != expect {
+		t.Errorf("unexpected spread to publishers, got %d instead of %d", actual, expect)
+	}
 }

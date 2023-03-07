@@ -33,9 +33,11 @@ type Twitter struct {
 	sync.RWMutex
 
 	ctx    context.Context
+	opts   *config.Options
 	pool   *pooling.Pool
 	client *twitter.Client
 	store  *storage.Storage
+	pub    *publish.Publish
 
 	archiving map[string]bool
 
@@ -43,30 +45,26 @@ type Twitter struct {
 }
 
 // New returns Twitter struct.
-func New(ctx context.Context, store *storage.Storage, pool *pooling.Pool) *Twitter {
-	if !config.Opts.PublishToTwitter() {
+func New(ctx context.Context, opts service.Options) *Twitter {
+	if !opts.Config.PublishToTwitter() {
 		logger.Fatal("missing required environment variable")
-	}
-	if store == nil {
-		logger.Fatal("must initialize storage")
-	}
-	if pool == nil {
-		logger.Fatal("must initialize pooling")
 	}
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	oauth := oauth1.NewConfig(config.Opts.TwitterConsumerKey(), config.Opts.TwitterConsumerSecret())
-	token := oauth1.NewToken(config.Opts.TwitterAccessToken(), config.Opts.TwitterAccessSecret())
+	oauth := oauth1.NewConfig(opts.Config.TwitterConsumerKey(), opts.Config.TwitterConsumerSecret())
+	token := oauth1.NewToken(opts.Config.TwitterAccessToken(), opts.Config.TwitterAccessSecret())
 	httpClient := oauth.Client(oauth1.NoContext, token)
 	client := twitter.NewClient(httpClient)
 
 	return &Twitter{
 		ctx:    ctx,
-		pool:   pool,
 		client: client,
-		store:  store,
+		store:  opts.Storage,
+		opts:   opts.Config,
+		pool:   opts.Pool,
+		pub:    opts.Publish,
 	}
 }
 
@@ -167,7 +165,7 @@ func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent)
 		t.Unlock()
 	}()
 
-	urls := service.MatchURL(text)
+	urls := service.MatchURL(t.opts, text)
 	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
 		return errors.New("Twitter: URL no found")
@@ -196,13 +194,11 @@ func (t *Twitter) process(ctx context.Context, event twitter.DirectMessageEvent)
 			resp.Body.Close()
 		}()
 
-		ctx = context.WithValue(ctx, publish.FlagTwitter, t.client)
-		ctx = context.WithValue(ctx, publish.PubBundle{}, rdx)
-		publish.To(ctx, cols, publish.FlagTwitter.String())
+		t.pub.Spread(ctx, rdx, cols, publish.FlagTwitter)
 		return nil
 	}
 
-	return service.Wayback(ctx, urls, do)
+	return service.Wayback(ctx, t.opts, urls, do)
 }
 
 func (t *Twitter) reply(event twitter.DirectMessageEvent, body string) (*twitter.DirectMessageEvent, error) {

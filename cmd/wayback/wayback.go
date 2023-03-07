@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback"
+	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/reduxer"
 	"golang.org/x/sync/errgroup"
@@ -34,15 +35,15 @@ func assets(art reduxer.Artifact) []reduxer.Asset {
 	}
 }
 
-func archive(cmd *cobra.Command, args []string) {
+func archive(cmd *cobra.Command, opts *config.Options, args []string) {
 	// TODO: clean the auto-created temporary directory.
 	archiving := func(ctx context.Context, urls []*url.URL) error {
 		g, ctx := errgroup.WithContext(ctx)
-		rdx, err := reduxer.Do(ctx, urls...)
+		rdx, err := reduxer.Do(ctx, opts, urls...)
 		if err != nil {
 			return errors.Wrap(err, "reduxer unexpected")
 		}
-		cols, err := wayback.Wayback(ctx, rdx, urls...)
+		cols, err := wayback.Wayback(ctx, rdx, opts, urls...)
 		if err != nil {
 			return err
 		}
