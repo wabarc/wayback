@@ -607,24 +607,6 @@ func TestTorRemotePorts(t *testing.T) {
 	}
 }
 
-func TestTorrcFile(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_TORRC", "/path/to/torrc")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := `/path/to/torrc`
-	got := opts.TorrcFile()
-
-	if got != expected {
-		t.Fatalf(`Unexpected Set torrc file, got %v instead of %v`, got, expected)
-	}
-}
-
 func TestListenAddr(t *testing.T) {
 	t.Parallel()
 

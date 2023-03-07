@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix semgrep scan workflow ([#312](https://github.com/wabarc/wayback/pull/312))
 - Fix terminal determination
 
+### Removed
+- Deprecate torrc configuration ([#332](https://github.com/wabarc/wayback/pull/332))
+
 ## [0.18.1] - 2022-10-30
 
 ### Fixed

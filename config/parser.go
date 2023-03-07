@@ -187,8 +187,6 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.tor.localPort = parseInt(val, defTorLocalPort)
 		case "WAYBACK_TOR_REMOTE_PORTS":
 			p.opts.tor.remotePorts = parseIntList(val, defTorRemotePorts)
-		case "WAYBACK_TORRC":
-			p.opts.tor.torrcFile = parseString(val, defTorrcFile)
 		case "WAYBACK_POOLING_SIZE":
 			p.opts.poolingSize = parseInt(val, defPoolingSize)
 		case "WAYBACK_BOLT_PATH":
