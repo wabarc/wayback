@@ -11,7 +11,7 @@
 [![Matrix Bot](https://img.shields.io/badge/Matrix-bot-0a976f.svg)](https://matrix.to/#/@wabarc_bot:matrix.org)
 [![Matrix Room](https://img.shields.io/badge/Matrix-room-0a976f.svg)](https://matrix.to/#/#wabarc:matrix.org)
 [![Tor Hidden Service](https://img.shields.io/badge/Tor%20Hidden%20Service-472756.svg)](http://wabarcoww2bxmdbixj7sjwggv3fonh2rpflfiildegcydk5udkdckdyd.onion/)
-[![World Wide Web](https://img.shields.io/badge/Web-15aabf.svg)](https://initium.eu.org/)
+[![World Wide Web](https://img.shields.io/badge/Web-15aabf.svg)](https://wabarc.eu.org/)
 [![Nostr](https://img.shields.io/badge/Nostr-8e44ad.svg)](https://iris.to/#/profile/npub1gm4xeu8wlt6aa56zenutkwa0ppjng5axsscv424d0xvv5jalxxzs4hjukz)
 
 Wayback is a tool that supports running as a command-line tool and docker container, purpose to snapshot webpage to time capsules.
