@@ -39,7 +39,11 @@ jobs:
           egress-policy: block
           disable-telemetry: true
           allowed-endpoints: >
+            github.com:443
             api.github.com:443
+            pypi.org:443
+            pip.pypa.io:443
+            files.pythonhosted.org:443
 
       - name: Check out code base
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0

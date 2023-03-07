@@ -3,7 +3,7 @@ mkdocs==1.4.2
 
 # Python Markdown Extensions
 pygments==2.14
-pymdown-extensions==9.9
+pymdown-extensions==9.10
 
 # MkDocs Plugins
 mkdocs-exclude-search==0.6.5
