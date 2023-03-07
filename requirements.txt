@@ -2,9 +2,9 @@ mkdocs-material==9.1.0
 mkdocs==1.4.2
 
 # Python Markdown Extensions
-pygments>=2.14
-pymdown-extensions>=9.9
+pygments==2.14
+pymdown-extensions==9.9
 
 # MkDocs Plugins
-mkdocs-exclude-search>=0.6.5
-mkdocs-git-revision-date-localized-plugin>=1.2.0
+mkdocs-exclude-search==0.6.5
+mkdocs-git-revision-date-localized-plugin==1.2.0
