@@ -31,6 +31,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const timeout = 30 * time.Second
+
 var (
 	ctxBasenameKey struct{}
 
@@ -154,9 +156,12 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 
 	var warc = &warcraft.Warcraft{BasePath: dir, UserAgent: opts.WaybackUserAgent()}
 	var craft = func(ctx context.Context, in *url.URL) (path string) {
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+
 		path, err = warc.Download(ctx, in)
 		if err != nil {
-			logger.Debug("create warc for %s failed: %v", in.String(), err)
+			logger.Debug("create warc for %s failed: %v", in, err)
 			return ""
 		}
 		return path
@@ -305,7 +310,7 @@ func remotely(ctx context.Context, artifact *Artifact) (err error) {
 		&artifact.Media,
 	}
 
-	c := &http.Client{}
+	c := &http.Client{Timeout: timeout}
 	cat := catbox.New(c)
 	anon := anonfile.NewAnonfile(c)
 	g, _ := errgroup.WithContext(ctx)
