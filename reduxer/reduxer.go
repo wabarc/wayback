@@ -185,7 +185,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 			}
 
 			fp := filepath.Join(dir, basename)
-			media := media{
+			m := media{
 				dir:  dir,
 				path: fp,
 				name: basename,
@@ -193,7 +193,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 			}
 
 			if supportedMediaSite(uri) {
-				artifact.Media.Local = media.download(ctx, opts)
+				artifact.Media.Local = m.download(ctx, opts)
 			}
 			// Attach single file
 			var buf []byte
