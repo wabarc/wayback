@@ -6,51 +6,19 @@ package reduxer // import "github.com/wabarc/wayback/reduxer"
 
 import (
 	"bufio"
+	"context"
 	"embed"
 	"net/url"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 
+	"github.com/gabriel-vasile/mimetype"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
+	"github.com/wabarc/wayback/config"
 	"golang.org/x/net/publicsuffix"
-
-	// Copied from https://github.com/iawia002/lux/blob/f1baf46e/app/register.go#L3-L40
-	_ "github.com/iawia002/lux/extractors/acfun"
-	_ "github.com/iawia002/lux/extractors/bcy"
-	_ "github.com/iawia002/lux/extractors/bilibili"
-	_ "github.com/iawia002/lux/extractors/douyin"
-	_ "github.com/iawia002/lux/extractors/douyu"
-	_ "github.com/iawia002/lux/extractors/eporner"
-	_ "github.com/iawia002/lux/extractors/facebook"
-	_ "github.com/iawia002/lux/extractors/geekbang"
-	_ "github.com/iawia002/lux/extractors/haokan"
-	_ "github.com/iawia002/lux/extractors/hupu"
-	_ "github.com/iawia002/lux/extractors/huya"
-	_ "github.com/iawia002/lux/extractors/instagram"
-	_ "github.com/iawia002/lux/extractors/iqiyi"
-	_ "github.com/iawia002/lux/extractors/ixigua"
-	_ "github.com/iawia002/lux/extractors/kuaishou"
-	_ "github.com/iawia002/lux/extractors/mgtv"
-	_ "github.com/iawia002/lux/extractors/miaopai"
-	_ "github.com/iawia002/lux/extractors/netease"
-	_ "github.com/iawia002/lux/extractors/pixivision"
-	_ "github.com/iawia002/lux/extractors/pornhub"
-	_ "github.com/iawia002/lux/extractors/qq"
-	_ "github.com/iawia002/lux/extractors/streamtape"
-	_ "github.com/iawia002/lux/extractors/tangdou"
-	_ "github.com/iawia002/lux/extractors/tiktok"
-	_ "github.com/iawia002/lux/extractors/tumblr"
-	_ "github.com/iawia002/lux/extractors/twitter"
-	_ "github.com/iawia002/lux/extractors/udn"
-	_ "github.com/iawia002/lux/extractors/universal"
-	_ "github.com/iawia002/lux/extractors/vimeo"
-	_ "github.com/iawia002/lux/extractors/weibo"
-	_ "github.com/iawia002/lux/extractors/ximalaya"
-	_ "github.com/iawia002/lux/extractors/xinpianchang"
-	_ "github.com/iawia002/lux/extractors/xvideos"
-	_ "github.com/iawia002/lux/extractors/yinyuetai"
-	_ "github.com/iawia002/lux/extractors/youku"
-	_ "github.com/iawia002/lux/extractors/youtube"
 )
 
 const filename = "sites"
@@ -58,7 +26,13 @@ const filename = "sites"
 //go:embed sites
 var sites embed.FS
 
-var managedMediaSites = make(map[string]struct{})
+var (
+	managedMediaSites = make(map[string]struct{})
+
+	_, existFFmpeg       = exists("ffmpeg")
+	youget, existYouGet  = exists("you-get")
+	ytdl, existYoutubeDL = exists("youtube-dl")
+)
 
 func init() {
 	parseMediaSites(filename)
@@ -114,4 +88,135 @@ func supportedMediaSite(u *url.URL) bool {
 	_, ok := managedMediaSites[dom]
 
 	return ok
+}
+
+type media struct {
+	dir  string
+	path string
+	name string
+	url  string
+}
+
+// nolint:gocyclo
+func (m media) download(ctx context.Context, cfg *config.Options) string {
+	logger.Debug("download media to %s, url: %s", m.dir, m.url)
+
+	v := m.viaYoutubeDL(ctx, cfg)
+	if v == "" {
+		v = m.viaYouGet(ctx, cfg)
+	}
+	if v == "" {
+		v = m.viaLux(ctx, cfg)
+	}
+	if !helper.Exists(v) {
+		logger.Warn("file %s not exists", m.path)
+		return ""
+	}
+	mtype, _ := mimetype.DetectFile(v) // nolint:errcheck
+	if strings.HasPrefix(mtype.String(), "video") || strings.HasPrefix(mtype.String(), "audio") {
+		return v
+	}
+
+	return ""
+}
+
+// Glob files by given pattern and return first file
+func match(pattern string) string {
+	paths, err := filepath.Glob(pattern)
+	if err != nil || len(paths) == 0 {
+		logger.Warn("file %s not found", pattern)
+		return ""
+	}
+	logger.Debug("matched paths: %v", paths)
+	return paths[0]
+}
+
+// Runs a command
+func run(cmd *exec.Cmd, debug bool) error {
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	cmd.Stderr = cmd.Stdout
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	if debug {
+		readOutput(stdout)
+	}
+
+	// Wait for the process to be finished.
+	// Don't care about this error in any scenario.
+	// nolint:errcheck
+	_ = cmd.Wait()
+
+	return nil
+}
+
+// Download media via youtube-dl
+func (m media) viaYoutubeDL(ctx context.Context, cfg *config.Options) string {
+	if !existYoutubeDL {
+		return ""
+	}
+	logger.Debug("download media via youtube-dl")
+
+	args := []string{
+		"--http-chunk-size=10M", "--prefer-free-formats", "--restrict-filenames",
+		"--no-color", "--rm-cache-dir", "--no-warnings", "--no-check-certificate",
+		"--no-progress", "--no-part", "--no-mtime", "--embed-subs", "--quiet",
+		"--ignore-errors", "--format=best[ext=mp4]/best", "--merge-output-format=mp4",
+		"--output=" + m.path + ".%(ext)s", m.url,
+	}
+	if cfg.HasDebugMode() {
+		args = append(args, "--verbose", "--print-traffic")
+	}
+
+	cmd := exec.CommandContext(ctx, ytdl, args...) // nosemgrep: gitlab.gosec.G204-1
+	logger.Debug("youtube-dl args: %s", cmd.String())
+
+	if err := run(cmd, cfg.HasDebugMode()); err != nil {
+		logger.Warn("start youtube-dl failed: %v", err)
+	}
+
+	return match(m.path + "*")
+}
+
+// Download media via you-get
+func (m media) viaYouGet(ctx context.Context, cfg *config.Options) string {
+	if !existYouGet || !existFFmpeg {
+		return ""
+	}
+	logger.Debug("download media via you-get")
+	args := []string{
+		"--output-filename=" + m.path + m.url,
+	}
+	cmd := exec.CommandContext(ctx, youget, args...) // nosemgrep: gitlab.gosec.G204-1
+	logger.Debug("youget args: %s", cmd.String())
+
+	if err := run(cmd, cfg.HasDebugMode()); err != nil {
+		logger.Warn("run you-get failed: %v", err)
+	}
+
+	return match(m.path + "*")
+}
+
+func exists(tool string) (string, bool) {
+	var locations []string
+	switch tool {
+	case "ffmpeg":
+		locations = []string{"ffmpeg", "ffmpeg.exe"}
+	case "youtube-dl":
+		locations = []string{"youtube-dl"}
+	case "you-get":
+		locations = []string{"you-get"}
+	}
+
+	for _, path := range locations {
+		found, err := exec.LookPath(path)
+		if err == nil {
+			return found, found != ""
+		}
+	}
+
+	return "", false
 }

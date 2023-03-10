@@ -125,6 +125,7 @@ fmt: ## Format codebase
 vet: ## Vet codebase
 	@echo "-> Running go vet"
 	@go vet $(PACKAGES)
+	@go vet -tags with_lux $(PACKAGES)
 
 test: ## Run testing
 	@echo "-> Running go test"
