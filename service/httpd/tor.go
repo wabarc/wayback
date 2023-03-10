@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"time"
 
 	// "github.com/ipsn/go-libtor"
@@ -76,7 +75,7 @@ func (t *Tor) Serve() error {
 	}
 
 	switch {
-	case torExist() && t.torrc() != "":
+	case torExist():
 		logger.Info("start a tor hidden server")
 		t.startTorServer(server)
 	default:
@@ -109,19 +108,6 @@ func (t *Tor) Shutdown() error {
 	return nil
 }
 
-func (t *Tor) torrc() string {
-	if t.opts.TorrcFile() == "" {
-		return ""
-	}
-	if torPortBusy() {
-		return ""
-	}
-	if _, err := os.Open(filepath.Clean(t.opts.TorrcFile())); err != nil {
-		return ""
-	}
-	return t.opts.TorrcFile()
-}
-
 func (t *Tor) startTorServer(server *http.Server) {
 	var pvk ed25519.PrivateKey
 	if t.opts.TorPrivKey() == "" {
@@ -141,7 +127,7 @@ func (t *Tor) startTorServer(server *http.Server) {
 
 	verbose := t.opts.HasDebugMode()
 	// startConf := &tor.StartConf{ProcessCreator: libtor.Creator, DataDir: "tor-data"}
-	startConf := &tor.StartConf{TorrcFile: t.torrc(), TempDataDirBase: os.TempDir()}
+	startConf := &tor.StartConf{TempDataDirBase: os.TempDir()}
 	if verbose {
 		startConf.DebugWriter = os.Stdout
 	} else {
@@ -191,22 +177,6 @@ func startHTTPServer(server *http.Server) {
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		logger.Fatal("Server failed to start: %v", err)
 	}
-}
-
-func torPortBusy() bool {
-	addr := net.JoinHostPort("127.0.0.1", "9050")
-	conn, err := net.DialTimeout("tcp", addr, time.Second)
-	if err != nil {
-		logger.Warn("defaults tor port is idle")
-		return false
-	}
-	if conn != nil {
-		conn.Close()
-		logger.Debug("defaults tor port is busy")
-		return true
-	}
-
-	return false
 }
 
 func torExist() bool {
