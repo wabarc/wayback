@@ -2,7 +2,7 @@
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
-//go:build !embedded_tor
+//go:build embedded_tor
 
 package httpd // import "github.com/wabarc/wayback/service/httpd"
 
@@ -12,14 +12,16 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
 
 	"github.com/cretz/bine/tor"
 	"github.com/cretz/bine/torutil/ed25519"
 	"github.com/fatih/color"
+	"github.com/ipsn/go-libtor"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/errors"
 )
+
+var creator = libtor.Creator
 
 func (h *Httpd) startTorServer(server *http.Server) error {
 	var pvk ed25519.PrivateKey
@@ -39,7 +41,7 @@ func (h *Httpd) startTorServer(server *http.Server) error {
 	}
 
 	verbose := h.opts.HasDebugMode()
-	startConf := &tor.StartConf{TempDataDirBase: os.TempDir()}
+	startConf := &tor.StartConf{ProcessCreator: creator, TempDataDirBase: os.TempDir()}
 	if verbose {
 		startConf.DebugWriter = os.Stdout
 	} else {
@@ -87,8 +89,5 @@ func (h *Httpd) startTorServer(server *http.Server) error {
 }
 
 func torExist() bool {
-	if _, err := exec.LookPath("tor"); err != nil {
-		return false
-	}
 	return true
 }
