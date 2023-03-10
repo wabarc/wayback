@@ -21,7 +21,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/hashicorp/go-version v1.6.0
-	github.com/iawia002/lux v0.14.0
+	github.com/iawia002/lux v0.17.0
 	github.com/ipsn/go-libtor v1.0.380
 	github.com/jedib0t/go-pretty/v6 v6.4.0
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
@@ -32,7 +32,7 @@ require (
 	github.com/prometheus/common v0.37.0
 	github.com/rs/xid v1.4.0
 	github.com/slack-go/slack v0.11.2
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.6.1
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
 	github.com/wabarc/archive.is v1.3.0
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
@@ -48,7 +48,7 @@ require (
 	github.com/wabarc/telegra.ph v0.0.0-20221226141851-edf1cc14c076
 	github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5
 	go.etcd.io/bbolt v1.3.6
-	golang.org/x/net v0.6.0
+	golang.org/x/net v0.8.0
 	golang.org/x/sync v0.1.0
 	gopkg.in/telebot.v3 v3.0.0-20220130115853-f0291132d3c3
 	maunium.net/go/mautrix v0.12.0
@@ -75,8 +75,8 @@ require (
 	github.com/decred/dcrd/crypto/blake256 v1.0.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/dghubble/sling v1.3.0 // indirect
-	github.com/dlclark/regexp2 v1.4.1-0.20201116162257-a2a8dda75c91 // indirect
-	github.com/dop251/goja v0.0.0-20211211112501-fb27c91c26ed // indirect
+	github.com/dlclark/regexp2 v1.7.0 // indirect
+	github.com/dop251/goja v0.0.0-20221115122301-6c0d9883792e // indirect
 	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
@@ -88,7 +88,8 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/iawia002/lia v0.0.0-20221116085912-1f653221be4b // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/ipfs/go-cid v0.3.2 // indirect
 	github.com/ipfs/go-ipfs-api v0.3.0 // indirect
 	github.com/ipfs/go-ipfs-files v0.2.0 // indirect
@@ -98,7 +99,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kallydev/telegraph-go v1.0.0 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
-	github.com/kkdai/youtube/v2 v2.7.10 // indirect
+	github.com/kkdai/youtube/v2 v2.7.18 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.2 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -111,7 +112,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mattn/go-pointer v0.0.1 // indirect
-	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -128,9 +129,9 @@ require (
 	github.com/oliamb/cutter v0.2.2 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f // indirect
-	github.com/rogpeppe/go-internal v1.8.1 // indirect
+	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spacemonkeygo/spacelog v0.0.0-20180420211403-2296661a0572 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
@@ -147,8 +148,8 @@ require (
 	github.com/ybbus/httpretry v1.0.1 // indirect
 	golang.org/x/crypto v0.4.0 // indirect
 	golang.org/x/exp v0.0.0-20221205204356-47842c84f3db // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

@@ -16,7 +16,7 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 
-	// Copied from https://github.com/iawia002/lux/blob/f1baf46e/app/register.go#L3-L40
+	// Copied from https://github.com/iawia002/lux/blob/b76533/app/register.go#L4-L41
 	_ "github.com/iawia002/lux/extractors/acfun"
 	_ "github.com/iawia002/lux/extractors/bcy"
 	_ "github.com/iawia002/lux/extractors/bilibili"
@@ -38,6 +38,7 @@ import (
 	_ "github.com/iawia002/lux/extractors/pixivision"
 	_ "github.com/iawia002/lux/extractors/pornhub"
 	_ "github.com/iawia002/lux/extractors/qq"
+	_ "github.com/iawia002/lux/extractors/reddit"
 	_ "github.com/iawia002/lux/extractors/streamtape"
 	_ "github.com/iawia002/lux/extractors/tangdou"
 	_ "github.com/iawia002/lux/extractors/tiktok"
@@ -46,6 +47,7 @@ import (
 	_ "github.com/iawia002/lux/extractors/udn"
 	_ "github.com/iawia002/lux/extractors/universal"
 	_ "github.com/iawia002/lux/extractors/vimeo"
+	_ "github.com/iawia002/lux/extractors/vk"
 	_ "github.com/iawia002/lux/extractors/weibo"
 	_ "github.com/iawia002/lux/extractors/ximalaya"
 	_ "github.com/iawia002/lux/extractors/xinpianchang"
