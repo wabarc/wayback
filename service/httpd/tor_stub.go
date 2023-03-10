@@ -2,7 +2,7 @@
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
-//go:build embedded_tor
+//go:build with_tor
 
 package httpd // import "github.com/wabarc/wayback/service/httpd"
 
