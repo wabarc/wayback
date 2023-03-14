@@ -77,7 +77,7 @@ jobs:
 
   trivy:
     name: Trivy
-    uses: wabarc/.github/.github/workflows/reusable-trivy.yml@trivy
+    uses: wabarc/.github/.github/workflows/reusable-trivy.yml@main
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results

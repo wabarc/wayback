@@ -317,7 +317,7 @@ jobs:
 
   trivy-standalone:
     name: Trivy for standalone
-    uses: wabarc/.github/.github/workflows/reusable-trivy.yml@trivy
+    uses: wabarc/.github/.github/workflows/reusable-trivy.yml@main
     needs: publish
     permissions:
       contents: read # for actions/checkout to fetch code
@@ -330,7 +330,7 @@ jobs:
 
   trivy-bundle:
     name: Trivy for bundle
-    uses: wabarc/.github/.github/workflows/reusable-trivy.yml@trivy
+    uses: wabarc/.github/.github/workflows/reusable-trivy.yml@main
     needs: allinone
     permissions:
       contents: read # for actions/checkout to fetch code
