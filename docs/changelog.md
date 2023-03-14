@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Bump alpine to 3.17
   - Upgrade dependencies for docker workflow
   - No longer build image for `linux/s390x`
+- Get rid of the Tor binary ([#336](https://github.com/wabarc/wayback/pull/336))
 
 ### Fixed
 - Fix semgrep scan workflow ([#312](https://github.com/wabarc/wayback/pull/312))
