@@ -89,7 +89,7 @@ func TestDo(t *testing.T) {
 		t.Skip("Chrome headless browser no found, skipped")
 	}
 
-	dir, err := os.MkdirTemp(os.TempDir(), "reduxer-")
+	dir, err := os.MkdirTemp(t.TempDir(), "reduxer-")
 	if err != nil {
 		t.Fatalf(`Unexpected create temp dir: %v`, err)
 	}
@@ -124,7 +124,7 @@ func TestDo(t *testing.T) {
 }
 
 func TestCreateDir(t *testing.T) {
-	dir, err := os.MkdirTemp(os.TempDir(), "reduxer-")
+	dir, err := os.MkdirTemp(t.TempDir(), "reduxer-")
 	if err != nil {
 		t.Fatalf(`Unexpected create temp dir: %v`, err)
 	}
@@ -143,7 +143,7 @@ func TestCreateDir(t *testing.T) {
 }
 
 func TestSingleFile(t *testing.T) {
-	dir, err := os.MkdirTemp(os.TempDir(), "reduxer-")
+	dir, err := os.MkdirTemp(t.TempDir(), "reduxer-")
 	if err != nil {
 		t.Fatalf(`Unexpected create temp dir: %v`, err)
 	}

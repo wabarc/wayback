@@ -5,7 +5,7 @@
 package storage // import "github.com/wabarc/wayback/storage"
 
 import (
-	"os"
+	"path"
 	"testing"
 
 	"github.com/wabarc/wayback/config"
@@ -13,16 +13,13 @@ import (
 )
 
 func TestCreatePlayback(t *testing.T) {
-	dbpath := tmpPath()
-	defer os.Remove(dbpath)
-
 	parser := config.NewParser()
 	opts, err := parser.ParseEnvironmentVariables()
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	s, err := Open(opts, dbpath)
+	s, err := Open(opts, path.Join(t.TempDir(), "wayback.db"))
 	if err != nil {
 		t.Fatalf("Unexpected open a bolt db: %v", err)
 	}
@@ -36,16 +33,13 @@ func TestCreatePlayback(t *testing.T) {
 }
 
 func TestPlayback(t *testing.T) {
-	dbpath := tmpPath()
-	defer os.Remove(dbpath)
-
 	parser := config.NewParser()
 	opts, err := parser.ParseEnvironmentVariables()
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	s, err := Open(opts, dbpath)
+	s, err := Open(opts, path.Join(t.TempDir(), "wayback.db"))
 	if err != nil {
 		t.Fatalf("Unexpected open a bolt db: %v", err)
 	}
@@ -71,16 +65,13 @@ func TestPlayback(t *testing.T) {
 }
 
 func TestRemovePlayback(t *testing.T) {
-	dbpath := tmpPath()
-	defer os.Remove(dbpath)
-
 	parser := config.NewParser()
 	opts, err := parser.ParseEnvironmentVariables()
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	s, err := Open(opts, dbpath)
+	s, err := Open(opts, path.Join(t.TempDir(), "wayback.db"))
 	if err != nil {
 		t.Fatalf("Unexpected open a bolt db: %v", err)
 	}

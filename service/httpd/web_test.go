@@ -25,7 +25,7 @@ import (
 
 func TestTransform(t *testing.T) {
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
-	os.Setenv("WAYBACK_STORAGE_DIR", path.Join(os.TempDir(), "reduxer"))
+	os.Setenv("WAYBACK_STORAGE_DIR", path.Join(t.TempDir(), "reduxer-"+helper.RandString(5, "")))
 
 	parser := config.NewParser()
 	opts, err := parser.ParseEnvironmentVariables()
@@ -112,7 +112,7 @@ func TestProcessRespStatus(t *testing.T) {
 
 func TestProcessContentType(t *testing.T) {
 	os.Setenv("WAYBACK_ENABLE_IA", "true")
-	os.Setenv("WAYBACK_STORAGE_DIR", path.Join(os.TempDir(), "reduxer"))
+	os.Setenv("WAYBACK_STORAGE_DIR", path.Join(t.TempDir(), "reduxer-"+helper.RandString(5, "")))
 
 	opts, err := config.NewParser().ParseEnvironmentVariables()
 	if err != nil {
