@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for publish to Nostr ([#311](https://github.com/wabarc/wayback/pull/311))
   - Message content styling
 - Add documentation ([#330](https://github.com/wabarc/wayback/pull/330))
+- Add Trivy workflow ([#340](https://github.com/wabarc/wayback/pull/340))
 
 ### Changed
 - Sign images using cosign
