@@ -74,3 +74,14 @@ jobs:
   dependency-review:
     name: Dependency Review
     uses: wabarc/.github/.github/workflows/reusable-dependency-review.yml@main
+
+  trivy:
+    name: Trivy
+    uses: wabarc/.github/.github/workflows/reusable-trivy.yml@main
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      #actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    with:
+      scan-type: 'fs'
+      sarif: 'filesystem.sarif'
