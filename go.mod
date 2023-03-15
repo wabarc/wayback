@@ -33,7 +33,7 @@ require (
 	github.com/rs/xid v1.4.0
 	github.com/slack-go/slack v0.11.2
 	github.com/spf13/cobra v1.6.1
-	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
+	github.com/thoj/go-ircevent v0.0.0-20210723090443-73e444401d64
 	github.com/wabarc/archive.is v1.3.0
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/go-anonfile v0.1.0
