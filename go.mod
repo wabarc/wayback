@@ -42,7 +42,7 @@ require (
 	github.com/wabarc/imgbb v1.0.0
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20220126131044-16299c0dd43d
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
-	github.com/wabarc/playback v0.0.0-20220715111526-90d0327d3f04
+	github.com/wabarc/playback v0.0.0-20221023042809-d97268bd20f6
 	github.com/wabarc/rivet v0.1.4-0.20221226142645-ebc8a29d914f
 	github.com/wabarc/screenshot v1.6.0
 	github.com/wabarc/telegra.ph v0.0.0-20221226141851-edf1cc14c076
