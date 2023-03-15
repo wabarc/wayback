@@ -46,7 +46,7 @@ require (
 	github.com/wabarc/rivet v0.1.4-0.20221226142645-ebc8a29d914f
 	github.com/wabarc/screenshot v1.6.1-0.20230315004517-7587f8bc14e0
 	github.com/wabarc/telegra.ph v0.0.0-20230318134541-a0922e1ace3a
-	github.com/wabarc/warcraft v0.3.1-0.20230308001245-81029e9c1365
+	github.com/wabarc/warcraft v0.3.1-0.20230308125707-3daa5592ba52
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/net v0.8.0
 	golang.org/x/sync v0.1.0

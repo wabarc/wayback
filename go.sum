@@ -618,8 +618,8 @@ github.com/wabarc/screenshot v1.6.1-0.20230315004517-7587f8bc14e0 h1:H7Ufx43fg3k
 github.com/wabarc/screenshot v1.6.1-0.20230315004517-7587f8bc14e0/go.mod h1:iQ6N8Myjc1XCR7Vh/1ihsWGZQY/vXAMneHwUmKRitxE=
 github.com/wabarc/telegra.ph v0.0.0-20230318134541-a0922e1ace3a h1:W1gb0ww1oIARudOfXEMoXkZU1gqk0JERkIvVEgtuzq4=
 github.com/wabarc/telegra.ph v0.0.0-20230318134541-a0922e1ace3a/go.mod h1:n+wNWjpzSvzIw8l5JbpeRzJqkOnSsXSgmI45635MUC4=
-github.com/wabarc/warcraft v0.3.1-0.20230308001245-81029e9c1365 h1:iEmU6uKU/b0Y3Ow9hfpvHr1p4qRttFziw7tEZLr3ELc=
-github.com/wabarc/warcraft v0.3.1-0.20230308001245-81029e9c1365/go.mod h1:/BbCwReBjlqHRaw8Yh+7sfAicOesiMYNhiFpuL1x8Rc=
+github.com/wabarc/warcraft v0.3.1-0.20230308125707-3daa5592ba52 h1:ys1ltR7cKqATsLeqXBCp7kPCItIDxwyOjAFj0btH0wQ=
+github.com/wabarc/warcraft v0.3.1-0.20230308125707-3daa5592ba52/go.mod h1:/BbCwReBjlqHRaw8Yh+7sfAicOesiMYNhiFpuL1x8Rc=
 github.com/whyrusleeping/tar-utils v0.0.0-20180509141711-8c6c8ba81d5c/go.mod h1:xxcJeBb7SIUl/Wzkz1eVKJE/CB34YNrqX2TQI6jY9zs=
 github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b h1:wA3QeTsaAXybLL2kb2cKhCAQTHgYTMwuI8lBlJSv5V8=
 github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b/go.mod h1:xT1Y5p2JR2PfSZihE0s4mjdJaRGp1waCTf5JzhQLBck=

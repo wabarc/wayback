@@ -9,7 +9,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -251,39 +250,36 @@ func capture(ctx context.Context, cfg *config.Options, uri *url.URL, dir string)
 		screenshot.Quality(100),   // image quality
 	}
 
-	if remote := remoteHeadless(cfg.ChromeRemoteAddr()); remote != nil {
-		logger.Debug("reduxer using remote browser")
-		addr := remote.(*net.TCPAddr)
-		browser, er := screenshot.NewChromeRemoteScreenshoter[screenshot.Path](addr.String())
-		if er != nil {
-			return shot, errors.Wrap(er, "dial screenshoter failed")
-		}
-		shot, err = browser.Screenshot(ctx, uri, opts...)
-	} else {
+	fallback := func() (*screenshot.Screenshots[screenshot.Path], error) {
 		logger.Debug("reduxer using local browser")
 		shot, err = screenshot.Screenshot[screenshot.Path](ctx, uri, opts...)
-	}
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			return shot, errors.Wrap(err, "screenshot deadline")
+		if err != nil {
+			if err == context.DeadlineExceeded {
+				return shot, errors.Wrap(err, "screenshot deadline")
+			}
+			return shot, errors.Wrap(err, "screenshot error")
 		}
-		return shot, errors.Wrap(err, "screenshot error")
+		return shot, err
 	}
 
-	return shot, err
-}
-
-func remoteHeadless(addr string) net.Addr {
-	conn, err := net.DialTimeout("tcp", addr, time.Second)
-	if err != nil {
-		return nil
+	// Try to take a screenshot with a remote headless browser
+	// Fallback to local browser if remote is unavailable
+	if remote := cfg.ChromeRemoteAddr(); remote != "" {
+		logger.Debug("reduxer using remote browser")
+		browser, er := screenshot.NewChromeRemoteScreenshoter[screenshot.Path](remote)
+		if er != nil {
+			logger.Error("screenshot dial failed: %v", er)
+			return fallback()
+		}
+		shot, err = browser.Screenshot(ctx, uri, opts...)
+		if err != nil {
+			logger.Error("screenshot failed: %v", err)
+			return fallback()
+		}
+		return shot, nil
 	}
 
-	if conn != nil {
-		conn.Close()
-		return conn.RemoteAddr()
-	}
-	return nil
+	return fallback()
 }
 
 func createDir(baseDir string) (dir string, err error) {
