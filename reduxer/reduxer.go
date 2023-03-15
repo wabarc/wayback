@@ -13,19 +13,13 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/dustin/go-humanize"
-	"github.com/gabriel-vasile/mimetype"
 	"github.com/go-shiori/go-readability"
 	"github.com/go-shiori/obelisk"
-	"github.com/iawia002/lux/downloader"
-	"github.com/iawia002/lux/extractors"
 	"github.com/wabarc/go-anonfile"
 	"github.com/wabarc/go-catbox"
 	"github.com/wabarc/helper"
@@ -41,10 +35,6 @@ var (
 	ctxBasenameKey struct{}
 
 	filePerm = os.FileMode(0o600)
-
-	_, existFFmpeg       = exists("ffmpeg")
-	youget, existYouGet  = exists("you-get")
-	ytdl, existYoutubeDL = exists("youtube-dl")
 )
 
 // Reduxer is the interface that wraps the basic reduxer method.
@@ -194,8 +184,16 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 				WARC: Asset{Local: craft(uri)},
 			}
 
+			fp := filepath.Join(dir, basename)
+			m := media{
+				dir:  dir,
+				path: fp,
+				name: basename,
+				url:  shot.URL,
+			}
+
 			if supportedMediaSite(uri) {
-				artifact.Media.Local = media(ctx, opts, dir, shot.URL)
+				artifact.Media.Local = m.download(ctx, opts)
 			}
 			// Attach single file
 			var buf []byte
@@ -210,7 +208,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 				logger.Error("parse html failed: %v", err)
 			}
 			txtName := basename + ".txt"
-			fp := filepath.Join(dir, txtName)
+			fp = filepath.Join(dir, txtName)
 			if err = os.WriteFile(fp, helper.String2Byte(article.TextContent), filePerm); err == nil && article.TextContent != "" {
 				artifact.Txt.Local = fp
 			}
@@ -293,190 +291,6 @@ func createDir(baseDir string) (dir string, err error) {
 		return "", errors.Wrap(err, "mkdir failed: "+dir)
 	}
 	return dir, nil
-}
-
-func exists(tool string) (string, bool) {
-	var locations []string
-	switch tool {
-	case "ffmpeg":
-		locations = []string{"ffmpeg", "ffmpeg.exe"}
-	case "youtube-dl":
-		locations = []string{"youtube-dl"}
-	case "you-get":
-		locations = []string{"you-get"}
-	}
-
-	for _, path := range locations {
-		found, err := exec.LookPath(path)
-		if err == nil {
-			return found, found != ""
-		}
-	}
-
-	return "", false
-}
-
-// nolint:gocyclo
-func media(ctx context.Context, cfg *config.Options, dir, in string) string {
-	logger.Debug("download media to %s, url: %s", dir, in)
-	fn := basename(ctx)
-	fp := filepath.Join(dir, fn)
-
-	// Glob files by given pattern and return first file
-	var match = func(pattern string) string {
-		paths, err := filepath.Glob(pattern)
-		if err != nil || len(paths) == 0 {
-			logger.Warn("file %s* not found", fp)
-			return ""
-		}
-		logger.Debug("matched paths: %v", paths)
-		return paths[0]
-	}
-
-	// Runs a command
-	var run = func(cmd *exec.Cmd) error {
-		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			return err
-		}
-		cmd.Stderr = cmd.Stdout
-		if err := cmd.Start(); err != nil {
-			return err
-		}
-		if cfg.HasDebugMode() {
-			readOutput(stdout)
-		}
-
-		// Wait for the process to be finished.
-		// Don't care about this error in any scenario.
-		// nolint:errcheck
-		_ = cmd.Wait()
-
-		return nil
-	}
-
-	// Download media via youtube-dl
-	var viaYoutubeDL = func() string {
-		if !existYoutubeDL {
-			return ""
-		}
-		logger.Debug("download media via youtube-dl")
-
-		args := []string{
-			"--http-chunk-size=10M", "--prefer-free-formats", "--restrict-filenames",
-			"--no-color", "--rm-cache-dir", "--no-warnings", "--no-check-certificate",
-			"--no-progress", "--no-part", "--no-mtime", "--embed-subs", "--quiet",
-			"--ignore-errors", "--format=best[ext=mp4]/best", "--merge-output-format=mp4",
-			"--output=" + fp + ".%(ext)s", in,
-		}
-		if cfg.HasDebugMode() {
-			args = append(args, "--verbose", "--print-traffic")
-		}
-
-		cmd := exec.CommandContext(ctx, ytdl, args...) // nosemgrep: gitlab.gosec.G204-1
-		logger.Debug("youtube-dl args: %s", cmd.String())
-
-		if err := run(cmd); err != nil {
-			logger.Warn("start youtube-dl failed: %v", err)
-		}
-
-		return match(fp + "*")
-	}
-
-	// Download media via you-get
-	var viaYouGet = func() string {
-		if !existYouGet || !existFFmpeg {
-			return ""
-		}
-		logger.Debug("download media via you-get")
-		args := []string{
-			"--output-filename=" + fp, in,
-		}
-		cmd := exec.CommandContext(ctx, youget, args...) // nosemgrep: gitlab.gosec.G204-1
-		logger.Debug("youget args: %s", cmd.String())
-
-		if err := run(cmd); err != nil {
-			logger.Warn("run you-get failed: %v", err)
-		}
-
-		return match(fp + "*")
-	}
-
-	var viaLux = func() string {
-		if !existFFmpeg {
-			logger.Warn("missing FFmpeg, skipped")
-			return ""
-		}
-		// Download media via Lux
-		logger.Debug("download media via lux")
-		data, err := extractors.Extract(in, extractors.Options{})
-		if err != nil || len(data) == 0 {
-			logger.Warn("data empty or error %v", err)
-			return ""
-		}
-		dt := data[0]
-		dl := downloader.New(downloader.Options{
-			OutputPath:   dir,
-			OutputName:   fn,
-			MultiThread:  true,
-			ThreadNumber: 10,
-			ChunkSizeMB:  10,
-			Silent:       !cfg.HasDebugMode(),
-		})
-		sortedStreams := sortStreams(dt.Streams)
-		if len(sortedStreams) == 0 {
-			logger.Warn("stream not found")
-			return ""
-		}
-		streamName := sortedStreams[0].ID
-		stream, ok := dt.Streams[streamName]
-		if !ok {
-			logger.Warn("stream not found")
-			return ""
-		}
-		logger.Debug("stream size: %s", humanize.Bytes(uint64(stream.Size)))
-		if stream.Size > int64(cfg.MaxMediaSize()) {
-			logger.Warn("media size large than %s, skipped", humanize.Bytes(cfg.MaxMediaSize()))
-			return ""
-		}
-		if err := dl.Download(dt); err != nil {
-			logger.Error("download media failed: %v", err)
-			return ""
-		}
-		fp += "." + stream.Ext
-		return fp
-	}
-
-	v := viaYoutubeDL()
-	if v == "" {
-		v = viaYouGet()
-	}
-	if v == "" {
-		v = viaLux()
-	}
-	if !helper.Exists(v) {
-		logger.Warn("file %s not exists", fp)
-		return ""
-	}
-	mtype, _ := mimetype.DetectFile(v) // nolint:errcheck
-	if strings.HasPrefix(mtype.String(), "video") || strings.HasPrefix(mtype.String(), "audio") {
-		return v
-	}
-
-	return ""
-}
-
-func sortStreams(streams map[string]*extractors.Stream) []*extractors.Stream {
-	sortedStreams := make([]*extractors.Stream, 0, len(streams))
-	for _, data := range streams {
-		sortedStreams = append(sortedStreams, data)
-	}
-	if len(sortedStreams) > 1 {
-		sort.Slice(
-			sortedStreams, func(i, j int) bool { return sortedStreams[i].Size > sortedStreams[j].Size },
-		)
-	}
-	return sortedStreams
 }
 
 func remotely(ctx context.Context, artifact *Artifact) (err error) {
