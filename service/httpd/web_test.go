@@ -7,7 +7,7 @@ package httpd // import "github.com/wabarc/wayback/service/httpd"
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -190,7 +190,7 @@ func TestProcessContentType(t *testing.T) {
 			if resp.StatusCode != test.status {
 				t.Fatalf("Unexpected response code got %d instead of %d", resp.StatusCode, test.status)
 			}
-			body, err := ioutil.ReadAll(resp.Body)
+			body, err := io.ReadAll(resp.Body)
 			if err != nil {
 				t.Fatalf("Unexpected read body: %v", err)
 			}

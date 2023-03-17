@@ -7,7 +7,7 @@ package meili // import "github.com/wabarc/wayback/publish/meili"
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -109,7 +109,7 @@ var (
 			w.WriteHeader(http.StatusAccepted)
 			_, _ = w.Write([]byte(respCreateIndex))
 		case r.Method == http.MethodPost && r.URL.Path == fmt.Sprintf(`/indexes/%s/documents`, indexing): // add documents
-			buf, err := ioutil.ReadAll(r.Body)
+			buf, err := io.ReadAll(r.Body)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				_, _ = w.Write([]byte(respInvalidRequest))
