@@ -14,6 +14,8 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
+var ErrDatabaseNotFound = errors.New("database not found")
+
 // Storage handles all operations related to the database.
 type Storage struct {
 	db *bolt.DB
@@ -38,7 +40,7 @@ func (s *Storage) Close() error {
 	if s.db != nil {
 		return s.db.Close()
 	}
-	return errors.New("database not found.")
+	return ErrDatabaseNotFound
 }
 
 func itob(v int) []byte {
