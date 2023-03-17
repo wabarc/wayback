@@ -50,6 +50,9 @@ jobs:
       SENDER_PWD: ${{ secrets.MATRIX_SENDER_PWD }}
       RECVER_UID: ${{ secrets.MATRIX_RECVER_UID }}
       RECVER_PWD: ${{ secrets.MATRIX_RECVER_PWD }}
+      WAYBACK_IPFS_MODE: ${{ vars.WAYBACK_IPFS_MODE }}
+      WAYBACK_IPFS_HOST: ${{ vars.WAYBACK_IPFS_HOST }}
+      WAYBACK_IPFS_PORT: ${{ vars.WAYBACK_IPFS_PORT }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
@@ -92,7 +95,7 @@ jobs:
         with:
           args: -h
 
-      - name: Install Packages
+      - name: Install Packages for Linux
         if: matrix.os == 'ubuntu-latest'
         shell: bash
         run: |
@@ -105,7 +108,7 @@ jobs:
           you-get --version
           ffmpeg -version
 
-      - name: Install Packages
+      - name: Install Packages for MacOS
         if: matrix.os == 'macos-latest'
         shell: bash
         run: |
@@ -115,7 +118,7 @@ jobs:
           you-get --version
           ffmpeg -version
 
-      - name: Install Packages
+      - name: Install Packages for Windows
         if: matrix.os == 'windows-latest'
         shell: bash
         run: |
@@ -129,6 +132,8 @@ jobs:
       - name: Set environments
         shell: bash
         run: |
+          ipfsMode="${{ vars.WAYBACK_IPFS_MODE }}"
+          echo "WAYBACK_IPFS_MODE=${ipfsMode:-daemon}" >> $GITHUB_ENV
           # Set env to enable reduxer
           echo "WAYBACK_STORAGE_DIR=${{ runner.temp }}" >> $GITHUB_ENV
           # Append paths to environment path
