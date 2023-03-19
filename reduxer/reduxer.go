@@ -295,7 +295,7 @@ func createDir(baseDir string) (dir string, err error) {
 }
 
 func remotely(ctx context.Context, artifact *Artifact) (err error) {
-	v := []*Asset{
+	assets := []*Asset{
 		&artifact.Img,
 		&artifact.PDF,
 		&artifact.Raw,
@@ -310,40 +310,45 @@ func remotely(ctx context.Context, artifact *Artifact) (err error) {
 	cat := catbox.New(c)
 	anon := anonfile.NewAnonfile(c)
 	g, _ := errgroup.WithContext(ctx)
-	var mu sync.Mutex
-	for _, asset := range v {
-		asset := asset
-		g.Go(func() error {
-			mu.Lock()
-			defer mu.Unlock()
 
-			if asset.Local == "" {
-				return nil
-			}
-			if !helper.Exists(asset.Local) {
-				logger.Debug("local asset: %s not exists", asset.Local)
-				return nil
-			}
-			r, e := anon.Upload(asset.Local)
-			if e != nil {
-				err = errors.Wrap(e, fmt.Sprintf("upload %s to anonfiles failed", asset.Local))
-			} else {
-				asset.Remote.Anonfile = r.Short()
-			}
-			c, e := cat.Upload(asset.Local)
-			if e != nil {
-				err = errors.Wrap(e, fmt.Sprintf("upload %s to catbox failed", asset.Local))
-			} else {
-				asset.Remote.Catbox = c
-			}
-			return err
+	var mu sync.Mutex
+	for _, asset := range assets {
+		asset := asset
+		if asset.Local == "" {
+			continue
+		}
+		if !helper.Exists(asset.Local) {
+			err = errors.Wrap(err, fmt.Sprintf("local asset: %s not exists", asset.Local))
+			continue
+		}
+		g.Go(func() error {
+			var remote Remote
+			func() {
+				r, e := anon.Upload(asset.Local)
+				if e != nil {
+					err = errors.Wrap(err, fmt.Sprintf("upload %s to anonfiles failed: %v", asset.Local, e))
+				} else {
+					remote.Anonfile = r.Short()
+				}
+			}()
+			func() {
+				c, e := cat.Upload(asset.Local)
+				if e != nil {
+					err = errors.Wrap(err, fmt.Sprintf("upload %s to catbox failed: %v", asset.Local, e))
+				} else {
+					remote.Catbox = c
+				}
+			}()
+			mu.Lock()
+			asset.Remote = remote
+			mu.Unlock()
+			return nil
 		})
 	}
-	if err = g.Wait(); err != nil {
-		return err
-	}
+	// nolint:errcheck
+	_ = g.Wait()
 
-	return nil
+	return err
 }
 
 func singleFile(ctx context.Context, opts *config.Options, inp io.Reader, dir, uri string) string {
