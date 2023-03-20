@@ -36,6 +36,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - No longer build image for `linux/s390x`
 - Get rid of the Tor binary ([#336](https://github.com/wabarc/wayback/pull/336))
 - Adjusting lux to pluggable mode ([#337](https://github.com/wabarc/wayback/pull/337))
+- Several improvements ([#335](https://github.com/wabarc/wayback/pull/335))
+  - Add client timeout for telegra.ph
+  - Log pooling errors
+  - Warcraft supports timeout and return waiting error
+  - Telegra.ph performance improvement
+  - Upload artifact remotely with timeout
+  - Remotely file upload with separate function
+  - Throw a fatal error if the command-line flag value is not specified
+  - Replace os.Tempdir with testing.T.TempDir
+  - Replace ioutil.ReadAll with io.ReadAll
+  - Add storage testing
+  - Change default ipfs port to 5001
+  - Place ipfs related environments for testing
+  - Wrap testing using t.Run
+  - Add `chromedp.NoModifyURL` compatibility
 
 ### Fixed
 - Fix semgrep scan workflow ([#312](https://github.com/wabarc/wayback/pull/312))
