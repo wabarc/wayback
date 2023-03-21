@@ -232,15 +232,7 @@ func TestProcess(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	dir := filepath.Join(os.TempDir(), "wayback")
-	if !helper.Exists(dir) {
-		if err := os.Mkdir(dir, 0744); err != nil {
-			t.Fatal(err)
-		}
-	}
-	defer os.RemoveAll(dir)
-
-	dbpath := filepath.Join(dir, "testing.db")
+	dbpath := filepath.Join(t.TempDir(), "testing.db")
 	store, err := storage.Open(opts, dbpath)
 	if err != nil {
 		t.Fatalf("open storage failed: %v", err)

@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	// "github.com/gorilla/websocket"
 	// "github.com/slack-go/slack/slackevents"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slacktest"

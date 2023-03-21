@@ -181,7 +181,7 @@ func (srv *services) run(ctx context.Context, opts service.Options) *services {
 				name: s,
 			})
 		default:
-			logger.Error("unrecognize %s in `--daemon`", s)
+			logger.Fatal("unrecognize %s in `--daemon`", s)
 		}
 	}
 

@@ -9,7 +9,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -30,6 +29,8 @@ import (
 	"github.com/wabarc/wayback/errors"
 	"golang.org/x/sync/errgroup"
 )
+
+const timeout = 30 * time.Second
 
 var (
 	ctxBasenameKey struct{}
@@ -153,10 +154,13 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 	}
 
 	var warc = &warcraft.Warcraft{BasePath: dir, UserAgent: opts.WaybackUserAgent()}
-	var craft = func(in *url.URL) (path string) {
+	var craft = func(ctx context.Context, in *url.URL) (path string) {
+		ctx, cancel := context.WithTimeout(ctx, timeout)
+		defer cancel()
+
 		path, err = warc.Download(ctx, in)
 		if err != nil {
-			logger.Debug("create warc for %s failed: %v", in.String(), err)
+			logger.Debug("create warc for %s failed: %v", in, err)
 			return ""
 		}
 		return path
@@ -181,7 +185,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 				Raw:  Asset{Local: fmt.Sprint(shot.HTML)},
 				PDF:  Asset{Local: fmt.Sprint(shot.PDF)},
 				HAR:  Asset{Local: fmt.Sprint(shot.HAR)},
-				WARC: Asset{Local: craft(uri)},
+				WARC: Asset{Local: craft(ctx, uri)},
 			}
 
 			fp := filepath.Join(dir, basename)
@@ -200,7 +204,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 			var article readability.Article
 			buf, err = os.ReadFile(fmt.Sprint(shot.HTML))
 			if err == nil {
-				singleFilePath := singleFile(ctx, bytes.NewReader(buf), dir, shot.URL)
+				singleFilePath := singleFile(ctx, opts, bytes.NewReader(buf), dir, shot.URL)
 				artifact.HTM.Local = singleFilePath
 			}
 			article, err = readability.FromReader(bytes.NewReader(buf), uri)
@@ -246,39 +250,36 @@ func capture(ctx context.Context, cfg *config.Options, uri *url.URL, dir string)
 		screenshot.Quality(100),   // image quality
 	}
 
-	if remote := remoteHeadless(cfg.ChromeRemoteAddr()); remote != nil {
-		logger.Debug("reduxer using remote browser")
-		addr := remote.(*net.TCPAddr)
-		browser, er := screenshot.NewChromeRemoteScreenshoter[screenshot.Path](addr.String())
-		if er != nil {
-			return shot, errors.Wrap(er, "dial screenshoter failed")
-		}
-		shot, err = browser.Screenshot(ctx, uri, opts...)
-	} else {
+	fallback := func() (*screenshot.Screenshots[screenshot.Path], error) {
 		logger.Debug("reduxer using local browser")
 		shot, err = screenshot.Screenshot[screenshot.Path](ctx, uri, opts...)
-	}
-	if err != nil {
-		if err == context.DeadlineExceeded {
-			return shot, errors.Wrap(err, "screenshot deadline")
+		if err != nil {
+			if err == context.DeadlineExceeded {
+				return shot, errors.Wrap(err, "screenshot deadline")
+			}
+			return shot, errors.Wrap(err, "screenshot error")
 		}
-		return shot, errors.Wrap(err, "screenshot error")
+		return shot, err
 	}
 
-	return shot, err
-}
-
-func remoteHeadless(addr string) net.Addr {
-	conn, err := net.DialTimeout("tcp", addr, time.Second)
-	if err != nil {
-		return nil
+	// Try to take a screenshot with a remote headless browser
+	// Fallback to local browser if remote is unavailable
+	if remote := cfg.ChromeRemoteAddr(); remote != "" {
+		logger.Debug("reduxer using remote browser")
+		browser, er := screenshot.NewChromeRemoteScreenshoter[screenshot.Path](remote)
+		if er != nil {
+			logger.Error("screenshot dial failed: %v", er)
+			return fallback()
+		}
+		shot, err = browser.Screenshot(ctx, uri, opts...)
+		if err != nil {
+			logger.Error("screenshot failed: %v", err)
+			return fallback()
+		}
+		return shot, nil
 	}
 
-	if conn != nil {
-		conn.Close()
-		return conn.RemoteAddr()
-	}
-	return nil
+	return fallback()
 }
 
 func createDir(baseDir string) (dir string, err error) {
@@ -294,7 +295,7 @@ func createDir(baseDir string) (dir string, err error) {
 }
 
 func remotely(ctx context.Context, artifact *Artifact) (err error) {
-	v := []*Asset{
+	assets := []*Asset{
 		&artifact.Img,
 		&artifact.PDF,
 		&artifact.Raw,
@@ -305,51 +306,57 @@ func remotely(ctx context.Context, artifact *Artifact) (err error) {
 		&artifact.Media,
 	}
 
-	c := &http.Client{}
+	c := &http.Client{Timeout: timeout}
 	cat := catbox.New(c)
 	anon := anonfile.NewAnonfile(c)
 	g, _ := errgroup.WithContext(ctx)
-	var mu sync.Mutex
-	for _, asset := range v {
-		asset := asset
-		g.Go(func() error {
-			mu.Lock()
-			defer mu.Unlock()
 
-			if asset.Local == "" {
-				return nil
-			}
-			if !helper.Exists(asset.Local) {
-				logger.Debug("local asset: %s not exists", asset.Local)
-				return nil
-			}
-			r, e := anon.Upload(asset.Local)
-			if e != nil {
-				err = errors.Wrap(e, fmt.Sprintf("upload %s to anonfiles failed", asset.Local))
-			} else {
-				asset.Remote.Anonfile = r.Short()
-			}
-			c, e := cat.Upload(asset.Local)
-			if e != nil {
-				err = errors.Wrap(e, fmt.Sprintf("upload %s to catbox failed", asset.Local))
-			} else {
-				asset.Remote.Catbox = c
-			}
-			return err
+	var mu sync.Mutex
+	for _, asset := range assets {
+		asset := asset
+		if asset.Local == "" {
+			continue
+		}
+		if !helper.Exists(asset.Local) {
+			err = errors.Wrap(err, fmt.Sprintf("local asset: %s not exists", asset.Local))
+			continue
+		}
+		g.Go(func() error {
+			var remote Remote
+			func() {
+				r, e := anon.Upload(asset.Local)
+				if e != nil {
+					err = errors.Wrap(err, fmt.Sprintf("upload %s to anonfiles failed: %v", asset.Local, e))
+				} else {
+					remote.Anonfile = r.Short()
+				}
+			}()
+			func() {
+				c, e := cat.Upload(asset.Local)
+				if e != nil {
+					err = errors.Wrap(err, fmt.Sprintf("upload %s to catbox failed: %v", asset.Local, e))
+				} else {
+					remote.Catbox = c
+				}
+			}()
+			mu.Lock()
+			asset.Remote = remote
+			mu.Unlock()
+			return nil
 		})
 	}
-	if err = g.Wait(); err != nil {
-		return err
-	}
+	// nolint:errcheck
+	_ = g.Wait()
 
-	return nil
+	return err
 }
 
-func singleFile(ctx context.Context, inp io.Reader, dir, uri string) string {
+func singleFile(ctx context.Context, opts *config.Options, inp io.Reader, dir, uri string) string {
 	req := obelisk.Request{URL: uri, Input: inp}
 	arc := &obelisk.Archiver{
 		SkipResourceURLError: true,
 		RequestTimeout:       3 * time.Second,
+		EnableVerboseLog:     opts.HasDebugMode(),
 	}
 	arc.Validate()
 

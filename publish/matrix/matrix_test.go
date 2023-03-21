@@ -6,7 +6,7 @@ package matrix // import "github.com/wabarc/wayback/publish/matrix"
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -36,7 +36,7 @@ func TestToMatrixRoom(t *testing.T) {
 		case r.URL.Path == "/_matrix/client/r0/login", r.URL.Path == "/_matrix/client/v3/login":
 			fmt.Fprintln(w, `{"access_token": "zoo"}`)
 		case strings.Contains(r.URL.Path, "!bar:example.com/send/m.room.message"):
-			body, _ := ioutil.ReadAll(r.Body)
+			body, _ := io.ReadAll(r.Body)
 			if !strings.Contains(string(body), config.SlotName(config.SLOT_IA)) {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return

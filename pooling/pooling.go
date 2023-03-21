@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/phf/go-queue/queue"
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/errors"
 )
 
@@ -109,8 +110,10 @@ func (p *Pool) Roll() {
 
 		if b, has := p.bucket(); has {
 			go b.once.Do(func() {
-				// nolint:errcheck
-				p.do(b)
+				err := p.do(b)
+				if err != nil {
+					logger.Error("pooling do failed: %v", err)
+				}
 			})
 		}
 	}

@@ -23,7 +23,7 @@ const (
 	defOverTor  = false
 
 	defIPFSHost   = "127.0.0.1"
-	defIPFSPort   = 4001
+	defIPFSPort   = 5001
 	defIPFSMode   = "pinner"
 	defIPFSTarget = ""
 	defIPFSApikey = ""

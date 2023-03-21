@@ -5,7 +5,7 @@ module github.com/wabarc/wayback
 go 1.18
 
 require (
-	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/bwmarrin/discordgo v0.23.3-0.20210627161652-421e14965030
 	github.com/cretz/bine v0.2.0
 	github.com/davecgh/go-spew v1.1.1
@@ -13,8 +13,8 @@ require (
 	github.com/dghubble/oauth1 v0.7.1
 	github.com/dstotijn/go-notion v0.6.1
 	github.com/dustin/go-humanize v1.0.0
-	github.com/fatih/color v1.13.0
-	github.com/gabriel-vasile/mimetype v1.4.1
+	github.com/fatih/color v1.15.0
+	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/go-shiori/go-readability v0.0.0-20220215145315-dd6828d2f09b
 	github.com/go-shiori/obelisk v0.0.0-20221119111008-23c015a8fad7
 	github.com/google/go-github/v40 v40.0.0
@@ -38,15 +38,15 @@ require (
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/go-anonfile v0.1.0
 	github.com/wabarc/go-catbox v0.1.0
-	github.com/wabarc/helper v0.0.0-20230209075818-96584f1ebf9d
+	github.com/wabarc/helper v0.0.0-20230318095659-969de9ddf4b6
 	github.com/wabarc/imgbb v1.0.0
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20220126131044-16299c0dd43d
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
 	github.com/wabarc/playback v0.0.0-20220715111526-90d0327d3f04
 	github.com/wabarc/rivet v0.1.4-0.20221226142645-ebc8a29d914f
-	github.com/wabarc/screenshot v1.6.0
-	github.com/wabarc/telegra.ph v0.0.0-20221226141851-edf1cc14c076
-	github.com/wabarc/warcraft v0.2.2-0.20211107142816-7beea5a75ab5
+	github.com/wabarc/screenshot v1.6.1-0.20230315004517-7587f8bc14e0
+	github.com/wabarc/telegra.ph v0.0.0-20230318134541-a0922e1ace3a
+	github.com/wabarc/warcraft v0.3.1-0.20230308125707-3daa5592ba52
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/net v0.8.0
 	golang.org/x/sync v0.1.0
@@ -68,8 +68,8 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cheggaaa/pb/v3 v3.0.8 // indirect
-	github.com/chromedp/cdproto v0.0.0-20221126224343-3a0787b8dd28 // indirect
-	github.com/chromedp/chromedp v0.8.6 // indirect
+	github.com/chromedp/cdproto v0.0.0-20230310204135-a6d692f2c96d // indirect
+	github.com/chromedp/chromedp v0.9.1 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
 	github.com/decred/dcrd/crypto/blake256 v1.0.0 // indirect
@@ -97,7 +97,7 @@ require (
 	github.com/itchyny/timefmt-go v0.1.3 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kallydev/telegraph-go v1.0.0 // indirect
+	github.com/kallydev/telegraph-go v1.0.1-0.20230318133700-df034d9eed50 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/kkdai/youtube/v2 v2.7.18 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.2 // indirect
