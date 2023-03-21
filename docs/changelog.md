@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.19.0] - 2023-03-21
+
 ### Added
 - Add support for reads from stdin and files ([#301](https://github.com/wabarc/wayback/pull/301))
 - Add support for publish to Nostr ([#311](https://github.com/wabarc/wayback/pull/311))
