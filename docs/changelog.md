@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.19.1] - 2023-03-21
+
+### Fixed
+- Correct Snapcraft workflow to update version ([#351](https://github.com/wabarc/wayback/pull/351))
+
 ## [0.19.0] - 2023-03-21
 
 ### Added
