@@ -11,11 +11,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  content: read
+  contents: read
 
 jobs:
   snapcraft:
-    runs-on: ubuntu-latest
     uses: wabarc/.github/.github/workflows/reusable-builder-snap.yml@main
     with:
       product: wayback
