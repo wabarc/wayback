@@ -20,6 +20,7 @@ jobs:
       product: wayback
       channel: stable
       publish: true
+      release: true
     secrets:
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
       snapcraft-token: ${{ secrets.SNAPCRAFT_TOKEN }}
