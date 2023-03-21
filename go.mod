@@ -12,7 +12,7 @@ require (
 	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
 	github.com/dghubble/oauth1 v0.7.1
 	github.com/dstotijn/go-notion v0.6.1
-	github.com/dustin/go-humanize v1.0.0
+	github.com/dustin/go-humanize v1.0.1
 	github.com/fatih/color v1.15.0
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/go-shiori/go-readability v0.0.0-20220215145315-dd6828d2f09b
