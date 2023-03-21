@@ -240,3 +240,11 @@ jobs:
           event-type: publish
           token: ${{ secrets.PAT_WORKFLOW }}
           client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
+
+      - name: Dispatch repository in flathub/org.eu.wabarc.wayback
+        uses: peter-evans/repository-dispatch@11ba7d3f32dc7cc919d1c43f1fec1c05260c26b5 # v2.0.0
+        with:
+          repository: wabarc/org.eu.wabarc.wayback
+          event-type: publish
+          token: ${{ secrets.PAT_WORKFLOW }}
+          client-payload: '{"from": "${{ github.repository }}", "channel": "stable", "version": "${{ github.ref_name }}"}'
