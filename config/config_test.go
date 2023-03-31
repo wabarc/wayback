@@ -3070,3 +3070,64 @@ func TestEnableServices(t *testing.T) {
 		})
 	}
 }
+
+func TestWireGuardConfig(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		config   string
+		expected string
+	}{
+		{
+			config:   "",
+			expected: defWireGuardConfig,
+		},
+		{
+			config: "[Interface]\nPrivateKey = cHjrT4AVXJBkufpQxfWFKbLGeKAykzJ6SitAXRRZKmU=\nAddress = 10.0.0.2/32\n\n[Peer]\nPublicKey = qEfR4bOboFVaavdICJoSujBmdJ2LOvjDZItWBqDh8HM=\nEndpoint = example.com:51820\nAllowedIPs = 0.0.0.0/0, ::/0",
+			expected: `[Interface]
+PrivateKey = cHjrT4AVXJBkufpQxfWFKbLGeKAykzJ6SitAXRRZKmU=
+Address = 10.0.0.2/32
+
+[Peer]
+PublicKey = qEfR4bOboFVaavdICJoSujBmdJ2LOvjDZItWBqDh8HM=
+Endpoint = example.com:51820
+AllowedIPs = 0.0.0.0/0, ::/0`,
+		},
+		{
+			config: `[Interface]
+PrivateKey = cHjrT4AVXJBkufpQxfWFKbLGeKAykzJ6SitAXRRZKmU=
+Address = 10.0.0.2/32
+
+[Peer]
+PublicKey = qEfR4bOboFVaavdICJoSujBmdJ2LOvjDZItWBqDh8HM=
+Endpoint = example.com:51820
+AllowedIPs = 0.0.0.0/0, ::/0`,
+			expected: `[Interface]
+PrivateKey = cHjrT4AVXJBkufpQxfWFKbLGeKAykzJ6SitAXRRZKmU=
+Address = 10.0.0.2/32
+
+[Peer]
+PublicKey = qEfR4bOboFVaavdICJoSujBmdJ2LOvjDZItWBqDh8HM=
+Endpoint = example.com:51820
+AllowedIPs = 0.0.0.0/0, ::/0`,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WIREGUARD_CONFIG", test.config)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.WireGuardConfig()
+			if got != test.expected {
+				t.Fatalf(`Unexpected get WireGuard config, got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}

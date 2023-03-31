@@ -92,6 +92,7 @@ const (
 	defWaybackMaxRetries   = 2
 	defWaybackUserAgent    = "WaybackArchiver/1.0"
 	defWaybackFallback     = false
+	defWireGuardConfig     = ""
 
 	defWaybackMeiliEndpoint = ""
 	defWaybackMeiliIndexing = "capsules"
@@ -143,6 +144,7 @@ type Options struct {
 	poolingSize         int
 	storageDir          string
 	maxMediaSize        string
+	wireguardConfig     string
 	waybackTimeout      int
 	waybackMaxRetries   int
 	waybackUserAgent    string
@@ -909,4 +911,9 @@ func (o *Options) EnabledMeilisearch() bool {
 // HTTPdEnabled returns whether enable HTTP daemon service.
 func (o *Options) HTTPdEnabled() bool {
 	return o.isEnabled(ServiceHTTPd)
+}
+
+// WireGuardConfig returns the WireGuard configuration.
+func (o *Options) WireGuardConfig() string {
+	return breakLine(o.wireguardConfig)
 }

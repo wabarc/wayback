@@ -1,8 +1,8 @@
 module github.com/wabarc/wayback
 
-// +heroku goVersion go1.19
+// +heroku goVersion go1.20
 
-go 1.18
+go 1.20
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
@@ -34,7 +34,7 @@ require (
 	github.com/slack-go/slack v0.11.2
 	github.com/spf13/cobra v1.6.1
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
-	github.com/wabarc/archive.is v1.3.0
+	github.com/wabarc/archive.is v1.3.1-0.20230411045956-7bc7ff721b7d
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/go-anonfile v0.1.0
 	github.com/wabarc/go-catbox v0.1.0
@@ -42,7 +42,8 @@ require (
 	github.com/wabarc/imgbb v1.0.0
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20220126131044-16299c0dd43d
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
-	github.com/wabarc/playback v0.0.0-20220715111526-90d0327d3f04
+	github.com/wabarc/playback v0.0.0-20230331122619-84484ab4d599
+	github.com/wabarc/proxier v0.0.0-20230331160507-4294c0d4f82c
 	github.com/wabarc/rivet v0.1.4-0.20221226142645-ebc8a29d914f
 	github.com/wabarc/screenshot v1.6.1-0.20230315004517-7587f8bc14e0
 	github.com/wabarc/telegra.ph v0.0.0-20230318134541-a0922e1ace3a
@@ -83,6 +84,7 @@ require (
 	github.com/dop251/goja v0.0.0-20221115122301-6c0d9883792e // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fortytw2/leaktest v1.3.0 // indirect
+	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
@@ -91,6 +93,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/gogs/chardet v0.0.0-20211120154057-b7413eaefb8f // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/btree v1.0.1 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/iawia002/lia v0.0.0-20221116085912-1f653221be4b // indirect
@@ -147,19 +150,23 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tidwall/sjson v1.2.4 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80 // indirect
-	github.com/wabarc/memento v0.0.0-20210703205719-adc2f8ab8bae // indirect
+	github.com/wabarc/memento v0.0.0-20221023035729-e42d0fe1cefb // indirect
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	github.com/ybbus/httpretry v1.0.1 // indirect
-	golang.org/x/crypto v0.5.0 // indirect
+	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/exp v0.0.0-20230425010034-47ecfdc1ba53 // indirect
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
 	golang.org/x/tools v0.6.0 // indirect
+	golang.zx2c4.com/wintun v0.0.0-20230126152724-0fa3db229ce2 // indirect
+	golang.zx2c4.com/wireguard v0.0.0-20230325221338-052af4a8072b // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gvisor.dev/gvisor v0.0.0-20221203005347-703fd9b7fbc0 // indirect
 	lukechampine.com/blake3 v1.1.7 // indirect
 	mellium.im/reader v0.1.0 // indirect
 	mvdan.cc/xurls/v2 v2.4.0 // indirect

@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/wabarc/logger"
+	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
@@ -41,6 +42,9 @@ func serve(_ *cobra.Command, opts *config.Options, _ []string) {
 
 	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
+
+	// Set global client
+	go wayback.NewClient(opts)
 
 	pub := publish.New(ctx, opts)
 	go pub.Start()
