@@ -5,16 +5,20 @@
 package wayback // import "github.com/wabarc/wayback"
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/playback"
+	"github.com/wabarc/proxier"
 	"github.com/wabarc/rivet/ipfs"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
@@ -30,7 +34,9 @@ import (
 )
 
 // TODO: find a better way to handle it
-var client = &http.Client{Timeout: 30 * time.Second}
+var client = &http.Client{
+	Timeout: 30 * time.Second,
+}
 
 // Collect results that archived, Arc is name of the archive service,
 // Dst mapping the original URL and archived destination URL,
@@ -81,7 +87,7 @@ type Waybacker interface {
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the IA and returns archived URL as a string.
 func (i IA) Wayback(_ reduxer.Reduxer) string {
-	arc := &ia.Archiver{}
+	arc := &ia.Archiver{Client: client}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
 		logger.Error("wayback %s to Internet Archive failed: %v", i.URL.String(), err)
@@ -93,7 +99,9 @@ func (i IA) Wayback(_ reduxer.Reduxer) string {
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the IS and returns archived URL as a string.
 func (i IS) Wayback(_ reduxer.Reduxer) string {
-	arc := &is.Archiver{}
+	arc := is.NewArchiver(client)
+	defer arc.CloseTor()
+
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
 		logger.Error("wayback %s to archive.today failed: %v", i.URL.String(), err)
@@ -294,4 +302,38 @@ func duration(ctx context.Context) time.Duration {
 	safeTime := elapsed * 90 / 100
 
 	return time.Duration(safeTime) * time.Second
+}
+
+// NewClient sets a http client.
+// TODO: refactoring
+func NewClient(opts *config.Options) {
+	if opts.WireGuardConfig() != "" && client != nil {
+		r := strings.NewReader(opts.WireGuardConfig())
+		proxy := proxier.NewClient(client)
+		if _, er := proxy.ViaWireGuard(r); er == nil {
+			client = proxy.Client
+			client.Timeout = opts.WaybackTimeout() * 90 / 100
+			if opts.HasDebugMode() {
+				for {
+					resp, err := client.Get("https://www.zx2c4.com/ip")
+					if err != nil {
+						logger.Error("request error: %v", err)
+						continue
+					}
+					body, err := io.ReadAll(resp.Body)
+					if err != nil {
+						logger.Error("read body error: %v", err)
+						continue
+					}
+					logger.Debug("client handshake: %s", bytes.ReplaceAll(body, []byte("\n"), []byte(" ")))
+					resp.Body.Close()
+					time.Sleep(time.Minute)
+				}
+			}
+		} else {
+			logger.Fatal("new client error: %v", er)
+		}
+	}
+
+	select {}
 }
