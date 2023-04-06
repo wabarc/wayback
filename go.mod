@@ -50,7 +50,7 @@ require (
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/net v0.9.0
 	golang.org/x/sync v0.1.0
-	gopkg.in/telebot.v3 v3.0.0-20220130115853-f0291132d3c3
+	gopkg.in/telebot.v3 v3.1.3
 	maunium.net/go/mautrix v0.12.0
 	mellium.im/sasl v0.3.1
 	mellium.im/xmlstream v0.15.4

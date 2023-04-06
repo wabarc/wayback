@@ -112,6 +112,8 @@ var (
 
 // Options represents a configuration options in the application.
 type Options struct {
+	*sync.Map
+
 	debug    bool
 	logTime  bool
 	logLevel string
@@ -246,6 +248,8 @@ type xmpp struct {
 // NewOptions returns Options with default values.
 func NewOptions() *Options {
 	opts := &Options{
+		Map: &sync.Map{},
+
 		debug:                defDebug,
 		logTime:              defLogTime,
 		logLevel:             defLogLevel,

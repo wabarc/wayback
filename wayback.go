@@ -94,6 +94,13 @@ func (i IA) Wayback(_ reduxer.Reduxer) string {
 // it reads URL from the IS and returns archived URL as a string.
 func (i IS) Wayback(_ reduxer.Reduxer) string {
 	arc := &is.Archiver{}
+
+	// Attach cookie to solve captcha
+	if v, ok := i.cfg.Load("ARCHIVE_COOKIE"); ok {
+		if cookie, ok := v.(string); ok {
+			arc.Cookie = cookie
+		}
+	}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
 		logger.Error("wayback %s to archive.today failed: %v", i.URL.String(), err)

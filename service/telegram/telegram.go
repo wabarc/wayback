@@ -214,6 +214,23 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 			}
 		}
 		return nil
+	case command == "setenv":
+		// This command do not show on interface
+		// TODO: command func
+		// TODO: check allowed uid
+		logger.Info("requested setenv command")
+		env := strings.TrimPrefix(content, fmt.Sprintf("/%s", command))
+		envs := strings.Split(env, ",")
+		for _, e := range envs {
+			pairs := strings.SplitN(e, "=", 2)
+			if len(pairs) != 2 {
+				logger.Warn("env pairs not macthing")
+				continue
+			}
+            key := strings.TrimSpace(pairs[0])
+            val := strings.TrimSpace(pairs[1])
+			t.opts.Store(key, val)
+		}
 	case command != "":
 		fallback := t.commandFallback()
 		if fallback != "" {
@@ -478,8 +495,7 @@ func transform(m *telegram.Message) {
 	}
 
 	// At lease one embed link is included in the message.
-	if len(m.Entities) > 0 {
-		uri := entities(m.Entities)
+	if uri := entities(m.Entities); len(uri) > 0 {
 		m.Text = fmt.Sprintf("%s and URI in message entity: %s", m.Text, strings.Join(uri, space))
 	}
 	// The message body is an attachment with a caption.
