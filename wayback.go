@@ -237,7 +237,15 @@ func Wayback(ctx context.Context, rdx reduxer.Reduxer, cfg *config.Options, urls
 func Playback(ctx context.Context, cfg *config.Options, urls ...*url.URL) (cols []Collect, err error) {
 	logger.Debug("start...")
 
-	ctx, cancel := context.WithTimeout(ctx, cfg.WaybackTimeout())
+	if _, ok := ctx.Deadline(); !ok {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, cfg.WaybackTimeout())
+		defer cancel()
+	}
+	deadline, _ := ctx.Deadline()
+	elapsed := deadline.Unix() - time.Now().Unix()
+	safeTime := elapsed * 90 / 100
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(safeTime))
 	defer cancel()
 
 	mu := sync.Mutex{}
