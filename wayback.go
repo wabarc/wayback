@@ -181,6 +181,11 @@ func Wayback(ctx context.Context, rdx reduxer.Reduxer, cfg *config.Options, urls
 		ctx, cancel = context.WithTimeout(ctx, cfg.WaybackTimeout())
 		defer cancel()
 	}
+	deadline, _ := ctx.Deadline()
+	elapsed := deadline.Unix() - time.Now().Unix()
+	safeTime := elapsed * 90 / 100
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(safeTime))
+	defer cancel()
 
 	mu := sync.Mutex{}
 	cols := []Collect{}
