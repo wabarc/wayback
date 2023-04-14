@@ -105,6 +105,29 @@ plugins:
   - exclude-search:
       exclude:
         - assets/*
+  - i18n:
+      default_language: en
+      languages:
+        en:
+          name: English
+          build: false
+        zh:
+          name: 简体中文
+      material_alternate: true
+      nav_translations:
+        zh:
+          Introduction: 简介
+          Installation: 安装
+          Usage: 使用
+          'Command Line': 命令行
+          'Service': 守护服务
+          Deployment: 部署
+          Integrations: 集成
+          Resources: 资源
+          Changelog: 变更记录
+          Contributing: 贡献
+          'Privacy Policy': 隐私条款
+          Troubleshooting: 问题排查
   - git-revision-date-localized:
       enable_creation_date: true
       fallback_to_build_date: true
@@ -112,5 +135,3 @@ plugins:
 watch:
   - docs
 
-extra_css:
-  - assets/extra.css

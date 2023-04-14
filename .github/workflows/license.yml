@@ -8,10 +8,16 @@ on:
   push:
     branches:
       - '**'
+    paths-ignore:
+      - 'docs/**'
+      - 'mkdocs.yml'
   pull_request:
     branches:
       - '**'
     types: [ opened, synchronize, reopened ]
+    paths-ignore:
+      - 'docs/**'
+      - 'mkdocs.yml'
 
 permissions:
   contents: read
