@@ -37,4 +37,3 @@ Additionally, you must specify the Mastodon server by setting the `WAYBACK_MASTO
 ## Further reading
 
 - [Fediverse Observer](https://mastodon.fediverse.observer/list)
-- [fediverse.space](https://fediverse.space/)

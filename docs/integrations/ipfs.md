@@ -8,4 +8,4 @@ ensuring that the user experience is identical to the original site.
 
 You can enable or disable this feature using the `--ip` flag or the `WAYBACK_ENABLE_IP` environment variable, which is enabled by default.
 
-The code for wayback's implementation of the Internet Archive integration can be found in the [wabarc/rivet](https://github.com/wabarc/rivet) repository.
+The code for wayback's implementation of the IPFS integration can be found in the [wabarc/rivet](https://github.com/wabarc/rivet) repository.

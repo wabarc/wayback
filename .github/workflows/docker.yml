@@ -17,6 +17,8 @@ on:
       - 'requirements.txt'
       - '.github/**'
       - '!.github/workflows/docker.yml'
+      - 'docs/**'
+      - 'mkdocs.yml'
   pull_request:
     branches:
       - 'main'
@@ -26,6 +28,8 @@ on:
       - 'requirements.txt'
       - '.github/**'
       - '!.github/workflows/docker.yml'
+      - 'docs/**'
+      - 'mkdocs.yml'
   workflow_dispatch:
 
 permissions:
