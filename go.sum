@@ -589,6 +589,8 @@ github.com/wabarc/archive.is v1.3.0/go.mod h1:01mgwPSUip7WkigtaZypTTHSpv3NVbtWpK
 github.com/wabarc/archive.org v1.2.0/go.mod h1:yEmUMlNO2PPAxIvo/Hf/VxOrCS5SBwL2/vCW8pyTWjA=
 github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896 h1:c3uD+IKXpNhtAHC2/fTt7R9dXnNhw1Q6sQrHUX3xo64=
 github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896/go.mod h1:yEmUMlNO2PPAxIvo/Hf/VxOrCS5SBwL2/vCW8pyTWjA=
+github.com/wabarc/archive.org v1.2.1-0.20230414040320-2d29d1fe1d8e h1:H50X3eiFRck9EsgQMhLtVaQV4nnCTbgcl7Q5hzQilw8=
+github.com/wabarc/archive.org v1.2.1-0.20230414040320-2d29d1fe1d8e/go.mod h1:yEmUMlNO2PPAxIvo/Hf/VxOrCS5SBwL2/vCW8pyTWjA=
 github.com/wabarc/go-anonfile v0.1.0 h1:M4jKUAMROxxVaqLQt30ONmaHA/0YnvyJtX8qg/zI9+I=
 github.com/wabarc/go-anonfile v0.1.0/go.mod h1:CH1LzSKQ0x/RlKpEG2gi+hXaOOZrfeRx6Rp717o+65A=
 github.com/wabarc/go-catbox v0.1.0 h1:/UhV9md3MJrjZtm+EToSyFjawXgPiHSExLNRqsWNisg=
