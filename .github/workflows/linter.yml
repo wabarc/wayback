@@ -41,7 +41,7 @@ jobs:
     name: URLCheck
     uses: wabarc/.github/.github/workflows/reusable-urlcheck.yml@main
     with:
-      exclude-patterns: '.onion,https://github.com/,https://repo.wabarc.eu.org/,twitter.com'
+      exclude-patterns: '.onion,https://github.com/,https://repo.wabarc.eu.org/,twitter.com,example.com'
 
   goreportcard:
     name: Go Report Card
