@@ -1,0 +1,42 @@
+# Copyright 2023 Wayback Archiver. All rights reserved.
+# Use of this source code is governed by the GNU GPL v3
+# license that can be found in the LICENSE file.
+
+version: "3"
+
+services:
+  browser:
+    image: chromedp/headless-shell
+    ports:
+      - 9222:9222
+    networks:
+      - back-tier
+    volumes:
+      - /dev/shm:/dev/shm
+    restart: unless-stopped
+    hostname: browser
+
+  wayback:
+    image: wabarc/wayback
+    ports:
+      - 8964:8964
+      - 80:80
+    networks:
+      - back-tier
+    volumes:
+      - storage:/data
+    depends_on:
+      - browser
+    environment:
+      - WAYBACK_STORAGE_DIR=/data
+      - CHROME_REMOTE_ADDR=browser:9222
+    command: wayback -d web
+    restart: unless-stopped
+    build: ./
+
+networks:
+  back-tier:
+
+volumes:
+  storage:
+    driver: local
