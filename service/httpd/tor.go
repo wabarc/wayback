@@ -67,6 +67,7 @@ func (h *Httpd) startTorServer(server *http.Server) error {
 		LocalListener: listener,
 		RemotePorts:   h.opts.TorRemotePorts(),
 		Version3:      true,
+		NoWait:        true,
 		Key:           pvk,
 	})
 	if err != nil {
