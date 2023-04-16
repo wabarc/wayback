@@ -16,6 +16,21 @@ services:
     restart: unless-stopped
     hostname: browser
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.1.0
+    ports:
+      - 7700:7700
+    networks:
+      - back-tier
+    volumes:
+      - storage:/meili_data
+    restart: unless-stopped
+    hostname: meilisearch
+    environment:
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_HTTP_ADDR=0.0.0.0:7700
+      - MEILI_ENV=production
+
   wayback:
     image: wabarc/wayback
     ports:
@@ -27,9 +42,12 @@ services:
       - storage:/data
     depends_on:
       - browser
+      - meilisearch
     environment:
       - WAYBACK_STORAGE_DIR=/data
       - CHROME_REMOTE_ADDR=browser:9222
+      - WAYBACK_MEILI_ENDPOINT=http://meilisearch:7700
+      - PLAYBACK_MEILI_ENDPOINT=http://meilisearch:7700
     command: wayback -d web
     restart: unless-stopped
     build: ./
