@@ -17,7 +17,7 @@ services:
     hostname: browser
 
   wayback:
-    image: wabarc/wayback:edge
+    image: wabarc/wayback
     ports:
       - 8964:8964
       - 80:80
