@@ -3,8 +3,14 @@
 # license that can be found in the LICENSE file.
 #
 #.git
-.docs/
 .github/
+.semgrepignore
+build/binary
+docs/
+install.sh
 mkdocs.yml
 snapcraft.yaml
 requirements.txt
+renovate.json
+codecov.yml
+cosign.pub
