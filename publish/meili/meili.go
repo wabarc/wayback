@@ -300,7 +300,9 @@ func (m *Meili) Publish(_ context.Context, _ reduxer.Reduxer, cols []wayback.Col
 
 func (m *Meili) do(method, url string, body io.Reader) (*http.Response, error) {
 	req, _ := http.NewRequest(method, url, body) // nolint:errcheck
-	req.Header.Add("Authorization", "Bearer "+m.apikey)
+	if m.apikey != "" {
+		req.Header.Add("Authorization", "Bearer "+m.apikey)
+	}
 	req.Header.Add("Content-Type", contentType)
 	req.Header.Add("User-Agent", userAgent)
 
