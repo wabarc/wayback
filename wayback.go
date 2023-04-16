@@ -291,5 +291,5 @@ func duration(ctx context.Context) time.Duration {
 	elapsed := deadline.Unix() - time.Now().Unix()
 	safeTime := elapsed * 90 / 100
 
-	return time.Duration(safeTime)
+	return time.Duration(safeTime) * time.Second
 }
