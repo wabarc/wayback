@@ -6,7 +6,8 @@
 .github/
 .semgrepignore
 build/binary
-docs/
+#docs required by rpm build
+#docs/
 install.sh
 mkdocs.yml
 snapcraft.yaml
