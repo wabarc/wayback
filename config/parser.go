@@ -181,12 +181,14 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.nostr.url = parseString(val, defNostrRelayURL)
 		case "WAYBACK_NOSTR_PRIVATE_KEY":
 			p.opts.nostr.privateKey = parseString(val, defNostrPrivateKey)
-		case "WAYBACK_TOR_PRIVKEY":
-			p.opts.tor.pvk = parseString(val, defTorPrivateKey)
-		case "WAYBACK_TOR_LOCAL_PORT":
-			p.opts.tor.localPort = parseInt(val, defTorLocalPort)
-		case "WAYBACK_TOR_REMOTE_PORTS":
-			p.opts.tor.remotePorts = parseIntList(val, defTorRemotePorts)
+		case "WAYBACK_TOR_PRIVKEY", "WAYBACK_ONION_PRIVKEY":
+			p.opts.onion.pvk = parseString(val, defOnionPrivateKey)
+		case "WAYBACK_TOR_LOCAL_PORT", "WAYBACK_ONION_LOCAL_PORT":
+			p.opts.onion.localPort = parseInt(val, defOnionLocalPort)
+		case "WAYBACK_TOR_REMOTE_PORTS", "WAYBACK_ONION_REMOTE_PORTS":
+			p.opts.onion.remotePorts = parseIntList(val, defOnionRemotePorts)
+		case "WAYBACK_ONION_DISABLED":
+			p.opts.onion.disabled = parseBool(val, defOnionDisabled)
 		case "WAYBACK_POOLING_SIZE":
 			p.opts.poolingSize = parseInt(val, defPoolingSize)
 		case "WAYBACK_BOLT_PATH":

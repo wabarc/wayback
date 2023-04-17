@@ -147,7 +147,7 @@ func setToEnv(cmd *cobra.Command) {
 		os.Setenv("WAYBACK_USE_TOR", fmt.Sprint(tor))
 	}
 	if flags.Changed("tor-key") {
-		os.Setenv("WAYBACK_TOR_PRIVKEY", torKey)
+		os.Setenv("WAYBACK_ONION_PRIVKEY", torKey)
 	}
 }
 

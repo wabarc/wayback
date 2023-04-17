@@ -2,8 +2,6 @@
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
-//go:build !with_tor
-
 package httpd // import "github.com/wabarc/wayback/service/httpd"
 
 import (
@@ -21,9 +19,9 @@ import (
 	"github.com/wabarc/wayback/errors"
 )
 
-func (h *Httpd) startTorServer(server *http.Server) error {
+func (h *Httpd) startOnionService(server *http.Server) error {
 	var pvk ed25519.PrivateKey
-	if h.opts.TorPrivKey() == "" {
+	if h.opts.OnionPrivKey() == "" {
 		if keypair, err := ed25519.GenerateKey(rand.Reader); err != nil {
 			return errors.Wrap(err, "generate key failed")
 		} else {
@@ -31,7 +29,7 @@ func (h *Httpd) startTorServer(server *http.Server) error {
 		}
 		logger.Info("important to keep the private key: %s", color.BlueString(hex.EncodeToString(pvk)))
 	} else {
-		privb, err := hex.DecodeString(h.opts.TorPrivKey())
+		privb, err := hex.DecodeString(h.opts.OnionPrivKey())
 		if err != nil {
 			return errors.Wrap(err, "key is not specific")
 		}
@@ -39,7 +37,7 @@ func (h *Httpd) startTorServer(server *http.Server) error {
 	}
 
 	verbose := h.opts.HasDebugMode()
-	startConf := &tor.StartConf{TempDataDirBase: os.TempDir()}
+	startConf := &tor.StartConf{ProcessCreator: creator, TempDataDirBase: os.TempDir()}
 	if verbose {
 		startConf.DebugWriter = os.Stdout
 	} else {
@@ -61,11 +59,11 @@ func (h *Httpd) startTorServer(server *http.Server) error {
 	}
 
 	// Create an onion service to listen on any port but show as local port,
-	// specify the local port using the `WAYBACK_TOR_LOCAL_PORT` environment variable.
+	// specify the local port using the `WAYBACK_ONION_LOCAL_PORT` environment variable.
 	onion, err := e.Listen(h.ctx, &tor.ListenConf{
-		LocalPort:     h.opts.TorLocalPort(),
+		LocalPort:     h.opts.OnionLocalPort(),
 		LocalListener: listener,
-		RemotePorts:   h.opts.TorRemotePorts(),
+		RemotePorts:   h.opts.OnionRemotePorts(),
 		Version3:      true,
 		NoWait:        true,
 		Key:           pvk,
@@ -87,7 +85,11 @@ func (h *Httpd) startTorServer(server *http.Server) error {
 	return nil
 }
 
-func torExist() bool {
+func (h *Httpd) serveOnion() bool {
+	if h.opts.OnionDisabled() {
+		return false
+	}
+
 	if _, err := exec.LookPath("tor"); err != nil {
 		return false
 	}

@@ -54,8 +54,8 @@ func New(ctx context.Context, opts service.Options) *Httpd {
 }
 
 // Serve accepts incoming HTTP requests over Tor network, or open
-// a local port for proxy server by "WAYBACK_TOR_LOCAL_PORT" env.
-// Use "WAYBACK_TOR_PRIVKEY" to keep the Tor hidden service hostname.
+// a local port for proxy server by "WAYBACK_ONION_LOCAL_PORT" env.
+// Use "WAYBACK_ONION_PRIVKEY" to keep the Tor hidden service hostname.
 //
 // Serve always returns an error.
 func (h *Httpd) Serve() error {
@@ -71,9 +71,9 @@ func (h *Httpd) Serve() error {
 	}
 
 	switch {
-	case torExist():
+	case h.serveOnion():
 		logger.Info("start a tor hidden server")
-		err := h.startTorServer(server)
+		err := h.startOnionService(server)
 		if err != nil {
 			return errors.Wrap(err, "start tor server failed")
 		}
@@ -92,7 +92,7 @@ func (h *Httpd) Serve() error {
 	return ErrServiceClosed
 }
 
-// Shutdown shuts down the Tor server
+// Shutdown shuts down the httpd server
 func (h *Httpd) Shutdown() error {
 	h.RLock()
 	defer h.RUnlock()

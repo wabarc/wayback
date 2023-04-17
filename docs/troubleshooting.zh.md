@@ -14,7 +14,7 @@ export DISABLEJS_URIS=wikipedia.org|eff.org/tags
 
 ## 如何保留Tor隐藏服务主机名？
 
-第一次运行`wayback`服务时，保留来自输出消息的私钥非常重要（私钥是`private key:`之后的部分）。下次运行wayback服务时，您可以通过将其提供给`--tor-key`选项或将其设置为`WAYBACK_TOR_PRIVKEY`环境变量来使用密钥。
+第一次运行`wayback`服务时，保留来自输出消息的私钥非常重要（私钥是`private key:`之后的部分）。下次运行wayback服务时，您可以通过将其提供给`--tor-key`选项或将其设置为`WAYBACK_ONION_PRIVKEY`环境变量来使用密钥。
 
 ```text
 [INFO] Web: Important: remember to keep the private key: d005473a611d2b23e54d6446dfe209cb6c52ddd698818d1233b1d750f790445fcfb5ece556fe5ee3b4724ac6bea7431898ee788c6011febba7f779c85845ae87

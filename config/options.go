@@ -72,9 +72,10 @@ const (
 	defNostrRelayURL   = "wss://nostr.developer.li"
 	defNostrPrivateKey = ""
 
-	defTorPrivateKey = ""
-	defListenAddr    = "0.0.0.0:8964"
-	defTorLocalPort  = 8964
+	defListenAddr      = "0.0.0.0:8964"
+	defOnionLocalPort  = 8964
+	defOnionPrivateKey = ""
+	defOnionDisabled   = false
 
 	defChromeRemoteAddr    = ""
 	defEnabledChromeRemote = false
@@ -99,8 +100,8 @@ var (
 	IPFSToken  = ""
 	IPFSTarget = "web3storage"
 
-	defStorageDir     = path.Join(os.TempDir(), "reduxer")
-	defTorRemotePorts = []int{80}
+	defStorageDir       = path.Join(os.TempDir(), "reduxer")
+	defOnionRemotePorts = []int{80}
 )
 
 // Options represents a configuration options in the application.
@@ -123,7 +124,7 @@ type Options struct {
 	slack    *slack
 	nostr    *nostr
 	irc      *irc
-	tor      *tor
+	onion    *onion
 
 	listenAddr          string
 	chromeRemoteAddr    string
@@ -216,11 +217,13 @@ type irc struct {
 	server   string
 }
 
-type tor struct {
+type onion struct {
 	pvk string
 
 	localPort   int
 	remotePorts []int
+
+	disabled bool
 }
 
 // NewOptions returns Options with default values.
@@ -313,10 +316,9 @@ func NewOptions() *Options {
 			channel:  defIRCChannel,
 			server:   defIRCServer,
 		},
-		tor: &tor{
-			pvk:         defTorPrivateKey,
-			localPort:   defTorLocalPort,
-			remotePorts: defTorRemotePorts,
+		onion: &onion{
+			localPort:   defOnionLocalPort,
+			remotePorts: defOnionRemotePorts,
 		},
 	}
 
@@ -664,20 +666,25 @@ func (o *Options) PublishToNostr() bool {
 	return len(o.NostrRelayURL()) > 0 && o.NostrPrivateKey() != ""
 }
 
-// TorPrivKey returns the private key of Tor service.
-func (o *Options) TorPrivKey() string {
-	return o.tor.pvk
+// OnionPrivKey returns the private key of Onion service.
+func (o *Options) OnionPrivKey() string {
+	return o.onion.pvk
 }
 
-// TorLocalPort returns the local port to a TCP listener on.
+// OnionLocalPort returns the local port to a TCP listener on.
 // This is ignored if `WAYBACK_LISTEN_ADDR` is set.
-func (o *Options) TorLocalPort() int {
-	return o.tor.localPort
+func (o *Options) OnionLocalPort() int {
+	return o.onion.localPort
 }
 
-// TorRemotePorts returns the remote ports to serve the Tor hidden service on.
-func (o *Options) TorRemotePorts() []int {
-	return o.tor.remotePorts
+// OnionRemotePorts returns the remote ports to serve the Onion hidden service on.
+func (o *Options) OnionRemotePorts() []int {
+	return o.onion.remotePorts
+}
+
+// OnionDisabled returns whether disable Onion service.
+func (o *Options) OnionDisabled() bool {
+	return o.onion.disabled
 }
 
 // ListenAddr returns the listen address for the HTTP server.
