@@ -2,8 +2,6 @@
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
-//go:build !with_tor
-
 package httpd // import "github.com/wabarc/wayback/service/httpd"
 
 import (
@@ -39,7 +37,7 @@ func (h *Httpd) startTorServer(server *http.Server) error {
 	}
 
 	verbose := h.opts.HasDebugMode()
-	startConf := &tor.StartConf{TempDataDirBase: os.TempDir()}
+	startConf := &tor.StartConf{ProcessCreator: creator, TempDataDirBase: os.TempDir()}
 	if verbose {
 		startConf.DebugWriter = os.Stdout
 	} else {
