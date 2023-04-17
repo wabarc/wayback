@@ -35,7 +35,6 @@ services:
     image: wabarc/wayback
     ports:
       - 8964:8964
-      - 80:80
     networks:
       - back-tier
     volumes:
