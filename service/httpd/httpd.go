@@ -73,7 +73,7 @@ func (h *Httpd) Serve() error {
 	switch {
 	case torExist():
 		logger.Info("start a tor hidden server")
-		err := h.startTorServer(server)
+		err := h.startOnionService(server)
 		if err != nil {
 			return errors.Wrap(err, "start tor server failed")
 		}
@@ -92,7 +92,7 @@ func (h *Httpd) Serve() error {
 	return ErrServiceClosed
 }
 
-// Shutdown shuts down the Tor server
+// Shutdown shuts down the httpd server
 func (h *Httpd) Shutdown() error {
 	h.RLock()
 	defer h.RUnlock()

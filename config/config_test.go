@@ -536,9 +536,9 @@ func TestPublishToChannel(t *testing.T) {
 	}
 }
 
-func TestTorPrivateKey(t *testing.T) {
+func TestOnionPrivateKey(t *testing.T) {
 	os.Clearenv()
-	os.Setenv("WAYBACK_TOR_PRIVKEY", "tor:private:key")
+	os.Setenv("WAYBACK_TOR_PRIVKEY", "onion:private:key")
 
 	parser := NewParser()
 	opts, err := parser.ParseEnvironmentVariables()
@@ -546,15 +546,15 @@ func TestTorPrivateKey(t *testing.T) {
 		t.Fatalf(`Parsing environment variables failed: %v`, err)
 	}
 
-	expected := "tor:private:key"
-	got := opts.TorPrivKey()
+	expected := "onion:private:key"
+	got := opts.OnionPrivKey()
 
 	if got != expected {
 		t.Fatalf(`Unexpected Tor private key, got %v instead of %s`, got, expected)
 	}
 }
 
-func TestTorLocalPort(t *testing.T) {
+func TestOnionLocalPort(t *testing.T) {
 	os.Clearenv()
 	os.Setenv("WAYBACK_TOR_LOCAL_PORT", "8080")
 
@@ -565,14 +565,14 @@ func TestTorLocalPort(t *testing.T) {
 	}
 
 	expected := 8080
-	got := opts.TorLocalPort()
+	got := opts.OnionLocalPort()
 
 	if got != expected {
 		t.Fatalf(`Unexpected Tor local port, got %v instead of %q`, got, expected)
 	}
 }
 
-func TestDefaultTorLocalPortValue(t *testing.T) {
+func TestDefaultOnionLocalPortValue(t *testing.T) {
 	os.Clearenv()
 
 	parser := NewParser()
@@ -581,8 +581,8 @@ func TestDefaultTorLocalPortValue(t *testing.T) {
 		t.Fatalf(`Parsing environment variables failed: %v`, err)
 	}
 
-	expected := defTorLocalPort
-	got := opts.TorLocalPort()
+	expected := defOnionLocalPort
+	got := opts.OnionLocalPort()
 
 	if got != expected {
 		t.Fatalf(`Unexpected Tor local port, got %v instead of %q`, got, expected)
@@ -600,7 +600,7 @@ func TestTorRemotePorts(t *testing.T) {
 	}
 
 	expected := []int{80, 81, 82}
-	got := opts.TorRemotePorts()
+	got := opts.OnionRemotePorts()
 
 	if got == nil || len(got) != 3 {
 		t.Fatalf(`Unexpected Tor remote port, got %v instead of %v`, got, expected)
@@ -653,7 +653,7 @@ func TestDefaultTorRemotePortsValue(t *testing.T) {
 	}
 
 	expected := []int{80}
-	got := opts.TorRemotePorts()
+	got := opts.OnionRemotePorts()
 
 	if got == nil || len(got) != 1 {
 		t.Fatalf(`Unexpected Tor remote port, got %v instead of %v`, got, expected)
