@@ -85,7 +85,11 @@ func (h *Httpd) startOnionService(server *http.Server) error {
 	return nil
 }
 
-func torExist() bool {
+func (h *Httpd) serveOnion() bool {
+	if h.opts.OnionDisabled() {
+		return false
+	}
+
 	if _, err := exec.LookPath("tor"); err != nil {
 		return false
 	}

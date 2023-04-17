@@ -75,6 +75,7 @@ const (
 	defListenAddr      = "0.0.0.0:8964"
 	defOnionLocalPort  = 8964
 	defOnionPrivateKey = ""
+	defOnionDisabled   = false
 
 	defChromeRemoteAddr    = ""
 	defEnabledChromeRemote = false
@@ -679,6 +680,11 @@ func (o *Options) OnionLocalPort() int {
 // OnionRemotePorts returns the remote ports to serve the Onion hidden service on.
 func (o *Options) OnionRemotePorts() []int {
 	return o.onion.remotePorts
+}
+
+// OnionDisabled returns whether disable Onion service.
+func (o *Options) OnionDisabled() bool {
+	return o.onion.disabled
 }
 
 // ListenAddr returns the listen address for the HTTP server.

@@ -187,6 +187,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.onion.localPort = parseInt(val, defOnionLocalPort)
 		case "WAYBACK_TOR_REMOTE_PORTS", "WAYBACK_ONION_REMOTE_PORTS":
 			p.opts.onion.remotePorts = parseIntList(val, defOnionRemotePorts)
+		case "WAYBACK_ONION_DISABLED":
+			p.opts.onion.disabled = parseBool(val, defOnionDisabled)
 		case "WAYBACK_POOLING_SIZE":
 			p.opts.poolingSize = parseInt(val, defPoolingSize)
 		case "WAYBACK_BOLT_PATH":

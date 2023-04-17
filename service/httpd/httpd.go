@@ -71,7 +71,7 @@ func (h *Httpd) Serve() error {
 	}
 
 	switch {
-	case torExist():
+	case h.serveOnion():
 		logger.Info("start a tor hidden server")
 		err := h.startOnionService(server)
 		if err != nil {

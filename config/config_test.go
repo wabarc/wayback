@@ -607,6 +607,37 @@ func TestTorRemotePorts(t *testing.T) {
 	}
 }
 
+func TestOnionDisabled(t *testing.T) {
+	tests := []struct {
+		name     string
+		disabled bool
+		expected bool
+	}{
+		{"default", defOnionDisabled, false},
+		{"disabled", true, true},
+		{"enabled", false, false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_ONION_DISABLED", strconv.FormatBool(test.disabled))
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.OnionDisabled()
+
+			if got != test.expected {
+				t.Fatalf(`Unexpected disable onion service, got %v instead of %v`, got, test.expected)
+			}
+		})
+	}
+}
+
 func TestListenAddr(t *testing.T) {
 	t.Parallel()
 
