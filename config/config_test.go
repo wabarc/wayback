@@ -538,7 +538,7 @@ func TestPublishToChannel(t *testing.T) {
 
 func TestOnionPrivateKey(t *testing.T) {
 	os.Clearenv()
-	os.Setenv("WAYBACK_TOR_PRIVKEY", "onion:private:key")
+	os.Setenv("WAYBACK_ONION_PRIVKEY", "onion:private:key")
 
 	parser := NewParser()
 	opts, err := parser.ParseEnvironmentVariables()
@@ -556,7 +556,7 @@ func TestOnionPrivateKey(t *testing.T) {
 
 func TestOnionLocalPort(t *testing.T) {
 	os.Clearenv()
-	os.Setenv("WAYBACK_TOR_LOCAL_PORT", "8080")
+	os.Setenv("WAYBACK_ONION_LOCAL_PORT", "8080")
 
 	parser := NewParser()
 	opts, err := parser.ParseEnvironmentVariables()
@@ -591,7 +591,7 @@ func TestDefaultOnionLocalPortValue(t *testing.T) {
 
 func TestTorRemotePorts(t *testing.T) {
 	os.Clearenv()
-	os.Setenv("WAYBACK_TOR_REMOTE_PORTS", "80,81,82")
+	os.Setenv("WAYBACK_ONION_REMOTE_PORTS", "80,81,82")
 
 	parser := NewParser()
 	opts, err := parser.ParseEnvironmentVariables()

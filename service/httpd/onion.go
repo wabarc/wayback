@@ -59,7 +59,7 @@ func (h *Httpd) startOnionService(server *http.Server) error {
 	}
 
 	// Create an onion service to listen on any port but show as local port,
-	// specify the local port using the `WAYBACK_TOR_LOCAL_PORT` environment variable.
+	// specify the local port using the `WAYBACK_ONION_LOCAL_PORT` environment variable.
 	onion, err := e.Listen(h.ctx, &tor.ListenConf{
 		LocalPort:     h.opts.OnionLocalPort(),
 		LocalListener: listener,

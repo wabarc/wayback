@@ -283,9 +283,9 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_NOSTR_RELAY_URL`         | `wss://nostr.developer.li` | Nostr relay server url, multiple separated by comma          |
 | -                   | `WAYBACK_NOSTR_PRIVATE_KEY`       | -                          | The private key of a Nostr account                           |
 | `--tor`             | `WAYBACK_USE_TOR`                 | `false`                    | Snapshot webpage via Tor anonymity network                   |
-| `--tor-key`         | `WAYBACK_TOR_PRIVKEY`             | -                          | The private key for Tor Hidden Service                       |
-| -                   | `WAYBACK_TOR_LOCAL_PORT`          | `8964`                     | Local port for Tor Hidden Service, also support for a **reverse proxy**. This is ignored if `WAYBACK_LISTEN_ADDR` is set. |
-| -                   | `WAYBACK_TOR_REMOTE_PORTS`        | `80`                       | Remote ports for Tor Hidden Service, e.g. `WAYBACK_TOR_REMOTE_PORTS=80,81` |
+| `--tor-key`         | `WAYBACK_ONION_PRIVKEY`           | -                          | The private key for Tor Hidden Service                       |
+| -                   | `WAYBACK_ONION_LOCAL_PORT`        | `8964`                     | Local port for Tor Hidden Service, also support for a **reverse proxy**. This is ignored if `WAYBACK_LISTEN_ADDR` is set. |
+| -                   | `WAYBACK_ONION_REMOTE_PORTS`      | `80`                       | Remote ports for Tor Hidden Service, e.g. `WAYBACK_ONION_REMOTE_PORTS=80,81` |
 | -                   | `WAYBACK_ONION_DISABLED`          | `false`                    | Disable onion service                                        |
 | -                   | `WAYBACK_SLOT`                    | -                          | Pinning service for IPFS mode of pinner, see [ipfs-pinner](https://github.com/wabarc/ipfs-pinner#supported-pinning-services) |
 | -                   | `WAYBACK_APIKEY`                  | -                          | API key for pinning service                                  |
