@@ -225,6 +225,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `LOG_LEVEL`                       | `info`                     | Log level, supported level are `debug`, `info`, `warn`, `error`, `fatal`, defaults to `info` |
 | -                   | `ENABLE_METRICS`                  | `false`                    | Enable metrics collector                                     |
 | -                   | `WAYBACK_LISTEN_ADDR`             | `0.0.0.0:8964`             | The listen address for the HTTP server                       |
+| -                   | `CHROME_BIN`                      | -                          | Preferred to sets the path to the Chrome executable          |
 | -                   | `CHROME_REMOTE_ADDR`              | -                          | Chrome/Chromium remote debugging address, for screenshot, format: `host:port`, `wss://domain.tld` |
 | -                   | `WAYBACK_POOLING_SIZE`            | `3`                        | Number of worker pool for wayback at once                    |
 | -                   | `WAYBACK_BOLT_PATH`               | `./wayback.db`             | File path of bolt database                                   |

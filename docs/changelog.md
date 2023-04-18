@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add docker-compose.yml ([#367](https://github.com/wabarc/wayback/pull/367))
 - Add option to disable onion service ([#372](https://github.com/wabarc/wayback/pull/372))
+- Add support for setting preferred path to Chrome executable ([#375](https://github.com/wabarc/wayback/pull/375))
 
 ### Changed
 - Set NoWait to true for tor listen config ([#368](https://github.com/wabarc/wayback/pull/368))
