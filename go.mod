@@ -24,7 +24,7 @@ require (
 	github.com/iawia002/lux v0.17.0
 	github.com/ipsn/go-libtor v1.0.380
 	github.com/jedib0t/go-pretty/v6 v6.4.0
-	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
+	github.com/mattn/go-mastodon v0.0.6
 	github.com/nbd-wtf/go-nostr v0.13.1
 	github.com/phf/go-queue v0.0.0-20170504031614-9abe38d0371d
 	github.com/pkg/errors v0.9.1
