@@ -21,12 +21,13 @@ Supported Golang version: See [.github/workflows/testing.yml](./.github/workflow
 ## Features
 
 - Free and open-source
+- Expose prometheus metrics
 - Cross-platform compatibility
 - Batch wayback URLs for faster archiving
 - Built-in CLI (`wayback`) for convenient use
 - Serve as a Tor Hidden Service or local web entry for added privacy and accessibility
 - Easier wayback to Internet Archive, archive.today, IPFS and Telegraph integration
-- Interactive with IRC, Matrix, Telegram bot, Discord bot, Mastodon, and Twitter as a daemon service for convenient use
+- Interactive with IRC, Matrix, Telegram bot, Discord bot, Mastodon, Twitter, and XMPP as a daemon service for convenient use
 - Supports publishing wayback results to Telegram channel, Mastodon, and GitHub Issues for sharing
 - Supports storing archived files to disk for offline use
 - Download streaming media (requires [FFmpeg](https://ffmpeg.org/)) for convenient media archiving.
@@ -114,7 +115,7 @@ Examples:
 Flags:
       --chatid string      Telegram channel id
   -c, --config string      Configuration file path, defaults: ./wayback.conf, ~/wayback.conf, /etc/wayback.conf
-  -d, --daemon strings     Run as daemon service, supported services are telegram, web, mastodon, twitter, discord, slack, irc
+  -d, --daemon strings     Run as daemon service, supported services are telegram, web, mastodon, twitter, discord, slack, irc, xmpp
       --debug              Enable debug mode (default mode is false)
   -h, --help               help for wayback
       --ia                 Wayback webpages to Internet Archive
@@ -283,6 +284,10 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_SLACK_HELPTEXT`          | -                          | The help text for Slack slash command                        |
 | -                   | `WAYBACK_NOSTR_RELAY_URL`         | `wss://nostr.developer.li` | Nostr relay server url, multiple separated by comma          |
 | -                   | `WAYBACK_NOSTR_PRIVATE_KEY`       | -                          | The private key of a Nostr account                           |
+| -                   | `WAYBACK_XMPP_JID`                | -                          | The JID of a XMPP account                                    |
+| -                   | `WAYBACK_XMPP_PASSWORD`           | -                          | The password of a XMPP account                               |
+| -                   | `WAYBACK_XMPP_NOTLS`              | -                          | Connect to XMPP server without TLS                           |
+| -                   | `WAYBACK_XMPP_HELPTEXT`           | -                          | The help text for XMPP command                               |
 | `--tor`             | `WAYBACK_USE_TOR`                 | `false`                    | Snapshot webpage via Tor anonymity network                   |
 | `--tor-key`         | `WAYBACK_ONION_PRIVKEY`           | -                          | The private key for Tor Hidden Service                       |
 | -                   | `WAYBACK_ONION_LOCAL_PORT`        | `8964`                     | Local port for Tor Hidden Service, also support for a **reverse proxy**. This is ignored if `WAYBACK_LISTEN_ADDR` is set. |

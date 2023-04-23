@@ -64,6 +64,11 @@ const (
 	defIRCChannel  = ""
 	defIRCServer   = "irc.libera.chat:6697"
 
+	defXMPPUsername = ""
+	defXMPPPassword = ""
+	defXMPPNoTLS    = false
+	defXMPPHelptext = "Hi there."
+
 	defMatrixHomeserver = "https://matrix.org"
 	defMatrixUserID     = ""
 	defMatrixRoomID     = ""
@@ -125,6 +130,7 @@ type Options struct {
 	nostr    *nostr
 	irc      *irc
 	onion    *onion
+	xmpp     *xmpp
 
 	listenAddr          string
 	chromeRemoteAddr    string
@@ -226,6 +232,13 @@ type onion struct {
 	disabled bool
 }
 
+type xmpp struct {
+	username string
+	password string
+	noTLS    bool
+	helptext string
+}
+
 // NewOptions returns Options with default values.
 func NewOptions() *Options {
 	opts := &Options{
@@ -319,6 +332,12 @@ func NewOptions() *Options {
 		onion: &onion{
 			localPort:   defOnionLocalPort,
 			remotePorts: defOnionRemotePorts,
+		},
+		xmpp: &xmpp{
+			username: defXMPPUsername,
+			password: defXMPPPassword,
+			noTLS:    defXMPPNoTLS,
+			helptext: defXMPPHelptext,
 		},
 	}
 
@@ -634,6 +653,26 @@ func (o *Options) SlackHelptext() string {
 // PublishToSlackChannel returns whether publish results to Slack channel.
 func (o *Options) PublishToSlackChannel() bool {
 	return o.SlackBotToken() != "" && o.SlackChannel() != ""
+}
+
+// XMPPUsername returns the XMPP username (JID).
+func (o *Options) XMPPUsername() string {
+	return o.xmpp.username
+}
+
+// XMPPPassword returns the XMPP password.
+func (o *Options) XMPPPassword() string {
+	return o.xmpp.password
+}
+
+// XMPPNoTLS returns whether disable TLS.
+func (o *Options) XMPPNoTLS() bool {
+	return o.xmpp.noTLS
+}
+
+// XMPPHelptext returns the help text for XMPP.
+func (o *Options) XMPPHelptext() string {
+	return breakLine(o.xmpp.helptext)
 }
 
 // NotionToken returns the Notion integration token.

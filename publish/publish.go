@@ -28,6 +28,7 @@ const (
 	FlagSlack                // FlagSlack publish from slack service
 	FlagNostr                // FlagSlack publish from nostr
 	FlagIRC                  // FlagIRC publish from relaychat service
+	FlagXMPP                 // FlagXMPP publish from XMPP service
 	FlagNotion               // FlagNotion is a flag for notion publish service
 	FlagGitHub               // FlagGitHub is a flag for github publish service
 	FlagMeili                // FlagMeili is a flag for meilisearch publish service

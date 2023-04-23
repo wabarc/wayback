@@ -7,12 +7,13 @@ Whether you need to archive a single web page or a large collection of websites,
 ## Features
 
 - Free and open-source
+- Expose prometheus metrics
 - Cross-platform compatibility
 - Batch wayback URLs for faster archiving
 - Built-in CLI (`wayback`) for convenient use
 - Serve as a Tor Hidden Service or local web entry for added privacy and accessibility
 - Easier wayback to Internet Archive, archive.today, IPFS and Telegraph integration
-- Interactive with IRC, Matrix, Telegram bot, Discord bot, Mastodon, and Twitter as a daemon service for convenient use
+- Interactive with IRC, Matrix, Telegram bot, Discord bot, Mastodon, Twitter, and XMPP as a daemon service for convenient use
 - Supports publishing wayback results to Telegram channel, Mastodon, and GitHub Issues for sharing
 - Supports storing archived files to disk for offline use
 - Download streaming media (requires [FFmpeg](https://ffmpeg.org/)) for convenient media archiving.

@@ -7,6 +7,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -23,6 +24,7 @@ import (
 	"github.com/wabarc/wayback/service/slack"
 	"github.com/wabarc/wayback/service/telegram"
 	"github.com/wabarc/wayback/service/twitter"
+	"github.com/wabarc/wayback/service/xmpp"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/systemd"
 
@@ -91,7 +93,7 @@ func (srv *services) run(ctx context.Context, opts service.Options) *services {
 	srv.targets = make([]target, 0, size)
 	for _, s := range daemon {
 		s := s
-		switch s {
+		switch strings.ToLower(s) {
 		case "irc":
 			irc := relaychat.New(ctx, opts)
 			go func() {
@@ -173,6 +175,17 @@ func (srv *services) run(ctx context.Context, opts service.Options) *services {
 			h := httpd.New(ctx, opts)
 			go func() {
 				if err := h.Serve(); err != httpd.ErrServiceClosed {
+					logger.Error("start %s service failed: %v", s, err)
+				}
+			}()
+			srv.targets = append(srv.targets, target{
+				call: func() { h.Shutdown() }, // nolint:errcheck
+				name: s,
+			})
+		case "jabber", "xmpp":
+			h := xmpp.New(ctx, opts)
+			go func() {
+				if err := h.Serve(); err != xmpp.ErrServiceClosed {
 					logger.Error("start %s service failed: %v", s, err)
 				}
 			}()
