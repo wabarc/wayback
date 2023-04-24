@@ -95,7 +95,7 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 	ev := nostr.Event{
 		Kind:      1,
 		Content:   note,
-		CreatedAt: time.Now(),
+		CreatedAt: nostr.Now(),
 		PubKey:    pk,
 		// Tags:      nostr.Tags{[]string{"foo", "bar"}},
 	}
@@ -114,12 +114,21 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 					logger.Error("publish to %s failed: %v", relay, r)
 				}
 			}()
-			client := relayConnect(ctx, relay)
-			if client.Connection == nil {
-				return fmt.Errorf("publish to %s failed: %v", relay, <-client.ConnectionError)
+
+			client, err := relayConnect(ctx, relay)
+			if err != nil {
+				return fmt.Errorf("connect to %s failed: %v", relay, err)
 			}
+			if client.Connection == nil {
+				return fmt.Errorf("publish to %s failed: %v", relay, client.ConnectionError)
+			}
+			defer client.Close()
+
 			// send the text note
-			status := client.Publish(ctx, ev)
+			status, err := client.Publish(ctx, ev)
+			if err != nil {
+				return fmt.Errorf("published to %s failed: %v", relay, err)
+			}
 			if status != nostr.PublishStatusSucceeded {
 				return fmt.Errorf("published to %s status is %s, not %s", relay, status, nostr.PublishStatusSucceeded)
 			}
@@ -133,12 +142,12 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 	return nil
 }
 
-func relayConnect(ctx context.Context, url string) *nostr.Relay {
+func relayConnect(ctx context.Context, url string) (*nostr.Relay, error) {
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	relay, err := nostr.RelayConnect(ctx, url)
 	if err != nil {
-		logger.Error("Connect to Nostr relay server got unpredictable error: %v", err)
+		return nil, err
 	}
-	return relay
+	return relay, nil
 }
