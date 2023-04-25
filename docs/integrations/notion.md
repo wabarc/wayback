@@ -2,7 +2,7 @@
 title: Publish to Notion
 ---
 
-## How to build a Notion Bot
+## How to build a Notion Integration
 
 1. Sign up for a Notion account, if you don't have one already.
 2. Create a new Integration by going to the [Notion API page](https://www.notion.so/my-integrations) and clicking on "**My integrations**" in the top-right corner of the page.

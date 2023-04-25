@@ -72,7 +72,7 @@ func (no *Notion) Publish(ctx context.Context, rdx reduxer.Reduxer, cols []wayba
 		head = "Published at " + time.Now().Format("2006-01-02T15:04:05")
 	}
 
-	params, children := no.params(cols, head, body)
+	params, childs := no.params(cols, head, body)
 	if err := params.Validate(); err != nil {
 		return errors.Wrap(err, "notion page params invalid")
 	}
@@ -86,7 +86,7 @@ func (no *Notion) Publish(ctx context.Context, rdx reduxer.Reduxer, cols []wayba
 
 	// A notion children must <= 100
 	size := 100
-	line := len(children)
+	line := len(childs)
 	max := line / size
 	if line%100 >= 0 {
 		max += 1
@@ -101,8 +101,8 @@ func (no *Notion) Publish(ctx context.Context, rdx reduxer.Reduxer, cols []wayba
 		if next > line {
 			next = line
 		}
-		childs := children[curr:next]
-		child, er := no.bot.AppendBlockChildren(ctx, page.ID, childs)
+		children := childs[curr:next]
+		child, er := no.bot.AppendBlockChildren(ctx, page.ID, children)
 		if er != nil {
 			err = errors.Wrap(err, fmt.Sprintf("append children failed: %v", err))
 		}
