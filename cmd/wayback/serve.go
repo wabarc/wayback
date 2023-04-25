@@ -206,10 +206,15 @@ func (srv *services) daemon(pool *pooling.Pool, pub *publish.Publish, cancel con
 
 	// Gracefully shutdown the server
 	srv.shutdown()
+
+	logger.Info("stopping pooling...")
 	// Gracefully closes the worker pool
 	pool.Close()
+
+	logger.Info("stopping publish...")
 	// Stop publish service
 	pub.Stop()
+
 	cancel()
 }
 
