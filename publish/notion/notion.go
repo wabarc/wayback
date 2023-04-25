@@ -88,34 +88,30 @@ func (no *Notion) Publish(ctx context.Context, rdx reduxer.Reduxer, cols []wayba
 }
 
 func (no *Notion) params(cols []wayback.Collect, head, body string) notion.CreatePageParams {
-	// tips := "Toggle open archived targets."
+	// tips := "Toggle Archiving"
 	table := []notion.Block{}
 	for i, col := range cols {
 		// Add the source URI to the first row
 		if i == 0 {
-			row := notion.Block{
-				TableRow: &notion.TableRow{
-					Cells: [][]notion.RichText{
-						{
-							{Type: notion.RichTextTypeText, Text: &notion.Text{Content: "Source"}, Annotations: &notion.Annotations{Bold: true}},
-						},
-						{
-							{Type: notion.RichTextTypeText, Text: &notion.Text{Content: col.Src, Link: &notion.Link{URL: col.Src}}},
-						},
+			row := notion.TableRowBlock{
+				Cells: [][]notion.RichText{
+					{
+						{Text: &notion.Text{Content: "Source"}, Annotations: &notion.Annotations{Bold: true}},
+					},
+					{
+						{Text: &notion.Text{Content: col.Src, Link: &notion.Link{URL: col.Src}}},
 					},
 				},
 			}
 			table = append(table, row)
 		}
-		row := notion.Block{
-			TableRow: &notion.TableRow{
-				Cells: [][]notion.RichText{
-					{
-						{Type: notion.RichTextTypeText, Text: &notion.Text{Content: config.SlotName(col.Arc)}, Annotations: &notion.Annotations{Bold: true}},
-					},
-					{
-						{Type: notion.RichTextTypeText, Text: &notion.Text{Content: col.Dst, Link: &notion.Link{URL: col.Dst}}},
-					},
+		row := notion.TableRowBlock{
+			Cells: [][]notion.RichText{
+				{
+					{Text: &notion.Text{Content: config.SlotName(col.Arc)}, Annotations: &notion.Annotations{Bold: true}},
+				},
+				{
+					{Text: &notion.Text{Content: col.Dst, Link: &notion.Link{URL: col.Dst}}},
 				},
 			},
 		}
@@ -123,25 +119,29 @@ func (no *Notion) params(cols []wayback.Collect, head, body string) notion.Creat
 	}
 
 	children := []notion.Block{
-		{
-			Object:  "object",
-			Type:    notion.BlockTypeDivider,
-			Divider: &notion.Divider{},
+		notion.DividerBlock{},
+		notion.TableBlock{
+			TableWidth:   2,
+			HasRowHeader: true,
+			Children:     table,
 		},
-		{
-			Object: "object",
-			Type:   notion.BlockTypeTable, // TODO replace with toggle list
-			Table: &notion.Table{
-				TableWidth:   2,
-				HasRowHeader: true,
-				Children:     table,
-			},
-		},
-		{
-			Object:  "object",
-			Type:    notion.BlockTypeDivider,
-			Divider: &notion.Divider{},
-		},
+		// notion.ToggleBlock{
+		// 	RichText: []notion.RichText{
+		// 		{
+		// 			Text: &notion.Text{
+		// 				Content: tips,
+		// 			},
+		// 		},
+		// 	},
+		// 	Children: []notion.Block{
+		// 		notion.TableBlock{
+		// 			TableWidth:   2,
+		// 			HasRowHeader: true,
+		// 			Children:     table,
+		// 		},
+		// 	},
+		// },
+		notion.DividerBlock{},
 		// {
 		// 	Object: "block",
 		// 	Type:   notion.BlockTypeHeading2,
@@ -167,7 +167,7 @@ func (no *Notion) params(cols []wayback.Collect, head, body string) notion.Creat
 		ParentType: notion.ParentTypeDatabase,
 		ParentID:   no.opts.NotionDatabaseID(),
 		DatabasePageProperties: &notion.DatabasePageProperties{
-			"Name": notion.DatabasePageProperty{
+			"title": notion.DatabasePageProperty{
 				Title: []notion.RichText{
 					{
 						Type: notion.RichTextTypeText,
@@ -192,16 +192,11 @@ func traverseNodes(selections *goquery.Selection, client *imgbb.ImgBB) []notion.
 			switch node.Type {
 			case html.TextNode:
 				if len(strings.TrimSpace(node.Data)) > 0 {
-					element = notion.Block{
-						Object: "block",
-						Type:   notion.BlockTypeParagraph,
-						Paragraph: &notion.RichTextBlock{
-							Text: []notion.RichText{
-								{
-									Type: notion.RichTextTypeText,
-									Text: &notion.Text{
-										Content: html.EscapeString(node.Data),
-									},
+					element = notion.ParagraphBlock{
+						RichText: []notion.RichText{
+							{
+								Text: &notion.Text{
+									Content: html.EscapeString(node.Data),
 								},
 							},
 						},
@@ -218,14 +213,10 @@ func traverseNodes(selections *goquery.Selection, client *imgbb.ImgBB) []notion.
 							if err == nil {
 								attr.Val = newurl
 							}
-							element = notion.Block{
-								Object: "block",
-								Type:   notion.BlockTypeImage,
-								Image: &notion.FileBlock{
-									Type: notion.FileTypeExternal,
-									External: &notion.FileExternal{
-										URL: attr.Val,
-									},
+							element = notion.ImageBlock{
+								Type: notion.FileTypeExternal,
+								External: &notion.FileExternal{
+									URL: attr.Val,
 								},
 							}
 							blocks = append(blocks, element)
