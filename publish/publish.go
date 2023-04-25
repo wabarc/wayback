@@ -113,7 +113,7 @@ func (p *Publish) Start() {
 // Stop uses a sync.Once to ensure that Stop is only called once.
 func (p *Publish) Stop() {
 	pub(func(mod *Module) {
-		_ = mod.Shutdown()
+		_ = mod.Shutdown() // nolint:errcheck
 	})
 
 	var once sync.Once
