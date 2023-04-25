@@ -112,7 +112,7 @@ func (p *Publish) Start() {
 //
 // Stop uses a sync.Once to ensure that Stop is only called once.
 func (p *Publish) Stop() {
-	pub(func(mod *Module) {
+	exec(func(mod *Module) {
 		_ = mod.Shutdown() // nolint:errcheck
 	})
 
@@ -130,7 +130,7 @@ func (p *Publish) Stop() {
 // Spread accepts calls from services that with collections and various parameters.
 // It prepare all available publishers and put them into pooling.
 func (p *Publish) Spread(_ context.Context, rdx reduxer.Reduxer, cols []wayback.Collect, from Flag, args ...string) {
-	pub(func(mod *Module) {
+	exec(func(mod *Module) {
 		bucket := pooling.Bucket{
 			Request: func(ctx context.Context) error {
 				logger.Info("requesting publishing from [%s] to [%s]...", from, mod.Flag)
@@ -148,7 +148,7 @@ func (p *Publish) Spread(_ context.Context, rdx reduxer.Reduxer, cols []wayback.
 	})
 }
 
-func pub(do func(*Module)) {
+func exec(pub func(*Module)) {
 	for flag := range publishers {
 		mod, err := loadPublisher(flag)
 		if err != nil {
@@ -159,6 +159,6 @@ func pub(do func(*Module)) {
 			logger.Error("module %s is nil", flag)
 			continue
 		}
-		do(mod)
+		pub(mod)
 	}
 }
