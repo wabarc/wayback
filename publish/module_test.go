@@ -24,6 +24,9 @@ func TestRegister(t *testing.T) {
 
 	// Call Register again with the same flag, it should panic
 	defer func() {
+		// Clear
+		delete(modules, FlagWeb)
+
 		if r := recover(); r == nil {
 			t.Errorf("Register should have panicked")
 		}

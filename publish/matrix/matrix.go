@@ -107,3 +107,15 @@ func (m *Matrix) toRoom(body string) bool {
 
 	return true
 }
+
+// Shutdown shuts down the Matrix publish service.
+func (m *Matrix) Shutdown() error {
+	if m.bot != nil {
+		// Stopping sync and logout all sessions
+		m.bot.StopSync()
+		// nolint:errcheck
+		m.bot.LogoutAll()
+	}
+
+	return nil
+}

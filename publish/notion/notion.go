@@ -294,3 +294,8 @@ func uploadImage(client *imgbb.ImgBB, s string) (string, error) {
 
 	return newurl, nil
 }
+
+// Shutdown shuts down the Notion publish service, it always return a nil error.
+func (no *Notion) Shutdown() error {
+	return nil
+}

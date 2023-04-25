@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/nbd-wtf/go-nostr"
@@ -23,8 +24,6 @@ import (
 	"github.com/wabarc/wayback/template/render"
 	"golang.org/x/sync/errgroup"
 )
-
-const timeout = 10 * time.Second
 
 // Interface guard
 var _ publish.Publisher = (*Nostr)(nil)
@@ -97,37 +96,39 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 		Content:   note,
 		CreatedAt: nostr.Now(),
 		PubKey:    pk,
-		// Tags:      nostr.Tags{[]string{"foo", "bar"}},
+		// Tags:   nostr.Tags{[]string{"foo", "bar"}},
 	}
 	if err := ev.Sign(sk); err != nil {
 		return fmt.Errorf("calling sign err: %v", err)
 	}
 
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
+
 	g, ctx := errgroup.WithContext(ctx)
-	for _, relay := range n.opts.NostrRelayURL() {
-		logger.Debug(`publish note to relay: %s`, relay)
-		relay := relay
+	var failed int32
+	for _, url := range n.opts.NostrRelayURL() {
+		logger.Debug(`publish note to relay: %s`, url)
+		url := url
 		g.Go(func() error {
 			defer func() {
 				// recover from upstream panic
 				if r := recover(); r != nil {
-					logger.Error("publish to %s failed: %v", relay, r)
+					logger.Error("publish to %s failed: %v", url, r)
 				}
 			}()
-
-			client, err := relayConnect(ctx, relay)
+			relay, err := relayConnect(ctx, url)
 			if err != nil {
-				return fmt.Errorf("connect to %s failed: %v", relay, err)
+				return fmt.Errorf("connect to %s failed: %v", url, err)
 			}
-			if client.Connection == nil {
-				return fmt.Errorf("publish to %s failed: %v", relay, client.ConnectionError)
+			if relay.Connection == nil {
+				return fmt.Errorf("publish to %s failed: %v", url, relay.ConnectionError)
 			}
-			defer client.Close()
-
 			// send the text note
-			status, err := client.Publish(ctx, ev)
+			status, err := relay.Publish(ctx, ev)
 			if err != nil {
-				return fmt.Errorf("published to %s failed: %v", relay, err)
+				atomic.AddInt32(&failed, 1)
+				return fmt.Errorf("published to %s failed: %v", url, err)
 			}
 			if status != nostr.PublishStatusSucceeded {
 				return fmt.Errorf("published to %s status is %s, not %s", relay, status, nostr.PublishStatusSucceeded)
@@ -135,7 +136,8 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 			return nil
 		})
 	}
-	if err := g.Wait(); err != nil {
+	annihilated := atomic.LoadInt32(&failed) == int32(len(n.opts.NostrRelayURL()))
+	if err := g.Wait(); err != nil && annihilated {
 		return err
 	}
 
@@ -143,11 +145,14 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 }
 
 func relayConnect(ctx context.Context, url string) (*nostr.Relay, error) {
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
 	relay, err := nostr.RelayConnect(ctx, url)
 	if err != nil {
 		return nil, err
 	}
 	return relay, nil
+}
+
+// Shutdown shuts down the Nostr publish service, it always return a nil error.
+func (n *Nostr) Shutdown() error {
+	return nil
 }

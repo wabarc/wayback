@@ -83,3 +83,12 @@ func (i *IRC) toChannel(_ context.Context, text string) bool {
 
 	return true
 }
+
+// Shutdown shuts down the IRC publish service.
+func (i *IRC) Shutdown() error {
+	if i.conn != nil {
+		i.conn.Quit()
+	}
+
+	return nil
+}

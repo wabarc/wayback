@@ -39,6 +39,9 @@ const (
 // The cols must either be a []wayback.Collect, args use for specific service.
 type Publisher interface {
 	Publish(context.Context, reduxer.Reduxer, []wayback.Collect, ...string) error
+
+	// Shutdown shuts down publish services.
+	Shutdown() error
 }
 
 // String returns the flag as a string.
@@ -109,6 +112,10 @@ func (p *Publish) Start() {
 //
 // Stop uses a sync.Once to ensure that Stop is only called once.
 func (p *Publish) Stop() {
+	pub(func(mod *Module) {
+		_ = mod.Shutdown()
+	})
+
 	var once sync.Once
 	for {
 		if p.pool.Status() == pooling.StatusIdle {
@@ -123,8 +130,26 @@ func (p *Publish) Stop() {
 // Spread accepts calls from services that with collections and various parameters.
 // It prepare all available publishers and put them into pooling.
 func (p *Publish) Spread(ctx context.Context, rdx reduxer.Reduxer, cols []wayback.Collect, from Flag, args ...string) {
+	pub(func(mod *Module) {
+		bucket := pooling.Bucket{
+			Request: func(_ context.Context) error {
+				logger.Info("requesting publishing from [%s] to [%s]...", from, mod.Flag)
+				err := mod.Publish(ctx, rdx, cols, args...)
+				if err != nil {
+					logger.Error("requesting publishing from [%s] to [%s] failed: %v", from, mod.Flag, err)
+				}
+				return err
+			},
+			Fallback: func(_ context.Context) error {
+				return nil
+			},
+		}
+		p.pool.Put(bucket)
+	})
+}
+
+func pub(do func(*Module)) {
 	for flag := range publishers {
-		flag := flag
 		mod, err := loadPublisher(flag)
 		if err != nil {
 			logger.Warn("load publisher failed: %v", err)
@@ -134,19 +159,6 @@ func (p *Publish) Spread(ctx context.Context, rdx reduxer.Reduxer, cols []waybac
 			logger.Error("module %s is nil", flag)
 			continue
 		}
-		bucket := pooling.Bucket{
-			Request: func(_ context.Context) error {
-				logger.Info("requesting publishing from [%s] to [%s]...", from, flag)
-				err := mod.Publish(ctx, rdx, cols, args...)
-				if err != nil {
-					logger.Error("requesting publishing from [%s] to [%s] failed: %v", from, flag, err)
-				}
-				return err
-			},
-			Fallback: func(_ context.Context) error {
-				return nil
-			},
-		}
-		p.pool.Put(bucket)
+		do(mod)
 	}
 }

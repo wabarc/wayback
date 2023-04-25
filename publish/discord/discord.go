@@ -107,3 +107,8 @@ func (d *Discord) toChannel(art reduxer.Artifact, body string) (ok bool) {
 
 	return true
 }
+
+// Shutdown shuts down the Discord publish service.
+func (d *Discord) Shutdown() error {
+	return d.bot.Close()
+}

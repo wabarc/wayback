@@ -97,3 +97,8 @@ func (m *Mastodon) toMastodon(ctx context.Context, text, id string) bool {
 
 	return true
 }
+
+// Shutdown shuts down the Mastodon publish service, it always return a nil error.
+func (m *Mastodon) Shutdown() error {
+	return nil
+}

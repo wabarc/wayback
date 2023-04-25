@@ -60,7 +60,7 @@ func TestToNostr(t *testing.T) {
 	os.Setenv("WAYBACK_NOSTR_PRIVATE_KEY", nsec)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	nos := New(nil, opts)

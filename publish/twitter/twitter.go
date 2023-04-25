@@ -89,3 +89,8 @@ func (t *Twitter) ToTwitter(ctx context.Context, body string) bool {
 
 	return true
 }
+
+// Shutdown shuts down the Twitter publish service, it always return a nil error.
+func (t *Twitter) Shutdown() error {
+	return nil
+}

@@ -64,6 +64,7 @@ type mockPublisher struct{}
 func (m *mockPublisher) Publish(_ context.Context, _ reduxer.Reduxer, _ []wayback.Collect, args ...string) error {
 	return nil
 }
+func (m *mockPublisher) Shutdown() error { return nil }
 
 func mockRegister(opts *config.Options) *Module {
 	publisher := &mockPublisher{}
