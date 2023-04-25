@@ -286,6 +286,8 @@ func Playback(ctx context.Context, cfg *config.Options, urls ...*url.URL) (cols 
 	return cols, nil
 }
 
+// duration reduce the context deadline time for downstream and reserve
+// extra time for the caller.
 func duration(ctx context.Context) time.Duration {
 	deadline, _ := ctx.Deadline()
 	elapsed := deadline.Unix() - time.Now().Unix()
