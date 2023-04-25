@@ -82,7 +82,7 @@ func (no *Notion) Publish(ctx context.Context, rdx reduxer.Reduxer, cols []wayba
 		metrics.IncrementPublish(metrics.PublishNotion, metrics.StatusFailure)
 		return errors.Wrap(err, "create page failed")
 	}
-	logger.Debug("created page: %#v", page)
+	logger.Info("created page: %s", page.URL)
 
 	// A notion children must <= 100
 	size := 100
@@ -102,11 +102,11 @@ func (no *Notion) Publish(ctx context.Context, rdx reduxer.Reduxer, cols []wayba
 			next = line
 		}
 		children := childs[curr:next]
-		child, er := no.bot.AppendBlockChildren(ctx, page.ID, children)
+		_, er := no.bot.AppendBlockChildren(ctx, page.ID, children)
 		if er != nil {
-			err = errors.Wrap(err, fmt.Sprintf("append children failed: %v", err))
+			err = errors.Wrap(err, fmt.Sprintf("append children block failed: %v", err))
 		}
-		logger.Debug("appended children: %#v", child)
+		logger.Info("append children block successful")
 	}
 	if err != nil {
 		return err
