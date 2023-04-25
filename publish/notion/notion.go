@@ -6,6 +6,7 @@ package notion // import "github.com/wabarc/wayback/publish/notion"
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -71,7 +72,7 @@ func (no *Notion) Publish(ctx context.Context, rdx reduxer.Reduxer, cols []wayba
 		head = "Published at " + time.Now().Format("2006-01-02T15:04:05")
 	}
 
-	params := no.params(cols, head, body)
+	params, children := no.params(cols, head, body)
 	if err := params.Validate(); err != nil {
 		return errors.Wrap(err, "notion page params invalid")
 	}
@@ -81,13 +82,41 @@ func (no *Notion) Publish(ctx context.Context, rdx reduxer.Reduxer, cols []wayba
 		metrics.IncrementPublish(metrics.PublishNotion, metrics.StatusFailure)
 		return errors.Wrap(err, "create page failed")
 	}
+	logger.Debug("created page: %#v", page)
 
-	logger.Debug("created page: %v", page)
+	// A notion children must <= 100
+	size := 100
+	line := len(children)
+	max := line / size
+	if line%100 >= 0 {
+		max += 1
+	}
+	// One page suffices
+	if line <= 100 {
+		max = 1
+	}
+	for i := 0; i < max; i++ {
+		curr := i * size             // 0, 100 ...
+		next := ((i + 1) * size) - 1 // 99, 199 ...
+		if next > line {
+			next = line
+		}
+		childs := children[curr:next]
+		child, er := no.bot.AppendBlockChildren(ctx, page.ID, childs)
+		if er != nil {
+			err = errors.Wrap(err, fmt.Sprintf("append children failed: %v", err))
+		}
+		logger.Debug("appended children: %#v", child)
+	}
+	if err != nil {
+		return err
+	}
+
 	metrics.IncrementPublish(metrics.PublishNotion, metrics.StatusSuccess)
 	return nil
 }
 
-func (no *Notion) params(cols []wayback.Collect, head, body string) notion.CreatePageParams {
+func (no *Notion) params(cols []wayback.Collect, head, body string) (notion.CreatePageParams, []notion.Block) {
 	// tips := "Toggle Archiving"
 	table := []notion.Block{}
 	for i, col := range cols {
@@ -178,10 +207,10 @@ func (no *Notion) params(cols []wayback.Collect, head, body string) notion.Creat
 				},
 			},
 		},
-		Children: children,
+		// Children: children,
 	}
 
-	return params
+	return params, children
 }
 
 func traverseNodes(selections *goquery.Selection, client *imgbb.ImgBB) []notion.Block {
