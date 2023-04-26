@@ -213,7 +213,9 @@ func (no *Notion) params(cols []wayback.Collect, head, body string) (notion.Crea
 	return params, children
 }
 
+// nolint:gocyclo
 func traverseNodes(selections *goquery.Selection, client *imgbb.ImgBB) []notion.Block {
+	const src = "src"
 	var element notion.Block
 	var blocks []notion.Block
 	selections.Each(func(_ int, child *goquery.Selection) {
@@ -236,7 +238,7 @@ func traverseNodes(selections *goquery.Selection, client *imgbb.ImgBB) []notion.
 				switch node.Data {
 				case "img":
 					for _, attr := range node.Attr {
-						if attr.Key == "src" && strings.TrimSpace(attr.Val) != "" {
+						if attr.Key == src && strings.TrimSpace(attr.Val) != "" {
 							// Upload the image to a third-party image hosting service
 							newurl, err := uploadImage(client, attr.Val)
 							if err == nil {
@@ -253,7 +255,7 @@ func traverseNodes(selections *goquery.Selection, client *imgbb.ImgBB) []notion.
 					}
 				case "embed":
 					for _, attr := range node.Attr {
-						if attr.Key == "src" && strings.TrimSpace(attr.Val) != "" {
+						if attr.Key == src && strings.TrimSpace(attr.Val) != "" {
 							element = notion.EmbedBlock{
 								URL: attr.Val,
 							}
@@ -262,7 +264,7 @@ func traverseNodes(selections *goquery.Selection, client *imgbb.ImgBB) []notion.
 					}
 				case "audio":
 					for _, attr := range node.Attr {
-						if attr.Key == "src" && strings.TrimSpace(attr.Val) != "" {
+						if attr.Key == src && strings.TrimSpace(attr.Val) != "" {
 							element = notion.AudioBlock{
 								Type: notion.FileTypeExternal,
 								External: &notion.FileExternal{
@@ -275,10 +277,9 @@ func traverseNodes(selections *goquery.Selection, client *imgbb.ImgBB) []notion.
 				case "video":
 					child.Find("source").Each(func(_ int, s *goquery.Selection) {
 						for _, node := range s.Nodes {
-							switch node.Type {
-							case html.ElementNode:
+							if node.Type == html.ElementNode {
 								for _, attr := range node.Attr {
-									if attr.Key == "src" && strings.TrimSpace(attr.Val) != "" {
+									if attr.Key == src && strings.TrimSpace(attr.Val) != "" {
 										element = notion.VideoBlock{
 											Type: notion.FileTypeExternal,
 											External: &notion.FileExternal{
