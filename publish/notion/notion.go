@@ -251,18 +251,57 @@ func traverseNodes(selections *goquery.Selection, client *imgbb.ImgBB) []notion.
 							blocks = append(blocks, element)
 						}
 					}
-					// case "pre":
-					// 	element = notion.Block{
-					// 		Object: "block",
-					// 		Type:   notion.BlockTypeCode,
-					// 		Code: &notion.Code{
-					// 			RichTextBlock: notion.RichTextBlock{
-					//                 Text: []notion.RichText{},
-					// 				Children: traverseNodes(child.Contents(), client),
-					// 			},
-					// 		},
-					// 	}
-					// 	blocks = append(blocks, element)
+				case "embed":
+					for _, attr := range node.Attr {
+						if attr.Key == "src" && strings.TrimSpace(attr.Val) != "" {
+							element = notion.EmbedBlock{
+								URL: attr.Val,
+							}
+							blocks = append(blocks, element)
+						}
+					}
+				case "audio":
+					for _, attr := range node.Attr {
+						if attr.Key == "src" && strings.TrimSpace(attr.Val) != "" {
+							element = notion.AudioBlock{
+								Type: notion.FileTypeExternal,
+								External: &notion.FileExternal{
+									URL: attr.Val,
+								},
+							}
+							blocks = append(blocks, element)
+						}
+					}
+				case "video":
+					child.Find("source").Each(func(_ int, s *goquery.Selection) {
+						for _, node := range s.Nodes {
+							switch node.Type {
+							case html.ElementNode:
+								for _, attr := range node.Attr {
+									if attr.Key == "src" && strings.TrimSpace(attr.Val) != "" {
+										element = notion.VideoBlock{
+											Type: notion.FileTypeExternal,
+											External: &notion.FileExternal{
+												URL: attr.Val,
+											},
+										}
+										blocks = append(blocks, element)
+									}
+								}
+							}
+						}
+					})
+				case "pre":
+					element = notion.CodeBlock{
+						RichText: []notion.RichText{
+							{
+								Text: &notion.Text{
+									Content: child.Contents().Text(),
+								},
+							},
+						},
+					}
+					blocks = append(blocks, element)
 				default:
 				}
 			}
