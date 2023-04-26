@@ -175,7 +175,7 @@ func TestToNotion(t *testing.T) {
 		switch r.URL.Path {
 		case "/v1/pages":
 			body, _ := io.ReadAll(r.Body)
-			if !strings.Contains(string(body), config.SlotName(config.SLOT_IA)) {
+			if !strings.Contains(string(body), "Example") {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
