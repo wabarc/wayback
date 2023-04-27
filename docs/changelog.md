@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Set NoWait to true for tor listen config ([#368](https://github.com/wabarc/wayback/pull/368))
+- Improve context deadline ([#381](https://github.com/wabarc/wayback/pull/381))
 
 ## [0.19.1] - 2023-03-21
 
