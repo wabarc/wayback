@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"strings"
 	"sync/atomic"
-	"time"
 
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/nbd-wtf/go-nostr/nip19"
@@ -102,9 +101,6 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 		return fmt.Errorf("calling sign err: %v", err)
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
-	defer cancel()
-
 	g, ctx := errgroup.WithContext(ctx)
 	var failed int32
 	for _, url := range n.opts.NostrRelayURL() {
@@ -117,14 +113,12 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 					logger.Error("publish to %s failed: %v", url, r)
 				}
 			}()
-			relay, err := relayConnect(ctx, url)
+
+			relay, err := nostr.RelayConnect(ctx, url)
 			if err != nil {
 				return fmt.Errorf("connect to %s failed: %v", url, err)
 			}
-			if relay.Connection == nil {
-				return fmt.Errorf("publish to %s failed: %v", url, relay.ConnectionError)
-			}
-			// send the text note
+
 			status, err := relay.Publish(ctx, ev)
 			if err != nil {
 				atomic.AddInt32(&failed, 1)
@@ -136,20 +130,15 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 			return nil
 		})
 	}
-	annihilated := atomic.LoadInt32(&failed) == int32(len(n.opts.NostrRelayURL()))
-	if err := g.Wait(); err != nil && annihilated {
-		return err
+	if err := g.Wait(); err != nil {
+		annihilated := atomic.LoadInt32(&failed) == int32(len(n.opts.NostrRelayURL()))
+		if annihilated {
+			return err
+		}
+		logger.Error("publish partially failed: %v", err)
 	}
 
 	return nil
-}
-
-func relayConnect(ctx context.Context, url string) (*nostr.Relay, error) {
-	relay, err := nostr.RelayConnect(ctx, url)
-	if err != nil {
-		return nil, err
-	}
-	return relay, nil
 }
 
 // Shutdown shuts down the Nostr publish service, it always return a nil error.
