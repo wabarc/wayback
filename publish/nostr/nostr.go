@@ -91,11 +91,11 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 		return fmt.Errorf("failed to get public key: %v", err)
 	}
 	ev := nostr.Event{
-		Kind:      1,
+		PubKey:    pk,
 		Content:   note,
 		CreatedAt: nostr.Now(),
-		PubKey:    pk,
-		// Tags:   nostr.Tags{[]string{"foo", "bar"}},
+		Tags:      nostr.Tags{},
+		Kind:      nostr.KindTextNote,
 	}
 	if err := ev.Sign(sk); err != nil {
 		return fmt.Errorf("calling sign err: %v", err)
