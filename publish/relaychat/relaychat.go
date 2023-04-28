@@ -43,7 +43,11 @@ func New(conn *irc.Connection, opts *config.Options) *IRC {
 		conn.UseTLS = true
 		conn.TLSConfig = &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12}
 	}
-	conn.Connect(opts.IRCServer())
+	server := opts.IRCServer()
+	if err := conn.Connect(server); err != nil {
+		logger.Error("connect to %s failed: %v", server, err)
+		return nil
+	}
 
 	return &IRC{conn: conn, opts: opts}
 }
