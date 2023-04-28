@@ -54,3 +54,18 @@ func TestToTwitter(t *testing.T) {
 		t.Errorf("Unexpected create GitHub Issues got %t instead of %t", got, true)
 	}
 }
+
+func TestShutdown(t *testing.T) {
+	setTwitterEnv()
+
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	tw := New(httpClient, opts)
+	err := tw.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
+	}
+}

@@ -62,3 +62,16 @@ func TestToMastodon(t *testing.T) {
 		t.Errorf("Unexpected publish toot got %t instead of %t", got, true)
 	}
 }
+
+func TestShutdown(t *testing.T) {
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	mstdn := New(*httpClient, opts)
+	err := mstdn.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
+	}
+}

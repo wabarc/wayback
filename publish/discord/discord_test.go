@@ -184,3 +184,16 @@ func TestToDiscordChannel(t *testing.T) {
 		t.Errorf("Unexpected publish to discord channel got %t instead of %t", got, true)
 	}
 }
+
+func TestShutdown(t *testing.T) {
+	opts := setDiscordEnv()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	d := New(httpClient, opts)
+	err := d.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
+	}
+}

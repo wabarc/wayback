@@ -43,6 +43,7 @@ func New(conn *irc.Connection, opts *config.Options) *IRC {
 		conn.UseTLS = true
 		conn.TLSConfig = &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12}
 	}
+	conn.Connect(opts.IRCServer())
 
 	return &IRC{conn: conn, opts: opts}
 }
@@ -86,9 +87,7 @@ func (i *IRC) toChannel(_ context.Context, text string) bool {
 
 // Shutdown shuts down the IRC publish service.
 func (i *IRC) Shutdown() error {
-	if i.conn != nil {
-		i.conn.Quit()
-	}
+	i.conn.Quit()
 
 	return nil
 }

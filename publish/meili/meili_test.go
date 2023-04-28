@@ -301,3 +301,16 @@ func TestVersion(t *testing.T) {
 		t.Fatal(`unexpected version`)
 	}
 }
+
+func TestShutdown(t *testing.T) {
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	m := New(httpClient, opts)
+	err := m.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
+	}
+}

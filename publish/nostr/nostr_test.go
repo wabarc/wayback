@@ -17,6 +17,7 @@ import (
 
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/nbd-wtf/go-nostr/nip19"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/template/render"
@@ -72,6 +73,19 @@ func TestToNostr(t *testing.T) {
 
 	if !published {
 		t.Errorf("fake relay server saw no event")
+	}
+}
+
+func TestShutdown(t *testing.T) {
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	nos := New(httpClient, opts)
+	err := nos.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
 	}
 }
 

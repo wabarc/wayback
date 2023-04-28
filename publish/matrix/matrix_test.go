@@ -5,9 +5,9 @@
 package matrix // import "github.com/wabarc/wayback/publish/matrix"
 
 import (
-	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -24,26 +24,32 @@ func setMatrixEnv() {
 	os.Setenv("WAYBACK_MATRIX_PASSWORD", "zoo")
 }
 
-func TestToMatrixRoom(t *testing.T) {
-	setMatrixEnv()
-
+func matrixServer() *httptest.Server {
 	_, mux, server := helper.MockServer()
-	defer server.Close()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch {
 		case r.URL.Path == "/_matrix/client/r0/login", r.URL.Path == "/_matrix/client/v3/login":
-			fmt.Fprintln(w, `{"access_token": "zoo"}`)
+			w.Write([]byte(`{"access_token": "zoo"}`))
 		case strings.Contains(r.URL.Path, "!bar:example.com/send/m.room.message"):
 			body, _ := io.ReadAll(r.Body)
 			if !strings.Contains(string(body), config.SlotName(config.SLOT_IA)) {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
-			fmt.Fprintln(w, `{"id": 1}`)
+			w.Write([]byte(`{"id": 1}`))
 		}
 	})
+
+	return server
+}
+
+func TestToMatrixRoom(t *testing.T) {
+	setMatrixEnv()
+
+	server := matrixServer()
+	defer server.Close()
 
 	os.Setenv("WAYBACK_MATRIX_HOMESERVER", server.URL)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
@@ -53,5 +59,21 @@ func TestToMatrixRoom(t *testing.T) {
 	got := mat.toRoom(txt)
 	if !got {
 		t.Errorf("Unexpected publish room message got %t instead of %t", got, true)
+	}
+}
+
+func TestShutdown(t *testing.T) {
+	setMatrixEnv()
+
+	server := matrixServer()
+	defer server.Close()
+
+	os.Setenv("WAYBACK_MATRIX_HOMESERVER", server.URL)
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	mat := New(nil, opts)
+	err := mat.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
 	}
 }

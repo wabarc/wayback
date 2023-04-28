@@ -166,3 +166,18 @@ func TestPublish(t *testing.T) {
 		})
 	}
 }
+
+func TestShutdown(t *testing.T) {
+	setEnv()
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	client, server := testServer()
+	defer server.Close()
+
+	tel := New(client, opts)
+	go tel.bot.Start()
+	err := tel.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
+	}
+}

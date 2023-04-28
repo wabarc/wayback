@@ -52,3 +52,16 @@ func TestToIssues(t *testing.T) {
 		t.Errorf("Unexpected create GitHub Issues got %t instead of %t", got, true)
 	}
 }
+
+func TestShutdown(t *testing.T) {
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	gh := New(httpClient, opts)
+	err := gh.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
+	}
+}

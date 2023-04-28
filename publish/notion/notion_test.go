@@ -259,3 +259,16 @@ func TestTraverseNodes(t *testing.T) {
 		t.Fatal("unexpected traverse nodes")
 	}
 }
+
+func TestShutdown(t *testing.T) {
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	no := New(httpClient, opts)
+	err := no.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
+	}
+}
