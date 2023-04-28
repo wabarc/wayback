@@ -201,6 +201,7 @@ func TestExistIndex(t *testing.T) {
 
 	mux.HandleFunc("/", handlerFunc)
 
+	t.Setenv("WAYBACK_MEILI_ENDPOINT", server.URL)
 	t.Setenv("WAYBACK_MEILI_INDEXING", indexing)
 	t.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
 	opts, err := config.NewParser().ParseEnvironmentVariables()
@@ -221,6 +222,7 @@ func TestCreateIndex(t *testing.T) {
 
 	mux.HandleFunc("/", handlerFunc)
 
+	t.Setenv("WAYBACK_MEILI_ENDPOINT", server.URL)
 	t.Setenv("WAYBACK_MEILI_INDEXING", indexing)
 	t.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
 	opts, err := config.NewParser().ParseEnvironmentVariables()
@@ -241,6 +243,7 @@ func TestPushDocument(t *testing.T) {
 
 	mux.HandleFunc("/", handlerFunc)
 
+	t.Setenv("WAYBACK_MEILI_ENDPOINT", server.URL)
 	t.Setenv("WAYBACK_MEILI_INDEXING", indexing)
 	t.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
 	opts, err := config.NewParser().ParseEnvironmentVariables()
@@ -284,6 +287,7 @@ func TestVersion(t *testing.T) {
 
 	mux.HandleFunc("/", handlerFunc)
 
+	t.Setenv("WAYBACK_MEILI_ENDPOINT", server.URL)
 	t.Setenv("WAYBACK_MEILI_INDEXING", indexing)
 	t.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
 	opts, err := config.NewParser().ParseEnvironmentVariables()
