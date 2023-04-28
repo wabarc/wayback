@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"sync"
 	"testing"
 	"time"
@@ -57,8 +56,8 @@ func TestToNostr(t *testing.T) {
 	})
 	defer ws.Close()
 
-	os.Setenv("WAYBACK_NOSTR_RELAY_URL", ws.URL)
-	os.Setenv("WAYBACK_NOSTR_PRIVATE_KEY", nsec)
+	t.Setenv("WAYBACK_NOSTR_RELAY_URL", ws.URL)
+	t.Setenv("WAYBACK_NOSTR_PRIVATE_KEY", nsec)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)

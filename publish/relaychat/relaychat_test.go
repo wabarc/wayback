@@ -5,7 +5,6 @@
 package relaychat // import "github.com/wabarc/wayback/publish/relaychat"
 
 import (
-	"os"
 	"testing"
 
 	"github.com/wabarc/helper"
@@ -14,16 +13,16 @@ import (
 
 const server = "irc.libera.chat:6697"
 
-func setIRCEnv() {
-	os.Setenv("WAYBACK_IRC_NICK", helper.RandString(6, ""))
-	os.Setenv("WAYBACK_IRC_CHANNEL", "bar")
-	os.Setenv("WAYBACK_IRC_SERVER", server)
+func setIRCEnv(t *testing.T) {
+	t.Setenv("WAYBACK_IRC_NICK", helper.RandString(6, ""))
+	t.Setenv("WAYBACK_IRC_CHANNEL", "bar")
+	t.Setenv("WAYBACK_IRC_SERVER", server)
 }
 func TestToIRCChannel(t *testing.T) {
 }
 
 func TestShutdown(t *testing.T) {
-	setIRCEnv()
+	setIRCEnv(t)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	irc := New(nil, opts)

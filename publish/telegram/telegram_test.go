@@ -11,7 +11,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -48,10 +47,10 @@ var (
 }`
 )
 
-func setEnv() {
-	os.Setenv("LOG_LEVEL", "fatal")
-	os.Setenv("WAYBACK_TELEGRAM_TOKEN", "foo")
-	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
+func setEnv(t *testing.T) {
+	t.Setenv("LOG_LEVEL", "fatal")
+	t.Setenv("WAYBACK_TELEGRAM_TOKEN", "foo")
+	t.Setenv("WAYBACK_TELEGRAM_CHANNEL", "bar")
 }
 
 func testServer() (*http.Client, *httptest.Server) {
@@ -89,8 +88,8 @@ func testServer() (*http.Client, *httptest.Server) {
 }
 
 func TestNew(t *testing.T) {
-	os.Setenv("LOG_LEVEL", "fatal")
-	os.Setenv("WAYBACK_TELEGRAM_TOKEN", "foo")
+	t.Setenv("LOG_LEVEL", "fatal")
+	t.Setenv("WAYBACK_TELEGRAM_TOKEN", "foo")
 
 	client, server := testServer()
 	defer server.Close()
@@ -111,7 +110,7 @@ func TestNew(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run("", func(t *testing.T) {
-			os.Setenv("WAYBACK_TELEGRAM_CHANNEL", test.channel)
+			t.Setenv("WAYBACK_TELEGRAM_CHANNEL", test.channel)
 			opts, _ := config.NewParser().ParseEnvironmentVariables()
 			actual := New(client, opts) == nil
 			if actual != test.isNil {
@@ -122,7 +121,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestPublish(t *testing.T) {
-	setEnv()
+	setEnv(t)
 
 	client, server := testServer()
 	defer server.Close()
@@ -168,7 +167,7 @@ func TestPublish(t *testing.T) {
 }
 
 func TestShutdown(t *testing.T) {
-	setEnv()
+	setEnv(t)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	client, server := testServer()

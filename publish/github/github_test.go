@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 
@@ -21,9 +20,9 @@ import (
 )
 
 func TestToIssues(t *testing.T) {
-	os.Setenv("WAYBACK_GITHUB_TOKEN", "foo")
-	os.Setenv("WAYBACK_GITHUB_OWNER", "bar")
-	os.Setenv("WAYBACK_GITHUB_REPO", "zoo")
+	t.Setenv("WAYBACK_GITHUB_TOKEN", "foo")
+	t.Setenv("WAYBACK_GITHUB_OWNER", "bar")
+	t.Setenv("WAYBACK_GITHUB_REPO", "zoo")
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	httpClient, mux, server := helper.MockServer()

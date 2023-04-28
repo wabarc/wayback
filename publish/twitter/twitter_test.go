@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 
@@ -18,15 +17,15 @@ import (
 	"github.com/wabarc/wayback/template/render"
 )
 
-func setTwitterEnv() {
-	os.Setenv("WAYBACK_TWITTER_CONSUMER_KEY", "foo")
-	os.Setenv("WAYBACK_TWITTER_CONSUMER_SECRET", "foo")
-	os.Setenv("WAYBACK_TWITTER_ACCESS_TOKEN", "foo")
-	os.Setenv("WAYBACK_TWITTER_ACCESS_SECRET", "foo")
+func setTwitterEnv(t *testing.T) {
+	t.Setenv("WAYBACK_TWITTER_CONSUMER_KEY", "foo")
+	t.Setenv("WAYBACK_TWITTER_CONSUMER_SECRET", "foo")
+	t.Setenv("WAYBACK_TWITTER_ACCESS_TOKEN", "foo")
+	t.Setenv("WAYBACK_TWITTER_ACCESS_SECRET", "foo")
 }
 
 func TestToTwitter(t *testing.T) {
-	setTwitterEnv()
+	setTwitterEnv(t)
 
 	client, mux, server := helper.MockServer()
 	defer server.Close()
@@ -56,7 +55,7 @@ func TestToTwitter(t *testing.T) {
 }
 
 func TestShutdown(t *testing.T) {
-	setTwitterEnv()
+	setTwitterEnv(t)
 
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 

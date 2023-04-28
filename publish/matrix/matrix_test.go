@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 
@@ -18,10 +17,10 @@ import (
 	"github.com/wabarc/wayback/template/render"
 )
 
-func setMatrixEnv() {
-	os.Setenv("WAYBACK_MATRIX_USERID", "@foo:example.com")
-	os.Setenv("WAYBACK_MATRIX_ROOMID", "!bar:example.com")
-	os.Setenv("WAYBACK_MATRIX_PASSWORD", "zoo")
+func setMatrixEnv(t *testing.T) {
+	t.Setenv("WAYBACK_MATRIX_USERID", "@foo:example.com")
+	t.Setenv("WAYBACK_MATRIX_ROOMID", "!bar:example.com")
+	t.Setenv("WAYBACK_MATRIX_PASSWORD", "zoo")
 }
 
 func matrixServer() *httptest.Server {
@@ -46,12 +45,12 @@ func matrixServer() *httptest.Server {
 }
 
 func TestToMatrixRoom(t *testing.T) {
-	setMatrixEnv()
+	setMatrixEnv(t)
 
 	server := matrixServer()
 	defer server.Close()
 
-	os.Setenv("WAYBACK_MATRIX_HOMESERVER", server.URL)
+	t.Setenv("WAYBACK_MATRIX_HOMESERVER", server.URL)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	mat := New(nil, opts)
@@ -63,12 +62,12 @@ func TestToMatrixRoom(t *testing.T) {
 }
 
 func TestShutdown(t *testing.T) {
-	setMatrixEnv()
+	setMatrixEnv(t)
 
 	server := matrixServer()
 	defer server.Close()
 
-	os.Setenv("WAYBACK_MATRIX_HOMESERVER", server.URL)
+	t.Setenv("WAYBACK_MATRIX_HOMESERVER", server.URL)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	mat := New(nil, opts)

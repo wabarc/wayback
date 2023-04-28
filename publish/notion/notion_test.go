@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -203,8 +202,8 @@ const (
 )
 
 func TestToNotion(t *testing.T) {
-	os.Setenv("WAYBACK_NOTION_TOKEN", "foo")
-	os.Setenv("WAYBACK_NOTION_DATABASE_ID", "bar")
+	t.Setenv("WAYBACK_NOTION_TOKEN", "foo")
+	t.Setenv("WAYBACK_NOTION_DATABASE_ID", "bar")
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	httpClient, mux, server := helper.MockServer()
