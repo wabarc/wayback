@@ -181,6 +181,8 @@ func Wayback(ctx context.Context, rdx reduxer.Reduxer, cfg *config.Options, urls
 		ctx, cancel = context.WithTimeout(ctx, cfg.WaybackTimeout())
 		defer cancel()
 	}
+	ctx, cancel := context.WithTimeout(ctx, duration(ctx))
+	defer cancel()
 
 	mu := sync.Mutex{}
 	cols := []Collect{}
@@ -232,7 +234,12 @@ func Wayback(ctx context.Context, rdx reduxer.Reduxer, cfg *config.Options, urls
 func Playback(ctx context.Context, cfg *config.Options, urls ...*url.URL) (cols []Collect, err error) {
 	logger.Debug("start...")
 
-	ctx, cancel := context.WithTimeout(ctx, cfg.WaybackTimeout())
+	if _, ok := ctx.Deadline(); !ok {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, cfg.WaybackTimeout())
+		defer cancel()
+	}
+	ctx, cancel := context.WithTimeout(ctx, duration(ctx))
 	defer cancel()
 
 	mu := sync.Mutex{}
@@ -277,4 +284,14 @@ func Playback(ctx context.Context, cfg *config.Options, urls ...*url.URL) (cols 
 	}
 
 	return cols, nil
+}
+
+// duration reduce the context deadline time for downstream and reserve
+// extra time for the caller.
+func duration(ctx context.Context) time.Duration {
+	deadline, _ := ctx.Deadline()
+	elapsed := deadline.Unix() - time.Now().Unix()
+	safeTime := elapsed * 90 / 100
+
+	return time.Duration(safeTime) * time.Second
 }
