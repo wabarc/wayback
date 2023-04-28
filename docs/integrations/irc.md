@@ -22,3 +22,5 @@ Note that some IRC servers may require additional configuration, such as TLS cer
 - [IRCv3 Specifications](https://ircv3.net/irc/)
 - [List of IRC networks](https://netsplit.de/networks/top100.php)
 - [Libera.chat documentation](https://libera.chat/guides)
+- [IRC Networks - Top 100](https://netsplit.de/networks/top100.php)
+- [BlockingIrc](https://gitlab.torproject.org/legacy/trac/-/wikis/doc/BlockingIrc)

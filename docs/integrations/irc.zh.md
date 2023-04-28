@@ -22,3 +22,5 @@ title: IRC
 - [IRCv3规范](https://ircv3.net/irc/)
 - [IRC网络列表](https://netsplit.de/networks/top100.php)
 - [Libera.chat文档](https://libera.chat/guides)
+- [IRC Networks - Top 100](https://netsplit.de/networks/top100.php)
+- [BlockingIrc](https://gitlab.torproject.org/legacy/trac/-/wikis/doc/BlockingIrc)
