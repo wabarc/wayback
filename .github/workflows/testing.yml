@@ -28,6 +28,11 @@ on:
 permissions:
   contents: read
 
+# New runs to only cancel in-progress runs of the same workflow.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   testing:
     name: Testing
