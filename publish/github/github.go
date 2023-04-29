@@ -104,3 +104,8 @@ func (gh *GitHub) toIssues(ctx context.Context, head, body string) bool {
 
 	return true
 }
+
+// Shutdown shuts down the GitHub publish service, it always return a nil error.
+func (gh *GitHub) Shutdown() error {
+	return nil
+}

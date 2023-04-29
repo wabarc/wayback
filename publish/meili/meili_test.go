@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 
@@ -147,7 +146,7 @@ func TestNewMeili(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run("", func(t *testing.T) {
-			os.Setenv("WAYBACK_MEILI_INDEXING", test.indexing)
+			t.Setenv("WAYBACK_MEILI_INDEXING", test.indexing)
 			opts, err := config.NewParser().ParseEnvironmentVariables()
 			if err != nil {
 				t.Fatalf("unexpected parse config")
@@ -179,9 +178,9 @@ func TestSetup(t *testing.T) {
 
 			mux.HandleFunc("/", test.handler)
 
-			os.Setenv("WAYBACK_MEILI_ENDPOINT", server.URL)
-			os.Setenv("WAYBACK_MEILI_INDEXING", indexing)
-			os.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
+			t.Setenv("WAYBACK_MEILI_ENDPOINT", server.URL)
+			t.Setenv("WAYBACK_MEILI_INDEXING", indexing)
+			t.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
 			opts, err := config.NewParser().ParseEnvironmentVariables()
 			if err != nil {
 				t.Fatalf("unexpected parse config")
@@ -202,8 +201,9 @@ func TestExistIndex(t *testing.T) {
 
 	mux.HandleFunc("/", handlerFunc)
 
-	os.Setenv("WAYBACK_MEILI_INDEXING", indexing)
-	os.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
+	t.Setenv("WAYBACK_MEILI_ENDPOINT", server.URL)
+	t.Setenv("WAYBACK_MEILI_INDEXING", indexing)
+	t.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
 	opts, err := config.NewParser().ParseEnvironmentVariables()
 	if err != nil {
 		t.Fatalf("unexpected parse config")
@@ -222,8 +222,9 @@ func TestCreateIndex(t *testing.T) {
 
 	mux.HandleFunc("/", handlerFunc)
 
-	os.Setenv("WAYBACK_MEILI_INDEXING", indexing)
-	os.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
+	t.Setenv("WAYBACK_MEILI_ENDPOINT", server.URL)
+	t.Setenv("WAYBACK_MEILI_INDEXING", indexing)
+	t.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
 	opts, err := config.NewParser().ParseEnvironmentVariables()
 	if err != nil {
 		t.Fatalf("unexpected parse config")
@@ -242,8 +243,9 @@ func TestPushDocument(t *testing.T) {
 
 	mux.HandleFunc("/", handlerFunc)
 
-	os.Setenv("WAYBACK_MEILI_INDEXING", indexing)
-	os.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
+	t.Setenv("WAYBACK_MEILI_ENDPOINT", server.URL)
+	t.Setenv("WAYBACK_MEILI_INDEXING", indexing)
+	t.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
 	opts, err := config.NewParser().ParseEnvironmentVariables()
 	if err != nil {
 		t.Fatalf("unexpected parse config")
@@ -285,8 +287,9 @@ func TestVersion(t *testing.T) {
 
 	mux.HandleFunc("/", handlerFunc)
 
-	os.Setenv("WAYBACK_MEILI_INDEXING", indexing)
-	os.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
+	t.Setenv("WAYBACK_MEILI_ENDPOINT", server.URL)
+	t.Setenv("WAYBACK_MEILI_INDEXING", indexing)
+	t.Setenv("WAYBACK_MEILI_APIKEY", apiKey)
 	opts, err := config.NewParser().ParseEnvironmentVariables()
 	if err != nil {
 		t.Fatalf("unexpected parse config")
@@ -299,5 +302,18 @@ func TestVersion(t *testing.T) {
 	}
 	if m.version == "" {
 		t.Fatal(`unexpected version`)
+	}
+}
+
+func TestShutdown(t *testing.T) {
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	m := New(httpClient, opts)
+	err := m.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
 	}
 }

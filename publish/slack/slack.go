@@ -100,3 +100,8 @@ func (s *Slack) toChannel(art reduxer.Artifact, head, body string) (ok bool) {
 
 	return true
 }
+
+// Shutdown shuts down the Slack publish service, it always return a nil error.
+func (s *Slack) Shutdown() error {
+	return nil
+}

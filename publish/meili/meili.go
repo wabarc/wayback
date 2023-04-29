@@ -351,3 +351,8 @@ func groupBySrc(cols []wayback.Collect) collects {
 	}
 	return c
 }
+
+// Shutdown shuts down the Meilisearch publish service, it always return a nil error.
+func (m *Meili) Shutdown() error {
+	return nil
+}

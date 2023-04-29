@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 
@@ -21,9 +20,9 @@ import (
 )
 
 func TestToIssues(t *testing.T) {
-	os.Setenv("WAYBACK_GITHUB_TOKEN", "foo")
-	os.Setenv("WAYBACK_GITHUB_OWNER", "bar")
-	os.Setenv("WAYBACK_GITHUB_REPO", "zoo")
+	t.Setenv("WAYBACK_GITHUB_TOKEN", "foo")
+	t.Setenv("WAYBACK_GITHUB_OWNER", "bar")
+	t.Setenv("WAYBACK_GITHUB_REPO", "zoo")
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	httpClient, mux, server := helper.MockServer()
@@ -50,5 +49,18 @@ func TestToIssues(t *testing.T) {
 	got := gh.toIssues(context.Background(), "", txt)
 	if !got {
 		t.Errorf("Unexpected create GitHub Issues got %t instead of %t", got, true)
+	}
+}
+
+func TestShutdown(t *testing.T) {
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	gh := New(httpClient, opts)
+	err := gh.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
 	}
 }

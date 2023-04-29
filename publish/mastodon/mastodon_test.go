@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 
@@ -18,14 +17,14 @@ import (
 	"github.com/wabarc/wayback/template/render"
 )
 
-func setMastodonEnv() {
-	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
-	os.Setenv("WAYBACK_MASTODON_SECRET", "bar")
-	os.Setenv("WAYBACK_MASTODON_TOKEN", "zoo")
+func setMastodonEnv(t *testing.T) {
+	t.Setenv("WAYBACK_MASTODON_KEY", "foo")
+	t.Setenv("WAYBACK_MASTODON_SECRET", "bar")
+	t.Setenv("WAYBACK_MASTODON_TOKEN", "zoo")
 }
 
 func TestToMastodon(t *testing.T) {
-	setMastodonEnv()
+	setMastodonEnv(t)
 
 	_, mux, server := helper.MockServer()
 	defer server.Close()
@@ -52,7 +51,7 @@ func TestToMastodon(t *testing.T) {
 		}
 	})
 
-	os.Setenv("WAYBACK_MASTODON_SERVER", server.URL)
+	t.Setenv("WAYBACK_MASTODON_SERVER", server.URL)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	mstdn := New(http.Client{}, opts)
@@ -60,5 +59,18 @@ func TestToMastodon(t *testing.T) {
 	got := mstdn.toMastodon(context.Background(), txt, "")
 	if !got {
 		t.Errorf("Unexpected publish toot got %t instead of %t", got, true)
+	}
+}
+
+func TestShutdown(t *testing.T) {
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	mstdn := New(*httpClient, opts)
+	err := mstdn.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
 	}
 }

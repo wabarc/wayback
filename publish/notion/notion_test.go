@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -144,27 +143,67 @@ const (
   "success": true,
   "status": 200
 }`
-	document = `<!doctype html>
+	document = `<!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Example Domain</title>
-</head>
+  </head>
 
-<body>
-<div>
-    <h1>Example Domain</h1>
-    <p>This domain is for use in illustrative examples in documents. You may use this
-    domain in literature without prior coordination or asking for permission.</p>
-    <p><a href="https://www.iana.org/domains/example">More information...</a></p>
-    <p><img src="https://example.com/images/dinosaur.jpg"></p>
-</div>
-</body>
+  <body>
+    <div>
+      <h1>Example Domain</h1>
+      <p>This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.</p>
+      <p><a href="https://www.iana.org/domains/example">More information...</a></p>
+      <p><img alt="" src="https://example.com/images/dinosaur.jpg" /></p>
+      <p>
+        <video controls width="250">
+          <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm" type="video/webm" />
+          <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+          Download the
+          <a href="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm">WEBM</a>
+          or
+          <a href="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4">MP4</a>
+          video.
+        </video>
+      </p>
+      <p>
+        <audio controls src="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3">
+          <a href="https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3">
+            Download audio
+          </a>
+        </audio>
+      </p>
+      <p>
+        <embed type="video/webm" src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" width="250" height="200" />
+      </p>
+      <pre>
+        <code>
+			  L          TE
+			    A       A
+			      C    V
+			       R A
+			       DOU
+			       LOU
+			      REUSE
+			      QUE TU
+			      PORTES
+			    ET QUI T'
+			    ORNE O CI
+			     VILISÉ
+			    OTE-  TU VEUX
+			     LA    BIEN
+			    SI      RESPI
+			            RER       - Apollinaire
+        </code>
+      </pre>
+    </div>
+  </body>
 </html>`
 )
 
 func TestToNotion(t *testing.T) {
-	os.Setenv("WAYBACK_NOTION_TOKEN", "foo")
-	os.Setenv("WAYBACK_NOTION_DATABASE_ID", "bar")
+	t.Setenv("WAYBACK_NOTION_TOKEN", "foo")
+	t.Setenv("WAYBACK_NOTION_DATABASE_ID", "bar")
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
 	httpClient, mux, server := helper.MockServer()
@@ -175,7 +214,7 @@ func TestToNotion(t *testing.T) {
 		switch r.URL.Path {
 		case "/v1/pages":
 			body, _ := io.ReadAll(r.Body)
-			if !strings.Contains(string(body), config.SlotName(config.SLOT_IA)) {
+			if !strings.Contains(string(body), "Example") {
 				http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 				return
 			}
@@ -217,5 +256,18 @@ func TestTraverseNodes(t *testing.T) {
 	nodes := traverseNodes(doc.Contents(), imgbb.NewImgBB(httpClient, ""))
 	if len(nodes) == 0 {
 		t.Fatal("unexpected traverse nodes")
+	}
+}
+
+func TestShutdown(t *testing.T) {
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	no := New(httpClient, opts)
+	err := no.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
 	}
 }

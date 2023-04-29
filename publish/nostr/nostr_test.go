@@ -10,13 +10,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/nbd-wtf/go-nostr/nip19"
+	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/template/render"
@@ -56,11 +56,11 @@ func TestToNostr(t *testing.T) {
 	})
 	defer ws.Close()
 
-	os.Setenv("WAYBACK_NOSTR_RELAY_URL", ws.URL)
-	os.Setenv("WAYBACK_NOSTR_PRIVATE_KEY", nsec)
+	t.Setenv("WAYBACK_NOSTR_RELAY_URL", ws.URL)
+	t.Setenv("WAYBACK_NOSTR_PRIVATE_KEY", nsec)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	nos := New(nil, opts)
@@ -72,6 +72,19 @@ func TestToNostr(t *testing.T) {
 
 	if !published {
 		t.Errorf("fake relay server saw no event")
+	}
+}
+
+func TestShutdown(t *testing.T) {
+	opts, _ := config.NewParser().ParseEnvironmentVariables()
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	nos := New(httpClient, opts)
+	err := nos.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
 	}
 }
 

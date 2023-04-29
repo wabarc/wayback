@@ -11,7 +11,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -153,17 +152,17 @@ func handle(mux *http.ServeMux, gateway string) {
 	})
 }
 
-func setDiscordEnv() *config.Options {
-	os.Setenv("WAYBACK_DISCORD_BOT_TOKEN", token)
-	os.Setenv("WAYBACK_DISCORD_CHANNEL", channelID)
-	os.Setenv("WAYBACK_ENABLE_IP", "true")
+func setDiscordEnv(t *testing.T) *config.Options {
+	t.Setenv("WAYBACK_DISCORD_BOT_TOKEN", token)
+	t.Setenv("WAYBACK_DISCORD_CHANNEL", channelID)
+	t.Setenv("WAYBACK_ENABLE_IP", "true")
 
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 	return opts
 }
 
 func TestToDiscordChannel(t *testing.T) {
-	opts := setDiscordEnv()
+	opts := setDiscordEnv(t)
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
@@ -182,5 +181,18 @@ func TestToDiscordChannel(t *testing.T) {
 	got := d.toChannel(art, txt)
 	if !got {
 		t.Errorf("Unexpected publish to discord channel got %t instead of %t", got, true)
+	}
+}
+
+func TestShutdown(t *testing.T) {
+	opts := setDiscordEnv(t)
+
+	httpClient, _, server := helper.MockServer()
+	defer server.Close()
+
+	d := New(httpClient, opts)
+	err := d.Shutdown()
+	if err != nil {
+		t.Errorf("Unexpected shutdown: %v", err)
 	}
 }

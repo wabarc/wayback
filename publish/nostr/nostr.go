@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"time"
+	"sync/atomic"
 
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/nbd-wtf/go-nostr/nip19"
@@ -23,8 +23,6 @@ import (
 	"github.com/wabarc/wayback/template/render"
 	"golang.org/x/sync/errgroup"
 )
-
-const timeout = 10 * time.Second
 
 // Interface guard
 var _ publish.Publisher = (*Nostr)(nil)
@@ -93,33 +91,39 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 		return fmt.Errorf("failed to get public key: %v", err)
 	}
 	ev := nostr.Event{
-		Kind:      1,
-		Content:   note,
-		CreatedAt: time.Now(),
 		PubKey:    pk,
-		// Tags:      nostr.Tags{[]string{"foo", "bar"}},
+		Content:   note,
+		CreatedAt: nostr.Now(),
+		Tags:      nostr.Tags{},
+		Kind:      nostr.KindTextNote,
 	}
 	if err := ev.Sign(sk); err != nil {
 		return fmt.Errorf("calling sign err: %v", err)
 	}
 
 	g, ctx := errgroup.WithContext(ctx)
-	for _, relay := range n.opts.NostrRelayURL() {
-		logger.Debug(`publish note to relay: %s`, relay)
-		relay := relay
+	var failed int32
+	for _, url := range n.opts.NostrRelayURL() {
+		logger.Debug(`publish note to relay: %s`, url)
+		url := url
 		g.Go(func() error {
 			defer func() {
 				// recover from upstream panic
 				if r := recover(); r != nil {
-					logger.Error("publish to %s failed: %v", relay, r)
+					logger.Error("publish to %s failed: %v", url, r)
 				}
 			}()
-			client := relayConnect(ctx, relay)
-			if client.Connection == nil {
-				return fmt.Errorf("publish to %s failed: %v", relay, <-client.ConnectionError)
+
+			relay, err := nostr.RelayConnect(ctx, url)
+			if err != nil {
+				return fmt.Errorf("connect to %s failed: %v", url, err)
 			}
-			// send the text note
-			status := client.Publish(ctx, ev)
+
+			status, err := relay.Publish(ctx, ev)
+			if err != nil {
+				atomic.AddInt32(&failed, 1)
+				return fmt.Errorf("published to %s failed: %v", url, err)
+			}
 			if status != nostr.PublishStatusSucceeded {
 				return fmt.Errorf("published to %s status is %s, not %s", relay, status, nostr.PublishStatusSucceeded)
 			}
@@ -127,18 +131,17 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 		})
 	}
 	if err := g.Wait(); err != nil {
-		return err
+		annihilated := atomic.LoadInt32(&failed) == int32(len(n.opts.NostrRelayURL()))
+		if annihilated {
+			return err
+		}
+		logger.Error("publish partially failed: %v", err)
 	}
 
 	return nil
 }
 
-func relayConnect(ctx context.Context, url string) *nostr.Relay {
-	ctx, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
-	relay, err := nostr.RelayConnect(ctx, url)
-	if err != nil {
-		logger.Error("Connect to Nostr relay server got unpredictable error: %v", err)
-	}
-	return relay
+// Shutdown shuts down the Nostr publish service, it always return a nil error.
+func (n *Nostr) Shutdown() error {
+	return nil
 }
