@@ -14,9 +14,7 @@
 [![World Wide Web](https://img.shields.io/badge/Web-15aabf.svg)](https://wabarc.eu.org/)
 [![Nostr](https://img.shields.io/badge/Nostr-8e44ad.svg)](https://iris.to/#/profile/npub1gm4xeu8wlt6aa56zenutkwa0ppjng5axsscv424d0xvv5jalxxzs4hjukz)
 
-Wayback is a tool that supports running as a command-line tool and docker container, purpose to snapshot webpage to time capsules.
-
-Supported Golang version: See [.github/workflows/testing.yml](./.github/workflows/testing.yml)
+Wayback is a web archiving and replay tool that enables users to capturing and preserving web content. It provides an interface to crawl and archive the contents of the web, and a search and replay service to access previously archived pages. Wayback is designed to be used by web archivists, researchers, and anyone who wants to preserve web content and access it in the future.
 
 ## Features
 
@@ -32,7 +30,11 @@ Supported Golang version: See [.github/workflows/testing.yml](./.github/workflow
 - Supports storing archived files to disk for offline use
 - Download streaming media (requires [FFmpeg](https://ffmpeg.org/)) for convenient media archiving.
 
-## Installation
+## Getting Started
+
+For a comprehensive guide, please refer to the complete [documentation](https://docs.wabarc.eu.org/).
+
+### Installation
 
 The simplest, cross-platform way is to download from [GitHub Releases](https://github.com/wabarc/wayback/releases) and place the executable file in your PATH.
 
@@ -92,9 +94,9 @@ brew tap wabarc/wayback
 brew install wayback
 ```
 
-## Usage
+### Usage
 
-### Command line
+#### Command line
 
 ```sh
 $ wayback -h
@@ -326,10 +328,6 @@ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANN
 - [wabarc/on-heroku](https://github.com/wabarc/on-heroku)
 - [wabarc/on-github](https://github.com/wabarc/on-github)
 - [wabarc/on-render](https://github.com/wabarc/on-render)
-
-## Documentation
-
-For a comprehensive guide, please refer to the complete [documentation](https://docs.wabarc.eu.org/).
 
 ## Contributing
 
