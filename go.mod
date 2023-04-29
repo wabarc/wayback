@@ -9,7 +9,7 @@ require (
 	github.com/bwmarrin/discordgo v0.23.3-0.20210627161652-421e14965030
 	github.com/cretz/bine v0.2.0
 	github.com/davecgh/go-spew v1.1.1
-	github.com/dghubble/go-twitter v0.0.0-20201011215211-4b180d0cc78d
+	github.com/dghubble/go-twitter v0.0.0-20221104224141-912508c3888b
 	github.com/dghubble/oauth1 v0.7.1
 	github.com/dstotijn/go-notion v0.11.0
 	github.com/dustin/go-humanize v1.0.0
@@ -75,7 +75,7 @@ require (
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
 	github.com/decred/dcrd/crypto/blake256 v1.0.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
-	github.com/dghubble/sling v1.3.0 // indirect
+	github.com/dghubble/sling v1.4.0 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/dop251/goja v0.0.0-20221115122301-6c0d9883792e // indirect
 	github.com/fortytw2/leaktest v1.3.0 // indirect
