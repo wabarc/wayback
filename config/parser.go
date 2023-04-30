@@ -177,6 +177,14 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.slack.channel = parseString(val, defSlackChannel)
 		case "WAYBACK_SLACK_HELPTEXT":
 			p.opts.slack.helptext = parseString(val, defSlackHelptext)
+		case "WAYBACK_XMPP_JID", "WAYBACK_XMPP_USERNAME":
+			p.opts.xmpp.username = parseString(val, defXMPPUsername)
+		case "WAYBACK_XMPP_PASSWORD":
+			p.opts.xmpp.password = parseString(val, defXMPPPassword)
+		case "WAYBACK_XMPP_NOTLS":
+			p.opts.xmpp.noTLS = parseBool(val, defXMPPNoTLS)
+		case "WAYBACK_XMPP_HELPTEXT":
+			p.opts.xmpp.helptext = parseString(val, defXMPPHelptext)
 		case "WAYBACK_NOSTR_RELAY_URL":
 			p.opts.nostr.url = parseString(val, defNostrRelayURL)
 		case "WAYBACK_NOSTR_PRIVATE_KEY":

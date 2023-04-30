@@ -15,6 +15,10 @@ import (
 )
 
 const (
+	CommandHelp     = "help"
+	CommandMetrics  = "metrics"
+	CommandPlayback = "playback"
+
 	MsgWaybackRetrying = "wayback timeout, retrying."
 	MsgWaybackTimeout  = "wayback timeout, please try later."
 )

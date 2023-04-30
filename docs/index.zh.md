@@ -12,11 +12,12 @@ Wayback是用Go编写的开源网络存档应用程序。具有模块化和可�
 
 - 完全开源
 - 跨平台兼容
+- 输出Prometheus度量指标
 - 批量存档URL以加快存档速度
 - 内置CLI工具（`wayback`）以便于使用
 - 可作为Tor隐藏服务或本地Web入口，增加隐私和可访问性
 - 更容易地集成到Internet Archive、archive.today、IPFS和Telegraph中
-- 可与IRC、Matrix、Telegram机器人、Discord机器人、Mastodon和Twitter进行交互，作为守护进程服务，以便于使用
+- 可与IRC、Matrix、Telegram机器人、Discord机器人、Mastodon、Twitter和XMPP进行交互，作为守护进程服务，以便于使用
 - 支持将存档结果发布到Telegram频道、Mastodon和GitHub Issues中进行共享
 - 支持将存档文件存储到磁盘中以供离线使用
 - 下载流媒体（需要[FFmpeg](https://ffmpeg.org/)）以便于媒体存档。

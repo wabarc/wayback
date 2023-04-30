@@ -24,6 +24,7 @@ const (
 	ServiceMastodon = "mastodon"
 	ServiceTelegram = "telegram"
 	ServiceTwitter  = "twitter"
+	ServiceXMPP     = "xmpp"
 
 	PublishIRC     = "irc"      // IRC channel
 	PublishGithub  = "github"   // GitHub issues

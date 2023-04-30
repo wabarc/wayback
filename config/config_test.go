@@ -1295,6 +1295,75 @@ func TestPublishToSlackChannel(t *testing.T) {
 	}
 }
 
+func TestXMPPUsername(t *testing.T) {
+	expected := "foo@example.com"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_XMPP_USERNAME", expected)
+
+	opts, err := NewParser().ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.XMPPUsername()
+	if got != expected {
+		t.Fatalf(`Unexpected XMPP username got %v instead of %v`, got, expected)
+	}
+}
+
+func TestXMPPPassword(t *testing.T) {
+	expected := "bar"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_XMPP_PASSWORD", expected)
+
+	opts, err := NewParser().ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.XMPPPassword()
+	if got != expected {
+		t.Fatalf(`Unexpected XMPP password got %v instead of %v`, got, expected)
+	}
+}
+
+func TestXMPPNoTLS(t *testing.T) {
+	expected := true
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_XMPP_NOTLS", strconv.FormatBool(expected))
+
+	opts, err := NewParser().ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.XMPPNoTLS()
+	if got != expected {
+		t.Fatalf(`Unexpected disable XMPP TLS got %v instead of %v`, got, expected)
+	}
+}
+
+func TestXMPPHelptext(t *testing.T) {
+	expected := "some text"
+
+	os.Clearenv()
+	os.Setenv("WAYBACK_XMPP_HELPTEXT", expected)
+
+	parser := NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf(`Parsing environment variables failed: %v`, err)
+	}
+
+	got := opts.XMPPHelptext()
+	if got != expected {
+		t.Fatalf(`Unexpected XMPP help text got %v instead of %v`, got, expected)
+	}
+}
+
 func TestNostrRelayURL(t *testing.T) {
 	var tests = []struct {
 		url string
