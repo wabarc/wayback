@@ -10,7 +10,7 @@ To use the publish package, import the package and its dependencies, such as reg
 	package main
 
 	import (
-	        _ "github.com/wabarc/wayback/publish/register"
+	        _ "github.com/wabarc/wayback/ingress"
 	        "github.com/wabarc/wayback/publish"
 	)
 

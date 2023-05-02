@@ -28,7 +28,7 @@ import (
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/systemd"
 
-	_ "github.com/wabarc/wayback/publish/register"
+	_ "github.com/wabarc/wayback/ingress"
 )
 
 // Create channel to listen for signals.
