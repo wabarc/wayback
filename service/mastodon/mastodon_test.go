@@ -76,7 +76,7 @@ func TestProcess(t *testing.T) {
 	defer pub.Stop()
 
 	o := service.ParseOptions(service.Config(opts), service.Storage(&storage.Storage{}), service.Pool(pool), service.Publish(pub))
-	m := New(ctx, o)
+	m, _ := New(ctx, o)
 	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)
@@ -149,7 +149,7 @@ func TestPlayback(t *testing.T) {
 	defer pub.Stop()
 
 	o := service.ParseOptions(service.Config(opts), service.Storage(&storage.Storage{}), service.Pool(pool), service.Publish(pub))
-	m := New(ctx, o)
+	m, _ := New(ctx, o)
 	noti, err := m.client.GetNotifications(m.ctx, nil)
 	if err != nil {
 		t.Fatalf("Mastodon: Get notifications failure, err: %v", err)

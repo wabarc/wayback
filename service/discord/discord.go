@@ -29,6 +29,9 @@ import (
 	discord "github.com/bwmarrin/discordgo"
 )
 
+// Interface guard
+var _ service.Servicer = (*Discord)(nil)
+
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
 var ErrServiceClosed = errors.New("discord: Service closed")
 
@@ -44,13 +47,13 @@ type Discord struct {
 }
 
 // New returns a Discord struct.
-func New(ctx context.Context, opts service.Options) *Discord {
-	if opts.Config.DiscordBotToken() == "" {
-		logger.Fatal("missing required environment variable")
+func New(ctx context.Context, opts service.Options) (*Discord, error) {
+	if !opts.Config.DiscordEnabled() {
+		return nil, errors.New("missing required environment variable, skipped")
 	}
 	bot, err := discord.New("Bot " + opts.Config.DiscordBotToken())
 	if err != nil {
-		logger.Fatal("create discord bot instance failed: %v", err)
+		return nil, errors.Wrap(err, "create discord bot instance failed")
 	}
 	// Debug mode for bwmarrin/discordgo will print the bot token, should not apply it on production
 	// if opts.Config.HasDebugMode() {
@@ -68,7 +71,7 @@ func New(ctx context.Context, opts service.Options) *Discord {
 		opts:  opts.Config,
 		pool:  opts.Pool,
 		pub:   opts.Publish,
-	}
+	}, nil
 }
 
 // Serve loop request message from the Discord api server.

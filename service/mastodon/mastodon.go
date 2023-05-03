@@ -26,6 +26,9 @@ import (
 	"golang.org/x/net/html"
 )
 
+// Interface guard
+var _ service.Servicer = (*Mastodon)(nil)
+
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
 var ErrServiceClosed = errors.New("mastodon: Service closed")
 
@@ -47,9 +50,9 @@ type Mastodon struct {
 }
 
 // New mastodon struct.
-func New(ctx context.Context, opts service.Options) *Mastodon {
-	if !opts.Config.PublishToMastodon() {
-		logger.Fatal("missing required environment variable")
+func New(ctx context.Context, opts service.Options) (*Mastodon, error) {
+	if !opts.Config.MastodonEnabled() {
+		return nil, errors.New("missing required environment variable, skipped")
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -68,7 +71,7 @@ func New(ctx context.Context, opts service.Options) *Mastodon {
 		opts:   opts.Config,
 		pool:   opts.Pool,
 		pub:    opts.Publish,
-	}
+	}, nil
 }
 
 // Serve loop request direct messages from the Mastodon instance.

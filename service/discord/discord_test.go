@@ -201,7 +201,7 @@ func TestServe(t *testing.T) {
 	defer pub.Stop()
 
 	o := service.ParseOptions(service.Config(opts), service.Storage(store), service.Pool(pool), service.Publish(pub))
-	d := New(ctx, o)
+	d, _ := New(ctx, o)
 	d.bot.Client = httpClient
 	time.AfterFunc(3*time.Second, func() {
 		// TODO: find a better way to avoid deadlock
@@ -258,7 +258,7 @@ func TestProcess(t *testing.T) {
 	defer pub.Stop()
 
 	o := service.ParseOptions(service.Config(opts), service.Storage(store), service.Pool(pool), service.Publish(pub))
-	d := New(ctx, o)
+	d, _ := New(ctx, o)
 	d.bot.Client = httpClient
 
 	// if err := d.bot.Open(); err != nil {

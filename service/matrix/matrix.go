@@ -26,6 +26,9 @@ import (
 	matrix "maunium.net/go/mautrix"
 )
 
+// Interface guard
+var _ service.Servicer = (*Matrix)(nil)
+
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
 var ErrServiceClosed = errors.New("matrix: Service closed")
 
@@ -42,9 +45,9 @@ type Matrix struct {
 }
 
 // New Matrix struct.
-func New(ctx context.Context, opts service.Options) *Matrix {
-	if opts.Config.MatrixUserID() == "" || opts.Config.MatrixPassword() == "" || opts.Config.MatrixHomeserver() == "" {
-		logger.Fatal("missing required environment variable")
+func New(ctx context.Context, opts service.Options) (*Matrix, error) {
+	if !opts.Config.MatrixEnabled() {
+		return nil, errors.New("missing required environment variable, skipped")
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -52,7 +55,7 @@ func New(ctx context.Context, opts service.Options) *Matrix {
 
 	client, err := matrix.NewClient(opts.Config.MatrixHomeserver(), "", "")
 	if err != nil {
-		logger.Fatal("Dial Matrix client got unpredictable error: %v", err)
+		return nil, errors.Wrap(err, "dial Matrix client got unpredictable error")
 	}
 	_, err = client.Login(&matrix.ReqLogin{
 		Type:             matrix.AuthTypePassword,
@@ -61,7 +64,7 @@ func New(ctx context.Context, opts service.Options) *Matrix {
 		StoreCredentials: true,
 	})
 	if err != nil {
-		logger.Fatal("Login to Matrix got unpredictable error: %v", err)
+		return nil, errors.Wrap(err, "login to Matrix got unpredictable error")
 	}
 
 	return &Matrix{
@@ -71,7 +74,7 @@ func New(ctx context.Context, opts service.Options) *Matrix {
 		opts:   opts.Config,
 		pool:   opts.Pool,
 		pub:    opts.Publish,
-	}
+	}, nil
 }
 
 // Serve loop request direct messages from the Matrix server.

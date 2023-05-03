@@ -453,6 +453,11 @@ func (o *Options) PublishToChannel() bool {
 	return o.telegram.token != "" && o.telegram.channel != ""
 }
 
+// TelegramEnabled returns whether enable Telegram service.
+func (o *Options) TelegramEnabled() bool {
+	return o.telegram.token != ""
+}
+
 // MastodonServer returns the domain of Mastodon instance.
 func (o *Options) MastodonServer() string {
 	if strings.HasPrefix(o.mastodon.server, "http://") || strings.HasPrefix(o.mastodon.server, "https://") {
@@ -490,6 +495,11 @@ func (o *Options) PublishToMastodon() bool {
 		o.MastodonClientSecret() != ""
 }
 
+// MastodonEnabled returns whether enable Mastodon service.
+func (o *Options) MastodonEnabled() bool {
+	return o.PublishToMastodon()
+}
+
 // TwitterConsumerKey returns the consumer key of Twitter application.
 func (o *Options) TwitterConsumerKey() string {
 	return o.twitter.consumerKey
@@ -516,6 +526,11 @@ func (o *Options) PublishToTwitter() bool {
 		o.TwitterConsumerSecret() != "" &&
 		o.TwitterAccessToken() != "" &&
 		o.TwitterAccessSecret() != ""
+}
+
+// TwitterEnabled returns whether enable Twitter service.
+func (o *Options) TwitterEnabled() bool {
+	return o.PublishToTwitter()
 }
 
 // GitHubToken returns the personal access token of GitHub account.
@@ -550,6 +565,9 @@ func (o *Options) IRCPassword() string {
 
 // IRCChannel returns channel of IRC
 func (o *Options) IRCChannel() string {
+	if o.irc.channel == "" {
+		return ""
+	}
 	if strings.HasPrefix(o.irc.channel, "#") {
 		return o.irc.channel
 	}
@@ -564,6 +582,11 @@ func (o *Options) IRCServer() string {
 // PublishToIRCChannel returns whether publish results to IRC channel.
 func (o *Options) PublishToIRCChannel() bool {
 	return o.irc.nick != "" && o.irc.channel != ""
+}
+
+// IRCEnabled returns whether enable IRC service.
+func (o *Options) IRCEnabled() bool {
+	return o.irc.nick != ""
 }
 
 // MatrixHomeserver returns the homeserver of Matrix.
@@ -604,6 +627,13 @@ func (o *Options) PublishToMatrixRoom() bool {
 		o.MatrixPassword() != ""
 }
 
+// MatrixEnabled returns whether enable Matrix service.
+func (o *Options) MatrixEnabled() bool {
+	return o.MatrixHomeserver() != "" &&
+		o.MatrixUserID() != "" &&
+		o.MatrixPassword() != ""
+}
+
 // DiscordBotToken returns the token of Discord bot
 func (o *Options) DiscordBotToken() string {
 	return o.discord.botToken
@@ -628,6 +658,11 @@ func (o *Options) DiscordHelptext() string {
 // PublishToDiscordChannel returns whether publish results to Discord channel.
 func (o *Options) PublishToDiscordChannel() bool {
 	return o.DiscordBotToken() != "" && o.DiscordChannel() != ""
+}
+
+// DiscordEnabled returns whether enable Discord service.
+func (o *Options) DiscordEnabled() bool {
+	return o.DiscordBotToken() != ""
 }
 
 // SlackAppToken returns the app-level token of Slack bot.
@@ -655,6 +690,11 @@ func (o *Options) PublishToSlackChannel() bool {
 	return o.SlackBotToken() != "" && o.SlackChannel() != ""
 }
 
+// SlackEnabled returns whether enable Slack service.
+func (o *Options) SlackEnabled() bool {
+	return o.SlackBotToken() != ""
+}
+
 // XMPPUsername returns the XMPP username (JID).
 func (o *Options) XMPPUsername() string {
 	return o.xmpp.username
@@ -673,6 +713,11 @@ func (o *Options) XMPPNoTLS() bool {
 // XMPPHelptext returns the help text for XMPP.
 func (o *Options) XMPPHelptext() string {
 	return breakLine(o.xmpp.helptext)
+}
+
+// XMPPEnabled returns whether enable XMPP service.
+func (o *Options) XMPPEnabled() bool {
+	return o.XMPPUsername() != "" && o.XMPPPassword() != ""
 }
 
 // NotionToken returns the Notion integration token.

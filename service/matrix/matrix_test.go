@@ -135,7 +135,8 @@ func senderClient(t *testing.T) *Matrix {
 	defer pub.Stop()
 
 	o := service.ParseOptions(service.Config(opts), service.Storage(&storage.Storage{}), service.Pool(pool), service.Publish(pub))
-	return New(ctx, o)
+	m, _ := New(ctx, o)
+	return m
 }
 
 func recverClient(t *testing.T) *Matrix {
@@ -161,7 +162,8 @@ func recverClient(t *testing.T) *Matrix {
 	defer pub.Stop()
 
 	o := service.ParseOptions(service.Config(opts), service.Storage(&storage.Storage{}), service.Pool(pool), service.Publish(pub))
-	return New(ctx, o)
+	m, _ := New(ctx, o)
+	return m
 }
 
 // nolint:gocyclo

@@ -104,7 +104,7 @@ func TestProcess(t *testing.T) {
 	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
 		if ev.Nick == sender {
 			done <- true
-			i := New(context.Background(), o)
+			i, _ := New(context.Background(), o)
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
 			if err = i.process(context.Background(), ev); err != nil {
@@ -211,7 +211,7 @@ func TestToIRCChannel(t *testing.T) {
 		if ev.Nick == sender {
 			done <- true
 			ctx := context.Background()
-			i := New(ctx, o)
+			i, _ := New(ctx, o)
 			// Replace IRC connection to receive connection
 			i.conn = recvConn
 			if err = i.process(ctx, ev); err != nil {
