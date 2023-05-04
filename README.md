@@ -47,7 +47,7 @@ go install github.com/wabarc/wayback/cmd/wayback@latest
 From GitHub Releases:
 
 ```sh
-curl -fsSL https://github.com/wabarc/wayback/raw/main/install.sh | sh
+curl -fsSL https://get.wabarc.eu.org | sh
 ```
 
 or via [Bina](https://bina.egoist.dev/):
