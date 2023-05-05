@@ -66,7 +66,7 @@ func (m *Matrix) ForPublish() *Render {
 		tmplBytes.WriteString(`</b> ›<br><br>`)
 	}
 
-	if dgst := Digest(m.Cols, m.Data); dgst != "" {
+	if dgst := summaryOrDigest(m.Cols, m.Data); dgst != "" {
 		tmplBytes.WriteString(dgst)
 		tmplBytes.WriteString(`<br><br>`)
 	}

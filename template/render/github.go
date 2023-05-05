@@ -33,7 +33,7 @@ func (gh *GitHub) ForReply() *Render {
 func (gh *GitHub) ForPublish() *Render {
 	var tmplBytes bytes.Buffer
 
-	if dgst := Digest(gh.Cols, gh.Data); dgst != "" {
+	if dgst := summaryOrDigest(gh.Cols, gh.Data); dgst != "" {
 		tmplBytes.WriteString(dgst)
 		tmplBytes.WriteString("\n\n")
 	}

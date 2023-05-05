@@ -27,6 +27,7 @@ import (
 	"github.com/wabarc/warcraft"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/summary"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -36,6 +37,9 @@ var (
 	ctxBasenameKey struct{}
 
 	filePerm = os.FileMode(0o600)
+
+	// TODO: find a better way to handle it
+	client = &http.Client{Timeout: timeout}
 )
 
 // Reduxer is the interface that wraps the basic reduxer method.
@@ -57,6 +61,7 @@ type bundle struct {
 	artifact Artifact
 	article  readability.Article
 	shots    *screenshot.Screenshots[screenshot.Path]
+	summary  string
 }
 
 // Artifact represents the file paths stored on the local disk.
@@ -134,6 +139,11 @@ func (b *bundle) Artifact() Artifact {
 // Article returns a readability.Article from bundle.
 func (b *bundle) Article() readability.Article {
 	return b.article
+}
+
+// Summary returns a summary of article.
+func (b *bundle) Summary() string {
+	return b.summary
 }
 
 // Do executes secreenshot, print PDF and export html of given URLs
@@ -216,11 +226,18 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 			if err = os.WriteFile(fp, helper.String2Byte(article.TextContent), filePerm); err == nil && article.TextContent != "" {
 				artifact.Txt.Local = fp
 			}
+
+			// Generate summary
+			sum := ""
+			if coh, err := summary.NewCohere(client, opts.CohereApiKey()); err == nil {
+				sum, _ = coh.Summarize(article.TextContent) // nolint:errcheck
+			}
+
 			// Upload files to third-party server
 			if err = remotely(ctx, artifact); err != nil {
 				logger.Error("upload files to remote server failed: %v", err)
 			}
-			bundle := &bundle{shots: shot, artifact: *artifact, article: article}
+			bundle := &bundle{shots: shot, artifact: *artifact, article: article, summary: sum}
 			bs.Store(Src(shot.URL), bundle)
 			return nil
 		})
@@ -306,9 +323,8 @@ func remotely(ctx context.Context, artifact *Artifact) (err error) {
 		&artifact.Media,
 	}
 
-	c := &http.Client{Timeout: timeout}
-	cat := catbox.New(c)
-	anon := anonfile.NewAnonfile(c)
+	cat := catbox.New(client)
+	anon := anonfile.NewAnonfile(client)
 	g, _ := errgroup.WithContext(ctx)
 
 	var mu sync.Mutex

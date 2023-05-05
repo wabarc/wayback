@@ -59,7 +59,7 @@ func (d *Discord) ForPublish() (r *Render) {
 		tmplBytes.WriteString("\n\n")
 	}
 
-	if dgst := Digest(d.Cols, d.Data); dgst != "" {
+	if dgst := summaryOrDigest(d.Cols, d.Data); dgst != "" {
 		tmplBytes.WriteString(dgst)
 		tmplBytes.WriteString("\n\n")
 	}

@@ -61,7 +61,7 @@ func (s *Slack) ForPublish() (r *Render) {
 		tmplBytes.WriteString(" ›\n\n")
 	}
 
-	if dgst := Digest(s.Cols, s.Data); dgst != "" {
+	if dgst := summaryOrDigest(s.Cols, s.Data); dgst != "" {
 		tmplBytes.WriteString(dgst)
 		tmplBytes.WriteString("\n\n")
 	}

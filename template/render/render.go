@@ -149,8 +149,8 @@ func Title(cols []wayback.Collect, rdx reduxer.Reduxer) (title string) {
 	return
 }
 
-// Digest returns digest of the webpage content. Its maximum length is defined by `maxDigestLen`.
-func Digest(cols []wayback.Collect, rdx reduxer.Reduxer) (dgst string) {
+// digest returns digest of the webpage content. Its maximum length is defined by `maxDigestLen`.
+func digest(cols []wayback.Collect, rdx reduxer.Reduxer) (dgst string) {
 	if rdx == nil {
 		return
 	}
@@ -175,6 +175,42 @@ func Digest(cols []wayback.Collect, rdx reduxer.Reduxer) (dgst string) {
 	}
 
 	return
+}
+
+// summary returns summary of the webpage content. Its maximum length is defined by `maxDigestLen`.
+func summary(cols []wayback.Collect, rdx reduxer.Reduxer) (dgst string) {
+	if rdx == nil {
+		return
+	}
+
+	for uri := range deDepURI(cols) {
+		if bundle, ok := rdx.Load(reduxer.Src(uri)); ok {
+			if text := bundle.Summary(); text != "" {
+				logger.Debug("extracted summary from article content: %s", text)
+				t := []rune(text)
+				l := len(t)
+				switch {
+				case l == 0:
+					continue
+				case l > maxDigestLen:
+					t = t[:maxDigestLen]
+					dgst += string(t) + ` ...`
+				default:
+					dgst += string(t)
+				}
+			}
+		}
+	}
+
+	return
+}
+
+func summaryOrDigest(cols []wayback.Collect, rdx reduxer.Reduxer) string {
+	if sum := summary(cols, rdx); sum != "" {
+		return sum
+	}
+
+	return digest(cols, rdx)
 }
 
 // writeArtifact writes archived artifact of the webpage.

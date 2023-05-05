@@ -232,6 +232,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_BOLT_PATH`               | `./wayback.db`             | File path of bolt database                                   |
 | -                   | `WAYBACK_STORAGE_DIR`             | -                          | Directory to store binary file, e.g. PDF, html file          |
 | -                   | `WAYBACK_MAX_MEDIA_SIZE`          | `512MB`                    | Max size to limit download stream media                      |
+| -                   | `WAYBACK_COHERE_APIKEY`           | ``                         | Cohere API key                                               |
 | -                   | `WAYBACK_MEDIA_SITES`             | -                          | Extra media websites wish to be supported, separate with comma |
 | -                   | `WAYBACK_TIMEOUT`                 | `300`                      | Timeout for single wayback request, defaults to 300 second   |
 | -                   | `WAYBACK_MAX_RETRIES`             | `2`                        | Max retries for single wayback request, defaults to 2        |

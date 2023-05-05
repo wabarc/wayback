@@ -69,7 +69,7 @@ func (t *Telegram) ForPublish() (r *Render) {
 		tmplBytes.WriteString("</b>\n\n")
 	}
 
-	if dgst := Digest(t.Cols, t.Data); dgst != "" {
+	if dgst := summaryOrDigest(t.Cols, t.Data); dgst != "" {
 		tmplBytes.WriteString(dgst)
 		tmplBytes.WriteString("\n\n")
 	}

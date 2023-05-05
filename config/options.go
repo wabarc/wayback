@@ -87,6 +87,7 @@ const (
 	defBoltPathname        = "wayback.db"
 	defPoolingSize         = 3
 	defMaxMediaSize        = "512MB"
+	defCohereApiKey        = ""
 	defWaybackTimeout      = 300
 	defWaybackMaxRetries   = 2
 	defWaybackUserAgent    = "WaybackArchiver/1.0"
@@ -139,6 +140,7 @@ type Options struct {
 	poolingSize         int
 	storageDir          string
 	maxMediaSize        string
+	cohereApiKey        string
 	waybackTimeout      int
 	waybackMaxRetries   int
 	waybackUserAgent    string
@@ -254,6 +256,7 @@ func NewOptions() *Options {
 		poolingSize:          defPoolingSize,
 		storageDir:           defStorageDir,
 		maxMediaSize:         defMaxMediaSize,
+		cohereApiKey:         defCohereApiKey,
 		waybackTimeout:       defWaybackTimeout,
 		waybackMaxRetries:    defWaybackMaxRetries,
 		waybackUserAgent:     defWaybackUserAgent,
@@ -769,6 +772,11 @@ func (o *Options) MaxMediaSize() uint64 {
 		return 0
 	}
 	return size
+}
+
+// CohereApiKey returns the apikey of Cohere.
+func (o *Options) CohereApiKey() string {
+	return o.cohereApiKey
 }
 
 // MaxAttachSize returns max attach size limits for several services.
