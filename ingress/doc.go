@@ -14,9 +14,23 @@ such as register, as shown in the following example:
 
 	import (
 	        _ "github.com/wabarc/wayback/ingress"
+	        "github.com/wabarc/wayback/publish"
+	        "github.com/wabarc/wayback/service"
 	)
 
 	func main() {
+	        // Initialize the publish service with configuration options and a context.
+	        opts := &config.Options{}
+	        ctx := context.Background()
+	        pub := publish.New(ctx, opts)
+	        go pub.Start()
+	        defer pub.Stop()
+
+	        // Use the publish service to publish data.
+	        // ...
+
+	        // Initialize services with configuration options and a context.
+	        err := service.Serve(ctx, service.Options{})
 	        // ...
 	}
 */
