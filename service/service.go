@@ -42,7 +42,7 @@ type Flag uint8
 
 type doFunc func(cols []wayback.Collect, rdx reduxer.Reduxer) error
 
-// Servicer is the interface that wraps New, Serve and Shutdown method.
+// Servicer is the interface that wraps Serve and Shutdown method.
 //
 // Servicer serve serveral media platforms, e.g. Telegram, Discord, etc.
 type Servicer interface {
@@ -79,7 +79,7 @@ func (f Flag) String() string {
 	}
 }
 
-// Serve runs all services.
+// Serve runs service in a separate goroutine.
 func Serve(ctx context.Context, opts Options) (errs error) {
 	// parse all modules
 	parseModule(ctx, opts)
