@@ -308,12 +308,12 @@ func duration(ctx context.Context) time.Duration {
 // NewClient sets a http client.
 // TODO: refactoring
 func NewClient(opts *config.Options) {
-	if opts.WireGuardConfig() != "" && client != nil {
+	client.Timeout = opts.WaybackTimeout() * 90 / 100
+	if opts.WireGuardConfig() != "" {
 		r := strings.NewReader(opts.WireGuardConfig())
 		proxy := proxier.NewClient(client)
 		if _, er := proxy.ViaWireGuard(r); er == nil {
 			client = proxy.Client
-			client.Timeout = opts.WaybackTimeout() * 90 / 100
 			if opts.HasDebugMode() {
 				for {
 					resp, err := client.Get("https://www.zx2c4.com/ip")
