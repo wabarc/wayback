@@ -5,7 +5,6 @@
 package wayback // import "github.com/wabarc/wayback"
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -34,9 +33,7 @@ import (
 )
 
 // TODO: find a better way to handle it
-var client = &http.Client{
-	Timeout: 30 * time.Second,
-}
+var client = http.DefaultClient
 
 // Collect results that archived, Arc is name of the archive service,
 // Dst mapping the original URL and archived destination URL,
@@ -308,25 +305,29 @@ func duration(ctx context.Context) time.Duration {
 // NewClient sets a http client.
 // TODO: refactoring
 func NewClient(opts *config.Options) {
-	client.Timeout = opts.WaybackTimeout() * 90 / 100
 	if opts.WireGuardConfig() != "" {
 		r := strings.NewReader(opts.WireGuardConfig())
 		proxy := proxier.NewClient(client)
 		if _, er := proxy.ViaWireGuard(r); er == nil {
 			client = proxy.Client
 			if opts.HasDebugMode() {
+				endpoint := "https://icanhazip.com"
 				for {
-					resp, err := client.Get("https://www.zx2c4.com/ip")
+					ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+					req, _ := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+					resp, err := client.Do(req)
 					if err != nil {
 						logger.Error("request error: %v", err)
+						cancel()
 						continue
 					}
+					cancel()
 					body, err := io.ReadAll(resp.Body)
 					if err != nil {
 						logger.Error("read body error: %v", err)
 						continue
 					}
-					logger.Debug("client handshake: %s", bytes.ReplaceAll(body, []byte("\n"), []byte(" ")))
+					logger.Debug("client handshake: %s", body)
 					resp.Body.Close()
 					time.Sleep(time.Minute)
 				}
