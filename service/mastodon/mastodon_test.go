@@ -136,6 +136,7 @@ func TestPlayback(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
+	opts.EnableServices(config.ServiceMastodon.String())
 
 	cfg := []pooling.Option{
 		pooling.Capacity(opts.PoolingSize()),
