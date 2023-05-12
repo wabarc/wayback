@@ -348,7 +348,7 @@ func NewOptions() *Options {
 	return opts
 }
 
-func (o *Options) EnableServices(s []string) {
+func (o *Options) EnableServices(s ...string) {
 	for _, srv := range s {
 		switch strings.ToLower(srv) {
 		case ServiceDiscord.String():

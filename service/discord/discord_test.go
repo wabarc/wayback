@@ -176,6 +176,7 @@ func TestServe(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
+	opts.EnableServices(config.ServiceDiscord.String())
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
@@ -231,6 +232,7 @@ func TestProcess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
+	opts.EnableServices(config.ServiceDiscord.String())
 
 	dbpath := filepath.Join(t.TempDir(), "testing.db")
 	store, err := storage.Open(opts, dbpath)

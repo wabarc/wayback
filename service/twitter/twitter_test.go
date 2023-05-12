@@ -86,6 +86,7 @@ func TestProcess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
+	opts.EnableServices(config.ServiceTwitter.String())
 
 	cfg := []pooling.Option{
 		pooling.Capacity(opts.PoolingSize()),

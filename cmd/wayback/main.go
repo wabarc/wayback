@@ -205,7 +205,7 @@ func run(cmd *cobra.Command, args []string) {
 	hasArgs := len(args) > 0
 	switch {
 	case hasDaemon:
-		opts.EnableServices(daemon)
+		opts.EnableServices(daemon...)
 		serve(cmd, opts, args)
 	case hasArgs:
 		archive(cmd, opts, args)
