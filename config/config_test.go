@@ -3071,52 +3071,39 @@ func TestEnableServices(t *testing.T) {
 	}
 }
 
-func TestWireGuardConfig(t *testing.T) {
+func TestProxy(t *testing.T) {
 	t.Parallel()
 
 	var tests = []struct {
-		config   string
+		address  string
 		expected string
 	}{
 		{
-			config:   "",
-			expected: defWireGuardConfig,
+			address:  "",
+			expected: defProxy,
 		},
 		{
-			config: "[Interface]\nPrivateKey = cHjrT4AVXJBkufpQxfWFKbLGeKAykzJ6SitAXRRZKmU=\nAddress = 10.0.0.2/32\n\n[Peer]\nPublicKey = qEfR4bOboFVaavdICJoSujBmdJ2LOvjDZItWBqDh8HM=\nEndpoint = example.com:51820\nAllowedIPs = 0.0.0.0/0, ::/0",
-			expected: `[Interface]
-PrivateKey = cHjrT4AVXJBkufpQxfWFKbLGeKAykzJ6SitAXRRZKmU=
-Address = 10.0.0.2/32
-
-[Peer]
-PublicKey = qEfR4bOboFVaavdICJoSujBmdJ2LOvjDZItWBqDh8HM=
-Endpoint = example.com:51820
-AllowedIPs = 0.0.0.0/0, ::/0`,
+			address:  "http://127.0.0.1",
+			expected: `http://127.0.0.1`,
 		},
 		{
-			config: `[Interface]
-PrivateKey = cHjrT4AVXJBkufpQxfWFKbLGeKAykzJ6SitAXRRZKmU=
-Address = 10.0.0.2/32
-
-[Peer]
-PublicKey = qEfR4bOboFVaavdICJoSujBmdJ2LOvjDZItWBqDh8HM=
-Endpoint = example.com:51820
-AllowedIPs = 0.0.0.0/0, ::/0`,
-			expected: `[Interface]
-PrivateKey = cHjrT4AVXJBkufpQxfWFKbLGeKAykzJ6SitAXRRZKmU=
-Address = 10.0.0.2/32
-
-[Peer]
-PublicKey = qEfR4bOboFVaavdICJoSujBmdJ2LOvjDZItWBqDh8HM=
-Endpoint = example.com:51820
-AllowedIPs = 0.0.0.0/0, ::/0`,
+			address:  "http://127.0.0.1:1080",
+			expected: `http://127.0.0.1:1080`,
+		},
+		{
+			address:  "https://127.0.0.1:1080",
+			expected: `https://127.0.0.1:1080`,
+		},
+		{
+			address:  "socks5://127.0.0.1:1080",
+			expected: `socks5://127.0.0.1:1080`,
 		},
 	}
 
 	for i, test := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			os.Clearenv()
-			os.Setenv("WIREGUARD_CONFIG", test.config)
+			os.Setenv("WAYBACK_PROXY", test.address)
 
 			parser := NewParser()
 			opts, err := parser.ParseEnvironmentVariables()
@@ -3124,9 +3111,9 @@ AllowedIPs = 0.0.0.0/0, ::/0`,
 				t.Fatalf(`Parsing environment variables failed: %v`, err)
 			}
 
-			got := opts.WireGuardConfig()
+			got := opts.Proxy()
 			if got != test.expected {
-				t.Fatalf(`Unexpected get WireGuard config, got %s instead of %s`, got, test.expected)
+				t.Fatalf(`Unexpected get proxy, got %s instead of %s`, got, test.expected)
 			}
 		})
 	}

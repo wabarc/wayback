@@ -92,7 +92,7 @@ const (
 	defWaybackMaxRetries   = 2
 	defWaybackUserAgent    = "WaybackArchiver/1.0"
 	defWaybackFallback     = false
-	defWireGuardConfig     = ""
+	defProxy               = ""
 
 	defWaybackMeiliEndpoint = ""
 	defWaybackMeiliIndexing = "capsules"
@@ -144,7 +144,7 @@ type Options struct {
 	poolingSize         int
 	storageDir          string
 	maxMediaSize        string
-	wireguardConfig     string
+	proxy               string
 	waybackTimeout      int
 	waybackMaxRetries   int
 	waybackUserAgent    string
@@ -913,7 +913,7 @@ func (o *Options) HTTPdEnabled() bool {
 	return o.isEnabled(ServiceHTTPd)
 }
 
-// WireGuardConfig returns the WireGuard configuration.
-func (o *Options) WireGuardConfig() string {
-	return breakLine(o.wireguardConfig)
+// Proxy returns the proxy server address.
+func (o *Options) Proxy() string {
+	return o.proxy
 }

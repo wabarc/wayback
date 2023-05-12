@@ -44,7 +44,7 @@ func serve(_ *cobra.Command, opts *config.Options, _ []string) {
 	go pool.Roll()
 
 	// Set global client
-	go wayback.NewClient(opts)
+	wayback.SetClient(ctx, opts)
 
 	pub := publish.New(ctx, opts)
 	go pub.Start()
