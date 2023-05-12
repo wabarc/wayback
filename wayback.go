@@ -307,7 +307,7 @@ func duration(ctx context.Context) time.Duration {
 func SetClient(ctx context.Context, opts *config.Options) {
 	var err error
 	if opts.Proxy() != "" {
-		client.Transport, err = proxier.NewUTLSRoundTripper(proxier.Proxy("socks5://127.0.0.1:25344"))
+		client.Transport, err = proxier.NewUTLSRoundTripper(proxier.Proxy(opts.Proxy()))
 		if err != nil {
 			logger.Error("create utls round tripper failed: %v", err)
 			return
