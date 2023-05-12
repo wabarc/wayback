@@ -33,7 +33,7 @@ import (
 )
 
 // TODO: find a better way to handle it
-var client = http.DefaultClient
+var client = &http.Client{}
 
 // Collect results that archived, Arc is name of the archive service,
 // Dst mapping the original URL and archived destination URL,
