@@ -305,8 +305,11 @@ func duration(ctx context.Context) time.Duration {
 // NewClient sets a http client.
 // TODO: refactoring
 func SetClient(ctx context.Context, opts *config.Options) {
-	var err error
 	if opts.Proxy() != "" {
+		var (
+			err    error
+			cancel context.CancelFunc
+		)
 		client.Transport, err = proxier.NewUTLSRoundTripper(proxier.Proxy(opts.Proxy()))
 		if err != nil {
 			logger.Error("create utls round tripper failed: %v", err)
@@ -316,8 +319,8 @@ func SetClient(ctx context.Context, opts *config.Options) {
 			endpoint := "https://icanhazip.com"
 			go func() {
 				for {
-					ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
-					req, _ := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+					ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
+					req, _ := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil) // nolint:errcheck
 					resp, err := client.Do(req)
 					if err != nil {
 						logger.Error("request error: %v", err)
