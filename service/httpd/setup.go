@@ -6,19 +6,25 @@ package httpd // import "github.com/wabarc/wayback/service/httpd"
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/service"
 )
 
 func init() {
-	service.Register(service.ServiceHTTPd, setup)
+	service.Register(config.ServiceHTTPd, setup)
 }
 
 func setup(ctx context.Context, opts service.Options) (*service.Module, error) {
-	mod, err := New(ctx, opts)
+	if opts.Config.HTTPdEnabled() {
+		mod, err := New(ctx, opts)
 
-	return &service.Module{
-		Servicer: mod,
-		Opts:     opts,
-	}, err
+		return &service.Module{
+			Servicer: mod,
+			Opts:     opts,
+		}, err
+	}
+
+	return nil, fmt.Errorf("httpd service disabled")
 }

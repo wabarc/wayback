@@ -11,6 +11,7 @@ package config // import "github.com/wabarc/wayback/config"
 import (
 	"os"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -611,6 +612,7 @@ func TestTelegram(t *testing.T) {
 				"WAYBACK_TELEGRAM_TOKEN": "token",
 			},
 			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices([]string{ServiceTelegram.String()})
 				called := strconv.FormatBool(opts.TelegramEnabled())
 				if called != want {
 					t.Errorf(`Unexpected enable telegram service, got %v instead of %s`, called, want)
@@ -1159,6 +1161,7 @@ func TestMastodon(t *testing.T) {
 				"WAYBACK_MASTODON_SECRET": "foo",
 			},
 			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices([]string{ServiceMastodon.String()})
 				called := strconv.FormatBool(opts.MastodonEnabled())
 				if called != want {
 					t.Errorf(`Unexpected enable mastodon service, got %v instead of %s`, called, want)
@@ -1382,6 +1385,7 @@ func TestTwitter(t *testing.T) {
 				"WAYBACK_TWITTER_ACCESS_SECRET":   "foo",
 			},
 			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices([]string{ServiceTwitter.String()})
 				called := strconv.FormatBool(opts.TwitterEnabled())
 				if called != want {
 					t.Errorf(`Unexpected enable twitter service, got %v instead of %s`, called, want)
@@ -1578,6 +1582,7 @@ func TestIRC(t *testing.T) {
 				"WAYBACK_IRC_NICK": "foo",
 			},
 			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices([]string{ServiceIRC.String()})
 				called := strconv.FormatBool(opts.IRCEnabled())
 				if called != want {
 					t.Errorf(`Unexpected enable irc service, got %v instead of %s`, called, want)
@@ -1782,6 +1787,7 @@ func TestMatrix(t *testing.T) {
 				"WAYBACK_MATRIX_PASSWORD": "zoo",
 			},
 			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices([]string{ServiceMatrix.String()})
 				called := strconv.FormatBool(opts.MatrixEnabled())
 				if called != want {
 					t.Errorf(`Unexpected enable matrix service, got %v instead of %s`, called, want)
@@ -1938,6 +1944,7 @@ func TestDiscord(t *testing.T) {
 				"WAYBACK_DISCORD_BOT_TOKEN": "foo",
 			},
 			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices([]string{ServiceDiscord.String()})
 				called := strconv.FormatBool(opts.DiscordEnabled())
 				if called != want {
 					t.Errorf(`Unexpected enable discord service, got %v instead of %s`, called, want)
@@ -2122,6 +2129,7 @@ func TestSlack(t *testing.T) {
 				"WAYBACK_SLACK_BOT_TOKEN": "foo",
 			},
 			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices([]string{ServiceSlack.String()})
 				called := strconv.FormatBool(opts.SlackEnabled())
 				if called != want {
 					t.Errorf(`Unexpected enable slack service, got %v instead of %s`, called, want)
@@ -2264,6 +2272,7 @@ func TestXMPP(t *testing.T) {
 				"WAYBACK_XMPP_PASSWORD": "foo",
 			},
 			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices([]string{ServiceXMPP.String()})
 				called := strconv.FormatBool(opts.XMPPEnabled())
 				if called != want {
 					t.Errorf(`Unexpected enable xmpp service got %v instead of %v`, called, want)
@@ -2999,6 +3008,61 @@ func TestEnabledMeilisearch(t *testing.T) {
 			if got != test.expected {
 				t.Fatalf(`Unexpected enabled meilisearch got %t instead of %t`, got, test.expected)
 			}
+		})
+	}
+}
+
+func TestEnableServices(t *testing.T) {
+	tests := []struct {
+		name     string
+		services []string
+	}{
+		{
+			name:     "enable Discord service",
+			services: []string{"discord"},
+		},
+		{
+			name:     "enable HTTPd service",
+			services: []string{"httpd", "web"},
+		},
+		{
+			name:     "enable Mastodon service",
+			services: []string{"mastodon", "mstdn"},
+		},
+		{
+			name:     "enable Matrix service",
+			services: []string{"matrix"},
+		},
+		{
+			name:     "enable IRC service",
+			services: []string{"irc"},
+		},
+		{
+			name:     "enable Slack service",
+			services: []string{"slack"},
+		},
+		{
+			name:     "enable Telegram service",
+			services: []string{"telegram"},
+		},
+		{
+			name:     "enable Twitter service",
+			services: []string{"twitter"},
+		},
+		{
+			name:     "enable XMPP service",
+			services: []string{"xmpp"},
+		},
+		{
+			name:     "enable multiple services",
+			services: []string{"discord", "httpd", "matrix"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			opts := &Options{services: sync.Map{}}
+			opts.EnableServices(tt.services)
 		})
 	}
 }

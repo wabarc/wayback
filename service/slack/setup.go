@@ -8,11 +8,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/service"
 )
 
 func init() {
-	service.Register(service.ServiceSlack, setup)
+	service.Register(config.ServiceSlack, setup)
 }
 
 func setup(ctx context.Context, opts service.Options) (*service.Module, error) {

@@ -8,11 +8,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/service"
 )
 
 func init() {
-	service.Register(service.ServiceIRC, setup)
+	service.Register(config.ServiceIRC, setup)
 }
 
 func setup(ctx context.Context, opts service.Options) (*service.Module, error) {

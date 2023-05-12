@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dustin/go-humanize"
@@ -116,6 +117,9 @@ type Options struct {
 	logLevel string
 	overTor  bool
 	metrics  bool
+
+	// Enabled services
+	services sync.Map
 
 	ipfs     *ipfs
 	slots    map[string]bool
@@ -344,6 +348,39 @@ func NewOptions() *Options {
 	return opts
 }
 
+func (o *Options) EnableServices(s []string) {
+	for _, srv := range s {
+		switch strings.ToLower(srv) {
+		case ServiceDiscord.String():
+			o.services.Store(ServiceDiscord, true)
+		case ServiceHTTPd.String(), "web":
+			o.services.Store(ServiceHTTPd, true)
+		case ServiceMastodon.String(), "mstdn":
+			o.services.Store(ServiceMastodon, true)
+		case ServiceMatrix.String():
+			o.services.Store(ServiceMatrix, true)
+		case ServiceIRC.String():
+			o.services.Store(ServiceIRC, true)
+		case ServiceSlack.String():
+			o.services.Store(ServiceSlack, true)
+		case ServiceTelegram.String():
+			o.services.Store(ServiceTelegram, true)
+		case ServiceTwitter.String():
+			o.services.Store(ServiceTwitter, true)
+		case ServiceXMPP.String():
+			o.services.Store(ServiceXMPP, true)
+		}
+	}
+}
+
+func (o *Options) isEnabled(f Flag) bool {
+	v, ok := o.services.Load(f)
+	if !ok {
+		return false
+	}
+	return v.(bool)
+}
+
 // HasDebugMode returns true if debug mode is enabled.
 func (o *Options) HasDebugMode() bool {
 	return o.debug
@@ -455,7 +492,7 @@ func (o *Options) PublishToChannel() bool {
 
 // TelegramEnabled returns whether enable Telegram service.
 func (o *Options) TelegramEnabled() bool {
-	return o.telegram.token != ""
+	return o.telegram.token != "" && o.isEnabled(ServiceTelegram)
 }
 
 // MastodonServer returns the domain of Mastodon instance.
@@ -497,7 +534,7 @@ func (o *Options) PublishToMastodon() bool {
 
 // MastodonEnabled returns whether enable Mastodon service.
 func (o *Options) MastodonEnabled() bool {
-	return o.PublishToMastodon()
+	return o.PublishToMastodon() && o.isEnabled(ServiceMastodon)
 }
 
 // TwitterConsumerKey returns the consumer key of Twitter application.
@@ -530,7 +567,7 @@ func (o *Options) PublishToTwitter() bool {
 
 // TwitterEnabled returns whether enable Twitter service.
 func (o *Options) TwitterEnabled() bool {
-	return o.PublishToTwitter()
+	return o.PublishToTwitter() && o.isEnabled(ServiceTwitter)
 }
 
 // GitHubToken returns the personal access token of GitHub account.
@@ -586,7 +623,7 @@ func (o *Options) PublishToIRCChannel() bool {
 
 // IRCEnabled returns whether enable IRC service.
 func (o *Options) IRCEnabled() bool {
-	return o.irc.nick != ""
+	return o.irc.nick != "" && o.isEnabled(ServiceIRC)
 }
 
 // MatrixHomeserver returns the homeserver of Matrix.
@@ -631,7 +668,8 @@ func (o *Options) PublishToMatrixRoom() bool {
 func (o *Options) MatrixEnabled() bool {
 	return o.MatrixHomeserver() != "" &&
 		o.MatrixUserID() != "" &&
-		o.MatrixPassword() != ""
+		o.MatrixPassword() != "" &&
+		o.isEnabled(ServiceMatrix)
 }
 
 // DiscordBotToken returns the token of Discord bot
@@ -662,7 +700,7 @@ func (o *Options) PublishToDiscordChannel() bool {
 
 // DiscordEnabled returns whether enable Discord service.
 func (o *Options) DiscordEnabled() bool {
-	return o.DiscordBotToken() != ""
+	return o.DiscordBotToken() != "" && o.isEnabled(ServiceDiscord)
 }
 
 // SlackAppToken returns the app-level token of Slack bot.
@@ -692,7 +730,7 @@ func (o *Options) PublishToSlackChannel() bool {
 
 // SlackEnabled returns whether enable Slack service.
 func (o *Options) SlackEnabled() bool {
-	return o.SlackBotToken() != ""
+	return o.SlackBotToken() != "" && o.isEnabled(ServiceSlack)
 }
 
 // XMPPUsername returns the XMPP username (JID).
@@ -717,7 +755,7 @@ func (o *Options) XMPPHelptext() string {
 
 // XMPPEnabled returns whether enable XMPP service.
 func (o *Options) XMPPEnabled() bool {
-	return o.XMPPUsername() != "" && o.XMPPPassword() != ""
+	return o.XMPPUsername() != "" && o.XMPPPassword() != "" && o.isEnabled(ServiceXMPP)
 }
 
 // NotionToken returns the Notion integration token.
@@ -866,4 +904,9 @@ func (o *Options) WaybackMeiliApikey() string {
 // EnabledMeilisearch returns whether enable meilisearch server.
 func (o *Options) EnabledMeilisearch() bool {
 	return o.WaybackMeiliEndpoint() != ""
+}
+
+// HTTPdEnabled returns whether enable HTTP daemon service.
+func (o *Options) HTTPdEnabled() bool {
+	return o.isEnabled(ServiceHTTPd)
 }

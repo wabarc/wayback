@@ -8,11 +8,13 @@ import (
 	"context"
 	"fmt"
 	"sync"
+
+	"github.com/wabarc/wayback/config"
 )
 
 var (
-	services = make(map[Flag]Servicer)
-	modules  = make(map[Flag]SetupFunc)
+	services = make(map[config.Flag]Servicer)
+	modules  = make(map[config.Flag]SetupFunc)
 	mu       sync.RWMutex
 )
 
@@ -27,12 +29,12 @@ type Module struct {
 	Servicer
 
 	Opts Options
-	Flag Flag
+	Flag config.Flag
 }
 
 // Register registers a service instance's setup function
 // and allows it to be called.
-func Register(srv Flag, action SetupFunc) {
+func Register(srv config.Flag, action SetupFunc) {
 	if _, exists := modules[srv]; exists {
 		panic(fmt.Sprintf("module %s registered", srv))
 	}
@@ -53,7 +55,7 @@ func parseModule(ctx context.Context, opts Options) {
 	}
 }
 
-func loadServicer(flag Flag) (*Module, error) {
+func loadServicer(flag config.Flag) (*Module, error) {
 	mu.RLock()
 	defer mu.RUnlock()
 

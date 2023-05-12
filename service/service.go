@@ -25,21 +25,6 @@ const (
 	MsgWaybackTimeout  = "wayback timeout, please try later."
 )
 
-const (
-	ServiceDiscord  Flag = iota + 1 // FlagDiscord represents discord service
-	ServiceHTTPd                    // FlagWeb represents httpd service
-	ServiceMastodon                 // FlagMastodon represents mastodon service
-	ServiceMatrix                   // FlagMatrix represents matrix service
-	ServiceIRC                      // FlagIRC represents relaychat service
-	ServiceSlack                    // FlagSlack represents slack service
-	ServiceTelegram                 // FlagTelegram represents telegram service
-	ServiceTwitter                  // FlagTwitter represents twitter srvice
-	ServiceXMPP                     // FlagXMPP represents XMPP service
-)
-
-// Flag represents a type of uint8
-type Flag uint8
-
 type doFunc func(cols []wayback.Collect, rdx reduxer.Reduxer) error
 
 // Servicer is the interface that wraps Serve and Shutdown method.
@@ -51,32 +36,6 @@ type Servicer interface {
 
 	// Shutdown shuts down service.
 	Shutdown() error
-}
-
-// String returns the flag as a string.
-func (f Flag) String() string {
-	switch f {
-	case ServiceHTTPd:
-		return "httpd"
-	case ServiceTelegram:
-		return "telegram"
-	case ServiceTwitter:
-		return "twiter"
-	case ServiceMastodon:
-		return "mastodon"
-	case ServiceDiscord:
-		return "discord"
-	case ServiceMatrix:
-		return "matrix"
-	case ServiceSlack:
-		return "slack"
-	case ServiceIRC:
-		return "relaychat"
-	case ServiceXMPP:
-		return "xmpp"
-	default:
-		return ""
-	}
 }
 
 // Serve runs service in a separate goroutine.

@@ -7,6 +7,8 @@ package service // import "github.com/wabarc/wayback/service"
 import (
 	"context"
 	"testing"
+
+	"github.com/wabarc/wayback/config"
 )
 
 func TestRegister(t *testing.T) {
@@ -14,22 +16,22 @@ func TestRegister(t *testing.T) {
 		return &Module{
 			Opts:     opts,
 			Servicer: nil,
-			Flag:     ServiceHTTPd,
+			Flag:     config.ServiceHTTPd,
 		}, nil
 	}
 	// Call Register with a valid flag and the setup function we just created
-	Register(ServiceHTTPd, setup)
+	Register(config.ServiceHTTPd, setup)
 
 	// Call Register again with the same flag, it should panic
 
 	defer func() {
 		// Clear
-		delete(modules, ServiceHTTPd)
+		delete(modules, config.ServiceHTTPd)
 
 		if r := recover(); r == nil {
 			t.Errorf("Register should have panicked")
 		}
 	}()
 
-	Register(ServiceHTTPd, setup)
+	Register(config.ServiceHTTPd, setup)
 }
