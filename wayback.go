@@ -112,7 +112,6 @@ func (i IS) Wayback(_ reduxer.Reduxer) string {
 func (i IP) Wayback(rdx reduxer.Reduxer) string {
 	opts := []ipfs.PinningOption{
 		ipfs.Mode(ipfs.Remote),
-		ipfs.Client(client),
 	}
 	if i.cfg.IPFSMode() == "daemon" {
 		opts = []ipfs.PinningOption{
@@ -129,7 +128,7 @@ func (i IP) Wayback(rdx reduxer.Reduxer) string {
 		secret := i.cfg.IPFSSecret()
 		opts = append(opts, ipfs.Uses(target), ipfs.Apikey(apikey), ipfs.Secret(secret))
 	}
-	arc := &ip.Shaft{Hold: ipfs.Options(opts...), Client: client}
+	arc := &ip.Shaft{Hold: ipfs.Options(opts...)}
 	uri := i.URL.String()
 	ctx := i.ctx
 
