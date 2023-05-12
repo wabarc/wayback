@@ -5,13 +5,13 @@
 package wayback // import "github.com/wabarc/wayback"
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -304,16 +304,19 @@ func duration(ctx context.Context) time.Duration {
 
 // NewClient sets a http client.
 // TODO: refactoring
-func NewClient(opts *config.Options) {
-	if opts.WireGuardConfig() != "" {
-		r := strings.NewReader(opts.WireGuardConfig())
-		proxy := proxier.NewClient(client)
-		if _, er := proxy.ViaWireGuard(r); er == nil {
-			client = proxy.Client
-			if opts.HasDebugMode() {
-				endpoint := "https://icanhazip.com"
+func SetClient(ctx context.Context, opts *config.Options) {
+	var err error
+	if opts.Proxy() != "" {
+		client.Transport, err = proxier.NewUTLSRoundTripper(proxier.Proxy("socks5://127.0.0.1:25344"))
+		if err != nil {
+			logger.Error("create utls round tripper failed: %v", err)
+			return
+		}
+		if opts.HasDebugMode() {
+			endpoint := "https://icanhazip.com"
+			go func() {
 				for {
-					ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+					ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 					req, _ := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 					resp, err := client.Do(req)
 					if err != nil {
@@ -327,15 +330,11 @@ func NewClient(opts *config.Options) {
 						logger.Error("read body error: %v", err)
 						continue
 					}
-					logger.Debug("client handshake: %s", body)
+					logger.Debug("client handshake: %s", bytes.TrimSpace(body))
 					resp.Body.Close()
 					time.Sleep(time.Minute)
 				}
-			}
-		} else {
-			logger.Fatal("new client error: %v", er)
+			}()
 		}
 	}
-
-	select {}
 }

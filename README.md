@@ -228,7 +228,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_LISTEN_ADDR`             | `0.0.0.0:8964`             | The listen address for the HTTP server                       |
 | -                   | `CHROME_BIN`                      | -                          | Preferred to sets the path to the Chrome executable          |
 | -                   | `CHROME_REMOTE_ADDR`              | -                          | Chrome/Chromium remote debugging address, for screenshot, format: `host:port`, `wss://domain.tld` |
-| -                   | `WIREGUARD_CONFIG`                | -                          | WireGuard proxy client config                                |
+| -                   | `WAYBACK_PROXY`                   | -                          | Proxy address, e.g. `socks5://127.0.0.1:1080`                |
 | -                   | `WAYBACK_POOLING_SIZE`            | `3`                        | Number of worker pool for wayback at once                    |
 | -                   | `WAYBACK_BOLT_PATH`               | `./wayback.db`             | File path of bolt database                                   |
 | -                   | `WAYBACK_STORAGE_DIR`             | -                          | Directory to store binary file, e.g. PDF, html file          |
