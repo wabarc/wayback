@@ -3057,6 +3057,10 @@ func TestEnableServices(t *testing.T) {
 			name:     "enable multiple services",
 			services: []string{"discord", "httpd", "matrix"},
 		},
+		{
+			name:     "enable unknown services",
+			services: []string{"unknown"},
+		},
 	}
 
 	for _, tt := range tests {
