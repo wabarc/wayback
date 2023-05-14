@@ -25,6 +25,9 @@ import (
 	twitter "github.com/dghubble/go-twitter/twitter"
 )
 
+// Interface guard
+var _ service.Servicer = (*Twitter)(nil)
+
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
 var ErrServiceClosed = errors.New("twitter: Service closed")
 
@@ -45,9 +48,9 @@ type Twitter struct {
 }
 
 // New returns Twitter struct.
-func New(ctx context.Context, opts service.Options) *Twitter {
+func New(ctx context.Context, opts service.Options) (*Twitter, error) {
 	if !opts.Config.PublishToTwitter() {
-		logger.Fatal("missing required environment variable")
+		return nil, errors.New("missing required environment variable, skipped")
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -65,7 +68,7 @@ func New(ctx context.Context, opts service.Options) *Twitter {
 		opts:   opts.Config,
 		pool:   opts.Pool,
 		pub:    opts.Publish,
-	}
+	}, nil
 }
 
 // Serve loop request direct messages from the Twitter API.

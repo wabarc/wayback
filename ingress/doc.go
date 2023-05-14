@@ -1,17 +1,21 @@
-// Copyright 2020 Wayback Archiver. All rights reserved.
+// Copyright 2023 Wayback Archiver. All rights reserved.
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
 /*
-The publish package provides a publishing service and requires initialization by the caller.
+Package ingress provides functionality for registering services.
 
-To use the publish package, import the package and its dependencies, such as register, as shown in the following example:
+The ingress package allows you to register wayback services.
+
+To use the ingress package, import the package and its dependencies,
+such as register, as shown in the following example:
 
 	package main
 
 	import (
 	        _ "github.com/wabarc/wayback/ingress"
 	        "github.com/wabarc/wayback/publish"
+	        "github.com/wabarc/wayback/service"
 	)
 
 	func main() {
@@ -24,6 +28,10 @@ To use the publish package, import the package and its dependencies, such as reg
 
 	        // Use the publish service to publish data.
 	        // ...
+
+	        // Initialize services with configuration options and a context.
+	        err := service.Serve(ctx, service.Options{})
+	        // ...
 	}
 */
-package publish // import "github.com/wabarc/wayback/publish"
+package ingress // import "github.com/wabarc/wayback/ingress"

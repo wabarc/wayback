@@ -73,6 +73,7 @@ func parseOpts(t *testing.T) service.Options {
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
+	opts.EnableServices(config.ServiceXMPP.String())
 
 	pool := &pooling.Pool{}
 	pub := &publish.Publish{}

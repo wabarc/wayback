@@ -24,6 +24,9 @@ import (
 	irc "github.com/thoj/go-ircevent"
 )
 
+// Interface guard
+var _ service.Servicer = (*IRC)(nil)
+
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
 var ErrServiceClosed = errors.New("irc: Service closed")
 
@@ -40,9 +43,9 @@ type IRC struct {
 }
 
 // New IRC struct.
-func New(ctx context.Context, opts service.Options) *IRC {
-	if opts.Config.IRCNick() == "" {
-		logger.Fatal("missing required environment variable")
+func New(ctx context.Context, opts service.Options) (*IRC, error) {
+	if !opts.Config.IRCEnabled() {
+		return nil, errors.New("missing required environment variable, skipped")
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -63,7 +66,7 @@ func New(ctx context.Context, opts service.Options) *IRC {
 		opts:  opts.Config,
 		pool:  opts.Pool,
 		pub:   opts.Publish,
-	}
+	}, nil
 }
 
 // Serve loop request direct messages from the IRC server.

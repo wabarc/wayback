@@ -21,6 +21,9 @@ import (
 	"github.com/wabarc/wayback/storage"
 )
 
+// Interface guard
+var _ service.Servicer = (*Httpd)(nil)
+
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
 var ErrServiceClosed = errors.New("httpd: Service closed")
 
@@ -39,7 +42,7 @@ type Httpd struct {
 }
 
 // New a Httpd struct.
-func New(ctx context.Context, opts service.Options) *Httpd {
+func New(ctx context.Context, opts service.Options) (*Httpd, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -50,7 +53,7 @@ func New(ctx context.Context, opts service.Options) *Httpd {
 		opts:  opts.Config,
 		pool:  opts.Pool,
 		pub:   opts.Publish,
-	}
+	}, nil
 }
 
 // Serve accepts incoming HTTP requests over Tor network, or open

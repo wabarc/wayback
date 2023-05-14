@@ -55,7 +55,7 @@ func TestNew(t *testing.T) {
 			ctx := test.ctx
 			opts := test.opts
 
-			h := New(ctx, opts)
+			h, _ := New(ctx, opts)
 			if h.opts != opts.Config {
 				t.Errorf("Expected config options to be %v, but got %v", opts.Config, h.opts)
 			}
@@ -89,7 +89,7 @@ func TestHttpdServe(t *testing.T) {
 	t.Setenv("PATH", "")
 
 	ctx := context.Background()
-	httpd := New(ctx, service.Options{
+	httpd, _ := New(ctx, service.Options{
 		Config:  opts,
 		Storage: &storage.Storage{},
 		Pool:    &pooling.Pool{},

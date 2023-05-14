@@ -57,7 +57,7 @@ var (
 			return checkRequiredFlags(cmd)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			handle(cmd, args)
+			run(cmd, args)
 		},
 		Version: version.Version,
 	}
@@ -152,7 +152,7 @@ func setToEnv(cmd *cobra.Command) {
 }
 
 // nolint:gocyclo
-func handle(cmd *cobra.Command, args []string) {
+func run(cmd *cobra.Command, args []string) {
 	if !ia && !is && !ip && !ph {
 		ia, is, ip = true, true, true
 		os.Setenv("WAYBACK_ENABLE_IA", "true")
@@ -205,6 +205,7 @@ func handle(cmd *cobra.Command, args []string) {
 	hasArgs := len(args) > 0
 	switch {
 	case hasDaemon:
+		opts.EnableServices(daemon...)
 		serve(cmd, opts, args)
 	case hasArgs:
 		archive(cmd, opts, args)

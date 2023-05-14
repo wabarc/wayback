@@ -130,6 +130,7 @@ func TestServe(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
+	opts.EnableServices(config.ServiceSlack.String())
 
 	s := slacktest.NewTestServer()
 	_, mux, server := helper.MockServer()

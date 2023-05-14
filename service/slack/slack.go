@@ -27,6 +27,9 @@ import (
 
 var callbackKey = "playback"
 
+// Interface guard
+var _ service.Servicer = (*Slack)(nil)
+
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
 var ErrServiceClosed = errors.New("slack: Service closed")
 
@@ -68,9 +71,9 @@ type event struct {
 }
 
 // New Slack struct.
-func New(ctx context.Context, opts service.Options) *Slack {
-	if opts.Config.SlackBotToken() == "" {
-		logger.Fatal("missing required environment variable")
+func New(ctx context.Context, opts service.Options) (*Slack, error) {
+	if !opts.Config.SlackEnabled() {
+		return nil, errors.New("missing required environment variable, skipped")
 	}
 	bot := slack.New(
 		opts.Config.SlackBotToken(),
@@ -78,7 +81,7 @@ func New(ctx context.Context, opts service.Options) *Slack {
 		slack.OptionAppLevelToken(opts.Config.SlackAppToken()),
 	)
 	if bot == nil {
-		logger.Fatal("create slack bot instance failed")
+		return nil, errors.New("create slack bot instance failed")
 	}
 
 	client := socketmode.New(
@@ -99,7 +102,7 @@ func New(ctx context.Context, opts service.Options) *Slack {
 		opts:   opts.Config,
 		pool:   opts.Pool,
 		pub:    opts.Publish,
-	}
+	}, nil
 }
 
 // Serve loop request message from the Slack api server.

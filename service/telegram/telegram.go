@@ -32,6 +32,9 @@ import (
 	telegram "gopkg.in/telebot.v3"
 )
 
+// Interface guard
+var _ service.Servicer = (*Telegram)(nil)
+
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
 var ErrServiceClosed = errors.New("telegram: Service closed")
 
@@ -52,9 +55,9 @@ type Telegram struct {
 }
 
 // New Telegram struct.
-func New(ctx context.Context, opts service.Options) *Telegram {
-	if opts.Config.TelegramToken() == "" {
-		logger.Fatal("missing required environment variable")
+func New(ctx context.Context, opts service.Options) (*Telegram, error) {
+	if !opts.Config.TelegramEnabled() {
+		return nil, errors.New("missing required environment variable, skipped")
 	}
 	bot, err := telegram.NewBot(telegram.Settings{
 		Token: opts.Config.TelegramToken(),
@@ -68,7 +71,7 @@ func New(ctx context.Context, opts service.Options) *Telegram {
 		},
 	})
 	if err != nil {
-		logger.Fatal("create telegram bot instance failed: %v", err)
+		return nil, errors.Wrap(err, "create telegram bot instance failed")
 	}
 
 	if ctx == nil {
@@ -82,7 +85,7 @@ func New(ctx context.Context, opts service.Options) *Telegram {
 		opts:  opts.Config,
 		pool:  opts.Pool,
 		pub:   opts.Publish,
-	}
+	}, nil
 }
 
 // Serve loop request message from the Telegram api server.

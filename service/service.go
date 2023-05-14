@@ -6,8 +6,10 @@ package service // import "github.com/wabarc/wayback/service"
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 
+	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
@@ -24,6 +26,62 @@ const (
 )
 
 type doFunc func(cols []wayback.Collect, rdx reduxer.Reduxer) error
+
+// Servicer is the interface that wraps Serve and Shutdown method.
+//
+// Servicer serve serveral media platforms, e.g. Telegram, Discord, etc.
+type Servicer interface {
+	// Serve serve a service.
+	Serve() error
+
+	// Shutdown shuts down service.
+	Shutdown() error
+}
+
+// Serve runs service in a separate goroutine.
+func Serve(ctx context.Context, opts Options) (errs error) {
+	// parse all modules
+	parseModule(ctx, opts)
+
+	for flag := range services {
+		mod, err := loadServicer(flag)
+		if err != nil {
+			return errors.Wrap(err, "load service failed")
+		}
+		if mod == nil {
+			return errors.New("module not found")
+		}
+		go func(mod *Module) {
+			logger.Info("starting %s service...", mod.Flag)
+			if err := mod.Serve(); err != nil {
+				errs = errors.Wrap(errs, fmt.Sprint(err))
+			}
+		}(mod)
+	}
+
+	return
+}
+
+// Shutdown shuts down all services.
+func Shutdown() (errs error) {
+	for flag := range services {
+		mod, err := loadServicer(flag)
+		if err != nil {
+			return errors.Wrap(err, "load service failed")
+		}
+		if mod == nil {
+			return errors.New("module not found")
+		}
+
+		logger.Info("stopping %s service...", flag)
+		if err = mod.Shutdown(); err != nil {
+			errs = fmt.Errorf("shutdown %s failed: %w", flag, err)
+		}
+		logger.Info("stopped %s service", flag)
+	}
+
+	return
+}
 
 // Wayback in a separate goroutine.
 func Wayback(ctx context.Context, opts *config.Options, urls []*url.URL, do doFunc) error {

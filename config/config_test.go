@@ -11,6 +11,7 @@ package config // import "github.com/wabarc/wayback/config"
 import (
 	"os"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -438,101 +439,200 @@ func TestDefaultSlots(t *testing.T) {
 	}
 }
 
-func TestTelegramToken(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_TELEGRAM_TOKEN", "tg:token")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "tg:token"
-	got := opts.TelegramToken()
-
-	if got != expected {
-		t.Fatalf(`Unexpected Telegram Bot token, got %v instead of %s`, got, expected)
-	}
-}
-
-func TestTelegramChannel(t *testing.T) {
-	var tests = []struct {
+func TestTelegram(t *testing.T) {
+	tests := []struct {
 		name string
-		expt string
+		envs map[string]string
+		call func(*testing.T, *Options, string)
+		want string
 	}{
 		{
-			name: "",
-			expt: "",
+			name: "default telegram token",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_TOKEN": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TelegramToken()
+				if called != want {
+					t.Errorf(`Unexpected get the telegram token, got %v instead of %s`, called, want)
+				}
+			},
+			want: defTelegramToken,
 		},
 		{
-			name: "tgchannelname",
-			expt: "@tgchannelname",
+			name: "specified telegram token",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_TOKEN": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TelegramToken()
+				if called != want {
+					t.Errorf(`Unexpected get the telegram token, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
 		},
 		{
-			name: "@tgchannelname",
-			expt: "@tgchannelname",
+			name: "default telegram channel",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_CHANNEL": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TelegramChannel()
+				if called != want {
+					t.Errorf(`Unexpected get the telegram channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: defTelegramChannel,
 		},
 		{
-			name: "-123456",
-			expt: "-123456",
+			name: "specified telegram channel",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_CHANNEL": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TelegramChannel()
+				if called != want {
+					t.Errorf(`Unexpected get the telegram channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "@foo",
+		},
+		{
+			name: "specified telegram channel",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_CHANNEL": "@foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TelegramChannel()
+				if called != want {
+					t.Errorf(`Unexpected get the telegram channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "@foo",
+		},
+		{
+			name: "specified telegram channel",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_CHANNEL": "-123456",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TelegramChannel()
+				if called != want {
+					t.Errorf(`Unexpected get the telegram channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "-123456",
+		},
+		{
+			name: "default telegram help text",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_HELPTEXT": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TelegramHelptext()
+				if called != want {
+					t.Errorf(`Unexpected get the telegram help text, got %v instead of %s`, called, want)
+				}
+			},
+			want: defTelegramHelptext,
+		},
+		{
+			name: "specified telegram help text",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_HELPTEXT": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TelegramHelptext()
+				if called != want {
+					t.Errorf(`Unexpected get the telegram help text, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "publish to telegram enabled",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_TOKEN":   "token",
+				"WAYBACK_TELEGRAM_CHANNEL": "@foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToChannel())
+				if called != want {
+					t.Errorf(`Unexpected enable publish to telegram, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
+		{
+			name: "publish to telegram disabled",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_TOKEN":   "",
+				"WAYBACK_TELEGRAM_CHANNEL": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToChannel())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to telegram, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to telegram disabled",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_TOKEN":   "",
+				"WAYBACK_TELEGRAM_CHANNEL": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToChannel())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to telegram, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to telegram disabled",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_TOKEN":   "token",
+				"WAYBACK_TELEGRAM_CHANNEL": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToChannel())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to telegram, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "telegram service enabled",
+			envs: map[string]string{
+				"WAYBACK_TELEGRAM_TOKEN": "token",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices(ServiceTelegram.String())
+				called := strconv.FormatBool(opts.TelegramEnabled())
+				if called != want {
+					t.Errorf(`Unexpected enable telegram service, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
 		},
 	}
 
-	for _, test := range tests {
-		t.Run("", func(t *testing.T) {
-			os.Clearenv()
-			os.Setenv("WAYBACK_TELEGRAM_CHANNEL", test.name)
-
-			parser := NewParser()
-			opts, err := parser.ParseEnvironmentVariables()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for key, val := range tt.envs {
+				t.Setenv(key, val)
+			}
+			opts, err := NewParser().ParseEnvironmentVariables()
 			if err != nil {
 				t.Fatalf(`Parsing environment variables failed: %v`, err)
 			}
-
-			expected := test.expt
-			got := opts.TelegramChannel()
-
-			if got != expected {
-				t.Fatalf(`Unexpected Telegram channel name, got %v instead of %s`, got, expected)
-			}
+			tt.call(t, opts, tt.want)
 		})
-	}
-}
-
-func TestTelegramHelptext(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_TELEGRAM_HELPTEXT", "some text")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "some text"
-	got := opts.TelegramHelptext()
-
-	if got != expected {
-		t.Fatalf(`Unexpected Telegram help text, got %v instead of %s`, got, expected)
-	}
-}
-
-func TestPublishToChannel(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_TELEGRAM_CHANNEL", "foo")
-	os.Setenv("WAYBACK_TELEGRAM_TOKEN", "tg:token")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	ok := opts.PublishToChannel()
-
-	if !ok {
-		t.Fatalf(`Unexpected publish to telegram channel, got %v instead of true`, ok)
 	}
 }
 
@@ -764,603 +864,1477 @@ func TestPublishToIssues(t *testing.T) {
 	}
 }
 
-func TestNotionToken(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_NOTION_TOKEN", "notion:token")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "notion:token"
-	got := opts.NotionToken()
-
-	if got != expected {
-		t.Fatalf(`Unexpected Notion integration token, got %v instead of %s`, got, expected)
-	}
-}
-
-func TestNotionDatabaseID(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_NOTION_DATABASE_ID", "uuid4")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "uuid4"
-	got := opts.NotionDatabaseID()
-
-	if got != expected {
-		t.Fatalf(`Unexpected Notion's database id, got %v instead of %s`, got, expected)
-	}
-}
-
-func TestPublishToNotion(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_NOTION_TOKEN", "notion:token")
-	os.Setenv("WAYBACK_NOTION_DATABASE_ID", "uuid4")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	ok := opts.PublishToNotion()
-
-	if !ok {
-		t.Fatalf(`Unexpected publish to notion, got %v instead of true`, ok)
-	}
-}
-
-func TestMastodonServer(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_MASTODON_SERVER", "https://mastodon.social")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "https://mastodon.social"
-	got := opts.MastodonServer()
-
-	if got != expected {
-		t.Fatalf(`Unexpected Mastodon instance domain, got %v instead of %s`, got, expected)
-	}
-}
-
-func TestMastodonClientKey(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "foo"
-	got := opts.MastodonClientKey()
-
-	if got != expected {
-		t.Fatalf(`Unexpected Mastodon client key, got %v instead of %s`, got, expected)
-	}
-}
-
-func TestMastodonClientSecret(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_MASTODON_SECRET", "foo")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "foo"
-	got := opts.MastodonClientSecret()
-
-	if got != expected {
-		t.Fatalf(`Unexpected Mastodon client secret, got %v instead of %s`, got, expected)
-	}
-}
-
-func TestMastodonAccessToken(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_MASTODON_TOKEN", "foo")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "foo"
-	got := opts.MastodonAccessToken()
-
-	if got != expected {
-		t.Fatalf(`Unexpected Mastodon access token, got %v instead of %s`, got, expected)
-	}
-}
-
-func TestPublishToMastodon(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_MASTODON_KEY", "foo")
-	os.Setenv("WAYBACK_MASTODON_SECRET", "foo")
-	os.Setenv("WAYBACK_MASTODON_TOKEN", "foo")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	ok := opts.PublishToMastodon()
-
-	if !ok {
-		t.Fatalf(`Unexpected publish to mastodon, got %v instead of true`, ok)
-	}
-}
-
-func TestPublishToTwitter(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_TWITTER_CONSUMER_KEY", "foo")
-	os.Setenv("WAYBACK_TWITTER_CONSUMER_SECRET", "foo")
-	os.Setenv("WAYBACK_TWITTER_ACCESS_TOKEN", "foo")
-	os.Setenv("WAYBACK_TWITTER_ACCESS_SECRET", "foo")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	ok := opts.PublishToTwitter()
-
-	if !ok {
-		t.Fatalf(`Unexpected publish to twitter, got %v instead of true`, ok)
-	}
-}
-
-func TestIRCNick(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_IRC_NICK", "foo")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "foo"
-	got := opts.IRCNick()
-
-	if got != expected {
-		t.Fatalf(`Unexpected IRC nick got %v instead of %s`, got, expected)
-	}
-}
-
-func TestIRCPassword(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_IRC_PASSWORD", "foo")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "foo"
-	got := opts.IRCPassword()
-
-	if got != expected {
-		t.Fatalf(`Unexpected IRC password got %v instead of %s`, got, expected)
-	}
-}
-
-func TestIRCChannel(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_IRC_CHANNEL", "foo")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "#foo"
-	got := opts.IRCChannel()
-
-	if got != expected {
-		t.Fatalf(`Unexpected IRC channel got %v instead of %s`, got, expected)
-	}
-}
-
-func TestIRCServer(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_IRC_SERVER", "example.net:7000")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := "example.net:7000"
-	got := opts.IRCServer()
-
-	if got != expected {
-		t.Fatalf(`Unexpected IRC server got %v instead of %s`, got, expected)
-	}
-}
-
-func TestPublishToIRCChannel(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_IRC_NICK", "foo")
-	os.Setenv("WAYBACK_IRC_CHANNEL", "bar")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := true
-	got := opts.PublishToIRCChannel()
-
-	if got != expected {
-		t.Fatalf(`Unexpected publish to IRC channel got %t instead of %v`, got, expected)
-	}
-}
-
-func TestMatrixHomeServer(t *testing.T) {
-	expected := "https://matrix-client.matrix.org"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_MATRIX_HOMESERVER", expected)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	got := opts.MatrixHomeserver()
-	if got != expected {
-		t.Fatalf(`Unexpected Matrix homeserver got %v instead of %v`, got, expected)
-	}
-}
-
-func TestMatrixUserID(t *testing.T) {
-	expected := "@foo:matrix.org"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_MATRIX_USERID", expected)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	got := opts.MatrixUserID()
-	if got != expected {
-		t.Fatalf(`Unexpected Matrix user ID got %v instead of %v`, got, expected)
-	}
-}
-
-func TestMatrixRoomID(t *testing.T) {
-	expected := "!foo:matrix.org"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_MATRIX_ROOMID", expected)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	got := opts.MatrixRoomID()
-	if got != expected {
-		t.Fatalf(`Unexpected Matrix room ID got %v instead of %v`, got, expected)
-	}
-}
-
-func TestMatrixPassword(t *testing.T) {
-	expected := "foo-bar"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_MATRIX_PASSWORD", expected)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	got := opts.MatrixPassword()
-	if got != expected {
-		t.Fatalf(`Unexpected Matrix password got %v instead of %v`, got, expected)
-	}
-}
-
-func TestPublishToMatrixRoom(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_MATRIX_HOMESERVER", "https://matrix-client.matrix.org")
-	os.Setenv("WAYBACK_MATRIX_USERID", "@foo:matrix.org")
-	os.Setenv("WAYBACK_MATRIX_ROOMID", "!bar:matrix.org")
-	os.Setenv("WAYBACK_MATRIX_PASSWORD", "zoo")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	expected := true
-	got := opts.PublishToMatrixRoom()
-
-	if got != expected {
-		t.Fatalf(`Unexpected publish to Matrix room got %t instead of %v`, got, expected)
-	}
-}
-
-func TestDiscordBotToken(t *testing.T) {
-	expected := "foo-bar"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_DISCORD_BOT_TOKEN", expected)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	got := opts.DiscordBotToken()
-	if got != expected {
-		t.Fatalf(`Unexpected Discord bot token got %v instead of %v`, got, expected)
-	}
-}
-
-func TestDiscordHelptext(t *testing.T) {
-	expected := "some text"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_DISCORD_HELPTEXT", expected)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	got := opts.DiscordHelptext()
-	if got != expected {
-		t.Fatalf(`Unexpected Discord help text got %v instead of %v`, got, expected)
-	}
-}
-
-func TestDiscordChannel(t *testing.T) {
-	t.Parallel()
-
-	var tests = []struct {
-		channel, expected string
+func TestNotion(t *testing.T) {
+	tests := []struct {
+		name string
+		envs map[string]string
+		call func(*testing.T, *Options, string)
+		want string
 	}{
 		{
-			channel:  "",
-			expected: "",
+			name: "default token",
+			envs: map[string]string{
+				"WAYBACK_NOTION_TOKEN": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.NotionToken()
+				if called != want {
+					t.Errorf(`Unexpected get the notion token, got %v instead of %s`, called, want)
+				}
+			},
+			want: defNotionToken,
 		},
 		{
-			channel:  "865981235815140000",
-			expected: "865981235815140000",
+			name: "specified token",
+			envs: map[string]string{
+				"WAYBACK_NOTION_TOKEN": "foo:bar",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.NotionToken()
+				if called != want {
+					t.Errorf(`Unexpected get the notion token, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo:bar",
+		},
+		{
+			name: "default database id",
+			envs: map[string]string{
+				"WAYBACK_NOTION_DATABASE_ID": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.NotionDatabaseID()
+				if called != want {
+					t.Errorf(`Unexpected get the database id, got %v instead of %s`, called, want)
+				}
+			},
+			want: defNotionToken,
+		},
+		{
+			name: "specified database id",
+			envs: map[string]string{
+				"WAYBACK_NOTION_DATABASE_ID": "foo:bar",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.NotionDatabaseID()
+				if called != want {
+					t.Errorf(`Unexpected get the databases id, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo:bar",
+		},
+		{
+			name: "publish to notion enabled",
+			envs: map[string]string{
+				"WAYBACK_NOTION_TOKEN":       "token",
+				"WAYBACK_NOTION_DATABASE_ID": "foo-bar-zoo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToNotion())
+				if called != want {
+					t.Errorf(`Unexpected enable publish to notion, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
+		{
+			name: "publish to notion disabled",
+			envs: map[string]string{
+				"WAYBACK_NOTION_TOKEN":       "",
+				"WAYBACK_NOTION_DATABASE_ID": "foo-bar-zoo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToNotion())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to notion, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to notion disabled",
+			envs: map[string]string{
+				"WAYBACK_NOTION_TOKEN":       "foo",
+				"WAYBACK_NOTION_DATABASE_ID": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToNotion())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to notion, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.channel, func(t *testing.T) {
-			os.Clearenv()
-			os.Setenv("WAYBACK_DISCORD_CHANNEL", test.channel)
-
-			parser := NewParser()
-			opts, err := parser.ParseEnvironmentVariables()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for key, val := range tt.envs {
+				t.Setenv(key, val)
+			}
+			opts, err := NewParser().ParseEnvironmentVariables()
 			if err != nil {
 				t.Fatalf(`Parsing environment variables failed: %v`, err)
 			}
-
-			got := opts.DiscordChannel()
-			if got != test.expected {
-				t.Fatalf(`Unexpected Discord channel got %v instead of %v`, got, test.expected)
-			}
+			tt.call(t, opts, tt.want)
 		})
 	}
 }
 
-func TestPublishToDiscordChannel(t *testing.T) {
-	os.Clearenv()
-	os.Setenv("WAYBACK_DISCORD_BOT_TOKEN", "discord-bot-token")
-	os.Setenv("WAYBACK_DISCORD_CHANNEL", "865981235815140000")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
+func TestMastodon(t *testing.T) {
+	server := "https://mastodon.social"
+	tests := []struct {
+		name string
+		envs map[string]string
+		call func(*testing.T, *Options, string)
+		want string
+	}{
+		{
+			name: "default mastodon server",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_SERVER": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MastodonServer()
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon server, got %v instead of %s`, called, want)
+				}
+			},
+			want: defMastodonServer,
+		},
+		{
+			name: "specified mastodon server",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_SERVER": server,
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MastodonServer()
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon server, got %v instead of %s`, called, want)
+				}
+			},
+			want: server,
+		},
+		{
+			name: "default mastodon client key",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_KEY": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MastodonClientKey()
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon client key, got %v instead of %s`, called, want)
+				}
+			},
+			want: defMastodonClientKey,
+		},
+		{
+			name: "specified mastodon client key",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_KEY": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MastodonClientKey()
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon client key, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "default mastodon client secret",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_SECRET": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MastodonClientKey()
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon access secret, got %v instead of %s`, called, want)
+				}
+			},
+			want: defMastodonClientSecret,
+		},
+		{
+			name: "specified mastodon client secret",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_SECRET": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MastodonClientSecret()
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon access secret, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "default mastodon access token",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_TOKEN": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MastodonAccessToken()
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon access token, got %v instead of %s`, called, want)
+				}
+			},
+			want: defMastodonClientSecret,
+		},
+		{
+			name: "specified mastodon access token",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_TOKEN": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MastodonAccessToken()
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon access token, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "publish to mastodon enabled",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_KEY":    "foo",
+				"WAYBACK_MASTODON_TOKEN":  "foo",
+				"WAYBACK_MASTODON_SECRET": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToMastodon())
+				if called != want {
+					t.Errorf(`Unexpected enable publish to mastodon, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
+		{
+			name: "publish to mastodon disabled",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_KEY":    "",
+				"WAYBACK_MASTODON_TOKEN":  "foo",
+				"WAYBACK_MASTODON_SECRET": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToMastodon())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to mastodon, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to mastodon disabled",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_KEY":    "foo",
+				"WAYBACK_MASTODON_TOKEN":  "",
+				"WAYBACK_MASTODON_SECRET": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToMastodon())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to mastodon, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to mastodon disabled",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_KEY":    "foo",
+				"WAYBACK_MASTODON_TOKEN":  "foo",
+				"WAYBACK_MASTODON_SECRET": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToMastodon())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to mastodon, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "mastodon service enabled",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_KEY":    "foo",
+				"WAYBACK_MASTODON_TOKEN":  "foo",
+				"WAYBACK_MASTODON_SECRET": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices(ServiceMastodon.String())
+				called := strconv.FormatBool(opts.MastodonEnabled())
+				if called != want {
+					t.Errorf(`Unexpected enable mastodon service, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
 	}
 
-	expected := true
-	got := opts.PublishToDiscordChannel()
-
-	if got != expected {
-		t.Fatalf(`Unexpected publish to Discord channel got %t instead of %v`, got, expected)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for key, val := range tt.envs {
+				t.Setenv(key, val)
+			}
+			opts, err := NewParser().ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+			tt.call(t, opts, tt.want)
+		})
 	}
 }
 
-func TestSlackAppToken(t *testing.T) {
-	expected := "xapp-1-A0000000FC7-2300600000035-a000000bc7d104f053f66000000e589dafabcde70c5152abaacbcaea00000000"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_SLACK_APP_TOKEN", expected)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
+func TestTwitter(t *testing.T) {
+	tests := []struct {
+		name string
+		envs map[string]string
+		call func(*testing.T, *Options, string)
+		want string
+	}{
+		{
+			name: "default twitter consumer key",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_CONSUMER_KEY": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TwitterConsumerKey()
+				if called != want {
+					t.Errorf(`Unexpected get the twitter consumer key, got %v instead of %s`, called, want)
+				}
+			},
+			want: defTwitterConsumerKey,
+		},
+		{
+			name: "specified twitter consumer key",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_CONSUMER_KEY": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TwitterConsumerKey()
+				if called != want {
+					t.Errorf(`Unexpected get the twitter consumer key, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "default twitter consumer secret",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_CONSUMER_SECRET": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TwitterConsumerSecret()
+				if called != want {
+					t.Errorf(`Unexpected get the twitter consumer secret, got %v instead of %s`, called, want)
+				}
+			},
+			want: defTwitterConsumerSecret,
+		},
+		{
+			name: "specified twitter consumer secret",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_CONSUMER_SECRET": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TwitterConsumerSecret()
+				if called != want {
+					t.Errorf(`Unexpected get the twitter consumer secret, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "default twitter access token",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_ACCESS_TOKEN": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TwitterAccessToken()
+				if called != want {
+					t.Errorf(`Unexpected get the twitter access token, got %v instead of %s`, called, want)
+				}
+			},
+			want: defTwitterAccessToken,
+		},
+		{
+			name: "specified twitter access token",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_ACCESS_TOKEN": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TwitterAccessToken()
+				if called != want {
+					t.Errorf(`Unexpected get the twitter access token, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "default twitter access secret",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_ACCESS_SECRET": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TwitterAccessSecret()
+				if called != want {
+					t.Errorf(`Unexpected get the twitter access secret, got %v instead of %s`, called, want)
+				}
+			},
+			want: defTwitterAccessSecret,
+		},
+		{
+			name: "specified twitter access secret",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_ACCESS_SECRET": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.TwitterAccessSecret()
+				if called != want {
+					t.Errorf(`Unexpected get the twitter access secret, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "publish to twitter enabled",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_CONSUMER_KEY":    "foo",
+				"WAYBACK_TWITTER_CONSUMER_SECRET": "foo",
+				"WAYBACK_TWITTER_ACCESS_TOKEN":    "foo",
+				"WAYBACK_TWITTER_ACCESS_SECRET":   "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToTwitter())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to twitter, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
+		{
+			name: "publish to twitter disabled",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_CONSUMER_KEY":    "",
+				"WAYBACK_TWITTER_CONSUMER_SECRET": "foo",
+				"WAYBACK_TWITTER_ACCESS_TOKEN":    "foo",
+				"WAYBACK_TWITTER_ACCESS_SECRET":   "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToTwitter())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to twitter, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to twitter disabled",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_CONSUMER_KEY":    "foo",
+				"WAYBACK_TWITTER_CONSUMER_SECRET": "",
+				"WAYBACK_TWITTER_ACCESS_TOKEN":    "foo",
+				"WAYBACK_TWITTER_ACCESS_SECRET":   "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToTwitter())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to twitter, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to twitter disabled",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_CONSUMER_KEY":    "foo",
+				"WAYBACK_TWITTER_CONSUMER_SECRET": "foo",
+				"WAYBACK_TWITTER_ACCESS_TOKEN":    "",
+				"WAYBACK_TWITTER_ACCESS_SECRET":   "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToTwitter())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to twitter, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to twitter disabled",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_CONSUMER_KEY":    "foo",
+				"WAYBACK_TWITTER_CONSUMER_SECRET": "foo",
+				"WAYBACK_TWITTER_ACCESS_TOKEN":    "foo",
+				"WAYBACK_TWITTER_ACCESS_SECRET":   "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToTwitter())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to twitter, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "twitter service enabled",
+			envs: map[string]string{
+				"WAYBACK_TWITTER_CONSUMER_KEY":    "foo",
+				"WAYBACK_TWITTER_CONSUMER_SECRET": "foo",
+				"WAYBACK_TWITTER_ACCESS_TOKEN":    "foo",
+				"WAYBACK_TWITTER_ACCESS_SECRET":   "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices(ServiceTwitter.String())
+				called := strconv.FormatBool(opts.TwitterEnabled())
+				if called != want {
+					t.Errorf(`Unexpected enable twitter service, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
 	}
 
-	got := opts.SlackAppToken()
-	if got != expected {
-		t.Fatalf(`Unexpected Slack app-level token got %v instead of %v`, got, expected)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for key, val := range tt.envs {
+				t.Setenv(key, val)
+			}
+			opts, err := NewParser().ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+			tt.call(t, opts, tt.want)
+		})
 	}
 }
 
-func TestSlackBotToken(t *testing.T) {
-	expected := "xoxb-2306408000000-2300127000000-GgLHgzqK3fXH5KA50AAbcdef"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_SLACK_BOT_TOKEN", expected)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
+func TestIRC(t *testing.T) {
+	server := "example.com:7700"
+	tests := []struct {
+		name string
+		envs map[string]string
+		call func(*testing.T, *Options, string)
+		want string
+	}{
+		{
+			name: "default irc nick",
+			envs: map[string]string{
+				"WAYBACK_IRC_NICK": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.IRCNick()
+				if called != want {
+					t.Errorf(`Unexpected get the irc nick, got %v instead of %s`, called, want)
+				}
+			},
+			want: defIRCNick,
+		},
+		{
+			name: "specified irc nick",
+			envs: map[string]string{
+				"WAYBACK_IRC_NICK": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.IRCNick()
+				if called != want {
+					t.Errorf(`Unexpected get the irc nick, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "default irc password",
+			envs: map[string]string{
+				"WAYBACK_IRC_PASSWORD": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.IRCPassword()
+				if called != want {
+					t.Errorf(`Unexpected get the irc password, got %v instead of %s`, called, want)
+				}
+			},
+			want: defIRCPassword,
+		},
+		{
+			name: "specified irc password",
+			envs: map[string]string{
+				"WAYBACK_IRC_PASSWORD": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.IRCPassword()
+				if called != want {
+					t.Errorf(`Unexpected get the irc password, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "default irc channel",
+			envs: map[string]string{
+				"WAYBACK_IRC_CHANNEL": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.IRCChannel()
+				if called != want {
+					t.Errorf(`Unexpected get the irc channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: defIRCChannel,
+		},
+		{
+			name: "specified irc channel",
+			envs: map[string]string{
+				"WAYBACK_IRC_CHANNEL": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.IRCChannel()
+				if called != want {
+					t.Errorf(`Unexpected get the irc channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "#foo",
+		},
+		{
+			name: "specified irc channel with prefix",
+			envs: map[string]string{
+				"WAYBACK_IRC_CHANNEL": "#foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.IRCChannel()
+				if called != want {
+					t.Errorf(`Unexpected get the irc channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "#foo",
+		},
+		{
+			name: "default irc server",
+			envs: map[string]string{
+				"WAYBACK_IRC_SERVER": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.IRCServer()
+				if called != want {
+					t.Errorf(`Unexpected get the irc server, got %v instead of %s`, called, want)
+				}
+			},
+			want: defIRCServer,
+		},
+		{
+			name: "specified irc server",
+			envs: map[string]string{
+				"WAYBACK_IRC_SERVER": server,
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.IRCServer()
+				if called != want {
+					t.Errorf(`Unexpected get the irc server, got %v instead of %s`, called, want)
+				}
+			},
+			want: server,
+		},
+		{
+			name: "publish to irc channel enabled",
+			envs: map[string]string{
+				"WAYBACK_IRC_NICK":    "foo",
+				"WAYBACK_IRC_CHANNEL": "bar",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToIRCChannel())
+				if called != want {
+					t.Errorf(`Unexpected enable publish to irc channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
+		{
+			name: "publish to irc channel disabled",
+			envs: map[string]string{
+				"WAYBACK_IRC_NICK":    "",
+				"WAYBACK_IRC_CHANNEL": "bar",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToIRCChannel())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to irc channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to irc channel disabled",
+			envs: map[string]string{
+				"WAYBACK_IRC_NICK":    "foo",
+				"WAYBACK_IRC_CHANNEL": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToIRCChannel())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to irc channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "irc service enabled",
+			envs: map[string]string{
+				"WAYBACK_IRC_NICK": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices(ServiceIRC.String())
+				called := strconv.FormatBool(opts.IRCEnabled())
+				if called != want {
+					t.Errorf(`Unexpected enable irc service, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
 	}
 
-	got := opts.SlackBotToken()
-	if got != expected {
-		t.Fatalf(`Unexpected Slack bot token got %v instead of %v`, got, expected)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for key, val := range tt.envs {
+				t.Setenv(key, val)
+			}
+			opts, err := NewParser().ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+			tt.call(t, opts, tt.want)
+		})
 	}
 }
 
-func TestSlackChannel(t *testing.T) {
-	expected := "C123ABCXY89"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_SLACK_CHANNEL", expected)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
+func TestMatrix(t *testing.T) {
+	server := "https://matrix-client.matrix.org"
+	userid := "@foo:matrix.org"
+	roomid := "!foo:matrix.org"
+	tests := []struct {
+		name string
+		envs map[string]string
+		call func(*testing.T, *Options, string)
+		want string
+	}{
+		{
+			name: "default matrix home server",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_HOMESERVER": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MatrixHomeserver()
+				if called != want {
+					t.Errorf(`Unexpected get the matrix homeserver, got %v instead of %s`, called, want)
+				}
+			},
+			want: defMatrixHomeserver,
+		},
+		{
+			name: "specified matrix home server",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_HOMESERVER": server,
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MatrixHomeserver()
+				if called != want {
+					t.Errorf(`Unexpected get the matrix homeserver, got %v instead of %s`, called, want)
+				}
+			},
+			want: server,
+		},
+		{
+			name: "default matrix user id",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_USERID": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MatrixUserID()
+				if called != want {
+					t.Errorf(`Unexpected get the matrix user id, got %v instead of %s`, called, want)
+				}
+			},
+			want: defMatrixUserID,
+		},
+		{
+			name: "specified matrix user id",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_USERID": userid,
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MatrixUserID()
+				if called != want {
+					t.Errorf(`Unexpected get the matrix user id, got %v instead of %s`, called, want)
+				}
+			},
+			want: userid,
+		},
+		{
+			name: "default matrix room id",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_ROOMID": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MatrixRoomID()
+				if called != want {
+					t.Errorf(`Unexpected get the matrix room id, got %v instead of %s`, called, want)
+				}
+			},
+			want: defMatrixRoomID,
+		},
+		{
+			name: "specified matrix room id",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_ROOMID": roomid,
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MatrixRoomID()
+				if called != want {
+					t.Errorf(`Unexpected get the matrix room id, got %v instead of %s`, called, want)
+				}
+			},
+			want: roomid,
+		},
+		{
+			name: "default matrix password",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_PASSWORD": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MatrixPassword()
+				if called != want {
+					t.Errorf(`Unexpected get the matrix password, got %v instead of %s`, called, want)
+				}
+			},
+			want: defMatrixPassword,
+		},
+		{
+			name: "specified matrix password",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_PASSWORD": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.MatrixPassword()
+				if called != want {
+					t.Errorf(`Unexpected get the matrix password, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "publish to matrix enabled",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_USERID":   "@foo:matrix.org",
+				"WAYBACK_MATRIX_ROOMID":   "!bar:matrix.org",
+				"WAYBACK_MATRIX_PASSWORD": "zoo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToMatrixRoom())
+				if called != want {
+					t.Errorf(`Unexpected enable publish to matrix channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
+		{
+			name: "publish to matrix disabled",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_USERID":   "",
+				"WAYBACK_MATRIX_ROOMID":   "!bar:matrix.org",
+				"WAYBACK_MATRIX_PASSWORD": "zoo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToMatrixRoom())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to matrix channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to matrix disabled",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_USERID":   "@foo:matrix.org",
+				"WAYBACK_MATRIX_ROOMID":   "",
+				"WAYBACK_MATRIX_PASSWORD": "zoo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToMatrixRoom())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to matrix channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to matrix disabled",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_USERID":   "@foo:matrix.org",
+				"WAYBACK_MATRIX_ROOMID":   "!bar:matrix.org",
+				"WAYBACK_MATRIX_PASSWORD": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToMatrixRoom())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to matrix channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "matrix service enabled",
+			envs: map[string]string{
+				"WAYBACK_MATRIX_USERID":   "@foo:matrix.org",
+				"WAYBACK_MATRIX_PASSWORD": "zoo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices(ServiceMatrix.String())
+				called := strconv.FormatBool(opts.MatrixEnabled())
+				if called != want {
+					t.Errorf(`Unexpected enable matrix service, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
 	}
 
-	got := opts.SlackChannel()
-	if got != expected {
-		t.Fatalf(`Unexpected Slack channel id got %v instead of %v`, got, expected)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for key, val := range tt.envs {
+				t.Setenv(key, val)
+			}
+			opts, err := NewParser().ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+			tt.call(t, opts, tt.want)
+		})
 	}
 }
 
-func TestSlackHelptext(t *testing.T) {
-	expected := "some text"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_SLACK_HELPTEXT", expected)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
+func TestDiscord(t *testing.T) {
+	tests := []struct {
+		name string
+		envs map[string]string
+		call func(*testing.T, *Options, string)
+		want string
+	}{
+		{
+			name: "default discord bot token",
+			envs: map[string]string{
+				"WAYBACK_DISCORD_BOT_TOKEN": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.DiscordBotToken()
+				if called != want {
+					t.Errorf(`Unexpected get the discord bot token, got %v instead of %s`, called, want)
+				}
+			},
+			want: defDiscordBotToken,
+		},
+		{
+			name: "specified discord bot token",
+			envs: map[string]string{
+				"WAYBACK_DISCORD_BOT_TOKEN": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.DiscordBotToken()
+				if called != want {
+					t.Errorf(`Unexpected get the discord bot token, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "default discord channel",
+			envs: map[string]string{
+				"WAYBACK_DISCORD_CHANNEL": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.DiscordChannel()
+				if called != want {
+					t.Errorf(`Unexpected get the discord channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: defDiscordChannel,
+		},
+		{
+			name: "specified discord channel",
+			envs: map[string]string{
+				"WAYBACK_DISCORD_CHANNEL": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.DiscordChannel()
+				if called != want {
+					t.Errorf(`Unexpected get the discord channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "default discord help text",
+			envs: map[string]string{
+				"WAYBACK_DISCORD_HELPTEXT": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.DiscordHelptext()
+				if called != want {
+					t.Errorf(`Unexpected get the discord help text, got %v instead of %s`, called, want)
+				}
+			},
+			want: defDiscordHelptext,
+		},
+		{
+			name: "specified discord help text",
+			envs: map[string]string{
+				"WAYBACK_DISCORD_HELPTEXT": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.DiscordHelptext()
+				if called != want {
+					t.Errorf(`Unexpected get the discord help text, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "publish discord enabled",
+			envs: map[string]string{
+				"WAYBACK_DISCORD_BOT_TOKEN": "foo",
+				"WAYBACK_DISCORD_CHANNEL":   "bar",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToDiscordChannel())
+				if called != want {
+					t.Errorf(`Unexpected enable publish to discord channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
+		{
+			name: "publish discord disabled",
+			envs: map[string]string{
+				"WAYBACK_DISCORD_BOT_TOKEN": "",
+				"WAYBACK_DISCORD_CHANNEL":   "bar",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToDiscordChannel())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to discord channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish discord disabled",
+			envs: map[string]string{
+				"WAYBACK_DISCORD_BOT_TOKEN": "foo",
+				"WAYBACK_DISCORD_CHANNEL":   "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToDiscordChannel())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to discord channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "discord service enabled",
+			envs: map[string]string{
+				"WAYBACK_DISCORD_BOT_TOKEN": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices(ServiceDiscord.String())
+				called := strconv.FormatBool(opts.DiscordEnabled())
+				if called != want {
+					t.Errorf(`Unexpected enable discord service, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
 	}
 
-	got := opts.SlackHelptext()
-	if got != expected {
-		t.Fatalf(`Unexpected Slack help text got %v instead of %v`, got, expected)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for key, val := range tt.envs {
+				t.Setenv(key, val)
+			}
+			opts, err := NewParser().ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+			tt.call(t, opts, tt.want)
+		})
 	}
 }
 
-func TestPublishToSlackChannel(t *testing.T) {
-	os.Clearenv()
-	// os.Setenv("WAYBACK_SLACK_APP_TOKEN", "slack-app-token")
-	os.Setenv("WAYBACK_SLACK_BOT_TOKEN", "slack-bot-token")
-	os.Setenv("WAYBACK_SLACK_CHANNEL", "C123ABCXY89")
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
+func TestSlack(t *testing.T) {
+	botToken := "xoxb-2306408000000-2300127000000-GgLHgzqK3fXH5KA50AAbcdef"
+	appToken := "xapp-1-A0000000FC7-2300600000035-a000000bc7d104f053f66000000e589dafabcde70c5152abaacbcaea00000000"
+	tests := []struct {
+		name string
+		envs map[string]string
+		call func(*testing.T, *Options, string)
+		want string
+	}{
+		{
+			name: "default slack bot token",
+			envs: map[string]string{
+				"WAYBACK_SLACK_BOT_TOKEN": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.SlackBotToken()
+				if called != want {
+					t.Errorf(`Unexpected get the slack bot token, got %v instead of %s`, called, want)
+				}
+			},
+			want: defSlackBotToken,
+		},
+		{
+			name: "specified slack bot token",
+			envs: map[string]string{
+				"WAYBACK_SLACK_BOT_TOKEN": botToken,
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.SlackBotToken()
+				if called != want {
+					t.Errorf(`Unexpected get the slack bot token, got %v instead of %s`, called, want)
+				}
+			},
+			want: botToken,
+		},
+		{
+			name: "default slack app token",
+			envs: map[string]string{
+				"WAYBACK_SLACK_APP_TOKEN": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.SlackAppToken()
+				if called != want {
+					t.Errorf(`Unexpected get the slack app token, got %v instead of %s`, called, want)
+				}
+			},
+			want: defSlackAppToken,
+		},
+		{
+			name: "specified slack app token",
+			envs: map[string]string{
+				"WAYBACK_SLACK_APP_TOKEN": appToken,
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.SlackAppToken()
+				if called != want {
+					t.Errorf(`Unexpected get the slack app token, got %v instead of %s`, called, want)
+				}
+			},
+			want: appToken,
+		},
+		{
+			name: "default slack channel",
+			envs: map[string]string{
+				"WAYBACK_SLACK_CHANNEL": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.SlackChannel()
+				if called != want {
+					t.Errorf(`Unexpected get the slack channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: defSlackChannel,
+		},
+		{
+			name: "specified slack channel",
+			envs: map[string]string{
+				"WAYBACK_SLACK_CHANNEL": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.SlackChannel()
+				if called != want {
+					t.Errorf(`Unexpected get the slack channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "default slack help text",
+			envs: map[string]string{
+				"WAYBACK_SLACK_HELPTEXT": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.SlackHelptext()
+				if called != want {
+					t.Errorf(`Unexpected get the slack help text, got %v instead of %s`, called, want)
+				}
+			},
+			want: defSlackHelptext,
+		},
+		{
+			name: "specified slack help text",
+			envs: map[string]string{
+				"WAYBACK_SLACK_HELPTEXT": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.SlackHelptext()
+				if called != want {
+					t.Errorf(`Unexpected get the slack help text, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "publish to slack enabled",
+			envs: map[string]string{
+				"WAYBACK_SLACK_BOT_TOKEN": "foo",
+				"WAYBACK_SLACK_CHANNEL":   "bar",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToSlackChannel())
+				if called != want {
+					t.Errorf(`Unexpected enable publish to slack channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
+		{
+			name: "publish to slack disabled",
+			envs: map[string]string{
+				"WAYBACK_SLACK_BOT_TOKEN": "",
+				"WAYBACK_SLACK_CHANNEL":   "bar",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToSlackChannel())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to slack channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "publish to slack disabled",
+			envs: map[string]string{
+				"WAYBACK_SLACK_BOT_TOKEN": "foo",
+				"WAYBACK_SLACK_CHANNEL":   "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.PublishToSlackChannel())
+				if called != want {
+					t.Errorf(`Unexpected disable publish to slack channel, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "slack service enabled",
+			envs: map[string]string{
+				"WAYBACK_SLACK_BOT_TOKEN": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices(ServiceSlack.String())
+				called := strconv.FormatBool(opts.SlackEnabled())
+				if called != want {
+					t.Errorf(`Unexpected enable slack service, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
 	}
 
-	expected := true
-	got := opts.PublishToSlackChannel()
-
-	if got != expected {
-		t.Fatalf(`Unexpected publish to Slack channel got %t instead of %v`, got, expected)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for key, val := range tt.envs {
+				t.Setenv(key, val)
+			}
+			opts, err := NewParser().ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+			tt.call(t, opts, tt.want)
+		})
 	}
 }
 
-func TestXMPPUsername(t *testing.T) {
-	expected := "foo@example.com"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_XMPP_USERNAME", expected)
-
-	opts, err := NewParser().ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
+func TestXMPP(t *testing.T) {
+	username := "foo@example.com"
+	tests := []struct {
+		name string
+		envs map[string]string
+		call func(*testing.T, *Options, string)
+		want string
+	}{
+		{
+			name: "default xmpp username",
+			envs: map[string]string{
+				"WAYBACK_XMPP_USERNAME": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.XMPPUsername()
+				if called != want {
+					t.Errorf(`Unexpected XMPP username got %v instead of %v`, called, want)
+				}
+			},
+			want: defXMPPUsername,
+		},
+		{
+			name: "specified xmpp username",
+			envs: map[string]string{
+				"WAYBACK_XMPP_USERNAME": username,
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.XMPPUsername()
+				if called != want {
+					t.Errorf(`Unexpected XMPP username got %v instead of %v`, called, want)
+				}
+			},
+			want: username,
+		},
+		{
+			name: "default xmpp password",
+			envs: map[string]string{
+				"WAYBACK_XMPP_PASSWORD": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.XMPPPassword()
+				if called != want {
+					t.Errorf(`Unexpected XMPP password got %v instead of %v`, called, want)
+				}
+			},
+			want: defXMPPPassword,
+		},
+		{
+			name: "specified xmpp password",
+			envs: map[string]string{
+				"WAYBACK_XMPP_PASSWORD": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.XMPPPassword()
+				if called != want {
+					t.Errorf(`Unexpected XMPP password got %v instead of %v`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "default xmpp notls",
+			envs: map[string]string{
+				"WAYBACK_XMPP_NOTLS": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.XMPPNoTLS())
+				if called != want {
+					t.Errorf(`Unexpected XMPP password got %v instead of %v`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "specified xmpp notls",
+			envs: map[string]string{
+				"WAYBACK_XMPP_NOTLS": "true",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.XMPPNoTLS())
+				if called != want {
+					t.Errorf(`Unexpected XMPP password got %v instead of %v`, called, want)
+				}
+			},
+			want: "true",
+		},
+		{
+			name: "default xmpp help text",
+			envs: map[string]string{
+				"WAYBACK_XMPP_HELPTEXT": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.XMPPHelptext()
+				if called != want {
+					t.Errorf(`Unexpected get the xmpp help text, got %v instead of %s`, called, want)
+				}
+			},
+			want: defXMPPHelptext,
+		},
+		{
+			name: "specified xmpp help text",
+			envs: map[string]string{
+				"WAYBACK_XMPP_HELPTEXT": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.XMPPHelptext()
+				if called != want {
+					t.Errorf(`Unexpected get the xmpp help text, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
+			name: "xmpp service enabled",
+			envs: map[string]string{
+				"WAYBACK_XMPP_USERNAME": "foo",
+				"WAYBACK_XMPP_PASSWORD": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				opts.EnableServices(ServiceXMPP.String())
+				called := strconv.FormatBool(opts.XMPPEnabled())
+				if called != want {
+					t.Errorf(`Unexpected enable xmpp service got %v instead of %v`, called, want)
+				}
+			},
+			want: "true",
+		},
+		{
+			name: "xmpp service disabled",
+			envs: map[string]string{
+				"WAYBACK_XMPP_USERNAME": "",
+				"WAYBACK_XMPP_PASSWORD": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.XMPPEnabled())
+				if called != want {
+					t.Errorf(`Unexpected disable xmpp service got %v instead of %v`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "xmpp service disabled",
+			envs: map[string]string{
+				"WAYBACK_XMPP_USERNAME": "",
+				"WAYBACK_XMPP_PASSWORD": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.XMPPEnabled())
+				if called != want {
+					t.Errorf(`Unexpected disable xmpp service got %v instead of %v`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "xmpp service disabled",
+			envs: map[string]string{
+				"WAYBACK_XMPP_USERNAME": "foo",
+				"WAYBACK_XMPP_PASSWORD": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.XMPPEnabled())
+				if called != want {
+					t.Errorf(`Unexpected disable xmpp service got %v instead of %v`, called, want)
+				}
+			},
+			want: "false",
+		},
 	}
 
-	got := opts.XMPPUsername()
-	if got != expected {
-		t.Fatalf(`Unexpected XMPP username got %v instead of %v`, got, expected)
-	}
-}
-
-func TestXMPPPassword(t *testing.T) {
-	expected := "bar"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_XMPP_PASSWORD", expected)
-
-	opts, err := NewParser().ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	got := opts.XMPPPassword()
-	if got != expected {
-		t.Fatalf(`Unexpected XMPP password got %v instead of %v`, got, expected)
-	}
-}
-
-func TestXMPPNoTLS(t *testing.T) {
-	expected := true
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_XMPP_NOTLS", strconv.FormatBool(expected))
-
-	opts, err := NewParser().ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	got := opts.XMPPNoTLS()
-	if got != expected {
-		t.Fatalf(`Unexpected disable XMPP TLS got %v instead of %v`, got, expected)
-	}
-}
-
-func TestXMPPHelptext(t *testing.T) {
-	expected := "some text"
-
-	os.Clearenv()
-	os.Setenv("WAYBACK_XMPP_HELPTEXT", expected)
-
-	parser := NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf(`Parsing environment variables failed: %v`, err)
-	}
-
-	got := opts.XMPPHelptext()
-	if got != expected {
-		t.Fatalf(`Unexpected XMPP help text got %v instead of %v`, got, expected)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for key, val := range tt.envs {
+				t.Setenv(key, val)
+			}
+			opts, err := NewParser().ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+			tt.call(t, opts, tt.want)
+		})
 	}
 }
 
@@ -2034,6 +3008,65 @@ func TestEnabledMeilisearch(t *testing.T) {
 			if got != test.expected {
 				t.Fatalf(`Unexpected enabled meilisearch got %t instead of %t`, got, test.expected)
 			}
+		})
+	}
+}
+
+func TestEnableServices(t *testing.T) {
+	tests := []struct {
+		name     string
+		services []string
+	}{
+		{
+			name:     "enable Discord service",
+			services: []string{"discord"},
+		},
+		{
+			name:     "enable HTTPd service",
+			services: []string{"httpd", "web"},
+		},
+		{
+			name:     "enable Mastodon service",
+			services: []string{"mastodon", "mstdn"},
+		},
+		{
+			name:     "enable Matrix service",
+			services: []string{"matrix"},
+		},
+		{
+			name:     "enable IRC service",
+			services: []string{"irc"},
+		},
+		{
+			name:     "enable Slack service",
+			services: []string{"slack"},
+		},
+		{
+			name:     "enable Telegram service",
+			services: []string{"telegram"},
+		},
+		{
+			name:     "enable Twitter service",
+			services: []string{"twitter"},
+		},
+		{
+			name:     "enable XMPP service",
+			services: []string{"xmpp"},
+		},
+		{
+			name:     "enable multiple services",
+			services: []string{"discord", "httpd", "matrix"},
+		},
+		{
+			name:     "enable unknown services",
+			services: []string{"unknown"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			opts := &Options{services: sync.Map{}}
+			opts.EnableServices(tt.services...)
 		})
 	}
 }

@@ -176,6 +176,7 @@ func TestServe(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
+	opts.EnableServices(config.ServiceDiscord.String())
 
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
@@ -201,7 +202,7 @@ func TestServe(t *testing.T) {
 	defer pub.Stop()
 
 	o := service.ParseOptions(service.Config(opts), service.Storage(store), service.Pool(pool), service.Publish(pub))
-	d := New(ctx, o)
+	d, _ := New(ctx, o)
 	d.bot.Client = httpClient
 	time.AfterFunc(3*time.Second, func() {
 		// TODO: find a better way to avoid deadlock
@@ -231,6 +232,7 @@ func TestProcess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
+	opts.EnableServices(config.ServiceDiscord.String())
 
 	dbpath := filepath.Join(t.TempDir(), "testing.db")
 	store, err := storage.Open(opts, dbpath)
@@ -258,7 +260,7 @@ func TestProcess(t *testing.T) {
 	defer pub.Stop()
 
 	o := service.ParseOptions(service.Config(opts), service.Storage(store), service.Pool(pool), service.Publish(pub))
-	d := New(ctx, o)
+	d, _ := New(ctx, o)
 	d.bot.Client = httpClient
 
 	// if err := d.bot.Open(); err != nil {

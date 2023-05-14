@@ -33,6 +33,9 @@ import (
 	"mellium.im/xmpp/stanza"
 )
 
+// Interface guard
+var _ service.Servicer = (*XMPP)(nil)
+
 // ErrServiceClosed is returned by the Service's Serve method after a call to Shutdown.
 var ErrServiceClosed = errors.New("xmpp: Service closed")
 
@@ -54,9 +57,9 @@ type messageBody struct {
 }
 
 // New XMPP struct.
-func New(ctx context.Context, opts service.Options) *XMPP {
-	if opts.Config.XMPPUsername() == "" || opts.Config.XMPPPassword() == "" {
-		logger.Fatal("missing required environment variable")
+func New(ctx context.Context, opts service.Options) (*XMPP, error) {
+	if !opts.Config.XMPPEnabled() {
+		return nil, errors.New("missing required environment variable, skipped")
 	}
 	if ctx == nil {
 		ctx = context.Background()
@@ -65,7 +68,7 @@ func New(ctx context.Context, opts service.Options) *XMPP {
 	// Parse and set up JID.
 	id, err := jid.Parse(opts.Config.XMPPUsername())
 	if err != nil {
-		logger.Fatal("parsing JID failed: %v", err)
+		return nil, errors.Wrap(err, "parsing JID failed")
 	}
 
 	// Enable optional features and initialize client session, according to configuration.
@@ -93,18 +96,18 @@ func New(ctx context.Context, opts service.Options) *XMPP {
 	dialer := &dial.Dialer{NoTLS: opts.Config.XMPPNoTLS(), NoLookup: opts.Config.XMPPNoTLS()}
 	conn, err := dialer.Dial(dialCtx, "tcp", id)
 	if err != nil {
-		logger.Fatal("establishing connection failed: %v", err)
+		return nil, errors.Wrap(err, "establishing connection failed")
 	}
 
 	bot, err := xmpp.NewClientSession(dialCtx, id, conn, features...)
 	if err != nil {
-		logger.Fatal("new xmpp client failed: %v", err)
+		return nil, errors.Wrap(err, "new xmpp client failed")
 	}
 
 	// Send initial presence to let the server know we want to receive messages.
 	err = bot.Send(ctx, stanza.Presence{Type: stanza.AvailablePresence}.Wrap(nil))
 	if err != nil {
-		logger.Fatal("Error sending initial presence: %v", err)
+		return nil, errors.Wrap(err, "error sending initial presence")
 	}
 
 	return &XMPP{
@@ -114,7 +117,7 @@ func New(ctx context.Context, opts service.Options) *XMPP {
 		opts:  opts.Config,
 		pool:  opts.Pool,
 		pub:   opts.Publish,
-	}
+	}, nil
 }
 
 // Serve loop request direct messages from the XMPP server.
