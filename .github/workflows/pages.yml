@@ -6,8 +6,6 @@ name: Pages
 
 on:
   push:
-    branches:
-      - main
     paths:
       - docs/**
       - mkdocs.yml
@@ -16,7 +14,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: 'pages'
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -71,4 +69,5 @@ jobs:
 
       - name: Deployment
         uses: actions/deploy-pages@0243b6c10d06cb8e95ed8ee471231877621202c0 # v1.2.4
+        if: github.ref == 'refs/heads/main'
         id: deployment
