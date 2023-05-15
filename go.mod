@@ -45,7 +45,7 @@ require (
 	github.com/wabarc/playback v0.0.0-20230331122619-84484ab4d599
 	github.com/wabarc/proxier v0.0.0-20230511195500-477b79d84aff
 	github.com/wabarc/rivet v0.1.4-0.20230505152228-2c5c81b4bd10
-	github.com/wabarc/screenshot v1.6.1-0.20230315004517-7587f8bc14e0
+	github.com/wabarc/screenshot v1.6.1-0.20230515153404-ed9208cc295b
 	github.com/wabarc/telegra.ph v0.0.0-20230318134541-a0922e1ace3a
 	github.com/wabarc/warcraft v0.3.1-0.20230308125707-3daa5592ba52
 	go.etcd.io/bbolt v1.3.6
