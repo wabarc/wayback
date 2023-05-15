@@ -11,15 +11,15 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/wabarc/logger"
-	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/ingress"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
 	"github.com/wabarc/wayback/systemd"
 
-	_ "github.com/wabarc/wayback/ingress"
+	_ "github.com/wabarc/wayback/ingress/register"
 )
 
 // Create channel to listen for signals.
@@ -43,8 +43,8 @@ func serve(_ *cobra.Command, opts *config.Options, _ []string) {
 	pool := pooling.New(ctx, cfg...)
 	go pool.Roll()
 
-	// Set global client
-	wayback.SetClient(ctx, opts)
+	// Ingress initialize
+	ingress.Init(opts)
 
 	pub := publish.New(ctx, opts)
 	go pub.Start()

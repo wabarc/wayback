@@ -499,8 +499,8 @@ github.com/wabarc/proxier v0.0.0-20230511195500-477b79d84aff h1:iYFrUax0puGvHmoO
 github.com/wabarc/proxier v0.0.0-20230511195500-477b79d84aff/go.mod h1:6fy1Vq25/cm5xXTf8fNiujx/aLUb4mB3lheiajTixUM=
 github.com/wabarc/rivet v0.1.4-0.20230505152228-2c5c81b4bd10 h1:d1lm7aXwtuVcUjHMW9Cm8CZIhoQtZCpvF2kXNEB2RGs=
 github.com/wabarc/rivet v0.1.4-0.20230505152228-2c5c81b4bd10/go.mod h1:fAjDHISxh7louWQ06lipWB0Dz7eYvQTzOOI86Mj+KiQ=
-github.com/wabarc/screenshot v1.6.1-0.20230315004517-7587f8bc14e0 h1:H7Ufx43fg3khCS7s39mfHHbpRFoo5GBJS846QhxfClo=
-github.com/wabarc/screenshot v1.6.1-0.20230315004517-7587f8bc14e0/go.mod h1:iQ6N8Myjc1XCR7Vh/1ihsWGZQY/vXAMneHwUmKRitxE=
+github.com/wabarc/screenshot v1.6.1-0.20230515153404-ed9208cc295b h1:LOpFnWJEgQ99Hv/DEK/bgO5oJDaiKfc3yodDcd9Rn84=
+github.com/wabarc/screenshot v1.6.1-0.20230515153404-ed9208cc295b/go.mod h1:iQ6N8Myjc1XCR7Vh/1ihsWGZQY/vXAMneHwUmKRitxE=
 github.com/wabarc/telegra.ph v0.0.0-20230318134541-a0922e1ace3a h1:W1gb0ww1oIARudOfXEMoXkZU1gqk0JERkIvVEgtuzq4=
 github.com/wabarc/telegra.ph v0.0.0-20230318134541-a0922e1ace3a/go.mod h1:n+wNWjpzSvzIw8l5JbpeRzJqkOnSsXSgmI45635MUC4=
 github.com/wabarc/warcraft v0.3.1-0.20230308125707-3daa5592ba52 h1:ys1ltR7cKqATsLeqXBCp7kPCItIDxwyOjAFj0btH0wQ=

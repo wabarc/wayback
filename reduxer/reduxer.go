@@ -9,7 +9,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -27,6 +26,7 @@ import (
 	"github.com/wabarc/warcraft"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/ingress"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -306,9 +306,8 @@ func remotely(ctx context.Context, artifact *Artifact) (err error) {
 		&artifact.Media,
 	}
 
-	c := &http.Client{Timeout: timeout}
-	cat := catbox.New(c)
-	anon := anonfile.NewAnonfile(c)
+	cat := catbox.New(ingress.Client())
+	anon := anonfile.NewAnonfile(ingress.Client())
 	g, _ := errgroup.WithContext(ctx)
 
 	var mu sync.Mutex

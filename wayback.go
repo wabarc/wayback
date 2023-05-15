@@ -5,11 +5,8 @@
 package wayback // import "github.com/wabarc/wayback"
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"os"
 	"sync"
@@ -17,10 +14,10 @@ import (
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/playback"
-	"github.com/wabarc/proxier"
 	"github.com/wabarc/rivet/ipfs"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/ingress"
 	"github.com/wabarc/wayback/reduxer"
 	"golang.org/x/sync/errgroup"
 
@@ -31,9 +28,6 @@ import (
 
 	pinner "github.com/wabarc/ipfs-pinner"
 )
-
-// TODO: find a better way to handle it
-var client = &http.Client{}
 
 // Collect results that archived, Arc is name of the archive service,
 // Dst mapping the original URL and archived destination URL,
@@ -84,7 +78,7 @@ type Waybacker interface {
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the IA and returns archived URL as a string.
 func (i IA) Wayback(_ reduxer.Reduxer) string {
-	arc := &ia.Archiver{Client: client}
+	arc := &ia.Archiver{Client: ingress.Client()}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
 		logger.Error("wayback %s to Internet Archive failed: %v", i.URL.String(), err)
@@ -96,7 +90,7 @@ func (i IA) Wayback(_ reduxer.Reduxer) string {
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the IS and returns archived URL as a string.
 func (i IS) Wayback(_ reduxer.Reduxer) string {
-	arc := is.NewArchiver(client)
+	arc := is.NewArchiver(ingress.Client())
 	defer arc.CloseTor()
 
 	dst, err := arc.Wayback(i.ctx, i.URL)
@@ -153,7 +147,7 @@ func (i IP) Wayback(rdx reduxer.Reduxer) string {
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the PH and returns archived URL as a string.
 func (i PH) Wayback(rdx reduxer.Reduxer) string {
-	arc := ph.New(client)
+	arc := ph.New(ingress.Client())
 	uri := i.URL.String()
 	ctx := i.ctx
 
@@ -299,44 +293,4 @@ func duration(ctx context.Context) time.Duration {
 	safeTime := elapsed * 90 / 100
 
 	return time.Duration(safeTime) * time.Second
-}
-
-// NewClient sets a http client.
-// TODO: refactoring
-func SetClient(ctx context.Context, opts *config.Options) {
-	if opts.Proxy() != "" {
-		var (
-			err    error
-			cancel context.CancelFunc
-		)
-		client.Transport, err = proxier.NewUTLSRoundTripper(proxier.Proxy(opts.Proxy()))
-		if err != nil {
-			logger.Error("create utls round tripper failed: %v", err)
-			return
-		}
-		if opts.HasDebugMode() {
-			endpoint := "https://icanhazip.com"
-			go func() {
-				for {
-					ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
-					req, _ := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil) // nolint:errcheck
-					resp, err := client.Do(req)
-					if err != nil {
-						logger.Error("request error: %v", err)
-						cancel()
-						continue
-					}
-					cancel()
-					body, err := io.ReadAll(resp.Body)
-					if err != nil {
-						logger.Error("read body error: %v", err)
-						continue
-					}
-					logger.Debug("client handshake: %s", bytes.TrimSpace(body))
-					resp.Body.Close()
-					time.Sleep(time.Minute)
-				}
-			}()
-		}
-	}
 }
