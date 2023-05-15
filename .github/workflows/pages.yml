@@ -67,7 +67,13 @@ jobs:
         with:
           path: 'site'
 
+      - name: Preview
+        uses: actions/deploy-pages@af48cf94a42f2c634308b1c9dc0151830b6f190a # v2.0.1
+        if: github.ref != 'refs/heads/main'
+        with:
+          preview: true
+
       - name: Deployment
-        uses: actions/deploy-pages@0243b6c10d06cb8e95ed8ee471231877621202c0 # v1.2.4
+        uses: actions/deploy-pages@af48cf94a42f2c634308b1c9dc0151830b6f190a # v2.0.1
         if: github.ref == 'refs/heads/main'
         id: deployment
