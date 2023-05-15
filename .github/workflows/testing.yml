@@ -61,7 +61,7 @@ jobs:
           disable-telemetry: true
 
       - name: Set up Go ${{ matrix.go }}.x
-        uses: actions/setup-go@c4a742cab115ed795e34d4513e2cf7d472deb55f # v3.3.1
+        uses: actions/setup-go@fac708d6674e30b6ba41289acaab6d4b75aa0753 # v4.0.1
         with:
           go-version: ${{ matrix.go }}
 
