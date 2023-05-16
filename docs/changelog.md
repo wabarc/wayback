@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve context deadline ([#381](https://github.com/wabarc/wayback/pull/381))
 - Improve publish services ([#382](https://github.com/wabarc/wayback/pull/382))
 - Refactor and reorganize service entry ([#389](https://github.com/wabarc/wayback/pull/389))
+- Improve documentation ([#385](https://github.com/wabarc/wayback/pull/385))
 
 ## [0.19.1] - 2023-03-21
 
