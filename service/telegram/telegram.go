@@ -227,8 +227,8 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 				logger.Warn("env pairs not macthing")
 				continue
 			}
-            key := strings.TrimSpace(pairs[0])
-            val := strings.TrimSpace(pairs[1])
+			key := strings.TrimSpace(pairs[0])
+			val := strings.TrimSpace(pairs[1])
 			t.opts.Store(key, val)
 		}
 	case command != "":
