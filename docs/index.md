@@ -1,8 +1,8 @@
-Wayback is a web archiving and replay tool that enables users to capturing and preserving web content. It provides an interface to crawl and archive the contents of the web, and a search and replay service to access previously archived pages. Wayback is designed to be used by web archivists, researchers, and anyone who wants to preserve web content and access it in the future.
+Wayback is a web archiving and playback tool that allows users to capture and preserve web content. It provides an IM-style interface to crawl and archive the contents of the web, and a search and replay service to access previously archived pages. Wayback is designed to be used by web archivists, researchers, and anyone who wants to preserve web content and access it in the future.
 
 Wayback is an open-source web archiving application written in Go. With a modular and customizable architecture, it is designed to be flexible and adaptable to various use cases and environments. It provides support for multiple storage backends and integration with other services.
 
-Whether you need to archive a single web page or a large collection of websites, Wayback can help you capture and store web content for posterity. With its user-friendly interface and powerful features, Wayback is a valuable tool for anyone interested in web archiving and preservation.
+Whether you need to archive a single web page or a large collection of web sites, Wayback can help you capture and preserve web content for posterity. With an easy-to-use interface and powerful features, Wayback is a valuable tool for anyone interested in web archiving and preservation.
 
 ## Features
 
