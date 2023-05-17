@@ -43,7 +43,8 @@ nav:
   - Installation: 'installation.md'
   - Usage:
     - 'Command Line': 'command-line.md'
-    - 'Service': 'service.md'
+    - 'Daemon Service': 'service.md'
+    - 'Configurations': 'environment.md'
   - Deployment: 'deployment.md'
   - Integrations:
     - Discord: 'integrations/discord.md'
@@ -120,7 +121,8 @@ plugins:
           Installation: 安装
           Usage: 使用
           'Command Line': 命令行
-          'Service': 守护服务
+          'Daemon Service': 守护服务
+          Configurations: 配置选项
           Deployment: 部署
           Integrations: 集成
           Resources: 资源
