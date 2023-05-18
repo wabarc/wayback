@@ -6,7 +6,7 @@ package relaychat // import "github.com/wabarc/wayback/publish/relaychat"
 
 import (
 	"context"
-	"crypto/tls"
+	"strings"
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
@@ -16,45 +16,40 @@ import (
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
 	"github.com/wabarc/wayback/template/render"
-
-	irc "github.com/thoj/go-ircevent"
+	"gopkg.in/irc.v4"
 )
 
 // Interface guard
 var _ publish.Publisher = (*IRC)(nil)
 
 type IRC struct {
-	conn *irc.Connection
+	conn *irc.Client
 	opts *config.Options
 }
 
 // New returns a IRC struct
-func New(conn *irc.Connection, opts *config.Options) *IRC {
+func New(c *irc.Client, opts *config.Options) *IRC {
 	if !opts.PublishToIRCChannel() {
 		logger.Debug("Missing required environment variable, abort.")
 		return nil
 	}
 
-	if conn == nil {
-		conn = irc.IRC(opts.IRCNick(), opts.IRCNick())
-		conn.Password = opts.IRCPassword()
-		conn.VerboseCallbackHandler = opts.HasDebugMode()
-		conn.Debug = opts.HasDebugMode()
-		conn.UseTLS = true
-		conn.TLSConfig = &tls.Config{InsecureSkipVerify: false, MinVersion: tls.VersionTLS12}
-	}
-	server := opts.IRCServer()
-	if err := conn.Connect(server); err != nil {
-		logger.Error("connect to %s failed: %v", server, err)
-		return nil
-	}
-
-	return &IRC{conn: conn, opts: opts}
+	return &IRC{opts: opts}
 }
 
 // Publish publish text to IRC channel of given cols and args.
 // A context should contain a `reduxer.Reduxer` via `publish.PubBundle` struct.
 func (i *IRC) Publish(ctx context.Context, _ reduxer.Reduxer, cols []wayback.Collect, args ...string) error {
+	// Most IRC server supports establish one connection,
+	// this value accessed from service module.
+	if i.conn == nil {
+		v := ctx.Value(publish.FlagIRC)
+		conn, ok := v.(*irc.Client)
+		if ok {
+			i.conn = conn
+		}
+	}
+
 	metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusRequest)
 
 	if len(cols) == 0 {
@@ -62,8 +57,8 @@ func (i *IRC) Publish(ctx context.Context, _ reduxer.Reduxer, cols []wayback.Col
 		return errors.New("publish to irc: collects empty")
 	}
 
-	var txt = render.ForPublish(&render.Relaychat{Cols: cols}).String()
-	if i.toChannel(ctx, txt) {
+	txt := strings.Split(render.ForPublish(&render.Relaychat{Cols: cols}).String(), "\n")
+	if i.toChannel(ctx, txt...) {
 		metrics.IncrementPublish(metrics.PublishIRC, metrics.StatusSuccess)
 		return nil
 	}
@@ -71,27 +66,47 @@ func (i *IRC) Publish(ctx context.Context, _ reduxer.Reduxer, cols []wayback.Col
 	return errors.New("publish to irc failed")
 }
 
-func (i *IRC) toChannel(_ context.Context, text string) bool {
+func (i *IRC) toChannel(_ context.Context, text ...string) bool {
 	if !i.opts.PublishToIRCChannel() || i.conn == nil {
 		logger.Warn("Do not publish to IRC channel.")
 		return false
 	}
-	if text == "" {
+	if len(text) == 0 {
 		logger.Warn("IRC validation failed: Text can't be blank")
 		return false
 	}
 
-	go func() {
-		// i.conn.Join(o.opts.IRCChannel())
-		i.conn.Privmsg(i.opts.IRCChannel(), text)
-	}()
+	err := i.reply(i.opts.IRCChannel(), text...)
+	if err != nil {
+		logger.Error("publish to IRC channel failed: %v", err)
+		return false
+	}
 
 	return true
 }
 
 // Shutdown shuts down the IRC publish service.
 func (i *IRC) Shutdown() error {
-	i.conn.Quit()
-
 	return nil
+}
+
+func (i *IRC) reply(name string, messages ...string) (err error) {
+	if i.conn == nil {
+		return errors.New("irc connection is missing")
+	}
+
+	for _, text := range messages {
+		text = strings.ReplaceAll(text, "\n", " ")
+		msg := &irc.Message{
+			Command: "PRIVMSG",
+			Params: []string{
+				name,
+				text,
+			},
+		}
+		if e := i.conn.WriteMessage(msg); e != nil {
+			err = errors.Wrap(err, e.Error())
+		}
+	}
+	return err
 }

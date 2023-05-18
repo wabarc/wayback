@@ -10,6 +10,7 @@ import (
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
+	"github.com/wabarc/wayback/reduxer"
 )
 
 var _ Renderer = (*Relaychat)(nil)
@@ -17,33 +18,61 @@ var _ Renderer = (*Relaychat)(nil)
 // Relaychat represents a Relaychat template data for render.
 type Relaychat struct {
 	Cols []wayback.Collect
-	Data interface{}
+	Data reduxer.Reduxer
 }
 
 // ForReply implements the standard Renderer interface:
 // it returns a Render from the ForPublish.
 func (i *Relaychat) ForReply() *Render {
-	return i.ForPublish()
+	buf := i.join(i.main())
+
+	return &Render{buf: *buf}
 }
 
 // ForPublish implements the standard Renderer interface:
 // it reads `[]wayback.Collect` from the Relaychat and returns a *Render.
 func (i *Relaychat) ForPublish() *Render {
-	var tmplBytes bytes.Buffer
+	tmplBytes := &bytes.Buffer{}
 
-	const tmpl = `{{range $ := .}}{{ $.Arc | name }}:- • {{ $.Dst }}, {{end}}`
+	if title := Title(i.Cols, i.Data); title != "" {
+		tmplBytes.WriteString(`‹ `)
+		tmplBytes.WriteString(title)
+		tmplBytes.WriteString(" ›")
+		tmplBytes.WriteString("\n \n")
+	}
+	// tmplBytes.WriteString("Source:")
+	// tmplBytes.WriteString("• ")
+	// tmplBytes.WriteString("\n \n")
+	tmplBytes.Write(i.join(i.main()).Bytes())
+
+	return &Render{buf: *tmplBytes}
+}
+
+func (i *Relaychat) main() *bytes.Buffer {
+	tmplBytes := new(bytes.Buffer)
+
+	const tmpl = "{{range $ := .}}{{ $.Arc | name }}:\n• {{ $.Dst }}\n{{end}}"
 
 	tpl, err := template.New("relaychat").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
 		logger.Error("parse IRC template failed, %v", err)
-		return new(Render)
+		return new(bytes.Buffer)
 	}
 
-	if err := tpl.Execute(&tmplBytes, i.Cols); err != nil {
+	if err := tpl.Execute(tmplBytes, i.Cols); err != nil {
 		logger.Error("execute IRC template failed, %v", err)
-		return new(Render)
+		return new(bytes.Buffer)
 	}
-	tmplBytes = *bytes.NewBuffer(bytes.TrimRight(tmplBytes.Bytes(), `, `))
 
-	return &Render{buf: tmplBytes}
+	return bytes.NewBuffer(bytes.TrimRight(tmplBytes.Bytes(), "\n"))
+}
+
+func (i *Relaychat) join(buf *bytes.Buffer) *bytes.Buffer {
+	tmplBytes := &bytes.Buffer{}
+	tmplBytes.WriteString("***** List of Archives *****")
+	tmplBytes.WriteString("\n \n") // blank line
+	tmplBytes.Write(buf.Bytes())
+	tmplBytes.WriteString("\n \n") // blank line
+	tmplBytes.WriteString("***** End of Archives *****")
+	return tmplBytes
 }

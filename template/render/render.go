@@ -58,6 +58,14 @@ func (r *Render) String() string {
 	return ""
 }
 
+// Bytes returns a []byte from the Render.
+func (r *Render) Bytes() []byte {
+	if r != nil {
+		return r.buf.Bytes()
+	}
+	return nil
+}
+
 func funcMap() template.FuncMap {
 	cache := "https://webcache.googleusercontent.com/search?q=cache:"
 	return template.FuncMap{

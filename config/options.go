@@ -61,6 +61,7 @@ const (
 	defSlackHelptext         = "Hi there."
 
 	defIRCNick     = ""
+	defIRCName     = ""
 	defIRCPassword = ""
 	defIRCChannel  = ""
 	defIRCServer   = "irc.libera.chat:6697"
@@ -224,6 +225,7 @@ type nostr struct {
 
 type irc struct {
 	nick     string
+	name     string
 	password string
 	channel  string
 	server   string
@@ -331,6 +333,7 @@ func NewOptions() *Options {
 		},
 		irc: &irc{
 			nick:     defIRCNick,
+			name:     defIRCName,
 			password: defIRCPassword,
 			channel:  defIRCChannel,
 			server:   defIRCServer,
@@ -361,7 +364,7 @@ func (o *Options) EnableServices(s ...string) {
 			o.services.Store(ServiceMastodon, true)
 		case ServiceMatrix.String():
 			o.services.Store(ServiceMatrix, true)
-		case ServiceIRC.String():
+		case ServiceIRC.String(), "irc":
 			o.services.Store(ServiceIRC, true)
 		case ServiceSlack.String():
 			o.services.Store(ServiceSlack, true)
@@ -594,6 +597,14 @@ func (o *Options) PublishToIssues() bool {
 
 // IRCNick returns nick of IRC
 func (o *Options) IRCNick() string {
+	return o.irc.nick
+}
+
+// IRCName returns name of IRC
+func (o *Options) IRCName() string {
+	if o.irc.name != "" {
+		return o.irc.name
+	}
 	return o.irc.nick
 }
 

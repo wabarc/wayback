@@ -130,11 +130,14 @@ func (p *Publish) Stop() {
 
 // Spread accepts calls from services that with collections and various parameters.
 // It prepare all available publishers and put them into pooling.
-func (p *Publish) Spread(_ context.Context, rdx reduxer.Reduxer, cols []wayback.Collect, from Flag, args ...string) {
+func (p *Publish) Spread(ctx context.Context, rdx reduxer.Reduxer, cols []wayback.Collect, from Flag, args ...string) {
+	v := ctx.Value(from)
+
 	exec(func(mod *Module) {
 		bucket := pooling.Bucket{
 			Request: func(ctx context.Context) error {
 				logger.Info("requesting publishing from [%s] to [%s]...", from, mod.Flag)
+				ctx = context.WithValue(ctx, from, v)
 				err := mod.Publish(ctx, rdx, cols, args...)
 				if err != nil {
 					logger.Error("requesting publishing from [%s] to [%s] failed: %v", from, mod.Flag, err)

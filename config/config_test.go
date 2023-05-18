@@ -1444,6 +1444,32 @@ func TestIRC(t *testing.T) {
 			want: "foo",
 		},
 		{
+			name: "default irc name",
+			envs: map[string]string{
+				"WAYBACK_IRC_NAME": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.IRCName()
+				if called != want {
+					t.Errorf(`Unexpected get the irc name, got %v instead of %s`, called, want)
+				}
+			},
+			want: defIRCName,
+		},
+		{
+			name: "specified irc name",
+			envs: map[string]string{
+				"WAYBACK_IRC_NAME": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := opts.IRCName()
+				if called != want {
+					t.Errorf(`Unexpected get the irc name, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
 			name: "default irc password",
 			envs: map[string]string{
 				"WAYBACK_IRC_PASSWORD": "",

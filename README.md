@@ -269,6 +269,7 @@ You can also specify configuration options either via command flags or via envir
 | -                   | `WAYBACK_TWITTER_ACCESS_TOKEN`    | -                          | The access token of your Twitter application                 |
 | -                   | `WAYBACK_TWITTER_ACCESS_SECRET`   | -                          | The access secret of your Twitter application                |
 | -                   | `WAYBACK_IRC_NICK`                | -                          | IRC nick                                                     |
+| -                   | `WAYBACK_IRC_NAME`                | -                          | IRC name                                                     |
 | -                   | `WAYBACK_IRC_PASSWORD`            | -                          | IRC password                                                 |
 | -                   | `WAYBACK_IRC_CHANNEL`             | -                          | IRC channel                                                  |
 | -                   | `WAYBACK_IRC_SERVER`              | `irc.libera.chat:6697`     | IRC server, required TLS                                     |

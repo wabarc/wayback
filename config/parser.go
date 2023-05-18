@@ -151,6 +151,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.notion.databaseID = parseString(val, defNotionDatabaseID)
 		case "WAYBACK_IRC_NICK":
 			p.opts.irc.nick = parseString(val, defIRCNick)
+		case "WAYBACK_IRC_NAME":
+			p.opts.irc.name = parseString(val, defIRCName)
 		case "WAYBACK_IRC_PASSWORD":
 			p.opts.irc.password = parseString(val, defIRCPassword)
 		case "WAYBACK_IRC_CHANNEL":

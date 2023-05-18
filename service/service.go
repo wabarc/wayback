@@ -26,6 +26,8 @@ const (
 	MsgWaybackTimeout  = "wayback timeout, please try later."
 )
 
+var ErrMissingURL = fmt.Errorf("URL no found")
+
 type doFunc func(cols []wayback.Collect, rdx reduxer.Reduxer) error
 
 // Servicer is the interface that wraps Serve and Shutdown method.
