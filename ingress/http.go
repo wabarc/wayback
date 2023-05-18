@@ -16,9 +16,12 @@ import (
 	"github.com/wabarc/logger"
 	"github.com/wabarc/proxier"
 	"github.com/wabarc/wayback/config"
+	"golang.org/x/net/proxy"
 )
 
 var (
+	dialer proxy.Dialer
+
 	client   = &http.Client{}
 	endpoint = "https://icanhazip.com"
 )
@@ -35,10 +38,13 @@ func initClient(opts *config.Options) {
 			return
 		}
 
-		client.Transport, err = proxier.NewUTLSRoundTripper(proxier.Proxy(opts.Proxy()))
+		rt, err := proxier.NewUTLSRoundTripper(proxier.Proxy(opts.Proxy()))
 		if err != nil {
 			logger.Error("create utls round tripper failed: %v", err)
 		}
+		dialer = rt.(*proxier.UTLSRoundTripper).Dialer()
+		client.Transport = rt
+
 		if opts.HasDebugMode() {
 			go func() {
 				for {
@@ -80,4 +86,12 @@ func canConnect(host, port string) bool {
 // Client returns http.Client
 func Client() *http.Client {
 	return client
+}
+
+// Dialer returns proxy.Dailer
+func Dialer() proxy.Dialer {
+	if dialer == nil {
+		return proxy.Direct
+	}
+	return dialer
 }
