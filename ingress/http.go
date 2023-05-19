@@ -41,6 +41,7 @@ func initClient(opts *config.Options) {
 		rt, err := proxier.NewUTLSRoundTripper(proxier.Proxy(opts.Proxy()))
 		if err != nil {
 			logger.Error("create utls round tripper failed: %v", err)
+			return
 		}
 		dialer = rt.(*proxier.UTLSRoundTripper).Dialer()
 		client.Transport = rt
