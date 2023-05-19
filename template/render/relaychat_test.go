@@ -9,14 +9,20 @@ import (
 )
 
 func TestRenderForIRC(t *testing.T) {
-	expected := `Internet Archive:
+	expected := `‹ Example ›
+ 
+***** List of Archives *****
+ 
+Internet Archive:
 • https://web.archive.org/web/20211000000001/https://example.com/
 archive.today:
 • http://archive.today/abcdE
 IPFS:
 • https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
 Telegraph:
-• http://telegra.ph/title-01-01`
+• http://telegra.ph/title-01-01
+ 
+***** End of Archives *****`
 
 	got := ForPublish(&Relaychat{Cols: collects, Data: bundleExample}).String()
 	if got != expected {
