@@ -14,7 +14,7 @@
 [![World Wide Web](https://img.shields.io/badge/Web-15aabf.svg)](https://wabarc.eu.org/)
 [![Nostr](https://img.shields.io/badge/Nostr-8e44ad.svg)](https://iris.to/#/profile/npub1gm4xeu8wlt6aa56zenutkwa0ppjng5axsscv424d0xvv5jalxxzs4hjukz)
 
-Wayback is a web archiving and playback tool that allows users to capture and preserve web content. It provides an IM-style interface to crawl and archive the contents of the web, and a search and replay service to access previously archived pages. Wayback is designed to be used by web archivists, researchers, and anyone who wants to preserve web content and access it in the future.
+Wayback is a web archiving and playback tool that allows users to capture and preserve web content. It provides an IM-style interface for receiving and presenting archived web content, and a search and playback service for retrieving previously archived pages. Wayback is designed to be used by web archivists, researchers, and anyone who wants to preserve web content and access it in the future.
 
 ## Features
 
