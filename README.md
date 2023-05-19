@@ -239,7 +239,34 @@ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANN
 
 ## Screenshots
 
-TODO
+<details><summary>Click to see screenshots of the services.</summary>
+
+### Discord
+![Discord](./docs/assets/discord-server.png)
+
+### Web Service
+![Web](./docs/assets/web.png)
+
+### Mastodon
+![Mastodon](./docs/assets/mastodon.png)
+
+### Matrix
+![Matrix Room](./docs/assets/matrix-room.png)
+
+### IRC
+![IRC](./docs/assets/irc.png)
+
+### Slack
+![Slack Channel](./docs/assets/slack-channel.png)
+
+### Telegram
+![Telegram Bot](./docs/assets/telegram.png)
+![Telegram Channel](./docs/assets/telegram-channel.png)
+
+### XMPP
+![XMPP](./docs/assets/xmpp.png)
+
+</details>
 
 ## Contributing
 
