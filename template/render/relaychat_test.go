@@ -9,18 +9,23 @@ import (
 )
 
 func TestRenderForIRC(t *testing.T) {
-	expected := `‹ Example ›
+	expected := `***** List of Archives *****
  
-***** List of Archives *****
+‹ Example ›
  
-Internet Archive:
-• https://web.archive.org/web/20211000000001/https://example.com/
-archive.today:
-• http://archive.today/abcdE
-IPFS:
-• https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
-Telegraph:
-• http://telegra.ph/title-01-01
+• Source
+> https://example.com/
+ 
+————
+ 
+• Internet Archive:
+> https://web.archive.org/web/20211000000001/https://example.com/
+• archive.today:
+> http://archive.today/abcdE
+• IPFS:
+> https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
+• Telegraph:
+> http://telegra.ph/title-01-01
  
 ***** End of Archives *****`
 

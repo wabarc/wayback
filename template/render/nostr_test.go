@@ -15,9 +15,9 @@ func TestRenderNostrForReply(t *testing.T) {
 func TestRenderNostrForPublish(t *testing.T) {
 	expected := `‹ Example ›
 
-• source
+• Source
 > https://example.com/
-
+ 
 ————
 
 • Internet Archive

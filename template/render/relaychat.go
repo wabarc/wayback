@@ -40,18 +40,18 @@ func (i *Relaychat) ForPublish() *Render {
 		tmplBytes.WriteString(" ›")
 		tmplBytes.WriteString("\n \n")
 	}
-	// tmplBytes.WriteString("Source:")
-	// tmplBytes.WriteString("• ")
-	// tmplBytes.WriteString("\n \n")
-	tmplBytes.Write(i.join(i.main()).Bytes())
+	// tmplBytes.WriteString("Source:\n")
+	tmplBytes.WriteString(original(i.Cols))
+	tmplBytes.WriteString(" \n")
+	tmplBytes.Write(i.main().Bytes())
 
-	return &Render{buf: *tmplBytes}
+	return &Render{buf: *i.join(tmplBytes)}
 }
 
 func (i *Relaychat) main() *bytes.Buffer {
 	tmplBytes := new(bytes.Buffer)
 
-	const tmpl = "{{range $ := .}}{{ $.Arc | name }}:\n• {{ $.Dst }}\n{{end}}"
+	const tmpl = "{{range $ := .}}• {{ $.Arc | name }}:\n> {{ $.Dst }}\n{{end}}"
 
 	tpl, err := template.New("relaychat").Funcs(funcMap()).Parse(tmpl)
 	if err != nil {
