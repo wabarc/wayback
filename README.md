@@ -212,6 +212,12 @@ cat url.txt | wayback
 
 Look at the [full list of configuration options](docs/environment.md).
 
+## Deployment
+
+- [wabarc/on-heroku](https://github.com/wabarc/on-heroku)
+- [wabarc/on-github](https://github.com/wabarc/on-github)
+- [wabarc/on-render](https://github.com/wabarc/on-render)
+
 ### Docker/Podman
 
 ```sh
@@ -230,12 +236,6 @@ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANN
     width="155px"
     />
 </a>
-
-## Deployment
-
-- [wabarc/on-heroku](https://github.com/wabarc/on-heroku)
-- [wabarc/on-github](https://github.com/wabarc/on-github)
-- [wabarc/on-render](https://github.com/wabarc/on-render)
 
 ## Screenshots
 
