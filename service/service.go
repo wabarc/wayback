@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/gookit/color"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -73,11 +74,11 @@ func Shutdown() (errs error) {
 			return errors.New("module not found")
 		}
 
-		logger.Info("stopping %s service...", flag)
+		logger.Info("stopping %s service...", color.Blue.Sprint(flag))
 		if err = mod.Shutdown(); err != nil {
-			errs = fmt.Errorf("shutdown %s failed: %w", flag, err)
+			errs = fmt.Errorf("shutdown %s failed: %w", color.Red.Sprint(flag), err)
 		}
-		logger.Info("stopped %s service", flag)
+		logger.Info("stopped %s service", color.Cyan.Sprint(flag))
 	}
 
 	return

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fatih/color"
+	"github.com/gookit/color"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
@@ -81,11 +81,11 @@ func (d *Discord) Serve() (err error) {
 		return errors.New("Initialize discord failed, error: %v", err)
 	}
 	d.bot.AddHandler(func(s *discord.Session, _ *discord.Ready) {
-		logger.Info("authorized on account %s", color.BlueString(s.State.User.Username))
+		logger.Info("authorized on account %s", color.Blue.Sprint(s.State.User.Username))
 	})
 
 	if channel, err := d.bot.UserChannelCreate(d.opts.DiscordChannel()); err == nil {
-		logger.Info("channel name: %s, channel id: %s", color.BlueString(channel.Name), color.BlueString(channel.ID))
+		logger.Info("channel name: %s, channel id: %s", color.Blue.Sprint(channel.Name), color.Blue.Sprint(channel.ID))
 	}
 
 	commandHandlers := d.commandHandlers()

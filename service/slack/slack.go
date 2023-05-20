@@ -8,7 +8,7 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/fatih/color"
+	"github.com/gookit/color"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 	"github.com/slack-go/slack/socketmode"
@@ -115,7 +115,7 @@ func (s *Slack) Serve() (err error) {
 	if err != nil {
 		return err
 	}
-	logger.Info("authorized on account %s", color.BlueString(user.User))
+	logger.Info("authorized on account %s", color.Blue.Sprint(user.User))
 
 	go func() {
 		for evt := range s.client.Events {
