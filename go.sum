@@ -495,8 +495,8 @@ github.com/wabarc/memento v0.0.0-20221023035729-e42d0fe1cefb h1:mi8kE7ET/CLeMCzQ
 github.com/wabarc/memento v0.0.0-20221023035729-e42d0fe1cefb/go.mod h1:qP6GisnqoSDc5Ivj34yV+Qar3B6tYyLDKx42oCDX1zY=
 github.com/wabarc/playback v0.0.0-20230331122619-84484ab4d599 h1:5L4QkS8MzMQNSDQ36VIaMEu7eSox0c9D5080pyJSZMM=
 github.com/wabarc/playback v0.0.0-20230331122619-84484ab4d599/go.mod h1:7Bs329a9s+wwKvINBacECHMN13VhQLGOQcJAT7gtS74=
-github.com/wabarc/proxier v0.0.0-20230517230719-3e0b9fa22471 h1:4kvMoaeqQGSZw1wzWFc38zk10rMAPrjjNXRcAb1d6BU=
-github.com/wabarc/proxier v0.0.0-20230517230719-3e0b9fa22471/go.mod h1:6fy1Vq25/cm5xXTf8fNiujx/aLUb4mB3lheiajTixUM=
+github.com/wabarc/proxier v0.0.0-20230520080149-2e6c2cb78ef7 h1:oUu1VqXWteoe+0uinzI7JKGaDD+ls/9yu7BuZl2hx04=
+github.com/wabarc/proxier v0.0.0-20230520080149-2e6c2cb78ef7/go.mod h1:6fy1Vq25/cm5xXTf8fNiujx/aLUb4mB3lheiajTixUM=
 github.com/wabarc/rivet v0.1.4-0.20230505152228-2c5c81b4bd10 h1:d1lm7aXwtuVcUjHMW9Cm8CZIhoQtZCpvF2kXNEB2RGs=
 github.com/wabarc/rivet v0.1.4-0.20230505152228-2c5c81b4bd10/go.mod h1:fAjDHISxh7louWQ06lipWB0Dz7eYvQTzOOI86Mj+KiQ=
 github.com/wabarc/screenshot v1.6.1-0.20230515153404-ed9208cc295b h1:LOpFnWJEgQ99Hv/DEK/bgO5oJDaiKfc3yodDcd9Rn84=
