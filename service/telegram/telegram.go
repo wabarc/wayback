@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
+	"github.com/gookit/color"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
@@ -94,11 +94,11 @@ func (t *Telegram) Serve() (err error) {
 	if t.bot == nil {
 		return errors.New("Initialize telegram failed, error: %v", err)
 	}
-	logger.Info("authorized on account %s", color.BlueString(t.bot.Me.Username))
+	logger.Info("authorized on account %s", color.Blue.Sprint(t.bot.Me.Username))
 
 	if channel, err := t.bot.ChatByUsername(t.opts.TelegramChannel()); err == nil {
 		id := strconv.FormatInt(channel.ID, 10)
-		logger.Info("channel title: %s, channel id: %s", color.BlueString(channel.Title), color.BlueString(id))
+		logger.Info("channel title: %s, channel id: %s", color.Blue.Sprint(channel.Title), color.Blue.Sprint(id))
 	}
 
 	// Set bot commands

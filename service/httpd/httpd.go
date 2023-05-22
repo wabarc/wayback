@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/cretz/bine/tor"
-	"github.com/fatih/color"
+	"github.com/gookit/color"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
@@ -116,7 +116,7 @@ func (h *Httpd) Shutdown() error {
 }
 
 func startHTTPServer(server *http.Server) {
-	logger.Info(`Listening on "%s" without TLS`, color.BlueString(server.Addr))
+	logger.Info(`Listening on "%s" without TLS`, color.Blue.Sprint(server.Addr))
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		logger.Fatal("Server failed to start: %v", err)
 	}

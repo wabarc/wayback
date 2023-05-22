@@ -14,7 +14,7 @@ import (
 
 	"github.com/cretz/bine/tor"
 	"github.com/cretz/bine/torutil/ed25519"
-	"github.com/fatih/color"
+	"github.com/gookit/color"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/errors"
 )
@@ -27,7 +27,7 @@ func (h *Httpd) startOnionService(server *http.Server) error {
 		} else {
 			pvk = keypair.PrivateKey()
 		}
-		logger.Info("important to keep the private key: %s", color.BlueString(hex.EncodeToString(pvk)))
+		logger.Info("important to keep the private key: %s", color.Blue.Sprint(hex.EncodeToString(pvk)))
 	} else {
 		privb, err := hex.DecodeString(h.opts.OnionPrivKey())
 		if err != nil {
@@ -73,7 +73,7 @@ func (h *Httpd) startOnionService(server *http.Server) error {
 	}
 	onion.CloseLocalListenerOnClose = true
 
-	logger.Info(`listening on "%s" without TLS`, color.BlueString(onion.LocalListener.Addr().String()))
+	logger.Info(`listening on "%s" without TLS`, color.Blue.Sprint(onion.LocalListener.Addr().String()))
 	logger.Info("please open a Tor capable browser and navigate to http://%v.onion", onion.ID)
 
 	go func() {
