@@ -6,6 +6,7 @@ header:
   license:
     spdx-id: GPL-3.0-or-later
     copyright-owner: Wayback Archiver
+    software-name: wayback
     content: |
       Copyright 2020 Wayback Archiver. All rights reserved.
       Use of this source code is governed by the GNU GPL v3
