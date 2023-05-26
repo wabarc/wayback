@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add docker-compose.yml ([#367](https://github.com/wabarc/wayback/pull/367))
 - Add option to disable onion service ([#372](https://github.com/wabarc/wayback/pull/372))
 - Add support for setting preferred path to Chrome executable ([#375](https://github.com/wabarc/wayback/pull/375))
+- Add support for XMPP ([#380](https://github.com/wabarc/wayback/pull/380))
 
 ### Changed
 - Set NoWait to true for tor listen config ([#368](https://github.com/wabarc/wayback/pull/368))
@@ -19,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor and reorganize service entry ([#389](https://github.com/wabarc/wayback/pull/389))
 - Replace `fatih/color` with `gookit/color` ([#390](https://github.com/wabarc/wayback/pull/390))
 - Using concurrency to manage new workflow runs ([#384](https://github.com/wabarc/wayback/pull/384))
+- Improve documentation ([#385](https://github.com/wabarc/wayback/pull/385))
 
 ## [0.19.1] - 2023-03-21
 
