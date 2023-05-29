@@ -22,7 +22,7 @@ import (
 var (
 	dialer proxy.Dialer
 
-	client   = &http.Client{}
+	client   = &http.Client{Timeout: 30 * time.Second}
 	endpoint = "https://icanhazip.com"
 )
 
