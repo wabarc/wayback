@@ -113,7 +113,7 @@ func filterArtifact(art reduxer.Artifact, upper int64) (paths []string) {
 }
 
 // UploadToDiscord composes files that share with Discord by a given artifact.
-func UploadToDiscord(opts *config.Options, rdx reduxer.Reduxer) (files []*discord.File, fn func()) {
+func UploadToDiscord(opts *config.Options, rdx reduxer.Reduxer) (files []*discord.File, closeFunc func()) {
 	upper := opts.MaxAttachSize("discord")
 	for _, bundle := range rdx.Bundles() {
 		art := bundle.Artifact()
@@ -128,7 +128,7 @@ func UploadToDiscord(opts *config.Options, rdx reduxer.Reduxer) (files []*discor
 		}
 	}
 
-	fn = func() {
+	closeFunc = func() {
 		for _, f := range files {
 			f.Reader.(*os.File).Close()
 		}
