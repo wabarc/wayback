@@ -39,16 +39,18 @@ var (
 )
 
 // Reduxer is the interface that wraps the basic reduxer method.
-//
-// Store sets the *bundle for a Src.
-//
-// Load returns the data stored in the map for a Src, or nil if no value is
-// present. The ok result indicates whether value was found in the map.
-//
-// Flush erases all bundles from the cache.
 type Reduxer interface {
+	// Store sets the *bundle for a Src.
 	Store(Src, *bundle)
+
+	// Load returns the data stored in the map for a Src, or nil if no value is
+	// present. The ok result indicates whether value was found in the map.
 	Load(Src) (*bundle, bool)
+
+	// Bundles returns all bundles with a map.
+	Bundles() map[Src]*bundle
+
+	// Flush erases all bundles from the cache.
 	Flush()
 }
 
@@ -110,6 +112,11 @@ func (bs *bundles) Load(key Src) (v *bundle, ok bool) {
 	v, ok = bs.dirty[key]
 	bs.mutex.RUnlock()
 	return
+}
+
+// Bundles returns all bundles with map.
+func (bs *bundles) Bundles() map[Src]*bundle {
+	return bs.dirty
 }
 
 // Flush removes all bundles from the cache.

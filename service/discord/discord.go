@@ -8,7 +8,6 @@ import (
 	"context"
 	"encoding/base64"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 
@@ -306,22 +305,13 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 		}
 
 		msg := &discord.MessageSend{Content: replyText, Reference: stage.Message.Reference()}
-		var files []*discord.File
-		for _, u := range urls {
-			if bundle, ok := rdx.Load(reduxer.Src(u.String())); ok {
-				files = append(files, service.UploadToDiscord(d.opts, bundle.Artifact())...)
-			}
-		}
+		files, closeFunc := service.UploadToDiscord(d.opts, rdx)
+		defer closeFunc()
 		if len(files) == 0 {
 			logger.Warn("files empty")
 			return nil
 		}
 		msg.Files = files
-		defer func() {
-			for _, f := range files {
-				f.Reader.(*os.File).Close()
-			}
-		}()
 
 		if _, err := d.bot.ChannelMessageSendComplex(m.ChannelID, msg); err != nil {
 			logger.Error("post message to channel failed, %v", err)

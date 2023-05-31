@@ -113,16 +113,25 @@ func filterArtifact(art reduxer.Artifact, upper int64) (paths []string) {
 }
 
 // UploadToDiscord composes files that share with Discord by a given artifact.
-func UploadToDiscord(opts *config.Options, art reduxer.Artifact) (files []*discord.File) {
+func UploadToDiscord(opts *config.Options, rdx reduxer.Reduxer) (files []*discord.File, fn func()) {
 	upper := opts.MaxAttachSize("discord")
-	for _, fp := range filterArtifact(art, upper) {
-		logger.Debug("open file: %s", fp)
-		rd, err := os.Open(filepath.Clean(fp))
-		if err != nil {
-			logger.Error("open file failed: %v", err)
-			continue
+	for _, bundle := range rdx.Bundles() {
+		art := bundle.Artifact()
+		for _, fp := range filterArtifact(art, upper) {
+			logger.Debug("open file: %s", fp)
+			rd, err := os.Open(filepath.Clean(fp))
+			if err != nil {
+				logger.Error("open file failed: %v", err)
+				continue
+			}
+			files = append(files, &discord.File{Name: path.Base(fp), Reader: rd})
 		}
-		files = append(files, &discord.File{Name: path.Base(fp), Reader: rd})
+	}
+
+	fn = func() {
+		for _, f := range files {
+			f.Reader.(*os.File).Close()
+		}
 	}
 
 	return

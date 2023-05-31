@@ -5,7 +5,6 @@
 package discord // import "github.com/wabarc/wayback/publish/discord"
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,7 +12,6 @@ import (
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/wabarc/helper"
@@ -169,16 +167,10 @@ func TestToDiscordChannel(t *testing.T) {
 	handle(mux, strings.Replace(server.URL, "http", "ws", 1))
 
 	d := New(httpClient, opts)
-	txt := render.ForPublish(&render.Discord{Cols: publish.Collects, Data: reduxer.BundleExample()}).String()
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
+	rdx := reduxer.BundleExample()
+	txt := render.ForPublish(&render.Discord{Cols: publish.Collects, Data: rdx}).String()
 
-	art, err := publish.Artifact(ctx, reduxer.BundleExample(), publish.Collects)
-	if err != nil {
-		t.Fatalf("extract data failed: %#v", err)
-	}
-
-	got := d.toChannel(art, txt)
+	got := d.toChannel(rdx, txt)
 	if !got {
 		t.Errorf("Unexpected publish to discord channel got %t instead of %t", got, true)
 	}

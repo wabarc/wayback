@@ -7,7 +7,6 @@ package discord // import "github.com/wabarc/wayback/publish/discord"
 import (
 	"context"
 	"net/http"
-	"os"
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
@@ -59,13 +58,8 @@ func (d *Discord) Publish(ctx context.Context, rdx reduxer.Reduxer, cols []wayba
 		return errors.New("publish to discord: collects empty")
 	}
 
-	art, err := publish.Artifact(ctx, rdx, cols)
-	if err != nil {
-		logger.Warn("extract data failed: %v", err)
-	}
-
 	var body = render.ForPublish(&render.Discord{Cols: cols, Data: rdx}).String()
-	if d.toChannel(art, body) {
+	if d.toChannel(rdx, body) {
 		metrics.IncrementPublish(metrics.PublishDiscord, metrics.StatusSuccess)
 		return nil
 	}
@@ -75,7 +69,7 @@ func (d *Discord) Publish(ctx context.Context, rdx reduxer.Reduxer, cols []wayba
 
 // toChannel for publish to message to Discord channel,
 // returns boolean as result.
-func (d *Discord) toChannel(art reduxer.Artifact, body string) (ok bool) {
+func (d *Discord) toChannel(rdx reduxer.Reduxer, body string) (ok bool) {
 	if body == "" {
 		logger.Warn("post to message to channel failed, body empty")
 		return ok
@@ -96,16 +90,12 @@ func (d *Discord) toChannel(art reduxer.Artifact, body string) (ok bool) {
 	}
 
 	// Send files as reference
-	files := service.UploadToDiscord(d.opts, art)
+	files, closeFunc := service.UploadToDiscord(d.opts, rdx)
+	defer closeFunc()
 	if len(files) == 0 {
 		logger.Debug("without files, complete.")
 		return true
 	}
-	defer func() {
-		for _, f := range files {
-			f.Reader.(*os.File).Close()
-		}
-	}()
 
 	ms := &discord.MessageSend{Files: files, Reference: msg.Reference()}
 	if _, err := d.bot.ChannelMessageSendComplex(d.opts.DiscordChannel(), ms); err != nil {
