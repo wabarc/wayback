@@ -7,6 +7,7 @@ package discord // import "github.com/wabarc/wayback/publish/discord"
 import (
 	"context"
 	"net/http"
+	"os"
 
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
@@ -100,6 +101,12 @@ func (d *Discord) toChannel(art reduxer.Artifact, body string) (ok bool) {
 		logger.Debug("without files, complete.")
 		return true
 	}
+	defer func() {
+		for _, f := range files {
+			f.Reader.(*os.File).Close()
+		}
+	}()
+
 	ms := &discord.MessageSend{Files: files, Reference: msg.Reference()}
 	if _, err := d.bot.ChannelMessageSendComplex(d.opts.DiscordChannel(), ms); err != nil {
 		logger.Error("upload files failed, %v", err)
