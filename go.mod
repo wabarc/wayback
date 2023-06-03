@@ -43,7 +43,7 @@ require (
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20230502052510-dc378f9e202b
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
 	github.com/wabarc/playback v0.0.0-20230331122619-84484ab4d599
-	github.com/wabarc/proxier v0.0.0-20230602144452-40c368621736
+	github.com/wabarc/proxier v0.0.0-20230603074528-11a336042b7b
 	github.com/wabarc/rivet v0.1.4-0.20230505152228-2c5c81b4bd10
 	github.com/wabarc/screenshot v1.6.1-0.20230515153404-ed9208cc295b
 	github.com/wabarc/telegra.ph v0.0.0-20230318134541-a0922e1ace3a
