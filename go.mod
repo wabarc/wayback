@@ -34,7 +34,7 @@ require (
 	github.com/slack-go/slack v0.11.2
 	github.com/spf13/cobra v1.6.1
 	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
-	github.com/wabarc/archive.is v1.3.1-0.20230411045956-7bc7ff721b7d
+	github.com/wabarc/archive.is v1.4.0
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/go-anonfile v0.1.0
 	github.com/wabarc/go-catbox v0.1.0
@@ -43,7 +43,7 @@ require (
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20230502052510-dc378f9e202b
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
 	github.com/wabarc/playback v0.0.0-20230331122619-84484ab4d599
-	github.com/wabarc/proxier v0.0.0-20230603074528-11a336042b7b
+	github.com/wabarc/proxier v0.0.0-20230610135141-b55fe1536465
 	github.com/wabarc/rivet v0.1.4-0.20230505152228-2c5c81b4bd10
 	github.com/wabarc/screenshot v1.6.1-0.20230515153404-ed9208cc295b
 	github.com/wabarc/telegra.ph v0.0.0-20230318134541-a0922e1ace3a
@@ -116,7 +116,7 @@ require (
 	github.com/libp2p/go-libp2p v0.27.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.18 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect

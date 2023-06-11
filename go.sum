@@ -303,8 +303,9 @@ github.com/mattn/go-isatty v0.0.12/go.mod h1:cbi8OIDigv2wuxKPP5vlRcQ1OAZbq2CE4Ky
 github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27kJ6hsGG94=
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
 github.com/mattn/go-isatty v0.0.17/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
-github.com/mattn/go-isatty v0.0.18 h1:DOKFKCQ7FNG2L1rbrmstDN4QVRdS89Nkh85u68Uwp98=
 github.com/mattn/go-isatty v0.0.18/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
+github.com/mattn/go-isatty v0.0.19 h1:JITubQf0MOLdlGRuRq+jtsDlekdYPia9ZFsB8h/APPA=
+github.com/mattn/go-isatty v0.0.19/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635 h1:SX3lH+1XhJ8bUKhSVve0vIpz1YXICbPAQAwLO7EeX7w=
 github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635/go.mod h1:CZ3bPYRNGgvMZr4d/SNMvCObyCQvTgCXdIOrW040z5U=
 github.com/mattn/go-runewidth v0.0.6/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
@@ -467,8 +468,8 @@ github.com/tomnomnom/linkheader v0.0.0-20180905144013-02ca5825eb80/go.mod h1:iFy
 github.com/ugorji/go v1.1.4/go.mod h1:uQMGLiO92mf5W77hV/PUCpI3pbzQx3CRekS0kk+RGrc=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/wabarc/archive.is v1.3.1-0.20230331115359-f27bc96f2b65/go.mod h1:MaYWQ+x3A4ZH33k2K5M9te0T5RBwF4vRS5vdeIYtnUI=
-github.com/wabarc/archive.is v1.3.1-0.20230411045956-7bc7ff721b7d h1:gXcxaYfrff8V+mICj3wmA9SF+QPUQ3RarxR8eSMvt6U=
-github.com/wabarc/archive.is v1.3.1-0.20230411045956-7bc7ff721b7d/go.mod h1:MaYWQ+x3A4ZH33k2K5M9te0T5RBwF4vRS5vdeIYtnUI=
+github.com/wabarc/archive.is v1.4.0 h1:gXOpYokaLjGz6gh5P+mtxA31G3lqlEm8I2T9LCXbMTY=
+github.com/wabarc/archive.is v1.4.0/go.mod h1:7LhCeNRE0hzSjop2qfMarjCSsyQnbPH6bVGqikPzYuM=
 github.com/wabarc/archive.org v1.2.0/go.mod h1:yEmUMlNO2PPAxIvo/Hf/VxOrCS5SBwL2/vCW8pyTWjA=
 github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896 h1:c3uD+IKXpNhtAHC2/fTt7R9dXnNhw1Q6sQrHUX3xo64=
 github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896/go.mod h1:yEmUMlNO2PPAxIvo/Hf/VxOrCS5SBwL2/vCW8pyTWjA=
@@ -495,8 +496,8 @@ github.com/wabarc/memento v0.0.0-20221023035729-e42d0fe1cefb h1:mi8kE7ET/CLeMCzQ
 github.com/wabarc/memento v0.0.0-20221023035729-e42d0fe1cefb/go.mod h1:qP6GisnqoSDc5Ivj34yV+Qar3B6tYyLDKx42oCDX1zY=
 github.com/wabarc/playback v0.0.0-20230331122619-84484ab4d599 h1:5L4QkS8MzMQNSDQ36VIaMEu7eSox0c9D5080pyJSZMM=
 github.com/wabarc/playback v0.0.0-20230331122619-84484ab4d599/go.mod h1:7Bs329a9s+wwKvINBacECHMN13VhQLGOQcJAT7gtS74=
-github.com/wabarc/proxier v0.0.0-20230603074528-11a336042b7b h1:pDC/g8PtfAO2XDPjHsmap9lmrHDSOTGfQjk+dSpq3UI=
-github.com/wabarc/proxier v0.0.0-20230603074528-11a336042b7b/go.mod h1:6fy1Vq25/cm5xXTf8fNiujx/aLUb4mB3lheiajTixUM=
+github.com/wabarc/proxier v0.0.0-20230610135141-b55fe1536465 h1:sHVTPLLitJIvSOcZMZmm+lxPS4TVBqJitmQvF5/yOE0=
+github.com/wabarc/proxier v0.0.0-20230610135141-b55fe1536465/go.mod h1:6fy1Vq25/cm5xXTf8fNiujx/aLUb4mB3lheiajTixUM=
 github.com/wabarc/rivet v0.1.4-0.20230505152228-2c5c81b4bd10 h1:d1lm7aXwtuVcUjHMW9Cm8CZIhoQtZCpvF2kXNEB2RGs=
 github.com/wabarc/rivet v0.1.4-0.20230505152228-2c5c81b4bd10/go.mod h1:fAjDHISxh7louWQ06lipWB0Dz7eYvQTzOOI86Mj+KiQ=
 github.com/wabarc/screenshot v1.6.1-0.20230515153404-ed9208cc295b h1:LOpFnWJEgQ99Hv/DEK/bgO5oJDaiKfc3yodDcd9Rn84=
