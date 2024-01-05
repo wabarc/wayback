@@ -126,7 +126,7 @@ jobs:
 
       - name: Generate meta
         id: meta
-        uses: docker/metadata-action@507c2f2dc502c992ad446e3d7a5dfbe311567a96 # v4.3.0
+        uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c # v5.5.0
         with:
           images: ${{ steps.prep.outputs.images }}
           tags: |
@@ -263,7 +263,7 @@ jobs:
 
       - name: Generate meta
         id: meta
-        uses: docker/metadata-action@507c2f2dc502c992ad446e3d7a5dfbe311567a96 # v4.3.0
+        uses: docker/metadata-action@dbef88086f6cef02e264edb7dbf63250c17cef6c # v5.5.0
         with:
           images: ${{ steps.prep.outputs.images }}
           flavor: |
