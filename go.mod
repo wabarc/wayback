@@ -15,7 +15,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/go-shiori/go-readability v0.0.0-20220215145315-dd6828d2f09b
-	github.com/go-shiori/obelisk v0.0.0-20221119111008-23c015a8fad7
+	github.com/go-shiori/obelisk v0.0.0-20240106093241-f70aef5a2762
 	github.com/google/go-github/v40 v40.0.0
 	github.com/gookit/color v1.5.3
 	github.com/gorilla/mux v1.8.0
