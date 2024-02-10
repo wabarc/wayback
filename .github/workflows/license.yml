@@ -26,3 +26,5 @@ jobs:
   license:
     name: License Checker
     uses: wabarc/.github/.github/workflows/reusable-license.yml@main
+    with:
+      egress-policy: audit
