@@ -45,3 +45,14 @@ header:
     - 'mkdocs.yml'
 
   comment: on-failure
+
+dependency:
+  files:
+    - go.mod
+  licenses:
+    - name: github.com/multiformats/go-base36
+      version: v0.2.0
+      license: Apache-2.0 OR MIT
+    - name: github.com/multiformats/go-multicodec
+      version: v0.9.0
+      license: Apache-2.0 OR MIT
