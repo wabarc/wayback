@@ -336,6 +336,7 @@ jobs:
       scan-type: 'image'
       image-ref: '${{ needs.publish.outputs.image }}:${{ needs.publish.outputs.version }}'
       sarif: 'container-standalone.sarif'
+      egress-policy: 'audit'
 
   trivy-bundle:
     name: Trivy for bundle
@@ -349,3 +350,4 @@ jobs:
       scan-type: 'image'
       image-ref: '${{ needs.allinone.outputs.image }}:${{ needs.allinone.outputs.version }}'
       sarif: 'container-bundle.sarif'
+      egress-policy: 'audit'
