@@ -60,7 +60,7 @@ jobs:
             ghcr.io:443
             github.com:443
             api.github.com:443
-            pkg-containers.githubusercontent.com:443
+            *.githubusercontent.com
             docker.io:443
             auth.docker.io:443
             index.docker.io:443
@@ -208,7 +208,7 @@ jobs:
             github.com:443
             api.github.com:443
             docker.io:443
-            pkg-containers.githubusercontent.com:443
+            *.githubusercontent.com
             auth.docker.io:443
             registry-1.docker.io:443
             production.cloudflare.docker.com:443
@@ -331,7 +331,7 @@ jobs:
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      #actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     with:
       scan-type: 'image'
       image-ref: '${{ needs.publish.outputs.image }}:${{ needs.publish.outputs.version }}'
@@ -344,7 +344,7 @@ jobs:
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      #actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     with:
       scan-type: 'image'
       image-ref: '${{ needs.allinone.outputs.image }}:${{ needs.allinone.outputs.version }}'
