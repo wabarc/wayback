@@ -157,7 +157,7 @@ jobs:
     uses: wabarc/.github/.github/workflows/reusable-builder-snap.yml@main
     with:
       product: wayback
-      channel: edge
+      channel: stable
       publish: ${{ github.repository == 'wabarc/wayback' && github.event_name == 'push' }}
       egress-policy: audit
     secrets:
