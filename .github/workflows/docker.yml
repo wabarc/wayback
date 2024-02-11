@@ -156,14 +156,14 @@ jobs:
             *.cache-from=type=local,src=/tmp/.image-cache/image
             *.cache-to=type=local,dest=/tmp/.image-cache-new/image
 
-      - name: Sign image with a key
+      - name: Siging image
         if: github.event_name != 'pull_request'
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
           COSIGN_PASSWORD: ${{secrets.COSIGN_PASSPHARSE}}
         run: |
-          cosign sign --key env://COSIGN_PRIVATE_KEY ${TAGS}
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${TAGS}
 
       - name: Check manifest
         if: github.event_name != 'pull_request'
@@ -300,7 +300,7 @@ jobs:
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
           COSIGN_PASSWORD: ${{secrets.COSIGN_PASSPHARSE}}
         run: |
-          cosign sign --key env://COSIGN_PRIVATE_KEY ${TAGS}
+          cosign sign --yes --key env://COSIGN_PRIVATE_KEY ${TAGS}
 
       - name: Check manifest
         if: github.event_name != 'pull_request'
