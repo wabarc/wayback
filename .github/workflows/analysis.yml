@@ -49,6 +49,7 @@ jobs:
     with:
       language: ${{ matrix.language }}
       config-file: './.github/codeql/codeql-config.yml'
+      egress-policy: audit
 
   nancy:
     name: Sonatype Nancy
@@ -85,3 +86,4 @@ jobs:
     with:
       scan-type: 'fs'
       sarif: 'filesystem.sarif'
+      egress-policy: audit
