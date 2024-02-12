@@ -15,6 +15,8 @@ on:
 
 permissions:
   contents: read
+  packages: read
+  statuses: write
 
 # New runs to only cancel in-progress runs of the same workflow.
 concurrency:
