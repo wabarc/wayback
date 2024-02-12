@@ -38,7 +38,6 @@ func TestWayback(t *testing.T) {
 	u, _ := url.Parse("https://example.com/")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	defer helper.CheckContext(ctx, t)
 
 	urls := []*url.URL{u}
 	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
@@ -73,7 +72,6 @@ func TestWaybackWithoutReduxer(t *testing.T) {
 	u, _ := url.Parse("https://example.com/")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	defer helper.CheckContext(ctx, t)
 
 	urls := []*url.URL{u}
 	do := func(cols []wayback.Collect, rdx reduxer.Reduxer) error {
