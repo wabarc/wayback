@@ -252,6 +252,9 @@ func capture(ctx context.Context, cfg *config.Options, uri *url.URL, dir string)
 
 	fallback := func() (*screenshot.Screenshots[screenshot.Path], error) {
 		logger.Debug("reduxer using local browser")
+		if os.Getenv("PROXY_SERVER") == "" {
+			os.Setenv("PROXY_SERVER", cfg.Proxy())
+		}
 		shot, err = screenshot.Screenshot[screenshot.Path](ctx, uri, opts...)
 		if err != nil {
 			if err == context.DeadlineExceeded {
