@@ -44,7 +44,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
-        go: [ "1.18", "1.19", "1.20" ]
+        go: [ "1.19", "1.20", "1.21", "1.22" ]
         include:
           # only update test coverage stats with the most recent go version on linux
           - go: 1.x
@@ -192,6 +192,9 @@ jobs:
           make test
           make test-cover
         shell: bash
+        env:
+          CHROMEDP_NO_SANDBOX: true
+          CHROMEDP_WSURLREADTIMEOUT: 60
 
       - name: Upload artifact
         uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
@@ -205,3 +208,6 @@ jobs:
 
       - name: Run integration test
         run: make test-integration
+        env:
+          CHROMEDP_NO_SANDBOX: true
+          CHROMEDP_WSURLREADTIMEOUT: 60

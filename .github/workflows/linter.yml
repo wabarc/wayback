@@ -25,6 +25,12 @@ jobs:
   super-linter:
     name: Super Linter
     uses: wabarc/.github/.github/workflows/reusable-super-linter.yml@main
+    with:
+      filter-regex-exclude: 'install.sh'
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
 
   golangci:
     name: golangci-lint

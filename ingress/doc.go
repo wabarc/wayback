@@ -13,9 +13,10 @@ such as register, as shown in the following example:
 	package main
 
 	import (
-	        _ "github.com/wabarc/wayback/ingress"
+	        "github.com/wabarc/wayback/ingress"
 	        "github.com/wabarc/wayback/publish"
 	        "github.com/wabarc/wayback/service"
+	        _ "github.com/wabarc/wayback/ingress/register"
 	)
 
 	func main() {
@@ -25,6 +26,8 @@ such as register, as shown in the following example:
 	        pub := publish.New(ctx, opts)
 	        go pub.Start()
 	        defer pub.Stop()
+
+	        ingress.Init(opts)
 
 	        // Use the publish service to publish data.
 	        // ...

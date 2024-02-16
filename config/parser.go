@@ -93,6 +93,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 		case "CHROME_REMOTE_ADDR":
 			p.opts.enabledChromeRemote = hasValue(val, defEnabledChromeRemote)
 			p.opts.chromeRemoteAddr = parseString(val, defChromeRemoteAddr)
+		case "WAYBACK_PROXY":
+			p.opts.proxy = parseString(val, defProxy)
 		case "WAYBACK_IPFS_HOST":
 			p.opts.ipfs.host = parseString(val, defIPFSHost)
 		case "WAYBACK_IPFS_PORT":

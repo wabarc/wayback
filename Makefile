@@ -134,8 +134,7 @@ test: ## Run testing
 
 test-integration: ## Run integration testing
 	@echo 'mode: atomic' > coverage.out
-	@go list ./... | xargs -n1 -I{} sh -c 'CGO_ENABLED=1 go test -race -tags=integration -covermode=atomic -coverprofile=coverage.tmp -coverpkg $(go list ./... | tr "\n" ",") {} && tail -n +2 coverage.tmp >> coverage.out || exit 255'
-	@rm coverage.tmp
+	@CGO_ENABLED=1 go test -race -tags=integration -covermode=atomic -parallel=1 -coverprofile=coverage.out ./...
 
 test-cover: ## Collect code coverage
 	@echo "-> Running go tool cover"

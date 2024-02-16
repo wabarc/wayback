@@ -2,7 +2,7 @@
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
-package ingress // import "github.com/wabarc/wayback/ingress"
+package register // import "github.com/wabarc/wayback/ingress/register"
 
 import (
 	_ "github.com/wabarc/wayback/service/discord"

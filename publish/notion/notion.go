@@ -23,6 +23,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/ingress"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
@@ -188,7 +189,7 @@ func (no *Notion) params(cols []wayback.Collect, head, body string) (notion.Crea
 	}
 
 	if doc, err := goquery.NewDocumentFromReader(strings.NewReader(body)); err == nil {
-		nodes := traverseNodes(doc.Contents(), imgbb.NewImgBB(nil, ""))
+		nodes := traverseNodes(doc.Contents(), imgbb.NewImgBB(ingress.Client(), ""))
 		children = append(children, nodes...)
 	}
 
@@ -321,7 +322,12 @@ func download(u *url.URL) (path string, err error) {
 	}
 	defer fd.Close()
 
-	resp, err := http.Get(u.String()) // nosemgrep: gitlab.gosec.G104-1.G107-1, gitlab.gosec.G107-1, gitlab.gosec.G108-1
+	client := ingress.Client()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	resp, err := client.Do(req) // nosemgrep: gitlab.gosec.G104-1.G107-1, gitlab.gosec.G107-1, gitlab.gosec.G108-1
 	if err != nil {
 		return path, err
 	}

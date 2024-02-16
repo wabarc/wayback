@@ -9,7 +9,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -27,6 +26,7 @@ import (
 	"github.com/wabarc/warcraft"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/ingress"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -252,6 +252,9 @@ func capture(ctx context.Context, cfg *config.Options, uri *url.URL, dir string)
 
 	fallback := func() (*screenshot.Screenshots[screenshot.Path], error) {
 		logger.Debug("reduxer using local browser")
+		if os.Getenv("PROXY_SERVER") == "" {
+			os.Setenv("PROXY_SERVER", cfg.Proxy())
+		}
 		shot, err = screenshot.Screenshot[screenshot.Path](ctx, uri, opts...)
 		if err != nil {
 			if err == context.DeadlineExceeded {
@@ -306,12 +309,11 @@ func remotely(ctx context.Context, artifact *Artifact) (err error) {
 		&artifact.Media,
 	}
 
-	c := &http.Client{Timeout: timeout}
-	cat := catbox.New(c)
-	anon := anonfile.NewAnonfile(c)
+	cat := catbox.New(ingress.Client())
+	anon := anonfile.NewAnonfile(ingress.Client())
 	g, _ := errgroup.WithContext(ctx)
 
-	var mu sync.Mutex
+	var mu sync.RWMutex
 	for _, asset := range assets {
 		asset := asset
 		if asset.Local == "" {
@@ -323,6 +325,7 @@ func remotely(ctx context.Context, artifact *Artifact) (err error) {
 		}
 		g.Go(func() error {
 			var remote Remote
+			mu.Lock()
 			func() {
 				r, e := anon.Upload(asset.Local)
 				if e != nil {
@@ -339,7 +342,6 @@ func remotely(ctx context.Context, artifact *Artifact) (err error) {
 					remote.Catbox = c
 				}
 			}()
-			mu.Lock()
 			asset.Remote = remote
 			mu.Unlock()
 			return nil

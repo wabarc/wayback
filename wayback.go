@@ -7,7 +7,6 @@ package wayback // import "github.com/wabarc/wayback"
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"net/url"
 	"os"
 	"sync"
@@ -18,6 +17,7 @@ import (
 	"github.com/wabarc/rivet/ipfs"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/ingress"
 	"github.com/wabarc/wayback/reduxer"
 	"golang.org/x/sync/errgroup"
 
@@ -28,9 +28,6 @@ import (
 
 	pinner "github.com/wabarc/ipfs-pinner"
 )
-
-// TODO: find a better way to handle it
-var client = &http.Client{Timeout: 30 * time.Second}
 
 // Collect results that archived, Arc is name of the archive service,
 // Dst mapping the original URL and archived destination URL,
@@ -81,7 +78,7 @@ type Waybacker interface {
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the IA and returns archived URL as a string.
 func (i IA) Wayback(_ reduxer.Reduxer) string {
-	arc := &ia.Archiver{}
+	arc := &ia.Archiver{Client: ingress.Client()}
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
 		logger.Error("wayback %s to Internet Archive failed: %v", i.URL.String(), err)
@@ -93,7 +90,9 @@ func (i IA) Wayback(_ reduxer.Reduxer) string {
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the IS and returns archived URL as a string.
 func (i IS) Wayback(_ reduxer.Reduxer) string {
-	arc := &is.Archiver{}
+	arc := is.NewArchiver(ingress.Client())
+	defer arc.CloseTor()
+
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
 		logger.Error("wayback %s to archive.today failed: %v", i.URL.String(), err)
@@ -148,7 +147,7 @@ func (i IP) Wayback(rdx reduxer.Reduxer) string {
 // Wayback implements the standard Waybacker interface:
 // it reads URL from the PH and returns archived URL as a string.
 func (i PH) Wayback(rdx reduxer.Reduxer) string {
-	arc := ph.New(client)
+	arc := ph.New(ingress.Client())
 	uri := i.URL.String()
 	ctx := i.ctx
 

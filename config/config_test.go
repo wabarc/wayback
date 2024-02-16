@@ -3070,3 +3070,51 @@ func TestEnableServices(t *testing.T) {
 		})
 	}
 }
+
+func TestProxy(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		address  string
+		expected string
+	}{
+		{
+			address:  "",
+			expected: defProxy,
+		},
+		{
+			address:  "http://127.0.0.1",
+			expected: `http://127.0.0.1`,
+		},
+		{
+			address:  "http://127.0.0.1:1080",
+			expected: `http://127.0.0.1:1080`,
+		},
+		{
+			address:  "https://127.0.0.1:1080",
+			expected: `https://127.0.0.1:1080`,
+		},
+		{
+			address:  "socks5://127.0.0.1:1080",
+			expected: `socks5://127.0.0.1:1080`,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_PROXY", test.address)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.Proxy()
+			if got != test.expected {
+				t.Fatalf(`Unexpected get proxy, got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}
