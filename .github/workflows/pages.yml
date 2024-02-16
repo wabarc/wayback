@@ -34,7 +34,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@c8454efe5d0bdefd25384362fe217428ca277d57 # v2.2.0
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
         with:
           egress-policy: audit
           disable-telemetry: true
