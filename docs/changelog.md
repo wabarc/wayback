@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Using concurrency to manage new workflow runs ([#384](https://github.com/wabarc/wayback/pull/384))
 - Improve documentation ([#385](https://github.com/wabarc/wayback/pull/385))
 - Refactoring HTTP client for better consistency and maintainability ([#401](https://github.com/wabarc/wayback/pull/401))
+- ci: bump action version for page workflow
 
 ## [0.19.1] - 2023-03-21
 
