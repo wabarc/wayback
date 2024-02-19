@@ -65,6 +65,19 @@ jobs:
           egress-policy: audit
           disable-telemetry: true
 
+      - name: Check out code base
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - name: Set up Go ${{ matrix.go }}.x
         uses: actions/setup-go@c4a742cab115ed795e34d4513e2cf7d472deb55f # v3.3.1
         with:
@@ -154,19 +167,6 @@ jobs:
           echo "PLAYBACK_MEILI_ENDPOINT=${{ vars.WAYBACK_MEILI_ENDPOINT }}" >> $GITHUB_ENV
           echo "WAYBACK_MEILI_APIKEY=${{ vars.MEILISEARCH_APIKEY }}" >> $GITHUB_ENV
           echo "PLAYBACK_MEILI_APIKEY=${{ vars.MEILISEARCH_APIKEY }}" >> $GITHUB_ENV
-
-      - name: Check out code base
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
-        with:
-          fetch-depth: 0
-
-      - name: Check out code base
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Cache go module
         uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7 # v3.0.11
