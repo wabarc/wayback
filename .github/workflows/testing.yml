@@ -87,12 +87,10 @@ jobs:
           chrome-version: stable
 
       - name: Set up Meilisearch
-        if: matrix.os == 'ubuntu-latest'
-        uses: moy2010/meilisearch-github-action@fcc5ef714af0596633665032d459bfb279d3c730 # 0.1.4
+        uses: wabarc/.github/meilisearch@7be5fc193abfb1d21e21691ebe24a8005808b94f
         with:
-          meilisearch-version: ${{ vars.MEILISEARCH_VERSION }}
-          meilisearch-port: ${{ vars.MEILISEARCH_PORT }}
-          meilisearch-api-key: ${{ vars.MEILISEARCH_APIKEY }}
+          master-key: ${{ vars.MEILISEARCH_APIKEY }}
+          port: ${{ vars.MEILISEARCH_PORT }}
 
       - name: Set up Chocolatey
         if: matrix.os == 'windows-latest'
