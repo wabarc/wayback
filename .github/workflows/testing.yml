@@ -100,7 +100,7 @@ jobs:
           chrome-version: stable
 
       - name: Set up Meilisearch
-        uses: wabarc/.github/meilisearch@7be5fc193abfb1d21e21691ebe24a8005808b94f
+        uses: wabarc/.github/meilisearch@0f543fdeb4abc7cc8639292b822edde87c85d4bb
         with:
           master-key: ${{ vars.MEILISEARCH_APIKEY }}
           port: ${{ vars.MEILISEARCH_PORT }}
