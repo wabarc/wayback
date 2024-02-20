@@ -21,8 +21,8 @@ import (
 
 var (
 	dialer proxy.Dialer
+	rt     http.RoundTripper
 
-	client   = &http.Client{}
 	endpoint = "https://icanhazip.com"
 )
 
@@ -38,15 +38,17 @@ func initClient(opts *config.Options) {
 			return
 		}
 
-		rt, err := proxier.NewUTLSRoundTripper(proxier.Proxy(opts.Proxy()))
+		rt, err = proxier.NewUTLSRoundTripper(proxier.Proxy(opts.Proxy()))
 		if err != nil {
 			logger.Error("create utls round tripper failed: %v", err)
+			return
 		}
 		dialer = rt.(*proxier.UTLSRoundTripper).Dialer()
-		client.Transport = rt
 
 		if opts.HasDebugMode() {
 			go func() {
+				client := &http.Client{Timeout: 30 * time.Second}
+				client.Transport = rt
 				for {
 					ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 					req, _ := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil) // nolint:errcheck
@@ -85,6 +87,7 @@ func canConnect(host, port string) bool {
 
 // Client returns http.Client
 func Client() *http.Client {
+	client := &http.Client{Transport: rt}
 	return client
 }
 

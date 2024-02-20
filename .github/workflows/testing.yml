@@ -44,7 +44,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
-        go: [ "1.18", "1.19", "1.20" ]
+        go: [ "1.19", "1.20", "1.21", "1.22" ]
         include:
           # only update test coverage stats with the most recent go version on linux
           - go: 1.x
@@ -64,6 +64,19 @@ jobs:
         with:
           egress-policy: audit
           disable-telemetry: true
+
+      - name: Check out code base
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Check out code base
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Set up Go ${{ matrix.go }}.x
         uses: actions/setup-go@c4a742cab115ed795e34d4513e2cf7d472deb55f # v3.3.1
@@ -87,12 +100,10 @@ jobs:
           chrome-version: stable
 
       - name: Set up Meilisearch
-        if: matrix.os == 'ubuntu-latest'
-        uses: moy2010/meilisearch-github-action@fcc5ef714af0596633665032d459bfb279d3c730 # 0.1.4
+        uses: wabarc/.github/meilisearch@0c62d131c3884390bd63a2b7650a21fe16581bfe
         with:
-          meilisearch-version: ${{ vars.MEILISEARCH_VERSION }}
-          meilisearch-port: ${{ vars.MEILISEARCH_PORT }}
-          meilisearch-api-key: ${{ vars.MEILISEARCH_APIKEY }}
+          master-key: ${{ vars.MEILISEARCH_APIKEY }}
+          port: ${{ vars.MEILISEARCH_PORT }}
 
       - name: Set up Chocolatey
         if: matrix.os == 'windows-latest'
@@ -146,29 +157,11 @@ jobs:
           # echo "$(which you-get)" >> $GITHUB_PATH
           # echo "$(which ffmpeg)" >> $GITHUB_PATH
           # echo "$(which wget)" >> $GITHUB_PATH
-
-      - name: Set environments for Meilisearch
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash
-        run: |
-          # Set env to enable reduxer
+          # Set environments for Meilisearch to enable reduxer
           echo "WAYBACK_MEILI_ENDPOINT=${{ vars.WAYBACK_MEILI_ENDPOINT }}" >> $GITHUB_ENV
           echo "PLAYBACK_MEILI_ENDPOINT=${{ vars.WAYBACK_MEILI_ENDPOINT }}" >> $GITHUB_ENV
           echo "WAYBACK_MEILI_APIKEY=${{ vars.MEILISEARCH_APIKEY }}" >> $GITHUB_ENV
           echo "PLAYBACK_MEILI_APIKEY=${{ vars.MEILISEARCH_APIKEY }}" >> $GITHUB_ENV
-
-      - name: Check out code base
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
-        with:
-          fetch-depth: 0
-
-      - name: Check out code base
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Cache go module
         uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7 # v3.0.11
@@ -192,6 +185,9 @@ jobs:
           make test
           make test-cover
         shell: bash
+        env:
+          CHROMEDP_NO_SANDBOX: true
+          CHROMEDP_WSURLREADTIMEOUT: 60
 
       - name: Upload artifact
         uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # v3.1.1
@@ -205,3 +201,6 @@ jobs:
 
       - name: Run integration test
         run: make test-integration
+        env:
+          CHROMEDP_NO_SANDBOX: true
+          CHROMEDP_WSURLREADTIMEOUT: 60
