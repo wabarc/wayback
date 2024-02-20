@@ -157,12 +157,7 @@ jobs:
           # echo "$(which you-get)" >> $GITHUB_PATH
           # echo "$(which ffmpeg)" >> $GITHUB_PATH
           # echo "$(which wget)" >> $GITHUB_PATH
-
-      - name: Set environments for Meilisearch
-        if: matrix.os == 'ubuntu-latest'
-        shell: bash
-        run: |
-          # Set env to enable reduxer
+          # Set environments for Meilisearch to enable reduxer
           echo "WAYBACK_MEILI_ENDPOINT=${{ vars.WAYBACK_MEILI_ENDPOINT }}" >> $GITHUB_ENV
           echo "PLAYBACK_MEILI_ENDPOINT=${{ vars.WAYBACK_MEILI_ENDPOINT }}" >> $GITHUB_ENV
           echo "WAYBACK_MEILI_APIKEY=${{ vars.MEILISEARCH_APIKEY }}" >> $GITHUB_ENV
