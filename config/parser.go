@@ -159,6 +159,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.irc.channel = parseString(val, defIRCChannel)
 		case "WAYBACK_IRC_SERVER":
 			p.opts.irc.server = parseString(val, defIRCServer)
+		case "WAYBACK_IRC_SECURE":
+			p.opts.irc.secure = parseBool(val, defIRCSecure)
 		case "WAYBACK_MATRIX_HOMESERVER":
 			p.opts.matrix.homeserver = parseString(val, defMatrixHomeserver)
 		case "WAYBACK_MATRIX_USERID":

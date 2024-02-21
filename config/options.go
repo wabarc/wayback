@@ -65,6 +65,7 @@ const (
 	defIRCPassword = ""
 	defIRCChannel  = ""
 	defIRCServer   = "irc.libera.chat:6697"
+	defIRCSecure   = true
 
 	defXMPPUsername = ""
 	defXMPPPassword = ""
@@ -229,6 +230,7 @@ type irc struct {
 	password string
 	channel  string
 	server   string
+	secure   bool
 }
 
 type onion struct {
@@ -337,6 +339,7 @@ func NewOptions() *Options {
 			password: defIRCPassword,
 			channel:  defIRCChannel,
 			server:   defIRCServer,
+			secure:   defIRCSecure,
 		},
 		onion: &onion{
 			localPort:   defOnionLocalPort,
@@ -627,6 +630,11 @@ func (o *Options) IRCChannel() string {
 // IRCServer returns server of IRC
 func (o *Options) IRCServer() string {
 	return o.irc.server
+}
+
+// IRCSecure returns whether use TLS for IRC connection.
+func (o *Options) IRCSecure() bool {
+	return o.irc.secure
 }
 
 // PublishToIRCChannel returns whether publish results to IRC channel.
