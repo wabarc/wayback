@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gookit/color"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
@@ -117,18 +118,30 @@ func (i *IRC) Serve() error {
 		return errors.Wrap(err, "failed to parse irc server")
 	}
 
+	secure := true
 	dialer := ingress.Dialer()
+conn:
 	conn, err := dialer.Dial("tcp", i.opts.IRCServer())
 	if err != nil {
 		return errors.Wrap(err, "failed to establish connection")
 	}
-	conn = tls.Client(conn, &tls.Config{MinVersion: tls.VersionTLS12, ServerName: srv.Hostname()})
+	if secure {
+		conn = tls.Client(conn, &tls.Config{MinVersion: tls.VersionTLS12, ServerName: srv.Hostname()})
+	}
 	i.conn = irc.NewClient(conn, config)
-	logger.Info("Serving IRC server: %s, nick: %s", i.opts.IRCServer(), i.conn.CurrentNick())
+	logger.Info("Serving IRC server: %s, nick: %s", i.opts.IRCServer(), color.Blue.Sprint(i.conn.CurrentNick()))
 
 	// Block until context done
 	err = i.conn.RunContext(i.ctx)
 	if err != nil {
+		switch {
+		case err.Error() == "EOF", err.Error() == "ping timeout":
+			goto conn
+		case strings.HasPrefix(err.Error(), "tls:"):
+			secure = false
+			logger.Info("Serving IRC server with TLS failed, fallback to non-TLS")
+			goto conn
+		}
 		logger.Error("failed to run, error: %v", err)
 		return errors.Wrap(err, "failed to run irc bot")
 	}
