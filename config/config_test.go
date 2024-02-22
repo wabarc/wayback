@@ -1630,52 +1630,6 @@ func TestIRC(t *testing.T) {
 			tt.call(t, opts, tt.want)
 		})
 	}
-
-	testsBool := []struct {
-		name string
-		envs map[string]bool
-		call func(*testing.T, *Options, bool)
-		want bool
-	}{
-		{
-			name: "default irc secure",
-			envs: map[string]bool{
-				"WAYBACK_IRC_SECURE": true,
-			},
-			call: func(t *testing.T, opts *Options, want bool) {
-				called := opts.IRCSecure()
-				if called != want {
-					t.Errorf(`Unexpected get the irc secure, got %v instead of %v`, called, want)
-				}
-			},
-			want: defIRCSecure,
-		},
-		{
-			name: "specified irc secure",
-			envs: map[string]bool{
-				"WAYBACK_IRC_SECURE": false,
-			},
-			call: func(t *testing.T, opts *Options, want bool) {
-				called := opts.IRCSecure()
-				if called != want {
-					t.Errorf(`Unexpected get the irc secure, got %v instead of %v`, called, want)
-				}
-			},
-			want: false,
-		},
-	}
-	for _, tt := range testsBool {
-		t.Run(tt.name, func(t *testing.T) {
-			for key, val := range tt.envs {
-				t.Setenv(key, strconv.FormatBool(val))
-			}
-			opts, err := NewParser().ParseEnvironmentVariables()
-			if err != nil {
-				t.Fatalf(`Parsing environment variables failed: %v`, err)
-			}
-			tt.call(t, opts, tt.want)
-		})
-	}
 }
 
 func TestMatrix(t *testing.T) {

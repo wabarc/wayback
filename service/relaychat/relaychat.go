@@ -122,9 +122,7 @@ func (i *IRC) Serve() error {
 	if err != nil {
 		return errors.Wrap(err, "failed to establish connection")
 	}
-	if i.opts.IRCSecure() {
-		conn = tls.Client(conn, &tls.Config{MinVersion: tls.VersionTLS12, ServerName: srv.Hostname()})
-	}
+	conn = tls.Client(conn, &tls.Config{MinVersion: tls.VersionTLS12, ServerName: srv.Hostname()})
 	i.conn = irc.NewClient(conn, config)
 	logger.Info("Serving IRC server: %s, nick: %s", i.opts.IRCServer(), i.conn.CurrentNick())
 
