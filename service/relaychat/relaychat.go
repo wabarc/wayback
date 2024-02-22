@@ -74,39 +74,7 @@ func (i *IRC) Serve() error {
 		Name: i.opts.IRCName(),
 		Pass: i.opts.IRCPassword(),
 		Handler: irc.HandlerFunc(func(c *irc.Client, m *irc.Message) {
-			logger.Debug("received message: %#v", m)
-
-			if m.Command == "ERROR" {
-				logger.Error("failed to handle irc request: %s", m)
-				return
-			}
-
-			if m.Command == "001" && i.opts.IRCChannel() != "" {
-				if err := c.Writef("JOIN %s", i.opts.IRCChannel()); err != nil {
-					logger.Error("failed to join %q channel: %v", err)
-				}
-				return
-			}
-
-			if m.Command == "NOTICE" && m.Prefix.Name == "NickServ" && strings.Contains(m.Trailing(), "dentified") {
-				logger.Debug("received command %q skipped", m.Command)
-				return
-			}
-
-			if m.Command != "PRIVMSG" {
-				logger.Debug("received command %q, skipped", m.Command)
-				return
-			}
-
-			if c.FromChannel(m) {
-				logger.Debug("received message from channel, skipped")
-				return
-			}
-
-			if err := i.process(m); err != nil {
-				logger.Error("process failure, message: %s, error: %v", m, err)
-				return
-			}
+			i.handle(c, m)
 		}),
 		PingFrequency: 3 * time.Second,
 		PingTimeout:   time.Minute,
@@ -152,6 +120,42 @@ conn:
 // Shutdown shuts down the IRC service, it always return a nil error.
 func (i *IRC) Shutdown() error {
 	return nil
+}
+
+func (i *IRC) handle(c *irc.Client, m *irc.Message) {
+	logger.Debug("received message: %#v", m)
+
+	if m.Command == "ERROR" {
+		logger.Error("failed to handle irc request: %s", m)
+		return
+	}
+
+	if m.Command == "001" && i.opts.IRCChannel() != "" {
+		if err := c.Writef("JOIN %s", i.opts.IRCChannel()); err != nil {
+			logger.Error("failed to join %q channel: %v", err)
+		}
+		return
+	}
+
+	if m.Command == "NOTICE" && m.Prefix.Name == "NickServ" && strings.Contains(m.Trailing(), "dentified") {
+		logger.Debug("received command %q skipped", m.Command)
+		return
+	}
+
+	if m.Command != "PRIVMSG" {
+		logger.Debug("received command %q, skipped", m.Command)
+		return
+	}
+
+	if c.FromChannel(m) {
+		logger.Debug("received message from channel, skipped")
+		return
+	}
+
+	if err := i.process(m); err != nil {
+		logger.Error("process failure, message: %s, error: %v", m, err)
+		return
+	}
 }
 
 func (i *IRC) process(m *irc.Message) error {
