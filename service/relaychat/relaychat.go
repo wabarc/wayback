@@ -107,7 +107,7 @@ conn:
 			goto conn
 		case strings.HasPrefix(err.Error(), "tls:"):
 			secure = false
-			logger.Info("Serving IRC server with TLS failed, fallback to non-TLS")
+			logger.Warn("Serving IRC server with TLS failed, fallback to non-TLS")
 			goto conn
 		}
 		logger.Error("failed to run, error: %v", err)
