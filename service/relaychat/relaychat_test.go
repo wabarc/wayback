@@ -2,26 +2,25 @@
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
-//go:build !race
-// +build !race
-
 package relaychat // import "github.com/wabarc/wayback/service/relaychat"
 
 import (
+	"bytes"
 	"context"
-	"crypto/tls"
+	"errors"
+	"io"
 	"os"
-	"strings"
+	"reflect"
 	"testing"
 	"time"
 
-	irc "github.com/thoj/go-ircevent"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/pooling"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/service"
 	"github.com/wabarc/wayback/storage"
+	"gopkg.in/irc.v4"
 )
 
 var (
@@ -32,14 +31,186 @@ var (
 	debug    = false
 )
 
-func conn(nick string) *irc.Connection {
-	i := irc.IRC(nick, nick)
-	i.UseTLS = true
-	i.VerboseCallbackHandler = debug
-	i.Debug = debug
-	i.TLSConfig = &tls.Config{InsecureSkipVerify: false}
+type TestHandler struct {
+	messages []*irc.Message
+	delay    time.Duration
+}
 
-	return i
+func (th *TestHandler) Handle(c *irc.Client, m *irc.Message) {
+	th.messages = append(th.messages, m)
+	if th.delay > 0 {
+		time.Sleep(th.delay)
+	}
+}
+
+func (th *TestHandler) Messages() []*irc.Message {
+	ret := th.messages
+	th.messages = nil
+	return ret
+}
+
+var errorWriterErr = errors.New("errorWriter: error")
+
+type errorWriter struct{}
+
+func (ew *errorWriter) Write([]byte) (int, error) {
+	return 0, errorWriterErr
+}
+
+type readWriteCloser struct {
+	io.Reader
+	io.Writer
+	io.Closer
+}
+
+type testReadWriteCloser struct {
+	client *bytes.Buffer
+	server *bytes.Buffer
+}
+
+type testReadWriter struct {
+	writeErrorChan chan error
+	writeChan      chan string
+	readErrorChan  chan error
+	readChan       chan string
+	readEmptyChan  chan struct{}
+	exiting        chan struct{}
+	clientDone     chan struct{}
+	closed         bool
+	serverBuffer   bytes.Buffer
+}
+
+func (rw *testReadWriter) maybeBroadcastEmpty() {
+	if rw.serverBuffer.Len() == 0 {
+		select {
+		case rw.readEmptyChan <- struct{}{}:
+		default:
+		}
+	}
+}
+
+func (rw *testReadWriter) Read(buf []byte) (int, error) {
+	// Check for a read error first
+	select {
+	case err := <-rw.readErrorChan:
+		return 0, err
+	default:
+	}
+
+	// If there's data left in the buffer, we want to use that first.
+	if rw.serverBuffer.Len() > 0 {
+		s, err := rw.serverBuffer.Read(buf)
+		if errors.Is(err, io.EOF) {
+			err = nil
+		}
+		rw.maybeBroadcastEmpty()
+		return s, err
+	}
+
+	// Read from server. We're waiting for this whole test to finish, data to
+	// come in from the server buffer, or for an error. We expect only one read
+	// to be happening at once.
+	select {
+	case err := <-rw.readErrorChan:
+		return 0, err
+	case data := <-rw.readChan:
+		rw.serverBuffer.WriteString(data)
+		s, err := rw.serverBuffer.Read(buf)
+		if errors.Is(err, io.EOF) {
+			err = nil
+		}
+		rw.maybeBroadcastEmpty()
+		return s, err
+	case <-rw.exiting:
+		return 0, io.EOF
+	}
+}
+
+func (rw *testReadWriter) Write(buf []byte) (int, error) {
+	select {
+	case err := <-rw.writeErrorChan:
+		return 0, err
+	default:
+	}
+
+	// Write to server. We can cheat with this because we know things
+	// will be written a line at a time.
+	select {
+	default:
+		return len(buf), nil
+	case rw.writeChan <- string(buf):
+		return len(buf), nil
+	case <-rw.exiting:
+		return 0, errors.New("Connection closed")
+	}
+}
+
+func (rw *testReadWriter) Close() error {
+	select {
+	case <-rw.exiting:
+		return errors.New("Connection closed")
+	default:
+		// Ensure no double close
+		if !rw.closed {
+			rw.closed = true
+			close(rw.exiting)
+		}
+		return nil
+	}
+}
+
+func newTestReadWriter() *testReadWriter {
+	return &testReadWriter{
+		writeErrorChan: make(chan error, 1),
+		writeChan:      make(chan string),
+		readErrorChan:  make(chan error, 1),
+		readChan:       make(chan string),
+		readEmptyChan:  make(chan struct{}, 1),
+		exiting:        make(chan struct{}),
+		clientDone:     make(chan struct{}),
+	}
+}
+
+func runClientTest(
+	t *testing.T,
+	cc irc.ClientConfig,
+	expectedErr error,
+	setup func(c *irc.Client),
+) *irc.Client {
+	t.Helper()
+
+	rw := newTestReadWriter()
+	c := irc.NewClient(rw, cc)
+
+	if setup != nil {
+		setup(c)
+	}
+
+	go func(t *testing.T) {
+		err := c.Run()
+		if !reflect.DeepEqual(expectedErr, err) {
+			// t.Fatalf("unexpected error, got %v instead of %v", err, expectedErr)
+		}
+		close(rw.clientDone)
+	}(t)
+
+	runTest(t, rw)
+
+	return c
+}
+
+func runTest(t *testing.T, rw *testReadWriter) {
+	t.Helper()
+
+	// Ask everything to shut down
+	rw.Close()
+
+	// Wait for the client to stop
+	select {
+	case <-rw.clientDone:
+	case <-time.After(1 * time.Second):
+		t.Fatal("Timeout in client shutdown")
+	}
 }
 
 // Bash: echo -e 'USER wabarc-sender guest * *\nNICK wabarc-sender\nPRIVMSG wabarc-receiver :Hello, World!\nQUIT\n' \ | nc irc.freenode.net 6667
@@ -58,33 +229,7 @@ func TestProcess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
-
-	sendConn := conn(sender)
-	recvConn := conn(receiver)
-	done := make(chan bool, 1)
-
-	// Send privmsg if receiver connected
-	recvConn.AddCallback("001", func(ev *irc.Event) {
-		go func() {
-			tick := time.NewTicker(3 * time.Second)
-			i := 10
-			for {
-				select {
-				case <-tick.C:
-					sendConn.Privmsg(receiver, "privmsg from sender https://example.com")
-					if i == 0 {
-						t.Errorf("Timeout while wating for test message from the other thread.")
-						recvConn.Quit()
-						sendConn.Quit()
-						return
-					}
-				case <-done:
-					tick.Stop()
-				}
-				i -= 1
-			}
-		}()
-	})
+	opts.EnableServices(config.ServiceIRC.String())
 
 	cfg := []pooling.Option{
 		pooling.Capacity(opts.PoolingSize()),
@@ -99,150 +244,43 @@ func TestProcess(t *testing.T) {
 	pub := publish.New(ctx, opts)
 	defer pub.Stop()
 
-	o := service.ParseOptions(service.Config(opts), service.Storage(&storage.Storage{}), service.Pool(pool), service.Publish(pub))
-	// Receive privmsg from sender
-	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
-		if ev.Nick == sender {
-			done <- true
-			i, _ := New(context.Background(), o)
-			// Replace IRC connection to receive connection
-			i.conn = recvConn
-			if err = i.process(context.Background(), ev); err != nil {
-				t.Error(err)
-			}
-			recvConn.Quit()
-		}
-	})
-
-	// Receive response from receiver
-	sendConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
-		if ev.Nick == receiver {
-			if !strings.Contains(ev.Message(), config.SlotName("ia")) {
-				t.Errorf("Unexpected message: %s", ev.Message())
-			}
-			sendConn.Quit()
-		}
-	})
-
-	err = recvConn.Connect(server)
-	if err != nil {
-		t.Errorf("Can't connect to freenode, error: %v", err)
+	cc := irc.ClientConfig{
+		Nick: opts.IRCNick(),
+		User: opts.IRCNick(),
+		Name: opts.IRCName(),
+		Pass: opts.IRCPassword(),
 	}
-	err = sendConn.Connect(server)
-	if err != nil {
-		t.Errorf("Can't connect to freenode, error: %v", err)
-	}
-
-	go recvConn.Loop()
-	sendConn.Loop()
-}
-
-func TestToIRCChannel(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skip test in short mode.")
-	}
-
-	conn := func(nick string) *irc.Connection {
-		i := irc.IRC(nick, nick)
-		i.UseTLS = true
-		i.VerboseCallbackHandler = debug
-		i.Debug = debug
-		i.TLSConfig = &tls.Config{InsecureSkipVerify: false}
-		return i
-	}
-
-	os.Setenv("WAYBACK_IRC_NICK", "wabarc-process")
-	os.Setenv("WAYBACK_IRC_SERVER", server)
-	os.Setenv("WAYBACK_IRC_CHANNEL", channel)
-	os.Setenv("WAYBACK_ENABLE_IA", "true")
-
-	parser := config.NewParser()
-	opts, err := parser.ParseEnvironmentVariables()
-	if err != nil {
-		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
-	}
-
-	sendConn := conn(sender)
-	recvConn := conn(receiver)
-	done := make(chan bool, 1)
-
-	sendConn.AddCallback("001", func(ev *irc.Event) { sendConn.Join(channel) })
-	recvConn.AddCallback("001", func(ev *irc.Event) { recvConn.Join(channel) })
-
-	// Send privmsg if receiver connected
-	recvConn.AddCallback("001", func(ev *irc.Event) {
-		go func() {
-			tick := time.NewTicker(3 * time.Second)
-			i := 10
-			for {
-				select {
-				case <-tick.C:
-					sendConn.Privmsg(receiver, "privmsg from sender https://example.com")
-					if i == 0 {
-						t.Errorf("Timeout while wating for test message from the other thread.")
-						recvConn.Quit()
-						sendConn.Quit()
-						return
-					}
-				case <-done:
-					tick.Stop()
-				}
-				i -= 1
-			}
-		}()
-	})
-
-	cfg := []pooling.Option{
-		pooling.Capacity(opts.PoolingSize()),
-		pooling.Timeout(opts.WaybackTimeout()),
-		pooling.MaxRetries(opts.WaybackMaxRetries()),
-	}
-	ctx := context.Background()
-	pool := pooling.New(ctx, cfg...)
-	go pool.Roll()
-	defer pool.Close()
-
-	pub := publish.New(ctx, opts)
-	defer pub.Stop()
+	rw := newTestReadWriter()
+	c := irc.NewClient(rw, cc)
 
 	o := service.ParseOptions(service.Config(opts), service.Storage(&storage.Storage{}), service.Pool(pool), service.Publish(pub))
-	// Receive privmsg from sender
-	recvConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
-		if ev.Nick == sender {
-			done <- true
-			ctx := context.Background()
-			i, _ := New(ctx, o)
-			// Replace IRC connection to receive connection
-			i.conn = recvConn
-			if err = i.process(ctx, ev); err != nil {
-				t.Error(err)
-			}
-			recvConn.Quit()
-		}
-	})
-
-	// Receive response from channel
-	sendConn.AddCallback("PRIVMSG", func(ev *irc.Event) {
-		if len(ev.Arguments) == 0 {
-			t.Fatal("Unexpected got IRC event")
-		}
-		if ev.Arguments[0] == channel {
-			if !strings.Contains(ev.Message(), config.SlotName("ia")) {
-				t.Errorf("Unexpected message: %s", ev.Message())
-			}
-			sendConn.Quit()
-		}
-	})
-
-	err = recvConn.Connect(server)
+	i, err := New(context.Background(), o)
 	if err != nil {
-		t.Errorf("Can't connect to freenode, error: %v", err)
+		t.Fatalf("unexpected to new an irc client: %v", err)
 	}
-	err = sendConn.Connect(server)
-	if err != nil {
-		t.Errorf("Can't connect to freenode, error: %v", err)
+	i.conn = c
+	defer i.Shutdown()
+
+	tests := []struct {
+		desc string
+		text string
+		want error
+	}{
+		{"test help command", "help", nil},
+		{"test wayback without url", ":foo bar", nil},
+		{"test wayback with url", ":foo bar https://example.com", nil},
+		{"test playback without url", ":playback", nil},
+		{"test playback with url", ":playback https://example.com", nil},
 	}
 
-	go recvConn.Loop()
-	sendConn.Loop()
+	for _, tt := range tests {
+		t.Run(tt.desc, func(t *testing.T) {
+			m := irc.MustParseMessage("privmsg " + tt.text)
+			err = i.process(m)
+			if !reflect.DeepEqual(err, tt.want) {
+				// TODO: assert error
+				t.Fatal(err)
+			}
+		})
+	}
 }

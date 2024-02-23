@@ -33,7 +33,6 @@ require (
 	github.com/rs/xid v1.4.0
 	github.com/slack-go/slack v0.11.2
 	github.com/spf13/cobra v1.6.1
-	github.com/thoj/go-ircevent v0.0.0-20190807115034-8e7ce4b5a1eb
 	github.com/wabarc/archive.is v1.4.0
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/go-anonfile v0.1.0
@@ -51,6 +50,7 @@ require (
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/net v0.21.0
 	golang.org/x/sync v0.6.0
+	gopkg.in/irc.v4 v4.0.0
 	gopkg.in/telebot.v3 v3.0.0-20220130115853-f0291132d3c3
 	maunium.net/go/mautrix v0.12.0
 	mellium.im/sasl v0.3.1
@@ -156,6 +156,7 @@ require (
 	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9 // indirect
 	golang.org/x/tools v0.17.0 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect

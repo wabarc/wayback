@@ -271,7 +271,7 @@ func capture(ctx context.Context, cfg *config.Options, uri *url.URL, dir string)
 		logger.Debug("reduxer using remote browser")
 		browser, er := screenshot.NewChromeRemoteScreenshoter[screenshot.Path](remote)
 		if er != nil {
-			logger.Error("screenshot dial failed: %v", er)
+			logger.Warn("screenshot dial failed: %v", er)
 			return fallback()
 		}
 		shot, err = browser.Screenshot(ctx, uri, opts...)

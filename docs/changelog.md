@@ -24,6 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactoring HTTP client for better consistency and maintainability ([#401](https://github.com/wabarc/wayback/pull/401))
 - ci: bump action version for page workflow
 - Replace meilisearch actions with `wabarc/.github/meilisearch` instead ([#491](https://github.com/wabarc/wayback/pull/491))
+- Proxy connection to IRC server ([#402](https://github.com/wabarc/wayback/pull/402))
+  - Change `github.com/thoj/go-ircevent` to `gopkg.in/irc.v4`
+  - Fix `daemon` flag not working when value is `irc`
+  - Add support for playback from IRC
+  - Add support for place IRC name
+  - Fallback to non-TLS server
+  - Styling IRC message
 
 ## [0.19.1] - 2023-03-21
 

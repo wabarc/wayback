@@ -15,9 +15,9 @@ import (
 func TestRenderMastodon(t *testing.T) {
 	const toot = `‹ Example ›
 
-• source
+• Source
 > https://example.com/
-
+ 
 ————
 
 • Internet Archive

@@ -58,6 +58,14 @@ func (r *Render) String() string {
 	return ""
 }
 
+// Bytes returns a []byte from the Render.
+func (r *Render) Bytes() []byte {
+	if r != nil {
+		return r.buf.Bytes()
+	}
+	return nil
+}
+
 func funcMap() template.FuncMap {
 	cache := "https://webcache.googleusercontent.com/search?q=cache:"
 	return template.FuncMap{
@@ -226,11 +234,11 @@ func original(v interface{}) (o string) {
 	})
 
 	var sb strings.Builder
-	sb.WriteString("• source\n")
+	sb.WriteString("• Source\n")
 	for _, kv := range ss {
 		sb.WriteString(`> `)
 		sb.WriteString(kv.Key)
-		sb.WriteString("\n")
+		sb.WriteString("\n ")
 	}
 	sb.WriteString("\n————\n")
 

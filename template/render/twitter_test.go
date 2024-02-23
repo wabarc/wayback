@@ -29,9 +29,9 @@ func TestRenderTwitterForReply(t *testing.T) {
 func TestRenderTwitterForPublish(t *testing.T) {
 	const tweet = `‹ Example ›
 
-• source
+• Source
 > https://example.com/
-
+ 
 ————
 
 • Internet Archive
