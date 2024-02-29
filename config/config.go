@@ -13,6 +13,7 @@ const (
 	SLOT_IS = "is" // archive.today
 	SLOT_IP = "ip" // IPFS
 	SLOT_PH = "ph" // Telegraph
+	SLOT_GA = "ga" // Ghostarchive
 	SLOT_TT = "tt" // Time Travel
 	SLOT_GC = "gc" // Google Cache
 
@@ -68,6 +69,7 @@ func SlotName(s string) string {
 		SLOT_IS: "archive.today",
 		SLOT_IP: "IPFS",
 		SLOT_PH: "Telegraph",
+		SLOT_GA: "Ghostarchive",
 		SLOT_TT: "Time Travel",
 		SLOT_GC: "Google Cache",
 	}
@@ -86,6 +88,7 @@ func SlotExtra(s string) string {
 		SLOT_IS: "https://archive.today/",
 		SLOT_IP: "https://ipfs.github.io/public-gateway-checker/",
 		SLOT_PH: "https://telegra.ph/",
+		SLOT_GA: "https://ghostarchive.org/",
 		SLOT_TT: "http://timetravel.mementoweb.org/",
 		SLOT_GC: "https://webcache.googleusercontent.com/",
 	}

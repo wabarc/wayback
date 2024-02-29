@@ -397,6 +397,7 @@ func TestEnableSlots(t *testing.T) {
 	os.Setenv("WAYBACK_ENABLE_IS", "true")
 	os.Setenv("WAYBACK_ENABLE_IP", "true")
 	os.Setenv("WAYBACK_ENABLE_PH", "true")
+	os.Setenv("WAYBACK_ENABLE_GA", "true")
 
 	parser := NewParser()
 	opts, err := parser.ParseEnvironmentVariables()
@@ -409,10 +410,11 @@ func TestEnableSlots(t *testing.T) {
 		SLOT_IS: true,
 		SLOT_IP: true,
 		SLOT_PH: true,
+		SLOT_GA: true,
 	}
 	got := opts.Slots()
 
-	if got == nil || !got[SLOT_IA] || !got[SLOT_IS] || !got[SLOT_IP] || !got[SLOT_PH] {
+	if got == nil || !got[SLOT_IA] || !got[SLOT_IS] || !got[SLOT_IP] || !got[SLOT_PH] || !got[SLOT_GA] {
 		t.Fatalf(`Unexpected default slots, got %v instead of %v`, got, expected)
 	}
 }
@@ -431,6 +433,7 @@ func TestDefaultSlots(t *testing.T) {
 		SLOT_IS: true,
 		SLOT_IP: true,
 		SLOT_PH: true,
+		SLOT_GA: true,
 	}
 	got := opts.Slots()
 
