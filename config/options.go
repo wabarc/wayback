@@ -34,6 +34,7 @@ const (
 	defEnabledIS = true
 	defEnabledIP = true
 	defEnabledPH = true
+	defEnabledGA = true
 
 	defTelegramToken    = ""
 	defTelegramChannel  = ""
@@ -286,6 +287,7 @@ func NewOptions() *Options {
 			SLOT_IS: defEnabledIS,
 			SLOT_IP: defEnabledIP,
 			SLOT_PH: defEnabledPH,
+			SLOT_GA: defEnabledGA,
 		},
 		telegram: &telegram{
 			token:    defTelegramToken,

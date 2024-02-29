@@ -2,10 +2,12 @@ module github.com/wabarc/wayback
 
 // +heroku goVersion go1.20
 
-go 1.20
+go 1.21
+
+toolchain go1.22.0
 
 require (
-	github.com/PuerkitoBio/goquery v1.8.1
+	github.com/PuerkitoBio/goquery v1.9.0
 	github.com/bwmarrin/discordgo v0.23.3-0.20210627161652-421e14965030
 	github.com/cretz/bine v0.2.0
 	github.com/davecgh/go-spew v1.1.1
@@ -35,13 +37,14 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/wabarc/archive.is v1.4.0
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
+	github.com/wabarc/ghostarchive v0.1.1
 	github.com/wabarc/go-anonfile v0.1.0
 	github.com/wabarc/go-catbox v0.1.0
 	github.com/wabarc/helper v0.0.0-20230418130954-be7440352bcb
 	github.com/wabarc/imgbb v1.0.0
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20230502052510-dc378f9e202b
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
-	github.com/wabarc/playback v0.0.0-20230331122619-84484ab4d599
+	github.com/wabarc/playback v0.0.0-20240229124108-a6ddc935de3c
 	github.com/wabarc/proxier v0.0.0-20230610135141-b55fe1536465
 	github.com/wabarc/rivet v0.1.4-0.20230505152228-2c5c81b4bd10
 	github.com/wabarc/screenshot v1.6.1-0.20240214000834-3820163034f4
@@ -62,7 +65,7 @@ require (
 	github.com/MercuryEngineering/CookieMonster v0.0.0-20180304172713-1584578b3403 // indirect
 	github.com/SaveTheRbtz/generic-sync-map-go v0.0.0-20230201052002-6c5833b989be // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
-	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -77,6 +80,7 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20240202021202-6d0b6a386732 // indirect
 	github.com/chromedp/chromedp v0.9.5 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
+	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
 	github.com/decred/dcrd/crypto/blake256 v1.0.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
@@ -85,7 +89,6 @@ require (
 	github.com/dop251/goja v0.0.0-20221115122301-6c0d9883792e // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fortytw2/leaktest v1.3.0 // indirect
-	github.com/gaukas/godicttls v0.0.3 // indirect
 	github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
@@ -107,7 +110,7 @@ require (
 	github.com/kallydev/telegraph-go v1.0.1-0.20230318133700-df034d9eed50 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/kkdai/youtube/v2 v2.7.18 // indirect
-	github.com/klauspost/compress v1.17.6 // indirect
+	github.com/klauspost/compress v1.17.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -134,7 +137,8 @@ require (
 	github.com/oliamb/cutter v0.2.2 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	github.com/refraction-networking/utls v1.3.2 // indirect
+	github.com/quic-go/quic-go v0.41.0 // indirect
+	github.com/refraction-networking/utls v1.6.3 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
@@ -151,7 +155,7 @@ require (
 	github.com/whyrusleeping/tar-utils v0.0.0-20201201191210-20a61371de5b // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	github.com/ybbus/httpretry v1.0.2 // indirect
-	golang.org/x/crypto v0.19.0 // indirect
+	golang.org/x/crypto v0.20.0 // indirect
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
 	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
