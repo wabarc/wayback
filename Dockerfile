@@ -3,7 +3,7 @@
 # license that can be found in the LICENSE file.
 #
 # syntax=docker/dockerfile:1.2
-ARG GO_VERSION=1.20
+ARG GO_VERSION=1.22
 
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-alpine AS builder
 COPY --from=tonistiigi/xx:golang / /
