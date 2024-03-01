@@ -31,7 +31,12 @@ var (
 
 	_, existFFmpeg       = exists("ffmpeg")
 	youget, existYouGet  = exists("you-get")
-	ytdl, existYoutubeDL = exists("youtube-dl")
+	ytdl, existYoutubeDL = func() (string, bool) {
+		if ytdlPath, ok := exists("youtube-dl"); ok {
+			return ytdlPath, ok
+		}
+		return exists("yt-dlp")
+	}()
 )
 
 func init() {
@@ -153,16 +158,17 @@ func run(cmd *exec.Cmd, debug bool) error {
 	return nil
 }
 
-// Download media via youtube-dl
+// Download media via youtube-dl or yt-dlp
 func (m media) viaYoutubeDL(ctx context.Context, cfg *config.Options) string {
 	if !existYoutubeDL {
 		return ""
 	}
-	logger.Debug("download media via youtube-dl")
+	ytdlCmd := filepath.Base(ytdl)
+	logger.Debug("download media via %s", ytdlCmd)
 
 	args := []string{
 		"--http-chunk-size=10M", "--prefer-free-formats", "--restrict-filenames",
-		"--no-color", "--rm-cache-dir", "--no-warnings", "--no-check-certificate",
+		"--rm-cache-dir", "--no-warnings",
 		"--no-progress", "--no-part", "--no-mtime", "--embed-subs", "--quiet",
 		"--ignore-errors", "--format=best[ext=mp4]/best", "--merge-output-format=mp4",
 		"--output=" + m.path + ".%(ext)s", m.url,
@@ -170,12 +176,18 @@ func (m media) viaYoutubeDL(ctx context.Context, cfg *config.Options) string {
 	if cfg.HasDebugMode() {
 		args = append(args, "--verbose", "--print-traffic")
 	}
+	// These arguments are different between youtube-dl and yt-dlp
+	if ytdlCmd == "youtube-dl" {
+		args = append(args, "--no-color", "--no-check-certificate")
+	} else {
+		args = append(args, "--color=no_color", "--no-check-certificates")
+	}
 
 	cmd := exec.CommandContext(ctx, ytdl, args...) // nosemgrep: gitlab.gosec.G204-1
-	logger.Debug("youtube-dl args: %s", cmd.String())
+	logger.Debug("%s args: %s", ytdlCmd, cmd.String())
 
 	if err := run(cmd, cfg.HasDebugMode()); err != nil {
-		logger.Warn("start youtube-dl failed: %v", err)
+		logger.Warn("start %s failed: %v", ytdlCmd, err)
 	}
 
 	return match(m.path + "*")
@@ -207,6 +219,8 @@ func exists(tool string) (string, bool) {
 		locations = []string{"ffmpeg", "ffmpeg.exe"}
 	case "youtube-dl":
 		locations = []string{"youtube-dl"}
+	case "yt-dlp":
+		locations = []string{"yt-dlp"}
 	case "you-get":
 		locations = []string{"you-get"}
 	}
