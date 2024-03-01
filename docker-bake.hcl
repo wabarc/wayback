@@ -1,6 +1,6 @@
 // Go version
 variable "GO_VERSION" {
-  default = "1.20"
+  default = "1.22"
 }
 
 variable "WAYBACK_IPFS_APIKEY" {
