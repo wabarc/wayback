@@ -150,6 +150,8 @@ github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65 h1:zx4B0AiwqKDQq+Agq
 github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65/go.mod h1:NPO1+buE6TYOWhUI98/hXLHHJhunIpXRuvDN4xjkCoE=
 github.com/go-shiori/go-readability v0.0.0-20220215145315-dd6828d2f09b h1:yrGomo5CP7IvXwSwKbDeaJkhwa4BxfgOO/s1V7iOQm4=
 github.com/go-shiori/go-readability v0.0.0-20220215145315-dd6828d2f09b/go.mod h1:LTRGsNyO3/Y6u3ERbz17OiXy2qO1Y+/8QjXpg2ViyEY=
+github.com/go-shiori/go-readability v0.0.0-20240204090920-819593fddc6b h1:Ob0i8iSJxsidQK41mP/NiAKyjqMWA/eD+lyyxgqIvQ8=
+github.com/go-shiori/go-readability v0.0.0-20240204090920-819593fddc6b/go.mod h1:2DpZlTJO/ycxp/vsc/C11oUyveStOgIXB88SYV1lncI=
 github.com/go-shiori/obelisk v0.0.0-20230316095823-42f6a2f99d9d h1:LQ2q0hNiWx8XrR+6qWYFS4mk+qVzmpSprhoO2V/DM/I=
 github.com/go-shiori/obelisk v0.0.0-20230316095823-42f6a2f99d9d/go.mod h1:qKa73D7hc0YucHndvsCOgZ5Ap54XgSmZxaIytNAFUAQ=
 github.com/go-sourcemap/sourcemap v2.1.3+incompatible h1:W1iEw64niKVGogNgBN3ePyLFfuisuzeidWPMPWmECqU=
