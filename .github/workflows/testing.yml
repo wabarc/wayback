@@ -197,7 +197,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: ${{ matrix.update-coverage }}
-        uses: codecov/codecov-action@81cd2dc8148241f03f5839d295e000b8f761e378 #v3.1.0
+        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
 
       - name: Run integration test
         run: make test-integration
