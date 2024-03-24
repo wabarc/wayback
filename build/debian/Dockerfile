@@ -2,7 +2,7 @@ ARG IMAGE_ARCH="amd64"
 ARG PKG_VERSION="0.0.1"
 ARG PKG_ARCH="amd64"
 
-FROM ${IMAGE_ARCH}/golang:buster AS build
+FROM ${IMAGE_ARCH}/golang:1.22-bookworm AS build
 
 ARG PKG_ARCH
 ARG PKG_VERSION
