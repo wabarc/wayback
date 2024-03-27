@@ -18,7 +18,8 @@ COPY . .
 
 RUN make linux-amd64
 
-FROM docker.io/library/fedora@sha256:61864fd19bbd64d620f338eb11dae9e8759bf7fa97302ac6c43865c48dccd679 AS runtime # fedora:39
+# FROM fedora:39 AS runtime
+FROM docker.io/library/fedora@sha256:61864fd19bbd64d620f338eb11dae9e8759bf7fa97302ac6c43865c48dccd679 AS runtime
 
 WORKDIR /rpmbuild
 
