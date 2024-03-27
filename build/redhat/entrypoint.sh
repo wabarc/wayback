@@ -21,7 +21,10 @@ mkdir -p "${WORKDIR}/{BUILD,RPMS,SOURCES,SPECS,SRPMS}"
 
 rpmbuild -bb --define "_wayback_version ${VERSION}" "${WORKDIR}/SPECS/wayback.spec"
 
-[[ -z "${WAYBACK_SIGNING_KEY}" ]] && exit 0
+if [ -z "${WAYBACK_SIGNING_KEY}" ]; then
+    echo 'Build RPM package without signing.'
+    exit 0 || true
+fi
 
 GPG_TTY="$(tty)"
 
