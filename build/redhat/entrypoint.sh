@@ -21,9 +21,11 @@ EOF
 
 mkdir -p "${WORKDIR}/{BUILD,RPMS,SOURCES,SPECS,SRPMS}"
 
-gpg --import --yes --pinentry-mode loopback --passphrase "${WAYBACK_SIGNING_PASSPHARSE}" <<< "${WAYBACK_SIGNING_KEY}"
-
 rpmbuild -bb --define "_wayback_version ${VERSION}" "${WORKDIR}/SPECS/wayback.spec"
+
+[[ -z "${WAYBACK_SIGNING_KEY}" ]] && exit 0
+
+gpg --import --yes --pinentry-mode loopback --passphrase "${WAYBACK_SIGNING_PASSPHARSE}" <<< "${WAYBACK_SIGNING_KEY}"
 
 find "${WORKDIR}/RPMS/x86_64" -type f -name "*.rpm" -exec rpm --verbose --define "_gpg_sign_cmd_extra_args --pinentry-mode loopback --passphrase ${WAYBACK_SIGNING_PASSPHARSE}" --addsign {} \;
 
