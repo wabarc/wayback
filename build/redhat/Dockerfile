@@ -13,16 +13,24 @@ RUN apk update && apk add --no-cache build-base ca-certificates git
 ENV WAYBACK_IPFS_APIKEY ${WAYBACK_IPFS_APIKEY}
 
 WORKDIR /go/src/app
+
 COPY . .
+
 RUN make linux-amd64
 
-FROM fedora:37
-RUN dnf install -y rpm-build systemd
-RUN mkdir -p /root/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-RUN echo "%_topdir /root/rpmbuild" >> .rpmmacros
-COPY --from=builder /go/src/app/build/binary/wayback-linux-amd64 /root/rpmbuild/SOURCES/wayback
-COPY --from=builder /go/src/app/LICENSE /root/rpmbuild/SOURCES/
-COPY --from=builder /go/src/app/CHANGELOG.md /root/rpmbuild/SOURCES/
-COPY --from=builder /go/src/app/wayback.1 /root/rpmbuild/SOURCES/
-COPY --from=builder /go/src/app/build/systemd/wayback.service /root/rpmbuild/SOURCES/
-COPY --from=builder /go/src/app/build/redhat/wayback.spec /root/rpmbuild/SPECS/wayback.spec
+FROM fedora:39 AS runtime
+
+WORKDIR /rpmbuild
+
+RUN dnf install -y rpm-build rpm-sign systemd
+
+COPY --from=builder /go/src/app/build/binary/wayback-linux-amd64 /rpmbuild/SOURCES/wayback
+COPY --from=builder /go/src/app/LICENSE /rpmbuild/SOURCES/
+COPY --from=builder /go/src/app/CHANGELOG.md /rpmbuild/SOURCES/
+COPY --from=builder /go/src/app/wayback.1 /rpmbuild/SOURCES/
+COPY --from=builder /go/src/app/build/systemd/wayback.service /rpmbuild/SOURCES/
+COPY --from=builder /go/src/app/build/redhat/wayback.spec /rpmbuild/SPECS/wayback.spec
+
+COPY build/redhat/entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT "/entrypoint.sh"
