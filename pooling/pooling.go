@@ -119,7 +119,7 @@ func (p *Pool) Roll() {
 	}
 }
 
-// Pub puts wayback requests to the resource pool
+// Put puts wayback requests to the resource pool
 func (p *Pool) Put(b Bucket) {
 	// Inserts a new bucket at the front of queue.
 	p.mutex.Lock()
