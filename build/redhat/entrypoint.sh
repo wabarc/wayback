@@ -6,8 +6,6 @@
 
 set -eu pipefail
 
-GPG_TTY="$(tty)"
-
 WAYBACK_SIGNING_KEY="${WAYBACK_SIGNING_KEY:-}"
 WAYBACK_SIGNING_PASSPHARSE="${WAYBACK_SIGNING_PASSPHARSE:-}"
 VERSION="${VERSION:-1.0}"
@@ -24,6 +22,10 @@ mkdir -p "${WORKDIR}/{BUILD,RPMS,SOURCES,SPECS,SRPMS}"
 rpmbuild -bb --define "_wayback_version ${VERSION}" "${WORKDIR}/SPECS/wayback.spec"
 
 [[ -z "${WAYBACK_SIGNING_KEY}" ]] && exit 0
+
+GPG_TTY="$(tty)"
+
+export GPG_TTY
 
 gpg --import --yes --pinentry-mode loopback --passphrase "${WAYBACK_SIGNING_PASSPHARSE}" <<< "${WAYBACK_SIGNING_KEY}"
 
