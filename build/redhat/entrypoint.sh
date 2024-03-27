@@ -6,7 +6,7 @@
 
 set -eu pipefail
 
-export GPG_TTY=$(tty)
+export GPG_TTY="$(tty)"
 
 WAYBACK_SIGNING_KEY="${WAYBACK_SIGNING_KEY:-}"
 WAYBACK_SIGNING_PASSPHARSE="${WAYBACK_SIGNING_PASSPHARSE:-}"
