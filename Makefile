@@ -163,8 +163,11 @@ rpm: ## Build RPM package
 		-t wayback-rpm-builder \
 		-f build/redhat/Dockerfile .
 	@$(DOCKER) run --rm \
-		-v ${PWD}/build/package:/root/rpmbuild/RPMS/x86_64 wayback-rpm-builder \
-		rpmbuild -bb --define "_wayback_version $(VERSION)" /root/rpmbuild/SPECS/wayback.spec
+		-e WAYBACK_SIGNING_KEY="$${WAYBACK_SIGNING_KEY}" \
+		-e WAYBACK_SIGNING_PASSPHARSE="$${WAYBACK_SIGNING_PASSPHARSE}" \
+		-e VERSION="${VERSION}" \
+		-v ${PWD}/build/package:/rpmbuild/RPMS/x86_64:Z \
+		wayback-rpm-builder
 
 debian: ## Build Debian packages
 	@echo "-> Building deb package..."
