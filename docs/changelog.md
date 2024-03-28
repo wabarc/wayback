@@ -32,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fallback to non-TLS server
   - Styling IRC message
 
+### Fixed
+- Load the config file always ([#498](https://github.com/wabarc/wayback/pull/498))
+
 ## [0.19.1] - 2023-03-21
 
 ### Fixed
