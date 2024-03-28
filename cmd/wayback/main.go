@@ -26,6 +26,7 @@ var (
 	is bool
 	ip bool
 	ph bool
+	ga bool
 
 	daemon []string
 
@@ -73,6 +74,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&is, "is", "", true, "Wayback webpages to Archive Today")
 	rootCmd.Flags().BoolVarP(&ip, "ip", "", true, "Wayback webpages to IPFS")
 	rootCmd.Flags().BoolVarP(&ph, "ph", "", true, "Wayback webpages to Telegraph")
+	rootCmd.Flags().BoolVarP(&ga, "ga", "", true, "Wayback webpages to Ghostarchive")
 	rootCmd.Flags().StringSliceVarP(&daemon, "daemon", "d", []string{}, "Run as daemon service, supported services are telegram, web, mastodon, twitter, discord, slack, irc")
 	rootCmd.Flags().StringVarP(&host, "ipfs-host", "", "127.0.0.1", "IPFS daemon host, do not require, unless enable ipfs")
 	rootCmd.Flags().UintVarP(&port, "ipfs-port", "p", 5001, "IPFS daemon port")
@@ -128,6 +130,9 @@ func setToEnv(cmd *cobra.Command) {
 	if flags.Changed("ph") {
 		os.Setenv("WAYBACK_ENABLE_PH", fmt.Sprint(ph))
 	}
+	if flags.Changed("ga") {
+		os.Setenv("WAYBACK_ENABLE_GA", fmt.Sprint(ga))
+	}
 	if flags.Changed("token") {
 		os.Setenv("WAYBACK_TELEGRAM_TOKEN", token)
 	}
@@ -153,11 +158,12 @@ func setToEnv(cmd *cobra.Command) {
 
 // nolint:gocyclo
 func run(cmd *cobra.Command, args []string) {
-	if !ia && !is && !ip && !ph {
+	if !ia && !is && !ip && !ph && !ga {
 		ia, is, ip = true, true, true
 		os.Setenv("WAYBACK_ENABLE_IA", "true")
 		os.Setenv("WAYBACK_ENABLE_IS", "true")
 		os.Setenv("WAYBACK_ENABLE_IP", "true")
+		os.Setenv("WAYBACK_ENABLE_GA", "true")
 	}
 
 	setToEnv(cmd)
