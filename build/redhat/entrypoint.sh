@@ -23,10 +23,10 @@ rpmbuild -bb --define "_wayback_version ${VERSION}" "${WORKDIR}/SPECS/wayback.sp
 
 if [ -z "${WAYBACK_SIGNING_KEY}" ]; then
     echo 'Build RPM package without signing.'
-    exit 0 || true
+    exit 0
 fi
 
-GPG_TTY="$(tty)"
+GPG_TTY="$(tty || true)"
 
 export GPG_TTY
 
