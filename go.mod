@@ -49,7 +49,7 @@ require (
 	github.com/wabarc/warcraft v0.3.1-0.20230308125707-3daa5592ba52
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/net v0.21.0
-	golang.org/x/sync v0.6.0
+	golang.org/x/sync v0.7.0
 	gopkg.in/irc.v4 v4.0.0
 	gopkg.in/telebot.v3 v3.0.0-20220130115853-f0291132d3c3
 	maunium.net/go/mautrix v0.12.0
