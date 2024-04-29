@@ -107,13 +107,15 @@ plugins:
       exclude:
         - assets/*
   - i18n:
-      default_language: en
+      fallback_to_default: true
       languages:
-        en:
-          name: English
-          build: false
-        zh:
-          name: 简体中文
+        - name: English
+          build: true
+          default: true
+          locale: en
+        - name: 简体中文
+          build: true
+          locale: zh
       material_alternate: true
       nav_translations:
         zh:
