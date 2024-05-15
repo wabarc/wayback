@@ -32,7 +32,7 @@ type doFunc func(cols []wayback.Collect, rdx reduxer.Reduxer) error
 
 // Servicer is the interface that wraps Serve and Shutdown method.
 //
-// Servicer serve serveral media platforms, e.g. Telegram, Discord, etc.
+// Servicer serve several media platforms, e.g. Telegram, Discord, etc.
 type Servicer interface {
 	// Serve serve a service.
 	Serve() error

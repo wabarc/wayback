@@ -519,7 +519,7 @@ func (o *Options) MastodonClientKey() string {
 	return o.mastodon.clientKey
 }
 
-// MastodonClientSecret returns the cilent secret of Mastodon application.
+// MastodonClientSecret returns the client secret of Mastodon application.
 func (o *Options) MastodonClientSecret() string {
 	return o.mastodon.clientSecret
 }

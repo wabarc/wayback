@@ -36,7 +36,7 @@ const (
 
 // Publisher is the interface that wraps the basic Publish method.
 //
-// Publish publish message to serveral media platforms, e.g. Telegram channel, GitHub Issues, etc.
+// Publish publish message to several media platforms, e.g. Telegram channel, GitHub Issues, etc.
 // The cols must either be a []wayback.Collect, args use for specific service.
 type Publisher interface {
 	Publish(context.Context, reduxer.Reduxer, []wayback.Collect, ...string) error

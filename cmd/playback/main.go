@@ -68,7 +68,7 @@ func unmarshalArgs(args []string) (urls []*url.URL, err error) {
 	for _, s := range args {
 		uri, er := url.Parse(s)
 		if er != nil {
-			err = fmt.Errorf("%w: unexpect url: %s", err, s)
+			err = fmt.Errorf("%w: unexpected url: %s", err, s)
 			continue
 		}
 		urls = append(urls, uri)
