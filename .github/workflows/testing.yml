@@ -90,7 +90,7 @@ jobs:
           ipfs_version: ${{ vars.IPFS_VERSION }}
 
       - name: Set up Tor
-        uses: tor-actions/setup-tor@462b4eef22eecc86cc4abdedafc95a38667e2557
+        uses: tor-actions/setup-tor@64121bc84235ab7038224e8ce08601efdb9bd8d9
         with:
           daemon: true
 
