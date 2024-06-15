@@ -85,6 +85,7 @@ func (m *Mastodon) toMastodon(ctx context.Context, text, id string) bool {
 
 	toot := &mastodon.Toot{
 		Status:     text,
+		SpoilerText: m.opts.MastodonCWText(),
 		Visibility: mastodon.VisibilityPublic,
 	}
 	if id != "" {
