@@ -143,6 +143,7 @@ func readFromFile(s string) (urls []*url.URL) {
 		if err != nil {
 			return
 		}
+		defer file.Close()
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
 			uri, err := url.Parse(scanner.Text())
