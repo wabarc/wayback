@@ -43,7 +43,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        # The step `Set up Chrome` do not support arm64 yet, so specified s version to use amd64 arch
+        # Refs to https://github.com/actions/runner-images#available-images
+        os: [ ubuntu-24.04, macos-13, windows-2022 ]
         go: [ "1.19", "1.20", "1.21", "1.22" ]
         include:
           # only update test coverage stats with the most recent go version on linux
@@ -103,6 +105,7 @@ jobs:
         uses: wabarc/.github/meilisearch@0c62d131c3884390bd63a2b7650a21fe16581bfe
         with:
           master-key: ${{ vars.MEILISEARCH_APIKEY }}
+          version: ${{ vars.MEILISEARCH_VERSION }}
           port: ${{ vars.MEILISEARCH_PORT }}
 
       - name: Set up Chocolatey
