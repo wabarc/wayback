@@ -5,7 +5,7 @@ set -eu pipefail
 WORKSPACE="/src"
 PKG_ARCH="${PKG_ARCH:-$(dpkg --print-architecture)}"
 PKG_DATE=$(date -R)
-PKG_VERSION="${PKG_VERSION:-0.0.1}"
+PKG_VERSION="${PKG_VERSION:-$(cd /src && git describe --tags --abbrev=0 | sed 's/^v//')}"
 
 echo "WORKSPACE=${WORKSPACE}"
 echo "PKG_VERSION=${PKG_VERSION}"
