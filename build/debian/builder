@@ -13,10 +13,10 @@ echo "PKG_ARCH=${PKG_ARCH}"
 echo "PKG_DATE=${PKG_DATE}"
 
 cd "${WORKSPACE}" && \
-    sh "${WORKSPACE}/build/binary.sh" "${PKG_ARCH}" && \
+    make build && \
     mkdir -p /build/debian /pkg && \
     cd /build && \
-    cp "${WORKSPACE}/build/binary/wayback-linux-${PKG_ARCH}" /build/wayback && \
+    cp "${WORKSPACE}/build/binary/wayback" /build/wayback && \
     cp "${WORKSPACE}/wayback.1" /build/ && \
     cp "${WORKSPACE}/LICENSE" /build/ && \
     cp "${WORKSPACE}/build/systemd/wayback.service" /build/debian/ && \
