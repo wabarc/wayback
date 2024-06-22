@@ -171,12 +171,13 @@ rpm: ## Build RPM package
 
 debian: ## Build Debian packages
 	@echo "-> Building deb package..."
-	@$(DOCKER) build \
+	@$(DOCKER) buildx build --load \
 		--platform linux/$(DOCKER_PLATFORM)
 		--build-arg PKG_VERSION=$(VERSION) \
 		--build-arg WAYBACK_IPFS_APIKEY=$(shell echo ${WAYBACK_IPFS_APIKEY}) \
 		-t wayback-deb-builder \
-		-f build/debian/Dockerfile .
+		-f build/debian/Dockerfile \
+		.
 	@$(DOCKER) run --rm --platform linux/$(DOCKER_PLATFORM) \
 		-v ${PWD}/build/package:/pkg wayback-deb-builder
 	@echo "-> DEB package below:"
