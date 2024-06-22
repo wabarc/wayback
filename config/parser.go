@@ -131,6 +131,10 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.mastodon.clientSecret = parseString(val, defMastodonClientSecret)
 		case "WAYBACK_MASTODON_TOKEN":
 			p.opts.mastodon.accessToken = parseString(val, defMastodonAccessToken)
+		case "WAYBACK_MASTODON_CW":
+			p.opts.mastodon.cw = parseBool(val, defMastodonCW)
+		case "WAYBACK_MASTODON_CWTEXT":
+			p.opts.mastodon.cwText = parseString(val, defMastodonCWText)
 		case "WAYBACK_TWITTER_CONSUMER_KEY":
 			p.opts.twitter.consumerKey = parseString(val, defTwitterConsumerKey)
 		case "WAYBACK_TWITTER_CONSUMER_SECRET":

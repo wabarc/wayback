@@ -1094,6 +1094,60 @@ func TestMastodon(t *testing.T) {
 			want: "foo",
 		},
 		{
+			name: "default mastodon cw",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_CW": "true",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.MastodonCW())
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon cw status, got %v instead of %s`, called, want)
+				}
+			},
+			want: "true",
+		},
+		{
+			name: "specified mastodon cw",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_CW": "false",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				called := strconv.FormatBool(opts.MastodonCW())
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon cw status, got %v instead of %s`, called, want)
+				}
+			},
+			want: "false",
+		},
+		{
+			name: "default mastodon cw text",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_CWTEXT": "",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				opts.mastodon.cw = true
+				called := opts.MastodonCWText()
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon cw text, got %v instead of %s`, called, want)
+				}
+			},
+			want: defMastodonCWText,
+		},
+		{
+			name: "specified mastodon cw text",
+			envs: map[string]string{
+				"WAYBACK_MASTODON_CWTEXT": "foo",
+			},
+			call: func(t *testing.T, opts *Options, want string) {
+				opts.mastodon.cw = true
+				called := opts.MastodonCWText()
+				if called != want {
+					t.Errorf(`Unexpected get the mastodon cw text, got %v instead of %s`, called, want)
+				}
+			},
+			want: "foo",
+		},
+		{
 			name: "publish to mastodon enabled",
 			envs: map[string]string{
 				"WAYBACK_MASTODON_KEY":    "foo",

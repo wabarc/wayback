@@ -63,6 +63,8 @@ Use the `-c` / `--config` option to specify the build definition file to use.
 | -                   | `WAYBACK_MASTODON_KEY`            | -                          | The client key of your Mastodon application                  |
 | -                   | `WAYBACK_MASTODON_SECRET`         | -                          | The client secret of your Mastodon application               |
 | -                   | `WAYBACK_MASTODON_TOKEN`          | -                          | The access token of your Mastodon application                |
+| -                   | `WAYBACK_MASTODON_CW`             | `false`                    | Whether specified content warning                            |
+| -                   | `WAYBACK_MASTODON_CWTEXT`         | `Wayback archive links`    | The text of content warning                                  |
 | -                   | `WAYBACK_TWITTER_CONSUMER_KEY`    | -                          | The customer key of your Twitter application                 |
 | -                   | `WAYBACK_TWITTER_CONSUMER_SECRET` | -                          | The customer secret of your Twitter application              |
 | -                   | `WAYBACK_TWITTER_ACCESS_TOKEN`    | -                          | The access token of your Twitter application                 |

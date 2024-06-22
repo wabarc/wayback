@@ -43,7 +43,8 @@ type Mastodon struct {
 	store  *storage.Storage
 	pub    *publish.Publish
 
-	archiving map[mastodon.ID]bool
+	archiving  map[mastodon.ID]bool
+	processing map[mastodon.ID]int
 
 	clearTick *time.Ticker
 	fetchTick *time.Ticker
@@ -104,6 +105,7 @@ func (m *Mastodon) Serve() error {
 
 	go func() {
 		m.archiving = make(map[mastodon.ID]bool)
+		m.processing = make(map[mastodon.ID]int)
 		for {
 			select {
 			case <-m.clearTick.C:
@@ -139,6 +141,9 @@ func (m *Mastodon) Serve() error {
 						metrics.IncrementWayback(metrics.ServiceMastodon, metrics.StatusRequest)
 						bucket := pooling.Bucket{
 							Request: func(ctx context.Context) error {
+								m.Lock()
+								m.processing[n.Status.ID] += 1
+								m.Unlock()
 								if err := m.process(ctx, n.ID, n.Status); err != nil {
 									logger.Error("process failure, notification: %#v, error: %v", n, err)
 									return err
@@ -155,6 +160,7 @@ func (m *Mastodon) Serve() error {
 						m.pool.Put(bucket)
 						m.Lock()
 						delete(m.archiving, n.ID)
+						delete(m.processing, n.ID)
 						m.Unlock()
 					}()
 				}
@@ -206,7 +212,10 @@ func (m *Mastodon) process(ctx context.Context, id mastodon.ID, status *mastodon
 	urls := service.MatchURL(m.opts, text)
 	if len(urls) == 0 {
 		logger.Warn("archives failure, URL no found.")
-		m.ToMastodon(ctx, "URL no found", string(status.ID))
+		// Ensure response once
+		if m.processing[status.ID] == m.opts.PoolingSize() {
+			m.ToMastodon(ctx, "URL no found", string(status.ID))
+		}
 		return errors.New("Mastodon: URL no found")
 	}
 
