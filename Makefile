@@ -172,7 +172,7 @@ rpm: ## Build RPM package
 debian: ## Build Debian packages
 	@echo "-> Building deb package..."
 	@$(DOCKER) buildx build --load \
-		--platform linux/$(DOCKER_PLATFORM)
+		--platform linux/$(DOCKER_PLATFORM) \
 		--build-arg PKG_VERSION=$(VERSION) \
 		--build-arg WAYBACK_IPFS_APIKEY=$(shell echo ${WAYBACK_IPFS_APIKEY}) \
 		-t wayback-deb-builder \
