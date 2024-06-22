@@ -16,7 +16,7 @@ cd "${WORKSPACE}" && \
     sh "${WORKSPACE}/build/binary.sh" "${PKG_ARCH}" && \
     mkdir -p /build/debian /pkg && \
     cd /build && \
-    cp "${WORKSPACE}/build/binary/wayback-linux-*" /build/wayback && \
+    cp "${WORKSPACE}/build/binary/wayback-linux-${PKG_ARCH}" /build/wayback && \
     cp "${WORKSPACE}/wayback.1" /build/ && \
     cp "${WORKSPACE}/LICENSE" /build/ && \
     cp "${WORKSPACE}/build/systemd/wayback.service" /build/debian/ && \
