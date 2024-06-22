@@ -4,8 +4,6 @@ module github.com/wabarc/wayback
 
 go 1.21
 
-toolchain go1.22.0
-
 require (
 	github.com/PuerkitoBio/goquery v1.9.0
 	github.com/bwmarrin/discordgo v0.23.3-0.20210627161652-421e14965030
