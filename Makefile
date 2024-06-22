@@ -171,23 +171,22 @@ rpm: ## Build RPM package
 
 debian: ## Build Debian packages
 	@echo "-> Building deb package..."
-	@$(DOCKER) build \
-		--build-arg IMAGE_ARCH=$(DEB_IMG_ARCH) \
+	@$(DOCKER) buildx build --load \
+		--platform linux/$(DOCKER_PLATFORM) \
 		--build-arg PKG_VERSION=$(VERSION) \
-		--build-arg PKG_ARCH=$(PKG_ARCH) \
 		--build-arg WAYBACK_IPFS_APIKEY=$(shell echo ${WAYBACK_IPFS_APIKEY}) \
-		-t $(DEB_IMG_ARCH)/wayback-deb-builder \
-		-f build/debian/Dockerfile .
-	@$(DOCKER) run --rm \
-		-v ${PWD}/build/package:/pkg \
-		$(DEB_IMG_ARCH)/wayback-deb-builder
+		-t wayback-deb-builder \
+		-f build/debian/Dockerfile \
+		.
+	@$(DOCKER) run --rm --platform linux/$(DOCKER_PLATFORM) \
+		-v ${PWD}/build/package:/pkg wayback-deb-builder
 	@echo "-> DEB package below:"
 	@ls -h ${PWD}/build/package/*.deb
 
 debian-packages: ## Build Debian packages, including amd64, arm32v7, arm64v8
-	$(MAKE) debian DEB_IMG_ARCH=amd64
-	$(MAKE) debian DEB_IMG_ARCH=arm32v7 PKG_ARCH=armv7
-	$(MAKE) debian DEB_IMG_ARCH=arm64v8 PKG_ARCH=arm64
+	$(MAKE) debian DOCKER_PLATFORM=amd64
+	$(MAKE) debian DOCKER_PLATFORM=arm64
+	$(MAKE) debian DOCKER_PLATFORM=arm/v7
 
 submodule: ## Update Git submodule
 	@echo "-> Updating Git submodule..."

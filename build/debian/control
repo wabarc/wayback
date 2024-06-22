@@ -1,6 +1,6 @@
 Source: wayback
 Maintainer: Wayback Archiver <wabarc@tuta.io>
-Build-Depends: debhelper (>= 9), dh-systemd
+Build-Depends: debhelper (>= 9.20160709) | dh-systemd
 
 Package: wayback
 Architecture: __PKG_ARCH__
