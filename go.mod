@@ -19,7 +19,7 @@ require (
 	github.com/google/go-github/v40 v40.0.0
 	github.com/gookit/color v1.5.3
 	github.com/gorilla/mux v1.8.0
-	github.com/gorilla/websocket v1.5.1
+	github.com/gorilla/websocket v1.5.3
 	github.com/hashicorp/go-version v1.6.0
 	github.com/iawia002/lux v0.17.0
 	github.com/ipsn/go-libtor v1.0.380
