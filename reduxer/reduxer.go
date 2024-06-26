@@ -150,7 +150,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 	}
 
 	// No supported browser found, returns empty results to ensure archives are normal.
-	if _, err := exec.LookPath(helper.FindChromeExecPath()); err != nil {
+	if _, err = exec.LookPath(helper.FindChromeExecPath()); err != nil {
 		logger.Debug("No browser detected, no artifacts scraped.")
 		return bs, nil
 	}
