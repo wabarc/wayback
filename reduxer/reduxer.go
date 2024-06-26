@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -146,6 +147,12 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 
 	if !opts.EnabledReduxer() {
 		return bs, errors.New("Specify directory to environment `WAYBACK_STORAGE_DIR` to enable reduxer")
+	}
+
+	// No supported browser found, returns empty results to ensure archives are normal.
+	if _, err := exec.LookPath(helper.FindChromeExecPath()); err != nil {
+		logger.Debug("No browser detected, no artifacts scraped.")
+		return bs, nil
 	}
 
 	dir, err := createDir(opts.StorageDir())
