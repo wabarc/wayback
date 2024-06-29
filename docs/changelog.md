@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fallback to non-TLS server
   - Styling IRC message
 - Improve build debian package workflow ([#527](https://github.com/wabarc/wayback/pull/527))
+- Allow perform wayback no browser detection ([#538](https://github.com/wabarc/wayback/pull/538))
 
 ### Fixed
 - Load the config file always ([#498](https://github.com/wabarc/wayback/pull/498))
