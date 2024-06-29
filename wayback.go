@@ -23,6 +23,7 @@ import (
 
 	is "github.com/wabarc/archive.is"
 	ia "github.com/wabarc/archive.org"
+	ga "github.com/wabarc/ghostarchive"
 	ip "github.com/wabarc/rivet"
 	ph "github.com/wabarc/telegra.ph"
 
@@ -67,6 +68,13 @@ type PH struct {
 	URL *url.URL
 }
 
+// GA represents the Ghostarchive slot.
+type GA struct {
+	ctx context.Context
+	cfg *config.Options
+	URL *url.URL
+}
+
 // Waybacker is the interface that wraps the basic Wayback method.
 //
 // Wayback wayback *url.URL from struct of the implementations to the Wayback Machine.
@@ -96,6 +104,18 @@ func (i IS) Wayback(_ reduxer.Reduxer) string {
 	dst, err := arc.Wayback(i.ctx, i.URL)
 	if err != nil {
 		logger.Error("wayback %s to archive.today failed: %v", i.URL.String(), err)
+		return fmt.Sprint(err)
+	}
+	return dst
+}
+
+// Wayback implements the standard Waybacker interface:
+// it reads URL from the Ghostarchive and returns archived URL as a string.
+func (g GA) Wayback(_ reduxer.Reduxer) string {
+	arc := &ga.Archiver{Client: ingress.Client()}
+	dst, err := arc.Wayback(g.ctx, g.URL)
+	if err != nil {
+		logger.Error("wayback %s to Ghostarchive failed: %v", g.URL.String(), err)
 		return fmt.Sprint(err)
 	}
 	return dst
@@ -207,6 +227,8 @@ func Wayback(ctx context.Context, rdx reduxer.Reduxer, cfg *config.Options, urls
 					col.Dst = wayback(IP{URL: input, cfg: cfg, ctx: ctx}, rdx)
 				case config.SLOT_PH:
 					col.Dst = wayback(PH{URL: input, cfg: cfg, ctx: ctx}, rdx)
+				case config.SLOT_GA:
+					col.Dst = wayback(GA{URL: input, cfg: cfg, ctx: ctx}, rdx)
 				}
 				col.Src = uri
 				col.Arc = slot
@@ -243,7 +265,15 @@ func Playback(ctx context.Context, cfg *config.Options, urls ...*url.URL) (cols 
 
 	mu := sync.Mutex{}
 	g, ctx := errgroup.WithContext(ctx)
-	var slots = []string{config.SLOT_IA, config.SLOT_IS, config.SLOT_IP, config.SLOT_PH, config.SLOT_TT, config.SLOT_GC}
+	var slots = []string{
+		config.SLOT_IA,
+		config.SLOT_IS,
+		config.SLOT_IP,
+		config.SLOT_PH,
+		config.SLOT_GA,
+		config.SLOT_TT,
+		config.SLOT_GC,
+	}
 	for _, input := range urls {
 		for _, slot := range slots {
 			slot, input := slot, input
@@ -259,6 +289,8 @@ func Playback(ctx context.Context, cfg *config.Options, urls ...*url.URL) (cols 
 					col.Dst = playback.Playback(ctx, playback.IP{URL: input})
 				case config.SLOT_PH:
 					col.Dst = playback.Playback(ctx, playback.PH{URL: input})
+				case config.SLOT_GA:
+					col.Dst = playback.Playback(ctx, playback.GA{URL: input})
 				case config.SLOT_TT:
 					col.Dst = playback.Playback(ctx, playback.TT{URL: input})
 				case config.SLOT_GC:
