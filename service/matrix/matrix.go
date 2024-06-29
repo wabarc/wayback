@@ -128,7 +128,7 @@ func (m *Matrix) Serve() error {
 		}(ev)
 	})
 	syncer.OnEventType(event.EventEncrypted, func(source matrix.EventSource, ev *event.Event) {
-		logger.Error("Unsupport encryption message")
+		logger.Error("Unsupported encryption message")
 		// logger.Debug("event: %v", ev)
 		// if err := m.process(context.Background(), ev); err != nil {
 		// 	logger.Error("process request failure, error: %v", err)

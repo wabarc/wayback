@@ -244,7 +244,7 @@ func TestProcess(t *testing.T) {
 		}
 	})
 	recvSyncer.OnEventType(event.EventEncrypted, func(source matrix.EventSource, ev *event.Event) {
-		t.Log("Unsupport encryption message")
+		t.Log("Unsupported encryption message")
 		// logger.Debug("event: %v", ev)
 		// if err := m.process(context.Background(), ev); err != nil {
 		// 	logger.Error("process request failure, error: %v", err)
@@ -258,7 +258,7 @@ func TestProcess(t *testing.T) {
 			select {
 			case <-tick.C:
 				if i == 0 {
-					t.Error("Timeout while wating for test message from the other thread.")
+					t.Error("Timeout while waiting for test message from the other thread.")
 					sender.destroyRoomForTest(resp.RoomID)
 					recver.destroyRoomForTest(resp.RoomID)
 					time.Sleep(time.Second)

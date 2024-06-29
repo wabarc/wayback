@@ -22,7 +22,7 @@ func profiling() {
 
 	addr := listener.Addr().(*net.TCPAddr)
 	logger.Info("Go profiling via: http://%s", addr)
-	logger.Info("More defails can be found at https://go.dev/blog/pprof")
+	logger.Info("More details can be found at https://go.dev/blog/pprof")
 
 	go func() {
 		//#nosec G114 -- Ignored for convenience

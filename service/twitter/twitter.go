@@ -75,7 +75,7 @@ func New(ctx context.Context, opts service.Options) (*Twitter, error) {
 // Serve always returns a nil error.
 func (t *Twitter) Serve() error {
 	if t.client == nil {
-		return errors.New("Initialize Twitter cilent failed.")
+		return errors.New("Initialize Twitter client failed.")
 	}
 
 	user, _, err := t.client.Accounts.VerifyCredentials(&twitter.AccountVerifyParams{IncludeEntities: twitter.Bool(false)})
