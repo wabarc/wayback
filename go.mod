@@ -13,7 +13,7 @@ require (
 	github.com/dghubble/oauth1 v0.7.1
 	github.com/dstotijn/go-notion v0.11.0
 	github.com/dustin/go-humanize v1.0.0
-	github.com/gabriel-vasile/mimetype v1.4.2
+	github.com/gabriel-vasile/mimetype v1.4.4
 	github.com/go-shiori/go-readability v0.0.0-20220215145315-dd6828d2f09b
 	github.com/go-shiori/obelisk v0.0.0-20230316095823-42f6a2f99d9d
 	github.com/google/go-github/v40 v40.0.0
