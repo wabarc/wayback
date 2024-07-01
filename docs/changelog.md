@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.20.0] - 2024-06-30
+
 ### Added
 - Add docker-compose.yml ([#367](https://github.com/wabarc/wayback/pull/367))
 - Add option to disable onion service ([#372](https://github.com/wabarc/wayback/pull/372))
