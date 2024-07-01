@@ -84,6 +84,7 @@ jobs:
       go-mips64: ${{ matrix.mips64 }}
       go-mipsle: ${{ matrix.mipsle }}
       artifact-path: build/package/wayback*
+      egress-policy: audit
     secrets:
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
@@ -107,6 +108,7 @@ jobs:
       go-arch: ${{ matrix.arch }}
       go-arm: ${{ matrix.arm }}
       artifact-path: build/package/wayback*.deb
+      egress-policy: audit
     secrets:
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
@@ -117,6 +119,7 @@ jobs:
       product: wayback
       params: 'make rpm'
       artifact-path: build/package/wayback*.rpm
+      egress-policy: audit
     secrets:
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
       wayback-signing-key: ${{ secrets.GEMFURY_SIGNING_KEY }}
@@ -132,6 +135,7 @@ jobs:
         build/aur/.SRCINFO
         build/aur/PKGBUILD
         build/aur/wayback*.pkg.tar.zst
+      egress-policy: audit
     secrets:
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
@@ -143,6 +147,7 @@ jobs:
       channel: stable
       release: true
       publish: true
+      egress-policy: audit
     secrets:
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
       snapcraft-token: ${{ secrets.SNAPCRAFT_TOKEN }}
@@ -154,6 +159,7 @@ jobs:
       product: wayback
       params: 'make build'
       artifact-path: org.wabarc.wayback-*.x86_64.flatpak
+      egress-policy: audit
     secrets:
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
 
@@ -166,6 +172,7 @@ jobs:
     with:
       product: wayback
       generate-bina: true
+      egress-policy: audit
 
   release-apt:
     if: github.repository == 'wabarc/wayback'
