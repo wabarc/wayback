@@ -182,6 +182,7 @@ jobs:
     with:
       product: wayback
       type: deb
+      egress-policy: audit
     secrets:
       fury-token: ${{ secrets.FURY_TOKEN }}
 
@@ -193,6 +194,7 @@ jobs:
     with:
       product: wayback
       type: rpm
+      egress-policy: audit
     secrets:
       fury-token: ${{ secrets.FURY_TOKEN }}
 
