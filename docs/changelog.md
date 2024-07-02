@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.20.1] - 2024-07-02
+
+### Fixed
+- Fix deb and rpm release workflow
+
 ## [0.20.0] - 2024-06-30
 
 ### Added
