@@ -62,7 +62,7 @@ jobs:
       WAYBACK_IPFS_PORT: ${{ vars.WAYBACK_IPFS_PORT }}
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@2e205a28d0e1da00c5f53b161f4067b052c61f34 # v1.5.0
+        uses: step-security/harden-runner@0d381219ddf674d61a7572ddd19d7941e271515c # v2.9.0
         with:
           egress-policy: audit
           disable-telemetry: true
