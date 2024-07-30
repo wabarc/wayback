@@ -22,5 +22,7 @@ jobs:
       publish: true
       release: true
     secrets:
+      wayback-ipfs-target: ${{ secrets.WAYBACK_IPFS_TARGET }}
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+      wayback-ipfs-secret: ${{ secrets.WAYBACK_IPFS_SECRET }}
       snapcraft-token: ${{ secrets.SNAPCRAFT_TOKEN }}

@@ -11,11 +11,15 @@ COPY --from=tonistiigi/xx:golang / /
 RUN apk add --no-cache -U build-base ca-certificates linux-headers musl-dev git tar
 
 ARG TARGETPLATFORM
+ARG WAYBACK_IPFS_TARGET
 ARG WAYBACK_IPFS_APIKEY
+ARG WAYBACK_IPFS_SECRET
 
 WORKDIR /src
 
+ENV WAYBACK_IPFS_TARGET ${WAYBACK_IPFS_TARGET}
 ENV WAYBACK_IPFS_APIKEY ${WAYBACK_IPFS_APIKEY}
+ENV WAYBACK_IPFS_SECRET ${WAYBACK_IPFS_SECRET}
 
 COPY . .
 RUN --mount=type=bind,target=/src,rw \

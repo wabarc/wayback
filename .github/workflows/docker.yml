@@ -134,7 +134,9 @@ jobs:
       - name: Build artifacts
         uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
         env:
+          WAYBACK_IPFS_TARGET: ${{ secrets.WAYBACK_IPFS_TARGET }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+          WAYBACK_IPFS_SECRET: ${{ secrets.WAYBACK_IPFS_SECRET }}
         with:
           files: ./docker-bake.hcl
           targets: artifact-all
@@ -145,7 +147,9 @@ jobs:
       - name: Build and push Docker image
         uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
         env:
+          WAYBACK_IPFS_TARGET: ${{ secrets.WAYBACK_IPFS_TARGET }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+          WAYBACK_IPFS_SECRET: ${{ secrets.WAYBACK_IPFS_SECRET }}
         with:
           files: |
             ./docker-bake.hcl
@@ -271,7 +275,9 @@ jobs:
       - name: Build artifacts
         uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
         env:
+          WAYBACK_IPFS_TARGET: ${{ secrets.WAYBACK_IPFS_TARGET }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+          WAYBACK_IPFS_SECRET: ${{ secrets.WAYBACK_IPFS_SECRET }}
         with:
           files: ./docker-bake.hcl
           targets: artifact-all
@@ -282,7 +288,9 @@ jobs:
       - name: Build and push Docker image
         uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
         env:
+          WAYBACK_IPFS_TARGET: ${{ secrets.WAYBACK_IPFS_TARGET }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+          WAYBACK_IPFS_SECRET: ${{ secrets.WAYBACK_IPFS_SECRET }}
         with:
           files: |
             ./docker-bake.hcl

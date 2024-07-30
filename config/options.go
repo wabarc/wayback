@@ -108,8 +108,9 @@ const (
 )
 
 var (
-	IPFSToken  = ""
-	IPFSTarget = "web3storage"
+	IPFSTarget = ""
+	IPFSApikey = ""
+	IPFSSecret = ""
 
 	defStorageDir       = path.Join(os.TempDir(), "reduxer")
 	defOnionRemotePorts = []int{80}
@@ -443,25 +444,30 @@ func (o *Options) IPFSMode() string {
 }
 
 // IPFSTarget returns which IPFS pinning service to use.
+// It returns a managed IPFS credential if env `WAYBACK_IPFS_TARGET` empty.
 func (o *Options) IPFSTarget() string {
-	if IPFSToken != "" {
-		return IPFSTarget
+	if o.ipfs.target != "" {
+		return o.ipfs.target
 	}
-	return o.ipfs.target
+	return IPFSTarget
 }
 
 // IPFSApiKey returns the apikey of the IPFS pinning service.
 // It returns a managed IPFS credential if env `WAYBACK_IPFS_APIKEY` empty.
 func (o *Options) IPFSApikey() string {
-	if o.ipfs.apikey == "" {
-		return IPFSToken
+	if o.ipfs.apikey != "" {
+		return o.ipfs.apikey
 	}
-	return o.ipfs.apikey
+	return IPFSApikey
 }
 
 // IPFSSecret returns the secret of the IPFS pinning service.
+// It returns a managed IPFS credential if env `WAYBACK_IPFS_SECRET` empty.
 func (o *Options) IPFSSecret() string {
-	return o.ipfs.secret
+	if o.ipfs.secret != "" {
+		return o.ipfs.secret
+	}
+	return IPFSSecret
 }
 
 // UseTor returns whether to use the Tor proxy when snapshot webpage.

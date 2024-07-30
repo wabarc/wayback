@@ -281,7 +281,7 @@ func TestIPFSTarget(t *testing.T) {
 			os.Clearenv()
 			os.Setenv("WAYBACK_IPFS_TARGET", test.userTarget)
 			os.Setenv("WAYBACK_IPFS_APIKEY", test.userApikey)
-			IPFSToken = test.token
+			IPFSApikey = test.token
 
 			parser := NewParser()
 			opts, err := parser.ParseEnvironmentVariables()
@@ -337,7 +337,7 @@ func TestIPFSApikey(t *testing.T) {
 			os.Clearenv()
 			os.Setenv("WAYBACK_IPFS_TARGET", test.userTarget)
 			os.Setenv("WAYBACK_IPFS_APIKEY", test.userApikey)
-			IPFSToken = test.token
+			IPFSApikey = test.token
 
 			parser := NewParser()
 			opts, err := parser.ParseEnvironmentVariables()

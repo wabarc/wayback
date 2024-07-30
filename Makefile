@@ -9,7 +9,9 @@ PACKDIR ?= ./build/package
 LDFLAGS := $(shell echo "-X '${REPO}/version.Version=`git describe --tags --abbrev=0`'")
 LDFLAGS := $(shell echo "${LDFLAGS} -X '${REPO}/version.Commit=`git rev-parse --short HEAD`'")
 LDFLAGS := $(shell echo "${LDFLAGS} -X '${REPO}/version.BuildDate=`date +%FT%T%z`'")
-LDFLAGS := $(shell echo "${LDFLAGS} -X '${REPO}/config.IPFSToken=$(shell echo ${WAYBACK_IPFS_APIKEY})'")
+LDFLAGS := $(shell echo "${LDFLAGS} -X '${REPO}/config.IPFSTarget=$(shell echo ${WAYBACK_IPFS_TARGET})'")
+LDFLAGS := $(shell echo "${LDFLAGS} -X '${REPO}/config.IPFSApikey=$(shell echo ${WAYBACK_IPFS_APIKEY})'")
+LDFLAGS := $(shell echo "${LDFLAGS} -X '${REPO}/config.IPFSSecret=$(shell echo ${WAYBACK_IPFS_SECRET})'")
 GOBUILD ?= go build -trimpath --ldflags "-s -w ${LDFLAGS} -buildid=" -v
 VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=1` | sed -e 's/v//g')
 GOFILES ?= $(wildcard ./cmd/wayback/*.go)
@@ -152,14 +154,18 @@ profile: ## Test and profile
 docker-image: ## Build Docker image
 	@echo "-> Building docker image..."
 	@$(DOCKER) build \
+		--build-arg WAYBACK_IPFS_TARGET=$(shell echo ${WAYBACK_IPFS_TARGET}) \
 		--build-arg WAYBACK_IPFS_APIKEY=$(shell echo ${WAYBACK_IPFS_APIKEY}) \
+		--build-arg WAYBACK_IPFS_SECRET=$(shell echo ${WAYBACK_IPFS_SECRET}) \
 		-t $(DOCKER_IMAGE):$(VERSION) \
 		-f ./build/docker/Dockerfile.dev .
 
 rpm: ## Build RPM package
 	@echo "-> Building rpm package..."
 	@$(DOCKER) build \
+		--build-arg WAYBACK_IPFS_TARGET=$(shell echo ${WAYBACK_IPFS_TARGET}) \
 		--build-arg WAYBACK_IPFS_APIKEY=$(shell echo ${WAYBACK_IPFS_APIKEY}) \
+		--build-arg WAYBACK_IPFS_SECRET=$(shell echo ${WAYBACK_IPFS_SECRET}) \
 		-t wayback-rpm-builder \
 		-f build/redhat/Dockerfile .
 	@$(DOCKER) run --rm \
@@ -174,7 +180,9 @@ debian: ## Build Debian packages
 	@$(DOCKER) buildx build --load \
 		--platform linux/$(DOCKER_PLATFORM) \
 		--build-arg PKG_VERSION=$(VERSION) \
+		--build-arg WAYBACK_IPFS_TARGET=$(shell echo ${WAYBACK_IPFS_TARGET}) \
 		--build-arg WAYBACK_IPFS_APIKEY=$(shell echo ${WAYBACK_IPFS_APIKEY}) \
+		--build-arg WAYBACK_IPFS_SECRET=$(shell echo ${WAYBACK_IPFS_SECRET}) \
 		-t wayback-deb-builder \
 		-f build/debian/Dockerfile \
 		.

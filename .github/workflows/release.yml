@@ -86,7 +86,9 @@ jobs:
       artifact-path: build/package/wayback*
       egress-policy: audit
     secrets:
+      wayback-ipfs-target: ${{ secrets.WAYBACK_IPFS_TARGET }}
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+      wayback-ipfs-secret: ${{ secrets.WAYBACK_IPFS_SECRET }}
 
   debpkg:
     name: Build DEB
@@ -110,7 +112,9 @@ jobs:
       artifact-path: build/package/wayback*.deb
       egress-policy: audit
     secrets:
+      wayback-ipfs-target: ${{ secrets.WAYBACK_IPFS_TARGET }}
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+      wayback-ipfs-secret: ${{ secrets.WAYBACK_IPFS_SECRET }}
 
   rpmpkg:
     name: Build RPM
@@ -121,7 +125,9 @@ jobs:
       artifact-path: build/package/wayback*.rpm
       egress-policy: audit
     secrets:
+      wayback-ipfs-target: ${{ secrets.WAYBACK_IPFS_TARGET }}
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+      wayback-ipfs-secret: ${{ secrets.WAYBACK_IPFS_SECRET }}
       wayback-signing-key: ${{ secrets.GEMFURY_SIGNING_KEY }}
       wayback-signing-passpharse: ${{ secrets.GEMFURY_SIGNING_PASSPHARSE }}
 
@@ -137,7 +143,9 @@ jobs:
         build/aur/wayback*.pkg.tar.zst
       egress-policy: audit
     secrets:
+      wayback-ipfs-target: ${{ secrets.WAYBACK_IPFS_TARGET }}
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+      wayback-ipfs-secret: ${{ secrets.WAYBACK_IPFS_SECRET }}
 
   snapcraft:
     name: Build Snap
@@ -149,7 +157,9 @@ jobs:
       publish: true
       egress-policy: audit
     secrets:
+      wayback-ipfs-target: ${{ secrets.WAYBACK_IPFS_TARGET }}
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+      wayback-ipfs-secret: ${{ secrets.WAYBACK_IPFS_SECRET }}
       snapcraft-token: ${{ secrets.SNAPCRAFT_TOKEN }}
 
   flatpak:
@@ -161,7 +171,9 @@ jobs:
       artifact-path: org.wabarc.wayback-*.x86_64.flatpak
       egress-policy: audit
     secrets:
+      wayback-ipfs-target: ${{ secrets.WAYBACK_IPFS_TARGET }}
       wayback-ipfs-apikey: ${{ secrets.WAYBACK_IPFS_APIKEY }}
+      wayback-ipfs-secret: ${{ secrets.WAYBACK_IPFS_SECRET }}
 
   release:
     name: Create and upload release
