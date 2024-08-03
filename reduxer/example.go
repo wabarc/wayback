@@ -16,57 +16,49 @@ func BundleExample() Reduxer {
 			Img: Asset{
 				Local: "/path/to/image",
 				Remote: Remote{
-					Anonfile: "https://anonfiles.com/FbZfSa9eu4",
-					Catbox:   "https://files.catbox.moe/9u6yvu.png",
+					Catbox: "https://files.catbox.moe/9u6yvu.png",
 				},
 			},
 			PDF: Asset{
 				Local: "/path/to/pdf",
 				Remote: Remote{
-					Anonfile: "https://anonfiles.com/r4G8Sb90ud",
-					Catbox:   "https://files.catbox.moe/q73uqh.pdf",
+					Catbox: "https://files.catbox.moe/q73uqh.pdf",
 				},
 			},
 			Raw: Asset{
 				Local: "/path/to/htm",
 				Remote: Remote{
-					Anonfile: "https://anonfiles.com/pbG4Se94ua",
-					Catbox:   "https://files.catbox.moe/bph1g6.htm",
+					Catbox: "https://files.catbox.moe/bph1g6.htm",
 				},
 			},
 			Txt: Asset{
 				Local: "/path/to/txt",
 				Remote: Remote{
-					Anonfile: "https://anonfiles.com/naG6S09bu1",
-					Catbox:   "https://files.catbox.moe/wwrby6.txt",
+					Catbox: "https://files.catbox.moe/wwrby6.txt",
 				},
 			},
 			HAR: Asset{
 				Local: "/path/to/har",
 				Remote: Remote{
-					Anonfile: "https://anonfiles.com/n1paZfB3ub",
-					Catbox:   "https://files.catbox.moe/3agtva.har",
+					Catbox: "https://files.catbox.moe/3agtva.har",
 				},
 			},
 			HTM: Asset{
 				Local: "/path/to/single-htm",
 				Remote: Remote{
-					Anonfile: "https://anonfiles.com/v4G4S09abc",
-					Catbox:   "",
+					Catbox: "",
 				},
 			},
 			WARC: Asset{
 				Local: "/path/to/warc",
 				Remote: Remote{
-					Anonfile: "https://anonfiles.com/v4G4S09auc",
-					Catbox:   "invalid-url-moe/kkai0w.warc",
+					Catbox: "invalid-url-moe/kkai0w.warc",
 				},
 			},
 			Media: Asset{
 				Local: "",
 				Remote: Remote{
-					Anonfile: "",
-					Catbox:   "",
+					Catbox: "",
 				},
 			},
 		},
