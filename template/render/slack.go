@@ -90,12 +90,7 @@ func (s *Slack) ForPublish() (r *Render) {
 }
 
 func (s *Slack) parseArtifact(assets reduxer.Artifact, tmplBytes *bytes.Buffer) {
-	tmpl := `<https://anonfiles.com/|AnonFiles> - [ <{{ .Img.Remote.Anonfile | url -}}
-|IMG> ¦ <{{ .PDF.Remote.Anonfile | url }}|PDF> ¦ <{{ .Raw.Remote.Anonfile | url -}}
-|RAW> ¦ <{{ .Txt.Remote.Anonfile | url }}|TXT> ¦ <{{ .HAR.Remote.Anonfile | url -}}
-|HAR> ¦ <{{ .HTM.Remote.Anonfile | url }}|HTM> ¦ <{{ .WARC.Remote.Anonfile | url -}}
-|WARC> ¦ <{{ .Media.Remote.Anonfile | url }}|MEDIA> ]
-<https://catbox.moe/|Catbox> - [ <{{ .Img.Remote.Catbox | url -}}
+	tmpl := `<https://catbox.moe/|Catbox> - [ <{{ .Img.Remote.Catbox | url -}}
 |IMG> ¦ <{{ .PDF.Remote.Catbox | url }}|PDF> ¦ <{{ .Raw.Remote.Catbox | url -}}
 |RAW> ¦ <{{ .Txt.Remote.Catbox | url }}|TXT> ¦ <{{ .HAR.Remote.Catbox | url -}}
 |HAR> ¦ <{{ .HTM.Remote.Catbox | url }}|HTM> ¦ <{{ .WARC.Remote.Catbox | url -}}

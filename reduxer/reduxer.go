@@ -19,7 +19,6 @@ import (
 
 	"github.com/go-shiori/go-readability"
 	"github.com/go-shiori/obelisk"
-	"github.com/wabarc/go-anonfile"
 	"github.com/wabarc/go-catbox"
 	"github.com/wabarc/helper"
 	"github.com/wabarc/logger"
@@ -73,8 +72,7 @@ type Asset struct {
 
 // Remote represents the file on the remote server.
 type Remote struct {
-	Anonfile string
-	Catbox   string
+	Catbox string
 }
 
 // Src represents the requested url.
@@ -317,7 +315,6 @@ func remotely(ctx context.Context, artifact *Artifact) (err error) {
 	}
 
 	cat := catbox.New(ingress.Client())
-	anon := anonfile.NewAnonfile(ingress.Client())
 	g, _ := errgroup.WithContext(ctx)
 
 	var mu sync.RWMutex
@@ -333,22 +330,12 @@ func remotely(ctx context.Context, artifact *Artifact) (err error) {
 		g.Go(func() error {
 			var remote Remote
 			mu.Lock()
-			func() {
-				r, e := anon.Upload(asset.Local)
-				if e != nil {
-					err = errors.Wrap(err, fmt.Sprintf("upload %s to anonfiles failed: %v", asset.Local, e))
-				} else {
-					remote.Anonfile = r.Short()
-				}
-			}()
-			func() {
-				c, e := cat.Upload(asset.Local)
-				if e != nil {
-					err = errors.Wrap(err, fmt.Sprintf("upload %s to catbox failed: %v", asset.Local, e))
-				} else {
-					remote.Catbox = c
-				}
-			}()
+			c, e := cat.Upload(asset.Local)
+			if e != nil {
+				err = errors.Wrap(err, fmt.Sprintf("upload %s to catbox failed: %v", asset.Local, e))
+			} else {
+				remote.Catbox = c
+			}
 			asset.Remote = remote
 			mu.Unlock()
 			return nil
