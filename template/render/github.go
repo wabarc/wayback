@@ -66,12 +66,7 @@ func (gh *GitHub) ForPublish() *Render {
 }
 
 func (gh *GitHub) parseArtifact(assets reduxer.Artifact, tmplBytes *bytes.Buffer) {
-	tmpl := `**[AnonFiles](https://anonfiles.com/)** - [ [IMG]({{ .Img.Remote.Anonfile | url -}}
-) ¦ [PDF]({{ .PDF.Remote.Anonfile | url }}) ¦ [RAW]({{ .Raw.Remote.Anonfile | url -}}
-) ¦ [TXT]({{ .Txt.Remote.Anonfile | url }}) ¦ [HAR]({{ .HAR.Remote.Anonfile | url -}}
-) ¦ [HTM]({{ .HTM.Remote.Anonfile | url }}) ¦ [WARC]({{ .WARC.Remote.Anonfile | url -}}
-) ¦ [MEDIA]({{ .Media.Remote.Anonfile | url }}) ]
-**[Catbox](https://catbox.moe/)** - [ [IMG]({{ .Img.Remote.Catbox | url -}}
+	tmpl := `**[Catbox](https://catbox.moe/)** - [ [IMG]({{ .Img.Remote.Catbox | url -}}
 ) ¦ [PDF]({{ .PDF.Remote.Catbox | url }}) ¦ [RAW]({{ .Raw.Remote.Catbox | url -}}
 ) ¦ [TXT]({{ .Txt.Remote.Catbox | url }}) ¦ [HAR]({{ .HAR.Remote.Catbox | url -}}
 ) ¦ [HTM]({{ .HTM.Remote.Catbox | url }}) ¦ [WARC]({{ .WARC.Remote.Catbox | url -}}
