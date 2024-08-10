@@ -70,9 +70,9 @@ func (i *Relaychat) main() *bytes.Buffer {
 func (i *Relaychat) join(buf *bytes.Buffer) *bytes.Buffer {
 	tmplBytes := &bytes.Buffer{}
 	tmplBytes.WriteString("***** List of Archives *****")
-	tmplBytes.WriteString("\n \n") // blank line
+	tmplBytes.WriteString("\n")
 	tmplBytes.Write(buf.Bytes())
-	tmplBytes.WriteString("\n \n") // blank line
+	tmplBytes.WriteString("\n")
 	tmplBytes.WriteString("***** End of Archives *****")
 	return tmplBytes
 }

@@ -10,7 +10,6 @@ import (
 
 func TestRenderForIRC(t *testing.T) {
 	expected := `***** List of Archives *****
- 
 ‹ Example ›
  
 • Source
@@ -26,7 +25,6 @@ func TestRenderForIRC(t *testing.T) {
 > https://ipfs.io/ipfs/QmTbDmpvQ3cPZG6TA5tnar4ZG6q9JMBYVmX2n3wypMQMtr
 • Telegraph:
 > http://telegra.ph/title-01-01
- 
 ***** End of Archives *****`
 
 	got := ForPublish(&Relaychat{Cols: collects, Data: bundleExample}).String()
