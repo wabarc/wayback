@@ -55,7 +55,7 @@ type Meili struct {
 
 // New returns a Meilisearch client.
 func New(client *http.Client, opts *config.Options) *Meili {
-	endpoint, apikey, idxname := opts.WaybackMeiliEndpoint(), opts.WaybackMeiliApikey(), opts.WaybackMeiliIndexing()
+	endpoint, apikey, idxname := opts.MeiliEndpoint(), opts.MeiliApikey(), opts.MeiliIndexing()
 
 	if client == nil {
 		client = &http.Client{

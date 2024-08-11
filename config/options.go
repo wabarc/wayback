@@ -98,9 +98,11 @@ const (
 	defWaybackFallback     = false
 	defProxy               = ""
 
-	defWaybackMeiliEndpoint = ""
-	defWaybackMeiliIndexing = "capsules"
-	defWaybackMeiliApikey   = ""
+	defMeiliEndpoint = ""
+	defMeiliIndexing = "capsules"
+	defMeiliApikey   = ""
+
+	defOmnivoreApikey = ""
 
 	maxAttachSizeTelegram = 50000000   // 50MB
 	maxAttachSizeDiscord  = 8000000    // 8MB
@@ -141,6 +143,8 @@ type Options struct {
 	irc      *irc
 	onion    *onion
 	xmpp     *xmpp
+	omnivore *omnivore
+	meili    *meili
 
 	listenAddr          string
 	chromeRemoteAddr    string
@@ -154,10 +158,6 @@ type Options struct {
 	waybackMaxRetries   int
 	waybackUserAgent    string
 	waybackFallback     bool
-
-	waybackMeiliEndpoint string
-	waybackMeiliIndexing string
-	waybackMeiliApikey   string
 }
 
 type ipfs struct {
@@ -253,28 +253,35 @@ type xmpp struct {
 	helptext string
 }
 
+type meili struct {
+	endpoint string
+	indexing string
+	apikey   string
+}
+
+type omnivore struct {
+	apikey string
+}
+
 // NewOptions returns Options with default values.
 func NewOptions() *Options {
 	opts := &Options{
-		debug:                defDebug,
-		logTime:              defLogTime,
-		logLevel:             defLogLevel,
-		overTor:              defOverTor,
-		metrics:              defMetrics,
-		listenAddr:           defListenAddr,
-		chromeRemoteAddr:     defChromeRemoteAddr,
-		enabledChromeRemote:  defEnabledChromeRemote,
-		boltPathname:         defBoltPathname,
-		poolingSize:          defPoolingSize,
-		storageDir:           defStorageDir,
-		maxMediaSize:         defMaxMediaSize,
-		waybackTimeout:       defWaybackTimeout,
-		waybackMaxRetries:    defWaybackMaxRetries,
-		waybackUserAgent:     defWaybackUserAgent,
-		waybackFallback:      defWaybackFallback,
-		waybackMeiliEndpoint: defWaybackMeiliEndpoint,
-		waybackMeiliIndexing: defWaybackMeiliIndexing,
-		waybackMeiliApikey:   defWaybackMeiliApikey,
+		debug:               defDebug,
+		logTime:             defLogTime,
+		logLevel:            defLogLevel,
+		overTor:             defOverTor,
+		metrics:             defMetrics,
+		listenAddr:          defListenAddr,
+		chromeRemoteAddr:    defChromeRemoteAddr,
+		enabledChromeRemote: defEnabledChromeRemote,
+		boltPathname:        defBoltPathname,
+		poolingSize:         defPoolingSize,
+		storageDir:          defStorageDir,
+		maxMediaSize:        defMaxMediaSize,
+		waybackTimeout:      defWaybackTimeout,
+		waybackMaxRetries:   defWaybackMaxRetries,
+		waybackUserAgent:    defWaybackUserAgent,
+		waybackFallback:     defWaybackFallback,
 		ipfs: &ipfs{
 			host:   defIPFSHost,
 			port:   defIPFSPort,
@@ -356,6 +363,14 @@ func NewOptions() *Options {
 			password: defXMPPPassword,
 			noTLS:    defXMPPNoTLS,
 			helptext: defXMPPHelptext,
+		},
+		meili: &meili{
+			endpoint: defMeiliEndpoint,
+			indexing: defMeiliIndexing,
+			apikey:   defMeiliApikey,
+		},
+		omnivore: &omnivore{
+			apikey: defOmnivoreApikey,
 		},
 	}
 
@@ -926,24 +941,34 @@ func (o *Options) WaybackFallback() bool {
 	return o.waybackFallback
 }
 
-// WaybackMeiliEndpoint returns the Meilisearch API endpoint.
-func (o *Options) WaybackMeiliEndpoint() string {
-	return o.waybackMeiliEndpoint
+// MeiliEndpoint returns the Meilisearch API endpoint.
+func (o *Options) MeiliEndpoint() string {
+	return o.meili.endpoint
 }
 
-// WaybackMeiliIndexing returns the Meilisearch indexing name.
-func (o *Options) WaybackMeiliIndexing() string {
-	return o.waybackMeiliIndexing
+// MeiliIndexing returns the Meilisearch indexing name.
+func (o *Options) MeiliIndexing() string {
+	return o.meili.indexing
 }
 
-// WaybackMeiliApikey returns the Meilisearch admin apikey.
-func (o *Options) WaybackMeiliApikey() string {
-	return o.waybackMeiliApikey
+// MeiliApikey returns the Meilisearch admin apikey.
+func (o *Options) MeiliApikey() string {
+	return o.meili.apikey
 }
 
 // EnabledMeilisearch returns whether enable meilisearch server.
 func (o *Options) EnabledMeilisearch() bool {
-	return o.WaybackMeiliEndpoint() != ""
+	return o.MeiliEndpoint() != ""
+}
+
+// OmnivoreApikey returns the Omnivore apikey.
+func (o *Options) OmnivoreApikey() string {
+	return o.omnivore.apikey
+}
+
+// EnabledOmnivore returns whether enable Omnivore.
+func (o *Options) EnabledOmnivore() bool {
+	return o.OmnivoreApikey() != ""
 }
 
 // HTTPdEnabled returns whether enable HTTP daemon service.

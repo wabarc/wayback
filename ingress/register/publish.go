@@ -12,6 +12,7 @@ import (
 	_ "github.com/wabarc/wayback/publish/meili"
 	_ "github.com/wabarc/wayback/publish/nostr"
 	_ "github.com/wabarc/wayback/publish/notion"
+	_ "github.com/wabarc/wayback/publish/omnivore"
 	_ "github.com/wabarc/wayback/publish/relaychat"
 	_ "github.com/wabarc/wayback/publish/slack"
 	_ "github.com/wabarc/wayback/publish/telegram"

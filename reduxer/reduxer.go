@@ -177,7 +177,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 		g.Go(func() error {
 			basename := strings.TrimSuffix(helper.FileName(uri.String(), ""), ".html")
 			basename = strings.TrimSuffix(basename, ".htm")
-			ctx = context.WithValue(ctx, ctxBasenameKey, basename)
+			ctx = context.WithValue(ctx, ctxBasenameKey, basename) // nolint:staticcheck
 
 			shot, er := capture(ctx, opts, uri, dir)
 			if er != nil {

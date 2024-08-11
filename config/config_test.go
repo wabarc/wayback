@@ -2960,7 +2960,7 @@ func TestWaybackMeiliEndpoint(t *testing.T) {
 	}{
 		{
 			endpoint: "",
-			expected: defWaybackMeiliEndpoint,
+			expected: defMeiliEndpoint,
 		},
 		{
 			endpoint: "https://example.com",
@@ -2979,7 +2979,7 @@ func TestWaybackMeiliEndpoint(t *testing.T) {
 				t.Fatalf(`Parsing environment variables failed: %v`, err)
 			}
 
-			got := opts.WaybackMeiliEndpoint()
+			got := opts.MeiliEndpoint()
 			if got != test.expected {
 				t.Fatalf(`Unexpected set meilisearch endpoint got %s instead of %s`, got, test.expected)
 			}
@@ -2996,7 +2996,7 @@ func TestWaybackMeiliIndexing(t *testing.T) {
 	}{
 		{
 			indexing: "",
-			expected: defWaybackMeiliIndexing,
+			expected: defMeiliIndexing,
 		},
 		{
 			indexing: "foo-bar",
@@ -3015,7 +3015,7 @@ func TestWaybackMeiliIndexing(t *testing.T) {
 				t.Fatalf(`Parsing environment variables failed: %v`, err)
 			}
 
-			got := opts.WaybackMeiliIndexing()
+			got := opts.MeiliIndexing()
 			if got != test.expected {
 				t.Fatalf(`Unexpected set meilisearch indexing got %s instead of %s`, got, test.expected)
 			}
@@ -3032,7 +3032,7 @@ func TestWaybackMeiliApikey(t *testing.T) {
 	}{
 		{
 			apikey:   "",
-			expected: defWaybackMeiliApikey,
+			expected: defMeiliApikey,
 		},
 		{
 			apikey:   "foo.bar",
@@ -3051,7 +3051,7 @@ func TestWaybackMeiliApikey(t *testing.T) {
 				t.Fatalf(`Parsing environment variables failed: %v`, err)
 			}
 
-			got := opts.WaybackMeiliApikey()
+			got := opts.MeiliApikey()
 			if got != test.expected {
 				t.Fatalf(`Unexpected set meilisearch api key got %s instead of %s`, got, test.expected)
 			}
@@ -3088,6 +3088,78 @@ func TestEnabledMeilisearch(t *testing.T) {
 			}
 
 			got := opts.EnabledMeilisearch()
+			if got != test.expected {
+				t.Fatalf(`Unexpected enabled meilisearch got %t instead of %t`, got, test.expected)
+			}
+		})
+	}
+}
+
+func TestOmnivoreApikey(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		apikey   string
+		expected string
+	}{
+		{
+			apikey:   "",
+			expected: defOmnivoreApikey,
+		},
+		{
+			apikey:   "foo.bar",
+			expected: "foo.bar",
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_OMNIVORE_APIKEY", test.apikey)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.OmnivoreApikey()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set Omnivore api key got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}
+
+func TestEnabledOmnivore(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		apikey   string
+		expected bool
+	}{
+		{
+			apikey:   "",
+			expected: false,
+		},
+		{
+			apikey:   "foo-bar",
+			expected: true,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_OMNIVORE_APIKEY", test.apikey)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.EnabledOmnivore()
 			if got != test.expected {
 				t.Fatalf(`Unexpected enabled meilisearch got %t instead of %t`, got, test.expected)
 			}

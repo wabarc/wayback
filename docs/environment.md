@@ -40,6 +40,7 @@ Use the `-c` / `--config` option to specify the build definition file to use.
 | -                   | `WAYBACK_MEILI_ENDPOINT`          | -                          | Meilisearch API endpoint                                     |
 | -                   | `WAYBACK_MEILI_INDEXING`          | `capsules`                 | Meilisearch indexing name                                    |
 | -                   | `WAYBACK_MEILI_APIKEY`            | -                          | Meilisearch admin API key                                    |
+| -                   | `WAYBACK_OMNIVORE_APIKEY`         | -                          | Omnivore API key                                             |
 | `-d`, `--daemon`    | -                                 | -                          | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter`, `discord` |
 | `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                     | Wayback webpages to **Internet Archive**                     |
 | `--is`              | `WAYBACK_ENABLE_IS`               | `true`                     | Wayback webpages to **Archive Today**                        |

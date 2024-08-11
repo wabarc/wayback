@@ -59,6 +59,7 @@ nav:
     - Notion: 'integrations/notion.md'
     - Nostr: 'integrations/nostr.md'
     - Meilisearch: 'integrations/meilisearch.md'
+    - Omnivore: 'integrations/omnivore.md'
     - Playback: 'integrations/playback.md'
     - 'Internet Archive': 'integrations/internet-archive.md'
     - 'Archive.today': 'integrations/archive-today.md'
