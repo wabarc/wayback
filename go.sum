@@ -422,8 +422,8 @@ github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPx
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
 github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=
 github.com/sirupsen/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
-github.com/slack-go/slack v0.11.2 h1:IWl90Rk+jqPEVyiBytH27CSN/TFAg2vuDDfoPRog/nc=
-github.com/slack-go/slack v0.11.2/go.mod h1:hlGi5oXA+Gt+yWTPP0plCdRKmjsDxecdHxYQdlMQKOw=
+github.com/slack-go/slack v0.14.0 h1:6c0UTfbRnvRssZUsZ2qe0Iu07VAMPjRqOa6oX8ewF4k=
+github.com/slack-go/slack v0.14.0/go.mod h1:hlGi5oXA+Gt+yWTPP0plCdRKmjsDxecdHxYQdlMQKOw=
 github.com/soheilhy/cmux v0.1.4/go.mod h1:IM3LyeVVIOuxMH7sFAkER9+bJ4dT7Ms6E4xg4kGIyLM=
 github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
 github.com/spaolacci/murmur3 v1.1.0 h1:7c1g84S4BPRrfL5Xrdp6fOJ206sU9y293DDHaoy0bLI=
@@ -479,13 +479,10 @@ github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896 h1:c3uD+IKXpN
 github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896/go.mod h1:yEmUMlNO2PPAxIvo/Hf/VxOrCS5SBwL2/vCW8pyTWjA=
 github.com/wabarc/ghostarchive v0.1.1 h1:iGnDwvUixynKGlUTtxGfWAD1p6QRtCj7pAYCqgZNZTQ=
 github.com/wabarc/ghostarchive v0.1.1/go.mod h1:+HB72/CrKK4at+QhWDKRZYB6WLLyE/xlXr6/LgfqFro=
-github.com/wabarc/go-anonfile v0.1.0 h1:M4jKUAMROxxVaqLQt30ONmaHA/0YnvyJtX8qg/zI9+I=
-github.com/wabarc/go-anonfile v0.1.0/go.mod h1:CH1LzSKQ0x/RlKpEG2gi+hXaOOZrfeRx6Rp717o+65A=
 github.com/wabarc/go-catbox v0.1.0 h1:/UhV9md3MJrjZtm+EToSyFjawXgPiHSExLNRqsWNisg=
 github.com/wabarc/go-catbox v0.1.0/go.mod h1:Zjs9Y55f2WOwGWwmKSCrUuMfwh+nDktkjub9jgHq4CQ=
 github.com/wabarc/helper v0.0.0-20210127120855-10af37cc2616/go.mod h1:N9P4r7Rn46p4nkWtXV6ztN3p5ACVnp++bgfwjTqSxQ8=
 github.com/wabarc/helper v0.0.0-20210407153720-1bfe98b427fe/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
-github.com/wabarc/helper v0.0.0-20210614160629-1a5ba5e551eb/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/helper v0.0.0-20210701193643-e0fe0a807cb9/go.mod h1:TuTZtoiOu984UWOf7FfX58JllKMjq7FCz701kB5W88E=
 github.com/wabarc/helper v0.0.0-20210718171053-59c70d0b20c2/go.mod h1:uS6mimKlWkGvEZXkJ6JoW7LYnnB2JP6dLU9q7pgDaWQ=
 github.com/wabarc/helper v0.0.0-20230418130954-be7440352bcb h1:psEAY4wXvhXp/Hp5CJWgAOKWqhvAom+/hOjK+Qscx7o=
