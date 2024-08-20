@@ -25,7 +25,7 @@ require (
 	github.com/ipsn/go-libtor v1.0.380
 	github.com/jedib0t/go-pretty/v6 v6.4.0
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
-	github.com/nbd-wtf/go-nostr v0.17.1-0.20230426111250-32ca737acf77
+	github.com/nbd-wtf/go-nostr v0.34.6
 	github.com/phf/go-queue v0.0.0-20170504031614-9abe38d0371d
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.1
@@ -36,7 +36,6 @@ require (
 	github.com/wabarc/archive.is v1.4.0
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/ghostarchive v0.1.1
-	github.com/wabarc/go-anonfile v0.1.0
 	github.com/wabarc/go-catbox v0.1.0
 	github.com/wabarc/helper v0.0.0-20230418130954-be7440352bcb
 	github.com/wabarc/imgbb v1.0.0
@@ -61,7 +60,6 @@ require (
 
 require (
 	github.com/MercuryEngineering/CookieMonster v0.0.0-20180304172713-1584578b3403 // indirect
-	github.com/SaveTheRbtz/generic-sync-map-go v0.0.0-20230201052002-6c5833b989be // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
@@ -137,6 +135,7 @@ require (
 	github.com/onsi/gomega v1.33.1 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
+	github.com/puzpuzpuz/xsync/v3 v3.0.2 // indirect
 	github.com/quic-go/quic-go v0.45.0 // indirect
 	github.com/refraction-networking/utls v1.6.3 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
@@ -146,7 +145,7 @@ require (
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/tdewolff/parse/v2 v2.6.5 // indirect
-	github.com/tidwall/gjson v1.14.1 // indirect
+	github.com/tidwall/gjson v1.14.4 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tidwall/sjson v1.2.4 // indirect
