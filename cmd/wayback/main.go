@@ -45,6 +45,8 @@ var (
 
 	configFile string
 
+	migrate bool
+
 	rootCmd = &cobra.Command{
 		Use:   "wayback",
 		Short: "A command-line tool and daemon service for archiving webpages.",
@@ -88,6 +90,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&debug, "debug", "", false, "Enable debug mode (default mode is false)")
 	rootCmd.Flags().BoolVarP(&info, "info", "", false, "Show application information")
 	rootCmd.Flags().BoolVarP(&print, "print", "", false, "Show application configurations")
+	rootCmd.Flags().BoolVarP(&migrate, "migrate", "", false, "Run SQL migrations")
 }
 
 func checkRequiredFlags(cmd *cobra.Command) error {

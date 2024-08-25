@@ -193,10 +193,11 @@ func TestServe(t *testing.T) {
 	go pool.Roll()
 
 	dbpath := filepath.Join(t.TempDir(), "testing.db")
-	store, err := storage.Open(opts, dbpath)
+	db, err := storage.Open(opts, dbpath)
 	if err != nil {
 		t.Fatalf("open storage failed: %v", err)
 	}
+	store := storage.NewStorage(nil, db)
 	defer store.Close()
 
 	pub := publish.New(ctx, opts)
@@ -236,10 +237,11 @@ func TestProcess(t *testing.T) {
 	opts.EnableServices(config.ServiceDiscord.String())
 
 	dbpath := filepath.Join(t.TempDir(), "testing.db")
-	store, err := storage.Open(opts, dbpath)
+	db, err := storage.Open(opts, dbpath)
 	if err != nil {
 		t.Fatalf("open storage failed: %v", err)
 	}
+	store := storage.NewStorage(nil, db)
 	defer store.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
