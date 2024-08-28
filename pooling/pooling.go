@@ -251,7 +251,7 @@ func (p *Pool) Status() Status {
 		return StatusIdle
 	}
 
-	if total < int32(cap(p.resource)) {
+	if int(total) < cap(p.resource) {
 		return StatusIdle
 	}
 

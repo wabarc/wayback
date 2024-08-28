@@ -33,7 +33,7 @@ func (s *Storage) createPlaybackBucket() error {
 }
 
 // Playback returns playback data of the given id.
-func (s *Storage) Playback(id int) (*entity.Playback, error) {
+func (s *Storage) Playback(id uint64) (*entity.Playback, error) {
 	var pb entity.Playback
 
 	err := s.db.View(func(tx *bolt.Tx) error {
@@ -63,7 +63,7 @@ func (s *Storage) CreatePlayback(pb *entity.Playback) error {
 		}
 		logger.Debug("putting data to bucket, id: %d, value: %s", id, pb.Source)
 
-		pb.ID = int(id)
+		pb.ID = id
 		buf := bytes.NewBufferString(pb.Source).Bytes()
 
 		return b.Put(itob(pb.ID), buf)

@@ -43,8 +43,8 @@ func (s *Storage) Close() error {
 	return ErrDatabaseNotFound
 }
 
-func itob(v int) []byte {
+func itob(v uint64) []byte {
 	b := make([]byte, 8)
-	binary.BigEndian.PutUint64(b, uint64(v))
+	binary.BigEndian.PutUint64(b, v)
 	return b
 }

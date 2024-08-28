@@ -102,7 +102,7 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 	}
 
 	g, ctx := errgroup.WithContext(ctx)
-	var failed int32
+	var failed int64
 	for _, url := range n.opts.NostrRelayURL() {
 		logger.Debug(`publish note to relay: %s`, url)
 		url := url
@@ -121,7 +121,7 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 
 			status, err := relay.Publish(ctx, ev)
 			if err != nil {
-				atomic.AddInt32(&failed, 1)
+				atomic.AddInt64(&failed, 1)
 				return fmt.Errorf("published to %s failed: %v", url, err)
 			}
 			if status != nostr.PublishStatusSucceeded {
@@ -131,7 +131,7 @@ func (n *Nostr) publish(ctx context.Context, note string) error {
 		})
 	}
 	if err := g.Wait(); err != nil {
-		annihilated := atomic.LoadInt32(&failed) == int32(len(n.opts.NostrRelayURL()))
+		annihilated := atomic.LoadInt64(&failed) == int64(len(n.opts.NostrRelayURL()))
 		if annihilated {
 			return err
 		}

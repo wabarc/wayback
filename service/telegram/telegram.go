@@ -119,7 +119,7 @@ func (t *Telegram) Serve() (err error) {
 			}
 
 			// Query playback callback data from database
-			pb, err := t.store.Playback(id)
+			pb, err := t.store.Playback(uint64(id))
 			if err != nil {
 				logger.Error("query playback data failed: %v", err)
 				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
@@ -345,7 +345,7 @@ func (t *Telegram) playback(message *telegram.Message) error {
 			InlineKeyboard: [][]telegram.InlineButton{
 				{{
 					Text: "wayback",
-					Data: strconv.Itoa(pb.ID),
+					Data: strconv.FormatUint(pb.ID, 10),
 				}},
 			},
 		},

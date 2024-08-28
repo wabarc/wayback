@@ -205,7 +205,7 @@ func (d *Discord) buttonHandlers() map[string]func(*discord.Session, *discord.In
 			}
 
 			// Query playback callback data from database
-			pb, err := d.store.Playback(id)
+			pb, err := d.store.Playback(uint64(id))
 			if err != nil {
 				logger.Error("query playback data failed: %v", err)
 				metrics.IncrementWayback(metrics.ServiceDiscord, metrics.StatusFailure)
@@ -373,7 +373,7 @@ func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) err
 						Label:    "wayback",
 						Style:    discord.SuccessButton,
 						Disabled: false,
-						CustomID: strconv.Itoa(pb.ID),
+						CustomID: strconv.FormatUint(pb.ID, 10),
 					},
 				},
 			},
