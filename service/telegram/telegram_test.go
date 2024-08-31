@@ -194,7 +194,6 @@ func newTelegram(client *http.Client, opts *config.Options, endpoint string) (tg
 		return tg, nil, err
 	}
 	store := storage.NewStorage(nil, db)
-	defer store.Close()
 
 	cfg := []pooling.Option{
 		pooling.Capacity(opts.PoolingSize()),
