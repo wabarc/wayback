@@ -232,8 +232,8 @@ func (d *Discord) buttonHandlers() map[string]func(*discord.Session, *discord.In
 			s.ChannelTyping(i.Message.ChannelID)
 
 			i.Message.Content = helper.Byte2String(data)
-			d.process(&discord.MessageCreate{Message: i.Message})       // nolint:errcheck
-			s.InteractionResponseDelete(s.State.User.ID, i.Interaction) // nolint:errcheck
+			d.process(&discord.MessageCreate{Message: i.Message}) // nolint:errcheck
+			s.InteractionResponseDelete(i.Interaction)            // nolint:errcheck
 		},
 	}
 }
@@ -341,13 +341,15 @@ func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) err
 		})
 	}
 
-	// nolint:errcheck
-	s.InteractionRespond(i.Interaction, &discord.InteractionResponse{
+	err := s.InteractionRespond(i.Interaction, &discord.InteractionResponse{
 		Type: discord.InteractionResponseChannelMessageWithSource,
 		Data: &discord.InteractionResponseData{
 			Content: "Processing...",
 		},
 	})
+	if err != nil {
+		return errors.Wrap(err, "discord: playback hint failed")
+	}
 
 	cols, err := wayback.Playback(d.ctx, d.opts, urls...)
 	if err != nil {
@@ -364,9 +366,9 @@ func (d *Discord) playback(s *discord.Session, i *discord.InteractionCreate) err
 	}
 
 	replyText := render.ForReply(&render.Discord{Cols: cols}).String()
-	err = s.InteractionResponseEdit(s.State.User.ID, i.Interaction, &discord.WebhookEdit{
-		Content: replyText,
-		Components: []discord.MessageComponent{
+	_, err = s.InteractionResponseEdit(i.Interaction, &discord.WebhookEdit{
+		Content: &replyText,
+		Components: &[]discord.MessageComponent{
 			discord.ActionsRow{
 				Components: []discord.MessageComponent{
 					discord.Button{

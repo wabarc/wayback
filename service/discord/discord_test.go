@@ -37,6 +37,7 @@ const (
 )
 
 var (
+	now      = time.Now()
 	upgrader = websocket.Upgrader{}
 	channel  = &discord.Channel{
 		ID:   channelID,
@@ -63,8 +64,8 @@ var (
 		ID:               messageID,
 		ChannelID:        channelID,
 		Content:          "https://example.com/",
-		Timestamp:        discord.Timestamp("1625186466"),
-		EditedTimestamp:  discord.Timestamp("1625186466"),
+		Timestamp:        now,
+		EditedTimestamp:  &now,
 		MentionRoles:     []string{},
 		TTS:              false,
 		MentionEveryone:  false,
@@ -135,7 +136,7 @@ func handle(mux *http.ServeMux, gateway string) {
 				URL string `json:"url"`
 			}{URL: gateway})
 			fmt.Fprintln(w, string(gatewayJson))
-		case r.URL.Path == "/api/v8/channels/messages":
+		case r.URL.Path == "/api/v8/channels/messages", r.URL.Path == "/api/v9/channels/messages":
 			once.Do(func() {
 				fmt.Fprintln(w, string(messageJson))
 			})

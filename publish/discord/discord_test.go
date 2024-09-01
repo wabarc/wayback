@@ -32,6 +32,7 @@ const (
 )
 
 var (
+	now      = time.Now()
 	token    = "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
 	upgrader = websocket.Upgrader{}
 	channel  = &discord.Channel{
@@ -59,8 +60,8 @@ var (
 		ID:               messageID,
 		ChannelID:        channelID,
 		Content:          "https://example.com/",
-		Timestamp:        discord.Timestamp("1625186466"),
-		EditedTimestamp:  discord.Timestamp("1625186466"),
+		Timestamp:        now,
+		EditedTimestamp:  &now,
 		MentionRoles:     []string{},
 		TTS:              false,
 		MentionEveryone:  false,

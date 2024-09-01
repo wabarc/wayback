@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Do not upload files to anonfiles
 
+### Fixed
+- Fix playback from discord no response
+
 ## [0.20.1] - 2024-07-02
 
 ### Fixed
