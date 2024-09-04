@@ -12,15 +12,15 @@ Wayback可以与各种消息平台集成，包括Discord、IRC、Mastodon、Matr
 
 有关如何为每个平台创建机器人的详细说明，请参见以下链接：
 
-- [Discord](integrations/discord.md)
-- [IRC](integrations/irc.md)
-- [Mastodon](integrations/mastodon.md)
-- [Matrix](integrations/matrix.md)
-- [Slack](integrations/slack.md)
-- [Telegram](integrations/telegram.md)
-- [Twitter](integrations/twitter.md)
-- [Web](integrations/web.md)
-- [XMPP](integrations/xmpp.md)
+- [Discord](integrations/discord.zh.md)
+- [IRC](integrations/irc.zh.md)
+- [Mastodon](integrations/mastodon.zh.md)
+- [Matrix](integrations/matrix.zh.md)
+- [Slack](integrations/slack.zh.md)
+- [Telegram](integrations/telegram.zh.md)
+- [Twitter](integrations/twitter.zh.md)
+- [Web](integrations/web.zh.md)
+- [XMPP](integrations/xmpp.zh.md)
 
 请注意，您需要在各自的平台上设置帐户并获取必要的凭据，例如访问令牌，才能将Wayback用作机器人。
 
@@ -32,16 +32,18 @@ Wayback的集成服务提供了将存档结果发布到各种消息和协作平�
 
 有关如何配置发布通道的详细说明，请参见以下链接：
 
-- [IRC](integrations/irc.md)
-- [Discord](integrations/discord.md)
-- [GitHub Issues](integrations/github.md)
-- [Mastodon](integrations/mastodon.md)
-- [Matrix](integrations/matrix.md)
-- [Meilisearch](integrations/meilisearch.md)
-- [Nostr](integrations/nostr.md)
-- [Notion](integrations/notion.md)
-- [Slack](integrations/slack.md)
-- [Telegram](integrations/telegram.md)
-- [Twitter](integrations/twitter.md)
+- [IRC](integrations/irc.zh.md)
+- [Discord](integrations/discord.zh.md)
+- [GitHub Issues](integrations/github.zh.md)
+- [Mastodon](integrations/mastodon.zh.md)
+- [Matrix](integrations/matrix.zh.md)
+- [Meilisearch](integrations/meilisearch.zh.md)
+- [Nostr](integrations/nostr.zh.md)
+- [Notion](integrations/notion.zh.md)
+- [Omnivore](integrations/omnivore.zh.md)
+- [Postgres](integrations/datastore.zh.md)
+- [Slack](integrations/slack.zh.md)
+- [Telegram](integrations/telegram.zh.md)
+- [Twitter](integrations/twitter.zh.md)
 
 每个平台都有自己的配置要求，因此请务必仔细按照说明操作，以确保成功发布存档结果。
