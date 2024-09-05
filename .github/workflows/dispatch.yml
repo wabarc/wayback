@@ -26,7 +26,7 @@ jobs:
             api.github.com:443
 
       - name: Dispatch repository in wabarc/aur
-        uses: peter-evans/repository-dispatch@f2696244ec00ed5c659a5cc77f7138ad0302dffb # v2.1.0
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
         with:
           repository: wabarc/homebrew-wayback
           event-type: publish
