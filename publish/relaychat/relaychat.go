@@ -12,6 +12,7 @@ import (
 	"github.com/wabarc/wayback"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
+	"github.com/wabarc/wayback/ingress"
 	"github.com/wabarc/wayback/metrics"
 	"github.com/wabarc/wayback/publish"
 	"github.com/wabarc/wayback/reduxer"
@@ -44,9 +45,22 @@ func (i *IRC) Publish(ctx context.Context, _ reduxer.Reduxer, cols []wayback.Col
 	// this value accessed from service module.
 	if i.conn == nil {
 		v := ctx.Value(publish.FlagIRC)
-		conn, ok := v.(*irc.Client)
+		client, ok := v.(*irc.Client)
 		if ok {
-			i.conn = conn
+			i.conn = client
+		} else {
+			config := irc.ClientConfig{
+				Nick: i.opts.IRCNick(),
+				User: i.opts.IRCNick(),
+				Name: i.opts.IRCName(),
+				Pass: i.opts.IRCPassword(),
+			}
+			dialer := ingress.Dialer()
+			conn, err := dialer.Dial("tcp", i.opts.IRCServer())
+			if err != nil {
+				return err
+			}
+			i.conn = irc.NewClient(conn, config)
 		}
 	}
 
