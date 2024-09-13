@@ -19,9 +19,13 @@ func TestCreatePlayback(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	s, err := Open(opts, path.Join(t.TempDir(), "wayback.db"))
+	db, err := Open(opts, path.Join(t.TempDir(), "wayback.db"))
 	if err != nil {
 		t.Fatalf("Unexpected open a bolt db: %v", err)
+	}
+	s := NewStorage(nil, db)
+	if err != nil {
+		t.Fatalf("failed to new storage: %v", err)
 	}
 	defer s.Close()
 
@@ -39,9 +43,13 @@ func TestPlayback(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	s, err := Open(opts, path.Join(t.TempDir(), "wayback.db"))
+	db, err := Open(opts, path.Join(t.TempDir(), "wayback.db"))
 	if err != nil {
 		t.Fatalf("Unexpected open a bolt db: %v", err)
+	}
+	s := NewStorage(nil, db)
+	if err != nil {
+		t.Fatalf("failed to new storage: %v", err)
 	}
 	defer s.Close()
 
@@ -71,9 +79,13 @@ func TestRemovePlayback(t *testing.T) {
 		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 	}
 
-	s, err := Open(opts, path.Join(t.TempDir(), "wayback.db"))
+	db, err := Open(opts, path.Join(t.TempDir(), "wayback.db"))
 	if err != nil {
 		t.Fatalf("Unexpected open a bolt db: %v", err)
+	}
+	s := NewStorage(nil, db)
+	if err != nil {
+		t.Fatalf("failed to new storage: %v", err)
 	}
 	defer s.Close()
 

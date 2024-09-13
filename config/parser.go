@@ -95,6 +95,14 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.chromeRemoteAddr = parseString(val, defChromeRemoteAddr)
 		case "WAYBACK_PROXY":
 			p.opts.proxy = parseString(val, defProxy)
+		case "WAYBACK_DATABASE_URL":
+			p.opts.database.url = parseString(val, defDatabaseURL)
+		case "WAYBACK_DATABASE_MAX_CONNS":
+			p.opts.database.maxConns = parseInt(val, defDatabaseMaxConns)
+		case "WAYBACK_DATABASE_MIN_CONNS":
+			p.opts.database.minConns = parseInt(val, defDatabaseMinConns)
+		case "WAYBACK_DATABASE_CONNECTION_LIFETIME":
+			p.opts.database.connectionLifetime = parseInt(val, defDatabaseConnectionLifetime)
 		case "WAYBACK_IPFS_HOST":
 			p.opts.ipfs.host = parseString(val, defIPFSHost)
 		case "WAYBACK_IPFS_PORT":

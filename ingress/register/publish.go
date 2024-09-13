@@ -5,6 +5,7 @@
 package register // import "github.com/wabarc/wayback/ingress/register"
 
 import (
+	_ "github.com/wabarc/wayback/publish/datastore"
 	_ "github.com/wabarc/wayback/publish/discord"
 	_ "github.com/wabarc/wayback/publish/github"
 	_ "github.com/wabarc/wayback/publish/mastodon"

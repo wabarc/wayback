@@ -40,6 +40,8 @@ For detailed instructions on how to configure the publishing channel, please ref
 - [Meilisearch](integrations/meilisearch.md)
 - [Nostr](integrations/nostr.md)
 - [Notion](integrations/notion.md)
+- [Omnivore](integrations/omnivore.md)
+- [Postgres](integrations/datastore.md)
 - [Slack](integrations/slack.md)
 - [Telegram](integrations/telegram.md)
 - [Twitter](integrations/twitter.md)

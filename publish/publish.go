@@ -33,6 +33,7 @@ const (
 	FlagGitHub               // FlagGitHub is a flag for github publish service
 	FlagMeili                // FlagMeili is a flag for meilisearch publish service
 	FlagOmnivore             // FlagOmnivore is a flag for Omnivore publish service
+	FlagDatabase             // FlagDatabase is a flag for database store publish service
 )
 
 // Publisher is the interface that wraps the basic Publish method.
@@ -75,6 +76,8 @@ func (f Flag) String() string {
 		return "meilisearch"
 	case FlagOmnivore:
 		return "omnivore"
+	case FlagDatabase:
+		return "database"
 	default:
 		return "unknown"
 	}

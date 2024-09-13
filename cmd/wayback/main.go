@@ -45,6 +45,8 @@ var (
 
 	configFile string
 
+	migrate bool
+
 	rootCmd = &cobra.Command{
 		Use:   "wayback",
 		Short: "A command-line tool and daemon service for archiving webpages.",
@@ -75,7 +77,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&ip, "ip", "", true, "Wayback webpages to IPFS")
 	rootCmd.Flags().BoolVarP(&ph, "ph", "", true, "Wayback webpages to Telegraph")
 	rootCmd.Flags().BoolVarP(&ga, "ga", "", true, "Wayback webpages to Ghostarchive")
-	rootCmd.Flags().StringSliceVarP(&daemon, "daemon", "d", []string{}, "Run as daemon service, supported services are telegram, web, mastodon, twitter, discord, slack, irc")
+	rootCmd.Flags().StringSliceVarP(&daemon, "daemon", "d", []string{}, "Run as daemon service, supported services are telegram, web, mastodon, twitter, discord, slack, irc, xmpp")
 	rootCmd.Flags().StringVarP(&host, "ipfs-host", "", "127.0.0.1", "IPFS daemon host, do not require, unless enable ipfs")
 	rootCmd.Flags().UintVarP(&port, "ipfs-port", "p", 5001, "IPFS daemon port")
 	rootCmd.Flags().StringVarP(&mode, "ipfs-mode", "m", "pinner", "IPFS mode")
@@ -88,6 +90,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&debug, "debug", "", false, "Enable debug mode (default mode is false)")
 	rootCmd.Flags().BoolVarP(&info, "info", "", false, "Show application information")
 	rootCmd.Flags().BoolVarP(&print, "print", "", false, "Show application configurations")
+	rootCmd.Flags().BoolVarP(&migrate, "migrate", "", false, "Run SQL migrations")
 }
 
 func checkRequiredFlags(cmd *cobra.Command) error {

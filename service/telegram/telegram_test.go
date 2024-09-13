@@ -189,10 +189,12 @@ func newTelegram(client *http.Client, opts *config.Options, endpoint string) (tg
 		return tg, nil, err
 	}
 
-	store, e := storage.Open(opts, "")
-	if e != nil {
-		return tg, nil, e
+	db, err := storage.Open(opts, "")
+	if err != nil {
+		return tg, nil, err
 	}
+	store := storage.NewStorage(nil, db)
+
 	cfg := []pooling.Option{
 		pooling.Capacity(opts.PoolingSize()),
 		pooling.Timeout(opts.WaybackTimeout()),

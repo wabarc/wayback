@@ -89,6 +89,11 @@ https://github.com/wabarc/ipfs-pinner\&.
 IPFS daemon port. default 5001\&.
 .RE
 .PP
+.B \-\-migrate
+.RS 4
+Run database migrations\&.
+.RE
+.PP
 .B \-t, \-\-token
 .RS 4
 Telegram Bot API Token\&.
@@ -191,6 +196,18 @@ Meilisearch admin API key.\&.
 .TP
 .B WAYBACK_OMNIVORE_APIKEY
 Omnivore API key.\&.
+.TP
+.B WAYBACK_DATABASE_URL
+The URL of the Postgres database.\&.
+.TP
+.B WAYBACK_DATABASE_MAX_CONNS
+Maximum connections of the Postgres database.\&.
+.TP
+.B WAYBACK_DATABASE_MIN_CONNS
+Minimum connections of the Postgres database.\&.
+.TP
+.B WAYBACK_DATABASE_CONNECTION_LIFETIME
+Connection lifetime of the Postgres database.\&.
 .TP
 .B WAYBACK_BOLT_PATH
 File path of bolt database. default ./wayback.db\&.

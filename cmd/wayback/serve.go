@@ -26,11 +26,35 @@ import (
 var signalChan chan (os.Signal) = make(chan os.Signal, 1)
 
 func serve(_ *cobra.Command, opts *config.Options, _ []string) {
-	store, err := storage.Open(opts, "")
+	db, err := storage.NewConnectionPool(
+		opts.DatabaseURL(),
+		opts.DatabaseMinConns(),
+		opts.DatabaseMaxConns(),
+		opts.DatabaseConnectionLifetime(),
+	)
+	if err != nil {
+		logger.Fatal("unable to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	bolt, err := storage.Open(opts, "")
 	if err != nil {
 		logger.Fatal("open storage failed: %v", err)
 	}
+	store := storage.NewStorage(db, bolt)
 	defer store.Close()
+
+	if !opts.IsDefaultDatabaseURL() {
+		if err = store.Ping(); err != nil {
+			logger.Fatal("ping database failed: %v", err)
+		}
+
+		if migrate {
+			if err = storage.Migrate(db); err != nil {
+				logger.Fatal("migrate database failed: %v", err)
+			}
+		}
+	}
 
 	cfg := []pooling.Option{
 		pooling.Capacity(opts.PoolingSize()),
