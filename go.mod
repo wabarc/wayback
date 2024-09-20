@@ -32,7 +32,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.1
 	github.com/prometheus/common v0.48.0
-	github.com/rs/xid v1.4.0
+	github.com/rs/xid v1.6.0
 	github.com/slack-go/slack v0.11.2
 	github.com/spf13/cobra v1.6.1
 	github.com/wabarc/archive.is v1.4.0
