@@ -15,7 +15,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/go-shiori/go-readability v0.0.0-20220215145315-dd6828d2f09b
-	github.com/go-shiori/obelisk v0.0.0-20230316095823-42f6a2f99d9d
+	github.com/go-shiori/obelisk v0.0.0-20241012070003-61fdf00f94d3
 	github.com/goccy/go-json v0.10.3
 	github.com/google/go-github/v40 v40.0.0
 	github.com/google/uuid v1.3.0
@@ -34,7 +34,7 @@ require (
 	github.com/prometheus/common v0.48.0
 	github.com/rs/xid v1.4.0
 	github.com/slack-go/slack v0.11.2
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.8.0
 	github.com/wabarc/archive.is v1.4.0
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/ghostarchive v0.1.1
@@ -88,7 +88,7 @@ require (
 	github.com/dop251/goja v0.0.0-20221115122301-6c0d9883792e // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/fortytw2/leaktest v1.3.0 // indirect
-	github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65 // indirect
+	github.com/go-shiori/dom v0.0.0-20230515143342-73569d674e1c // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
@@ -97,7 +97,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/pprof v0.0.0-20240528025155-186aa0362fba // indirect
 	github.com/iawia002/lia v0.0.0-20221116085912-1f653221be4b // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/ipfs/boxo v0.8.1 // indirect
 	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/ipfs/go-ipfs-api v0.6.0 // indirect
@@ -142,10 +142,10 @@ require (
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/tdewolff/parse/v2 v2.6.5 // indirect
+	github.com/tdewolff/parse/v2 v2.7.11 // indirect
 	github.com/tidwall/gjson v1.14.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
