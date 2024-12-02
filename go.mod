@@ -3,6 +3,7 @@ module github.com/wabarc/wayback
 // +heroku goVersion go1.21
 
 go 1.21
+toolchain go1.22.5
 
 require (
 	github.com/PuerkitoBio/goquery v1.9.0
@@ -95,7 +96,6 @@ require (
 	github.com/gobwas/ws v1.3.2 // indirect
 	github.com/gogs/chardet v0.0.0-20211120154057-b7413eaefb8f // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/google/pprof v0.0.0-20240528025155-186aa0362fba // indirect
 	github.com/iawia002/lia v0.0.0-20221116085912-1f653221be4b // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/ipfs/boxo v0.8.1 // indirect
@@ -133,11 +133,9 @@ require (
 	github.com/multiformats/go-multistream v0.5.0 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/oliamb/cutter v0.2.2 // indirect
-	github.com/onsi/ginkgo/v2 v2.19.0 // indirect
-	github.com/onsi/gomega v1.33.1 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	github.com/quic-go/quic-go v0.45.0 // indirect
+	github.com/quic-go/quic-go v0.48.2 // indirect
 	github.com/refraction-networking/utls v1.6.3 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f // indirect
