@@ -132,7 +132,7 @@ jobs:
             type=raw,${{ steps.prep.outputs.version }}
 
       - name: Build artifacts
-        uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
+        uses: docker/bake-action@3fc70e1131fee40a422dd8dd0ff22014ae20a1f3 # v5.11.0
         env:
           WAYBACK_IPFS_TARGET: ${{ secrets.WAYBACK_IPFS_TARGET }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
@@ -273,7 +273,7 @@ jobs:
             type=raw,${{ steps.prep.outputs.version }}
 
       - name: Build artifacts
-        uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
+        uses: docker/bake-action@3fc70e1131fee40a422dd8dd0ff22014ae20a1f3 # v5.11.0
         env:
           WAYBACK_IPFS_TARGET: ${{ secrets.WAYBACK_IPFS_TARGET }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
