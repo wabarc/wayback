@@ -132,7 +132,7 @@ jobs:
             type=raw,${{ steps.prep.outputs.version }}
 
       - name: Build artifacts
-        uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
+        uses: docker/bake-action@3fc70e1131fee40a422dd8dd0ff22014ae20a1f3 # v5.11.0
         env:
           WAYBACK_IPFS_TARGET: ${{ secrets.WAYBACK_IPFS_TARGET }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
@@ -141,8 +141,8 @@ jobs:
           files: ./docker-bake.hcl
           targets: artifact-all
           set: |
-            *.cache-from=type=local,src=/tmp/.image-cache/artifacts
-            *.cache-to=type=local,dest=/tmp/.image-cache-new/artifacts
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
 
       - name: Build and push Docker image
         uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
@@ -157,8 +157,8 @@ jobs:
           targets: release
           push: ${{ github.event_name != 'pull_request' }}
           set: |
-            *.cache-from=type=local,src=/tmp/.image-cache/image
-            *.cache-to=type=local,dest=/tmp/.image-cache-new/image
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
 
       - name: Siging image
         if: github.event_name != 'pull_request'
@@ -273,7 +273,7 @@ jobs:
             type=raw,${{ steps.prep.outputs.version }}
 
       - name: Build artifacts
-        uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
+        uses: docker/bake-action@3fc70e1131fee40a422dd8dd0ff22014ae20a1f3 # v5.11.0
         env:
           WAYBACK_IPFS_TARGET: ${{ secrets.WAYBACK_IPFS_TARGET }}
           WAYBACK_IPFS_APIKEY: ${{ secrets.WAYBACK_IPFS_APIKEY }}
@@ -282,8 +282,8 @@ jobs:
           files: ./docker-bake.hcl
           targets: artifact-all
           set: |
-            *.cache-from=type=local,src=/tmp/.image-cache/artifacts
-            *.cache-to=type=local,dest=/tmp/.image-cache-new/artifacts
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
 
       - name: Build and push Docker image
         uses: docker/bake-action@6c87dcca988e4e074e3ab1f976a70f63ec9673fb # v2.3.0
@@ -298,8 +298,8 @@ jobs:
           targets: bundle
           push: ${{ github.event_name != 'pull_request' }}
           set: |
-            *.cache-from=type=local,src=/tmp/.image-cache/image
-            *.cache-to=type=local,dest=/tmp/.image-cache-new/image
+            *.cache-from=type=gha
+            *.cache-to=type=gha,mode=max
 
       - name: Sign image with a key
         if: github.event_name != 'pull_request'
