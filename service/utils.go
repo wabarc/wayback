@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -103,7 +104,13 @@ func filterArtifact(art reduxer.Artifact, upper int64) (paths []string) {
 		}
 		fsize += helper.FileSize(asset.Local)
 		if fsize > upper {
-			logger.Warn("total file size large than %s, skipped", humanize.Bytes(uint64(upper)))
+			s := strconv.FormatInt(upper, 10)
+			u, err := strconv.ParseUint(s, 10, 64)
+			if err != nil {
+				logger.Warn("parse uint failed %v", err)
+				continue
+			}
+			logger.Warn("total file size large than %s, skipped", humanize.Bytes(u))
 			continue
 		}
 		paths = append(paths, asset.Local)

@@ -119,7 +119,13 @@ func (t *Telegram) Serve() (err error) {
 			}
 
 			// Query playback callback data from database
-			pb, err := t.store.Playback(uint64(id))
+			x := strconv.Itoa(id)
+			u, err := strconv.ParseUint(x, 10, 64)
+			if err != nil {
+				logger.Error("parse uint failed: %v", err)
+				return false
+			}
+			pb, err := t.store.Playback(u)
 			if err != nil {
 				logger.Error("query playback data failed: %v", err)
 				metrics.IncrementWayback(metrics.ServiceTelegram, metrics.StatusFailure)
