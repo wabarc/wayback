@@ -283,3 +283,13 @@ Note: All interaction here should conform to the [Code of Conduct](./CODE_OF_CON
 This software is released under the terms of the GNU General Public License v3.0. See the [LICENSE](https://github.com/wabarc/wayback/blob/main/LICENSE) file for details.
 
 [![FOSSA Status](https://app.fossa.com/api/projects/custom%2B30014%2Fgithub.com%2Fwabarc%2Fwayback.svg?type=large)](https://app.fossa.com/projects/custom%2B30014%2Fgithub.com%2Fwabarc%2Fwayback?ref=badge_large)
+
+## Credits
+
+Thanks to DigitalOcean for supporting open-source software.
+
+<p>
+  <a href="https://m.do.co/c/cb27a8691d73">
+    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width="201px">
+  </a>
+</p>
