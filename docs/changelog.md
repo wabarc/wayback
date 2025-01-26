@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fix playback from discord no response
 - Improve IRC publish
+- Improve type conversion ([#628](https://github.com/wabarc/wayback/pull/628))
 
 ## [0.20.1] - 2024-07-02
 
