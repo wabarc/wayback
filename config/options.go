@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -927,7 +928,12 @@ func (o *Options) WaybackTimeout() time.Duration {
 
 // WaybackMaxRetries returns max retries for a wayback request.
 func (o *Options) WaybackMaxRetries() uint64 {
-	return uint64(o.waybackMaxRetries)
+	s := strconv.Itoa(o.waybackMaxRetries)
+	u, err := strconv.ParseUint(s, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return u
 }
 
 // WaybackUserAgent returns User-Agent for a wayback request.

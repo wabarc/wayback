@@ -205,7 +205,13 @@ func (d *Discord) buttonHandlers() map[string]func(*discord.Session, *discord.In
 			}
 
 			// Query playback callback data from database
-			pb, err := d.store.Playback(uint64(id))
+			x := strconv.Itoa(id)
+			u, err := strconv.ParseUint(x, 10, 64)
+			if err != nil {
+				logger.Error("parse uint failed: %v", err)
+				return
+			}
+			pb, err := d.store.Playback(u)
 			if err != nil {
 				logger.Error("query playback data failed: %v", err)
 				metrics.IncrementWayback(metrics.ServiceDiscord, metrics.StatusFailure)
