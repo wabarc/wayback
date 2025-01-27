@@ -121,9 +121,9 @@ jobs:
           # search package https://pkgs.org/
           sudo add-apt-repository universe
           sudo apt-get -y -qq update
-          sudo apt-get -y -qq install ffmpeg webp youtube-dl
+          sudo apt-get -y -qq install ffmpeg webp yt-dlp
           pip3 install you-get
-          echo "youtube-dl version $(youtube-dl --version)"
+          echo "yt-dlp version $(yt-dlp --version)"
           you-get --version
           ffmpeg -version
 
