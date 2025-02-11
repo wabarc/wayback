@@ -25,7 +25,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0
 	github.com/iawia002/lux v0.17.0
 	github.com/ipsn/go-libtor v1.0.380
-	github.com/jedib0t/go-pretty/v6 v6.4.0
+	github.com/jedib0t/go-pretty/v6 v6.6.6
 	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
 	github.com/nbd-wtf/go-nostr v0.17.1-0.20230426111250-32ca737acf77
 	github.com/phf/go-queue v0.0.0-20170504031614-9abe38d0371d
@@ -51,7 +51,7 @@ require (
 	github.com/wabarc/warcraft v0.3.1-0.20230308125707-3daa5592ba52
 	go.etcd.io/bbolt v1.3.6
 	golang.org/x/net v0.28.0
-	golang.org/x/sync v0.8.0
+	golang.org/x/sync v0.11.0
 	gopkg.in/irc.v4 v4.0.0
 	gopkg.in/telebot.v3 v3.0.0-20220130115853-f0291132d3c3
 	maunium.net/go/mautrix v0.12.0
@@ -118,7 +118,7 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -139,7 +139,7 @@ require (
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/quic-go/quic-go v0.45.0 // indirect
 	github.com/refraction-networking/utls v1.6.3 // indirect
-	github.com/rivo/uniseg v0.4.3 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
@@ -158,8 +158,8 @@ require (
 	golang.org/x/crypto v0.26.0 // indirect
 	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
 	golang.org/x/mod v0.18.0 // indirect
-	golang.org/x/sys v0.24.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
