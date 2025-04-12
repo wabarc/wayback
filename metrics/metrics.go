@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/version"
@@ -141,7 +142,7 @@ func init() {
 
 func (c *Collector) collect(ch chan<- prometheus.Metric) error {
 	// Set uptime
-	duration := fmt.Sprint(time.Since(startTime).Truncate(time.Second))
+	duration := humanize.Time(startTime)
 	m, err := prometheus.NewConstMetric(c.uptimeDesc, prometheus.GaugeValue, float64(1), duration)
 	if err != nil {
 		return err
