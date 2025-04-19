@@ -5,10 +5,10 @@
 package metrics // import "github.com/wabarc/wayback/metrics"
 
 import (
-	"fmt"
 	"runtime"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/version"
@@ -117,7 +117,7 @@ func NewCollector() *Collector {
 		uptimeDesc: prometheus.NewDesc(
 			"wayback_uptime",
 			"The uptime of wayback service.",
-			[]string{"duration"}, nil),
+			[]string{"up"}, nil),
 	}
 	prometheus.MustRegister(collector)
 	prometheus.MustRegister(buildInfoGauge)
@@ -141,8 +141,8 @@ func init() {
 
 func (c *Collector) collect(ch chan<- prometheus.Metric) error {
 	// Set uptime
-	duration := fmt.Sprint(time.Since(startTime).Truncate(time.Second))
-	m, err := prometheus.NewConstMetric(c.uptimeDesc, prometheus.GaugeValue, float64(1), duration)
+	uptime := humanize.Time(startTime)
+	m, err := prometheus.NewConstMetric(c.uptimeDesc, prometheus.GaugeValue, float64(1), uptime)
 	if err != nil {
 		return err
 	}
