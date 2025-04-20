@@ -1,6 +1,6 @@
 // Go version
 variable "GO_VERSION" {
-  default = "1.22"
+  default = "1.24"
 }
 
 variable "WAYBACK_IPFS_TARGET" {

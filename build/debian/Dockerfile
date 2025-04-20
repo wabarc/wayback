@@ -1,4 +1,4 @@
-FROM docker.io/golang:1.22-bookworm AS build
+FROM docker.io/golang:1.24-bookworm AS build
 
 ARG WAYBACK_IPFS_APIKEY
 
