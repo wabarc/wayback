@@ -18,7 +18,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/go-shiori/go-readability v0.0.0-20220215145315-dd6828d2f09b
 	github.com/go-shiori/obelisk v0.0.0-20230316095823-42f6a2f99d9d
-	github.com/goccy/go-json v0.10.3
+	github.com/goccy/go-json v0.10.5
 	github.com/google/go-github/v40 v40.0.0
 	github.com/google/uuid v1.3.0
 	github.com/gookit/color v1.5.3
