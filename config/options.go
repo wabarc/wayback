@@ -105,6 +105,8 @@ const (
 
 	defOmnivoreApikey = ""
 
+	defPrivacyURL = "https://privacy.wabarc.eu.org"
+
 	maxAttachSizeTelegram = 50000000   // 50MB
 	maxAttachSizeDiscord  = 8000000    // 8MB
 	maxAttachSizeSlack    = 5000000000 // 5GB
@@ -147,6 +149,7 @@ type Options struct {
 	chromeRemoteAddr    string
 	boltPathname        string
 	poolingSize         int
+	privacyURL          string
 	waybackTimeout      int
 	waybackMaxRetries   int
 	enabledChromeRemote bool
@@ -272,6 +275,7 @@ func NewOptions() *Options {
 		poolingSize:         defPoolingSize,
 		storageDir:          defStorageDir,
 		maxMediaSize:        defMaxMediaSize,
+		privacyURL:          defPrivacyURL,
 		waybackTimeout:      defWaybackTimeout,
 		waybackMaxRetries:   defWaybackMaxRetries,
 		waybackUserAgent:    defWaybackUserAgent,
@@ -978,4 +982,9 @@ func (o *Options) HTTPdEnabled() bool {
 // Proxy returns the proxy server address.
 func (o *Options) Proxy() string {
 	return o.proxy
+}
+
+// PrivacyURL returns the privacy policy URL.
+func (o *Options) PrivacyURL() string {
+	return o.privacyURL
 }

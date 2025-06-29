@@ -205,6 +205,8 @@ func (x *XMPP) process(msg messageBody) error {
 		return nil
 	case service.CommandPlayback:
 		return x.playback(cmdctx, msg)
+	case service.CommandPrivacy:
+		return x.reply(cmdctx, msg, fmt.Sprintf("To read our privacy policy, please visit %s.", x.opts.PrivacyURL()))
 	default:
 		metrics.IncrementWayback(metrics.ServiceXMPP, metrics.StatusRequest)
 		bucket := pooling.Bucket{

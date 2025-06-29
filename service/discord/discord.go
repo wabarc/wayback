@@ -7,6 +7,7 @@ package discord // import "github.com/wabarc/wayback/service/discord"
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -166,7 +167,7 @@ func (d *Discord) Shutdown() error {
 
 func (d *Discord) commandHandlers() map[string]func(*discord.Session, *discord.InteractionCreate) {
 	return map[string]func(s *discord.Session, i *discord.InteractionCreate){
-		"help": func(s *discord.Session, i *discord.InteractionCreate) {
+		service.CommandHelp: func(s *discord.Session, i *discord.InteractionCreate) {
 			// nolint:errcheck
 			s.InteractionRespond(i.Interaction, &discord.InteractionResponse{
 				Type: discord.InteractionResponseChannelMessageWithSource,
@@ -175,10 +176,10 @@ func (d *Discord) commandHandlers() map[string]func(*discord.Session, *discord.I
 				},
 			})
 		},
-		"playback": func(s *discord.Session, i *discord.InteractionCreate) {
+		service.CommandPlayback: func(s *discord.Session, i *discord.InteractionCreate) {
 			d.playback(s, i) // nolint:errcheck
 		},
-		"metrics": func(s *discord.Session, i *discord.InteractionCreate) {
+		service.CommandMetrics: func(s *discord.Session, i *discord.InteractionCreate) {
 			stats := metrics.Gather.Export("wayback")
 			if !d.opts.EnabledMetrics() || stats == "" {
 				return
@@ -191,12 +192,21 @@ func (d *Discord) commandHandlers() map[string]func(*discord.Session, *discord.I
 				},
 			})
 		},
+		service.CommandPrivacy: func(s *discord.Session, i *discord.InteractionCreate) {
+			// nolint:errcheck
+			s.InteractionRespond(i.Interaction, &discord.InteractionResponse{
+				Type: discord.InteractionResponseChannelMessageWithSource,
+				Data: &discord.InteractionResponseData{
+					Content: fmt.Sprintf("To read our privacy policy, please visit %s.", d.opts.PrivacyURL()),
+				},
+			})
+		},
 	}
 }
 
 func (d *Discord) buttonHandlers() map[string]func(*discord.Session, *discord.InteractionCreate) {
 	return map[string]func(s *discord.Session, i *discord.InteractionCreate){
-		"playback": func(s *discord.Session, i *discord.InteractionCreate) {
+		service.CommandPlayback: func(s *discord.Session, i *discord.InteractionCreate) {
 			id, err := strconv.Atoi(i.MessageComponentData().CustomID)
 			if err != nil {
 				logger.Warn("invalid playback id: %s", i.MessageComponentData().CustomID)

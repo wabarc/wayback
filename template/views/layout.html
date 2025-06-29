@@ -135,7 +135,6 @@
       width: 99%;
       max-width: 630px;
       bottom: 0;
-      padding: 2rem 0;
       left: 0;
       right: 0;
       z-index: 12;
@@ -203,7 +202,7 @@
     @media only screen and (max-width: 1012px) {
       textarea {
         height: 17em;
-        font-size: 1.5em;
+        font-size: 1.1em;
         -webkit-text-fill-color: initial;
         line-height: 30px;
         border-right-width: 24px;
@@ -218,23 +217,23 @@
       }
 
       textarea::-webkit-input-placeholder {
-        font-size: 1.5em;
+        font-size: 1.1em;
       }
 
       textarea::-moz-placeholder {
-        font-size: 1.5em;
+        font-size: 1.1em;
       }
 
       textarea:-ms-input-placeholder {
-        font-size: 1.5em;
+        font-size: 1.1em;
       }
 
       textarea::-ms-input-placeholder {
-        font-size: 1.5em;
+        font-size: 1.1em;
       }
 
       textarea::placeholder {
-        font-size: 1.5em;
+        font-size: 1.1em;
       }
     }
 
@@ -414,6 +413,46 @@
       height: 35px;
       text-align: center;
     }
+
+    .privacy {
+      position: relative;
+      transform: none;
+      transition: all;
+      box-sizing: border-box;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      display: flex;
+      justify-content: center;
+      border: 0px solid;
+      min-height: auto;
+      min-width: auto;
+      padding: 20px 60px 8px 60px;
+    }
+
+    .privacy > .read {
+      height: 14px;
+      text-align: center;
+      box-sizing: border-box;
+      min-width: auto;
+      min-height: auto;
+      font-size: 14px;
+      line-height: 14px;
+      word-spacing: 0px;
+    }
+
+    @media only screen and (max-width: 1012px) {
+      .privacy {
+        padding: calc(.25rem*2);
+      }
+    }
+
+    .read > a {
+      float: none;
+      text-decoration: underline;
+      cursor: pointer;
+    }
   </style>
   <script src="{{ route "javascript" "name" "index" }}" defer></script>
 </head>
@@ -436,6 +475,9 @@
         <input type="submit" id="playback" name="action" value="" accesskey="p" formaction="/playback">
         <input type="submit" id="wayback" name="action" value="" accesskey="s" formaction="/wayback">
       </form>
+    </div>
+    <div class="privacy">
+      <span class="read">By messaging Wayback Archiver, you have read our <a href="https://privacy.wabarc.eu.org" target="_blank" rel="noreferrer">Privacy Policy</a>.</span>
     </div>
   </div>
 </body>

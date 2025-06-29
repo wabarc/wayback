@@ -6,7 +6,9 @@ package slack // import "github.com/wabarc/wayback/service/slack"
 
 import (
 	"context"
+	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/gookit/color"
 	"github.com/slack-go/slack"
@@ -225,8 +227,8 @@ func (s *Slack) handleCommand(evt socketmode.Event) {
 	logger.Debug("slash command received: %+v", cmd)
 
 	var payload interface{}
-	switch cmd.Command {
-	case "/help":
+	switch strings.TrimPrefix(cmd.Command, "/") {
+	case service.CommandHelp:
 		payload = map[string]interface{}{
 			"blocks": []slack.Block{
 				slack.NewSectionBlock(
@@ -237,7 +239,7 @@ func (s *Slack) handleCommand(evt socketmode.Event) {
 					nil, nil,
 				),
 			}}
-	case "/metrics":
+	case service.CommandMetrics:
 		stats := metrics.Gather.Export("wayback")
 		if s.opts.EnabledMetrics() && stats != "" {
 			payload = map[string]interface{}{
@@ -251,9 +253,20 @@ func (s *Slack) handleCommand(evt socketmode.Event) {
 					),
 				}}
 		}
-	case "/playback":
+	case service.CommandPlayback:
 		// nolint:errcheck
 		s.playback(cmd.ChannelID, cmd.Text, cmd.TriggerID)
+	case service.CommandPrivacy:
+		payload = map[string]interface{}{
+			"blocks": []slack.Block{
+				slack.NewSectionBlock(
+					&slack.TextBlockObject{
+						Type: slack.PlainTextType,
+						Text: fmt.Sprintf("To read our privacy policy, please visit %s.", s.opts.PrivacyURL()),
+					},
+					nil, nil,
+				),
+			}}
 	default:
 	}
 	s.client.Ack(*evt.Request, payload)

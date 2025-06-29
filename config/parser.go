@@ -229,6 +229,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.meili.apikey = parseString(val, defMeiliApikey)
 		case "WAYBACK_OMNIVORE_APIKEY":
 			p.opts.omnivore.apikey = parseString(val, defOmnivoreApikey)
+		case "WAYBACK_PRIVACY_URL":
+			p.opts.privacyURL = parseString(val, defPrivacyURL)
 		default:
 			if os.Getenv(key) == "" && val != "" {
 				os.Setenv(key, val)

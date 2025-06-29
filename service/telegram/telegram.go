@@ -207,12 +207,12 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 
 	command := command(content)
 	switch {
-	case command == "help", command == "start":
+	case command == service.CommandHelp, command == "start":
 		// nolint:errcheck
 		t.reply(message, t.opts.TelegramHelptext())
-	case command == "playback":
+	case command == service.CommandPlayback:
 		return t.playback(message)
-	case command == "metrics":
+	case command == service.CommandMetrics:
 		stats := metrics.Gather.Export("wayback")
 		if t.opts.EnabledMetrics() && stats != "" {
 			if _, err = t.reply(message, stats); err != nil {
@@ -220,6 +220,9 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 			}
 		}
 		return nil
+	case command == service.CommandPrivacy:
+		// nolint:errcheck
+		t.reply(message, fmt.Sprintf("To read our privacy policy, please visit %s.", t.opts.PrivacyURL()))
 	case command != "":
 		fallback := t.commandFallback()
 		if fallback != "" {
@@ -467,6 +470,8 @@ func command(message string) string {
 		return "playback"
 	case strings.HasPrefix(message, "/metrics"):
 		return "metrics"
+	case strings.HasPrefix(message, "/privacy"):
+		return "privacy"
 	default:
 		return matchCmd(message)
 	}
