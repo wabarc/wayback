@@ -439,6 +439,10 @@ func (t *Telegram) defaultCommands() []telegram.Command {
 			Text:        "playback",
 			Description: "Playback archived url",
 		},
+		{
+			Text:        "privacy",
+			Description: "Read our privacy policy",
+		},
 	}
 	if t.opts.EnabledMetrics() {
 		commands = append(commands, telegram.Command{
