@@ -432,21 +432,23 @@ func (t *Telegram) setCommands() error {
 func (t *Telegram) defaultCommands() []telegram.Command {
 	commands := []telegram.Command{
 		{
-			Text:        "help",
+			Text:        service.CommandHelp,
 			Description: "Show help information",
 		},
 		{
-			Text:        "playback",
+			Text:        service.CommandPlayback,
 			Description: "Playback archived url",
 		},
-		{
-			Text:        "privacy",
+	}
+	if t.opts.PrivacyURL() != "" {
+		commands = append(commands, telegram.Command{
+			Text:        service.CommandPrivacy,
 			Description: "Read our privacy policy",
-		},
+		})
 	}
 	if t.opts.EnabledMetrics() {
 		commands = append(commands, telegram.Command{
-			Text:        "metrics",
+			Text:        service.CommandMetrics,
 			Description: "Show service metrics",
 		})
 	}
@@ -469,13 +471,13 @@ func command(message string) string {
 
 	switch {
 	case strings.HasPrefix(message, "/help"), strings.HasPrefix(message, "/start"):
-		return "help"
+		return service.CommandHelp
 	case strings.HasPrefix(message, "/playback"):
-		return "playback"
+		return service.CommandPlayback
 	case strings.HasPrefix(message, "/metrics"):
-		return "metrics"
+		return service.CommandMetrics
 	case strings.HasPrefix(message, "/privacy"):
-		return "privacy"
+		return service.CommandPrivacy
 	default:
 		return matchCmd(message)
 	}

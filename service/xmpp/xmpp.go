@@ -326,6 +326,10 @@ func command(msg messageBody) string {
 		strings.HasPrefix(body, "/"+service.CommandPlayback),
 		strings.HasPrefix(body, service.CommandPlayback+":"):
 		return service.CommandPlayback
+	case strings.HasPrefix(body, service.CommandPrivacy),
+		strings.HasPrefix(body, "/"+service.CommandPrivacy),
+		strings.HasPrefix(body, service.CommandPrivacy+":"):
+		return service.CommandPrivacy
 	}
 	return "unknown"
 }

@@ -155,7 +155,6 @@
       border: 1px solid #00000026;
       -webkit-box-shadow: 0 2px 3px #0000000f;
       box-shadow: 0 2px 3px #0000000f;
-      padding-right: 1em;
       margin: 0;
       padding: 0;
     }
@@ -465,12 +464,17 @@
             placeholder="e.g. https://www.eff.org https://www.wikipedia.org" autofocus></textarea>
           <input type="submit" id="playback" name="action" value="" accesskey="p" formaction="/playback">
           <input type="submit" id="wayback" name="action" value="" accesskey="s" formaction="/wayback">
-	</div>
+        </div>
       </form>
     </div>
+    {{if not .PrivacyURL}}
+    <div style="padding-bottom: .375rem;"></div>
+    {{end}}
+    {{if .PrivacyURL}}
     <div class="privacy">
-	   <span class="read">By messaging Wayback Archiver, you have read our <a href="{{- .PrivacyURL -}}" target="_blank" rel="noreferrer">Privacy Policy</a>.</span>
+      <span class="read">By messaging Wayback Archiver, you have read our <a href="{{- .PrivacyURL -}}" target="_blank" rel="noreferrer">Privacy Policy</a>.</span>
     </div>
+    {{end}}
   </div>
 </body>
 

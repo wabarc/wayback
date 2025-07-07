@@ -105,7 +105,7 @@ const (
 
 	defOmnivoreApikey = ""
 
-	defPrivacyURL = "https://wabarc.eu.org/privacy"
+	defPrivacyURL = ""
 
 	maxAttachSizeTelegram = 50000000   // 50MB
 	maxAttachSizeDiscord  = 8000000    // 8MB

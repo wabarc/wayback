@@ -100,4 +100,4 @@ Use the `-c` / `--config` option to specify the build definition file to use.
 | -                   | `WAYBACK_SLOT`                    | -                          | Pinning service for IPFS mode of pinner, see [ipfs-pinner](https://github.com/wabarc/ipfs-pinner#supported-pinning-services) |
 | -                   | `WAYBACK_APIKEY`                  | -                          | API key for pinning service                                  |
 | -                   | `WAYBACK_SECRET`                  | -                          | API secret for pinning service                               |
-| -                   | `WAYBACK_PRIVACY_URL`             | `https://wabarc.eu.org/privacy` | Privacy policy URL                                      |
+| -                   | `WAYBACK_PRIVACY_URL`             | -                          | Privacy policy URL                                      |

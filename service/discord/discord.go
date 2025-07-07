@@ -449,18 +449,24 @@ func (d *Discord) setCommands(guild string) (err error) {
 func (d *Discord) requires() (commands []*discord.ApplicationCommand) {
 	if d.opts.DiscordHelptext() != "" {
 		commands = append(commands, &discord.ApplicationCommand{
-			Name:        "help",
+			Name:        service.CommandHelp,
 			Description: "Show help information",
 		})
 	}
 	if d.opts.EnabledMetrics() {
 		commands = append(commands, &discord.ApplicationCommand{
-			Name:        "metrics",
+			Name:        service.CommandMetrics,
 			Description: "Show service metrics",
 		})
 	}
+	if d.opts.PrivacyURL() != "" {
+		commands = append(commands, &discord.ApplicationCommand{
+			Name:        service.CommandPrivacy,
+			Description: "Read our privacy policy",
+		})
+	}
 	commands = append(commands, &discord.ApplicationCommand{
-		Name:        "playback",
+		Name:        service.CommandPlayback,
 		Description: "Playback archived url",
 		Options: []*discord.ApplicationCommandOption{
 			{
