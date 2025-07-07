@@ -309,10 +309,6 @@
       input[type="submit"] {
         font-size: 2.45em;
       }
-      input#wayback {
-      }
-      input#playback {
-      }
     }
 
     .archived {
@@ -455,7 +451,7 @@
   <div class="wrapper">
     <button class="add-button">Add to home screen</button>
     <div class="archived" id="archived">
-      {{- range $i, $collect := . -}}
+      {{- range $i, $collect := .Collect -}}
       <ul class="row">
         <li class="src" title="{{ $collect.Src }}">{{ $collect.Src }}</li>
         <li class="dst" title="{{ $collect.Dst }}"><a href="{{ $collect.Dst }}" target="blank">{{ $collect.Dst }}</a></li>
@@ -473,7 +469,7 @@
       </form>
     </div>
     <div class="privacy">
-      <span class="read">By messaging Wayback Archiver, you have read our <a href="https://wabarc.eu.org/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.</span>
+	   <span class="read">By messaging Wayback Archiver, you have read our <a href="{{- .PrivacyURL -}}" target="_blank" rel="noreferrer">Privacy Policy</a>.</span>
     </div>
   </div>
 </body>

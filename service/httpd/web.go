@@ -46,7 +46,7 @@ func newWeb(ctx context.Context, opts *config.Options, pool *pooling.Pool, pub *
 		opts:     opts,
 		pool:     pool,
 		router:   router,
-		template: template.New(router),
+		template: template.New(router, opts),
 	}
 	if err := web.template.ParseTemplates(); err != nil {
 		logger.Fatal("unable to parse templates: %v", err)
