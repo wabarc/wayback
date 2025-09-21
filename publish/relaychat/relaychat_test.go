@@ -25,7 +25,7 @@ func TestShutdown(t *testing.T) {
 	setIRCEnv(t)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
-	irc := New(nil, opts)
+	irc := New(t.Context(), nil, opts)
 	err := irc.Shutdown()
 	if err != nil {
 		t.Errorf("Unexpected shutdown: %v", err)

@@ -152,7 +152,7 @@ func TestNewMeili(t *testing.T) {
 				t.Fatalf("unexpected parse config")
 			}
 
-			m := New(nil, opts)
+			m := New(t.Context(), nil, opts)
 			if m.indexing != test.expected {
 				t.Fatalf(`unexpected new meilisearch client got indexing name %s instead of %s`, m.indexing, test.expected)
 			}
@@ -186,7 +186,7 @@ func TestSetup(t *testing.T) {
 				t.Fatalf("unexpected parse config")
 			}
 
-			m := New(client, opts)
+			m := New(t.Context(), client, opts)
 			err = m.setup()
 			if err != test.returns {
 				t.Fatalf(`unexpected setup meilisearch, got error: %v`, err)
@@ -209,7 +209,7 @@ func TestExistIndex(t *testing.T) {
 		t.Fatalf("unexpected parse config")
 	}
 
-	m := New(client, opts)
+	m := New(t.Context(), client, opts)
 	err = m.existIndex()
 	if err != nil {
 		t.Fatalf(`unexpected check index: %v`, err)
@@ -230,7 +230,7 @@ func TestCreateIndex(t *testing.T) {
 		t.Fatalf("unexpected parse config")
 	}
 
-	m := New(client, opts)
+	m := New(t.Context(), client, opts)
 	err = m.createIndex()
 	if err != nil {
 		t.Fatalf(`unexpected create index: %v`, err)
@@ -251,7 +251,7 @@ func TestPushDocument(t *testing.T) {
 		t.Fatalf("unexpected parse config")
 	}
 
-	m := New(client, opts)
+	m := New(t.Context(), client, opts)
 
 	tests := []struct {
 		collect []wayback.Collect
@@ -295,7 +295,7 @@ func TestVersion(t *testing.T) {
 		t.Fatalf("unexpected parse config")
 	}
 
-	m := New(client, opts)
+	m := New(t.Context(), client, opts)
 	err = m.getVersion()
 	if err != nil {
 		t.Fatalf(`unexpected get version: %v`, err)
@@ -311,7 +311,7 @@ func TestShutdown(t *testing.T) {
 	httpClient, _, server := helper.MockServer()
 	defer server.Close()
 
-	m := New(httpClient, opts)
+	m := New(t.Context(), httpClient, opts)
 	err := m.Shutdown()
 	if err != nil {
 		t.Errorf("Unexpected shutdown: %v", err)

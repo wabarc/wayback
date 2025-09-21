@@ -46,7 +46,7 @@ func TestToTwitter(t *testing.T) {
 	})
 
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
-	twitt := New(client, opts)
+	twitt := New(t.Context(), client, opts)
 	txt := render.ForPublish(&render.Twitter{Cols: publish.Collects}).String()
 	got := twitt.ToTwitter(context.Background(), txt)
 	if !got {
@@ -62,7 +62,7 @@ func TestShutdown(t *testing.T) {
 	httpClient, _, server := helper.MockServer()
 	defer server.Close()
 
-	tw := New(httpClient, opts)
+	tw := New(t.Context(), httpClient, opts)
 	err := tw.Shutdown()
 	if err != nil {
 		t.Errorf("Unexpected shutdown: %v", err)

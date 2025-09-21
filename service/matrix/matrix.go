@@ -57,7 +57,7 @@ func New(ctx context.Context, opts service.Options) (*Matrix, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "dial Matrix client got unpredictable error")
 	}
-	_, err = client.Login(&matrix.ReqLogin{
+	_, err = client.Login(ctx, &matrix.ReqLogin{
 		Type:             matrix.AuthTypePassword,
 		Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: opts.Config.MatrixUserID()},
 		Password:         opts.Config.MatrixPassword(),
@@ -87,17 +87,17 @@ func (m *Matrix) Serve() error {
 
 	syncer := m.client.Syncer.(*matrix.DefaultSyncer)
 	// Listen join room invite event from user
-	syncer.OnEventType(event.StateMember, func(source matrix.EventSource, ev *event.Event) {
+	syncer.OnEventType(event.StateMember, func(ctx context.Context, ev *event.Event) {
 		ms := ev.Content.AsMember().Membership
 		if ms == event.MembershipInvite {
 			logger.Debug("StateMember event id: %s, event type: %s, event content: %v", ev.ID, ev.Type.Type, ev.Content.Raw)
-			if _, err := m.client.JoinRoomByID(ev.RoomID); err != nil {
+			if _, err := m.client.JoinRoomByID(m.ctx, ev.RoomID); err != nil {
 				logger.Error("accept invitation from sender failure, error: %v", err)
 			}
 		}
 	})
 	// Listen message event from user
-	syncer.OnEventType(event.EventMessage, func(source matrix.EventSource, ev *event.Event) {
+	syncer.OnEventType(event.EventMessage, func(ctx context.Context, ev *event.Event) {
 		logger.Debug("event: %#v", ev)
 		go func(ev *event.Event) {
 			// Do not handle message event:
@@ -127,7 +127,7 @@ func (m *Matrix) Serve() error {
 			m.pool.Put(bucket)
 		}(ev)
 	})
-	syncer.OnEventType(event.EventEncrypted, func(source matrix.EventSource, ev *event.Event) {
+	syncer.OnEventType(event.EventEncrypted, func(ctx context.Context, ev *event.Event) {
 		logger.Error("Unsupported encryption message")
 		// logger.Debug("event: %v", ev)
 		// if err := m.process(context.Background(), ev); err != nil {
@@ -154,7 +154,7 @@ func (m *Matrix) Shutdown() error {
 		// Stopping sync and logout all sessions
 		m.client.StopSync()
 		// nolint:errcheck
-		m.client.LogoutAll()
+		m.client.LogoutAll(m.ctx)
 	}
 
 	return nil
@@ -198,7 +198,7 @@ func (m *Matrix) process(ctx context.Context, ev *event.Event) error {
 		m.redact(ev, "wayback completed. original message: "+text)
 
 		// Mark message as receipt
-		if err := m.client.MarkRead(ev.RoomID, ev.ID); err != nil {
+		if err := m.client.MarkRead(m.ctx, ev.RoomID, ev.ID); err != nil {
 			logger.Error("mark message as receipt failure: %v", err)
 		}
 
@@ -239,7 +239,7 @@ func (m *Matrix) reply(ev *event.Event, msg string) error {
 		MsgType:       event.MsgText,
 	}
 	content.SetReply(ev)
-	if _, err := m.client.SendMessageEvent(ev.RoomID, event.EventMessage, content); err != nil {
+	if _, err := m.client.SendMessageEvent(m.ctx, ev.RoomID, event.EventMessage, content); err != nil {
 		return err
 	}
 	return nil
@@ -250,7 +250,7 @@ func (m *Matrix) redact(ev *event.Event, reason string) {
 		return
 	}
 	extra := matrix.ReqRedact{Reason: reason}
-	if _, err := m.client.RedactEvent(ev.RoomID, ev.ID, extra); err != nil {
+	if _, err := m.client.RedactEvent(m.ctx, ev.RoomID, ev.ID, extra); err != nil {
 		logger.Error("react message failure, error: %v", err)
 	}
 }

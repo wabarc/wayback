@@ -26,12 +26,14 @@ import (
 var _ publish.Publisher = (*Matrix)(nil)
 
 type Matrix struct {
+	ctx context.Context
+
 	bot  *matrix.Client
 	opts *config.Options
 }
 
 // New returns a Matrix client.
-func New(client *http.Client, opts *config.Options) *Matrix {
+func New(ctx context.Context, client *http.Client, opts *config.Options) *Matrix {
 	if !opts.PublishToMatrixRoom() {
 		logger.Debug("Missing required environment variable, abort.")
 		return nil
@@ -42,7 +44,7 @@ func New(client *http.Client, opts *config.Options) *Matrix {
 		logger.Error("Dial Matrix client got unpredictable error: %v", err)
 		return nil
 	}
-	_, err = bot.Login(&matrix.ReqLogin{
+	_, err = bot.Login(ctx, &matrix.ReqLogin{
 		Type:             matrix.AuthTypePassword,
 		Identifier:       matrix.UserIdentifier{Type: matrix.IdentifierTypeUser, User: opts.MatrixUserID()},
 		Password:         opts.MatrixPassword(),
@@ -56,7 +58,7 @@ func New(client *http.Client, opts *config.Options) *Matrix {
 		bot.Client = client
 	}
 
-	return &Matrix{bot: bot, opts: opts}
+	return &Matrix{ctx: ctx, bot: bot, opts: opts}
 }
 
 // Publish publish text to the Matrix room of given cols and args.
@@ -100,7 +102,7 @@ func (m *Matrix) toRoom(body string) bool {
 		MsgType:       event.MsgText,
 	}
 	logger.Debug("send to Matrix room, body:\n%s", body)
-	if _, err := m.bot.SendMessageEvent(id.RoomID(m.opts.MatrixRoomID()), event.EventMessage, content); err != nil {
+	if _, err := m.bot.SendMessageEvent(m.ctx, id.RoomID(m.opts.MatrixRoomID()), event.EventMessage, content); err != nil {
 		logger.Error("send to Matrix room failure: %v", err)
 		return false
 	}
@@ -114,7 +116,7 @@ func (m *Matrix) Shutdown() error {
 		// Stopping sync and logout all sessions
 		m.bot.StopSync()
 		// nolint:errcheck
-		m.bot.LogoutAll()
+		m.bot.LogoutAll(m.ctx)
 	}
 
 	return nil

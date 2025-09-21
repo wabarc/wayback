@@ -35,12 +35,14 @@ import (
 var _ publish.Publisher = (*Notion)(nil)
 
 type Notion struct {
+	ctx context.Context
+
 	bot  *notion.Client
 	opts *config.Options
 }
 
 // New returns a notion client.
-func New(client *http.Client, opts *config.Options) *Notion {
+func New(ctx context.Context, client *http.Client, opts *config.Options) *Notion {
 	if opts.NotionToken() == "" {
 		logger.Debug("Notion integration access token is required")
 		return nil
@@ -52,7 +54,7 @@ func New(client *http.Client, opts *config.Options) *Notion {
 		bot = notion.NewClient(opts.NotionToken(), newcli)
 	}
 
-	return &Notion{bot: bot, opts: opts}
+	return &Notion{ctx: ctx, bot: bot, opts: opts}
 }
 
 // Publish publish text to the Notion block of the given cols and args.

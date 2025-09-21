@@ -169,7 +169,7 @@ func TestToDiscordChannel(t *testing.T) {
 	defer server.Close()
 	handle(mux, strings.Replace(server.URL, "http", "ws", 1))
 
-	d := New(httpClient, opts)
+	d := New(t.Context(), httpClient, opts)
 	txt := render.ForPublish(&render.Discord{Cols: publish.Collects, Data: reduxer.BundleExample()}).String()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
@@ -191,7 +191,7 @@ func TestShutdown(t *testing.T) {
 	httpClient, _, server := helper.MockServer()
 	defer server.Close()
 
-	d := New(httpClient, opts)
+	d := New(t.Context(), httpClient, opts)
 	err := d.Shutdown()
 	if err != nil {
 		t.Errorf("Unexpected shutdown: %v", err)

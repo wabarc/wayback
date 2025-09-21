@@ -5,6 +5,8 @@
 package relaychat // import "github.com/wabarc/wayback/publish/relaychat"
 
 import (
+	"context"
+
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/publish"
 )
@@ -13,9 +15,9 @@ func init() {
 	publish.Register(publish.FlagIRC, setup)
 }
 
-func setup(opts *config.Options) *publish.Module {
+func setup(ctx context.Context, opts *config.Options) *publish.Module {
 	if opts.PublishToIRCChannel() {
-		publisher := New(nil, opts)
+		publisher := New(ctx, nil, opts)
 
 		return &publish.Module{
 			Publisher: publisher,

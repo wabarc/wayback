@@ -65,7 +65,7 @@ func TestProcess(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
 		case "/1.1/direct_messages/events/new.json":
-			fmt.Fprintf(w, testDMEventShowJSON)
+			fmt.Fprintln(w, testDMEventShowJSON)
 		case "/1.1/direct_messages/events/destroy.json":
 			w.WriteHeader(204)
 		case "/1.1/statuses/update.json":

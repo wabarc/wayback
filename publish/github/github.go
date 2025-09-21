@@ -24,12 +24,14 @@ import (
 var _ publish.Publisher = (*GitHub)(nil)
 
 type GitHub struct {
+	ctx context.Context
+
 	client *github.Client
 	opts   *config.Options
 }
 
 // New returns a GitHub client.
-func New(httpClient *http.Client, opts *config.Options) *GitHub {
+func New(ctx context.Context, httpClient *http.Client, opts *config.Options) *GitHub {
 	if opts.GitHubToken() == "" || opts.GitHubOwner() == "" {
 		logger.Debug("GitHub personal access token is required")
 		return nil
@@ -46,7 +48,7 @@ func New(httpClient *http.Client, opts *config.Options) *GitHub {
 	}
 	client := github.NewClient(httpClient)
 
-	return &GitHub{client: client, opts: opts}
+	return &GitHub{ctx: ctx, client: client, opts: opts}
 }
 
 // Publish publish markdown text to the GitHub issues of given cols and args.

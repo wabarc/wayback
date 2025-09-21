@@ -93,7 +93,7 @@ type Publish struct {
 // Returns a new Publish with the provided options and pooling.
 func New(ctx context.Context, opts *config.Options) *Publish {
 	// parse all modules
-	parseModule(opts)
+	parseModule(ctx, opts)
 
 	cfg := []pooling.Option{
 		pooling.Capacity(len(publishers)),

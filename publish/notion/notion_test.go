@@ -227,7 +227,7 @@ func TestToNotion(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	no := New(httpClient, opts)
+	no := New(t.Context(), httpClient, opts)
 	got := no.Publish(ctx, reduxer.BundleExample(), publish.Collects)
 	if got != nil {
 		t.Errorf("unexpected create Notion got %v", got)
@@ -265,7 +265,7 @@ func TestShutdown(t *testing.T) {
 	httpClient, _, server := helper.MockServer()
 	defer server.Close()
 
-	no := New(httpClient, opts)
+	no := New(t.Context(), httpClient, opts)
 	err := no.Shutdown()
 	if err != nil {
 		t.Errorf("Unexpected shutdown: %v", err)

@@ -65,7 +65,7 @@ func (m *mockPublisher) Publish(_ context.Context, _ reduxer.Reduxer, _ []waybac
 }
 func (m *mockPublisher) Shutdown() error { return nil }
 
-func mockRegister(opts *config.Options) *Module {
+func mockRegister(ctx context.Context, opts *config.Options) *Module {
 	publisher := &mockPublisher{}
 
 	return &Module{
@@ -201,7 +201,7 @@ func TestSpread(t *testing.T) {
 		}
 		Register(test.pubTo, mockRegister)
 	}
-	parseModule(opts)
+	parseModule(ctx, opts)
 
 	// Request from Telegram
 	pub.Spread(ctx, nil, []wayback.Collect{}, FlagTelegram)

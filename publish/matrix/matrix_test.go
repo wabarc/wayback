@@ -53,7 +53,7 @@ func TestToMatrixRoom(t *testing.T) {
 	t.Setenv("WAYBACK_MATRIX_HOMESERVER", server.URL)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
-	mat := New(nil, opts)
+	mat := New(t.Context(), nil, opts)
 	txt := render.ForPublish(&render.Mastodon{Cols: publish.Collects}).String()
 	got := mat.toRoom(txt)
 	if !got {
@@ -70,7 +70,7 @@ func TestShutdown(t *testing.T) {
 	t.Setenv("WAYBACK_MATRIX_HOMESERVER", server.URL)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
-	mat := New(nil, opts)
+	mat := New(t.Context(), nil, opts)
 	err := mat.Shutdown()
 	if err != nil {
 		t.Errorf("Unexpected shutdown: %v", err)

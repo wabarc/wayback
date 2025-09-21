@@ -38,6 +38,8 @@ var (
 
 // Meili represents a Meilisearch client.
 type Meili struct {
+	ctx context.Context
+
 	// Meilisearch server API endpoint.
 	endpoint string
 
@@ -54,7 +56,7 @@ type Meili struct {
 }
 
 // New returns a Meilisearch client.
-func New(client *http.Client, opts *config.Options) *Meili {
+func New(ctx context.Context, client *http.Client, opts *config.Options) *Meili {
 	endpoint, apikey, idxname := opts.MeiliEndpoint(), opts.MeiliApikey(), opts.MeiliIndexing()
 
 	if client == nil {
@@ -67,6 +69,7 @@ func New(client *http.Client, opts *config.Options) *Meili {
 	}
 
 	return &Meili{
+		ctx:      ctx,
 		endpoint: endpoint,
 		indexing: idxname,
 		apikey:   apikey,

@@ -74,7 +74,7 @@ func (m *Matrix) joinedRooms() []id.RoomID {
 	if m.client == nil {
 		return rooms
 	}
-	resp, err := m.client.JoinedRooms()
+	resp, err := m.client.JoinedRooms(m.ctx)
 	if err != nil {
 		return rooms
 	}
@@ -90,8 +90,8 @@ func (m *Matrix) destroyRoom(roomID id.RoomID) {
 		return
 	}
 
-	m.client.LeaveRoom(roomID)
-	m.client.ForgetRoom(roomID)
+	m.client.LeaveRoom(m.ctx, roomID)
+	m.client.ForgetRoom(m.ctx, roomID)
 }
 
 var (
@@ -206,7 +206,7 @@ func TestProcess(t *testing.T) {
 	// sender.client.Client = httpClient
 
 	// Create a room and invite recver
-	resp, err := sender.client.CreateRoom(&matrix.ReqCreateRoom{
+	resp, err := sender.client.CreateRoom(t.Context(), &matrix.ReqCreateRoom{
 		Invite:     []id.UserID{id.UserID(opts.MatrixUserID())},
 		Preset:     "trusted_private_chat",
 		Visibility: "private",
@@ -217,22 +217,22 @@ func TestProcess(t *testing.T) {
 	}
 
 	// Send message to recver
-	if _, err = sender.client.SendText(resp.RoomID, "Hello, https://example.com?r="+helper.RandString(3, "")); err != nil {
+	if _, err = sender.client.SendText(t.Context(), resp.RoomID, "Hello, https://example.com?r="+helper.RandString(3, "")); err != nil {
 		t.Fatalf("Send text to recver failure, error: %v", err)
 	}
 
 	// Listen message event from sender
 	recvSyncer := recver.client.Syncer.(*matrix.DefaultSyncer)
-	recvSyncer.OnEventType(event.StateMember, func(source matrix.EventSource, ev *event.Event) {
+	recvSyncer.OnEventType(event.StateMember, func(ctx context.Context, ev *event.Event) {
 		ms := ev.Content.AsMember().Membership
 		if ev.Sender == id.UserID(senderUID) && ms == event.MembershipInvite {
 			t.Logf("Event id: %s, event type: %s, event content: %v", ev.ID, ev.Type.Type, ev.Content.Raw)
-			if _, err := recver.client.JoinRoomByID(ev.RoomID); err != nil {
+			if _, err := recver.client.JoinRoomByID(t.Context(), ev.RoomID); err != nil {
 				t.Fatalf("Accept invitation from sender failure, error: %v", err)
 			}
 		}
 	})
-	recvSyncer.OnEventType(event.EventMessage, func(source matrix.EventSource, ev *event.Event) {
+	recvSyncer.OnEventType(event.EventMessage, func(ctx context.Context, ev *event.Event) {
 		if ev.Sender == id.UserID(senderUID) {
 			t.Logf("Event id: %s, event type: %s, event content: %v", ev.ID, ev.Type.Type, ev.Content.AsMessage().Body)
 
@@ -243,7 +243,7 @@ func TestProcess(t *testing.T) {
 			done <- true
 		}
 	})
-	recvSyncer.OnEventType(event.EventEncrypted, func(source matrix.EventSource, ev *event.Event) {
+	recvSyncer.OnEventType(event.EventEncrypted, func(ctx context.Context, ev *event.Event) {
 		t.Log("Unsupported encryption message")
 		// logger.Debug("event: %v", ev)
 		// if err := m.process(context.Background(), ev); err != nil {
@@ -295,6 +295,6 @@ func (m *Matrix) destroyRoomForTest(roomID id.RoomID) {
 		return
 	}
 
-	m.client.LeaveRoom(roomID)
-	m.client.ForgetRoom(roomID)
+	m.client.LeaveRoom(m.ctx, roomID)
+	m.client.ForgetRoom(m.ctx, roomID)
 }

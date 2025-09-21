@@ -24,18 +24,20 @@ import (
 var _ publish.Publisher = (*IRC)(nil)
 
 type IRC struct {
+	ctx context.Context
+
 	conn *irc.Client
 	opts *config.Options
 }
 
 // New returns a IRC struct
-func New(c *irc.Client, opts *config.Options) *IRC {
+func New(ctx context.Context, c *irc.Client, opts *config.Options) *IRC {
 	if !opts.PublishToIRCChannel() {
 		logger.Debug("Missing required environment variable, abort.")
 		return nil
 	}
 
-	return &IRC{opts: opts}
+	return &IRC{ctx: ctx, opts: opts}
 }
 
 // Publish publish text to IRC channel of given cols and args.

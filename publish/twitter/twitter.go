@@ -24,12 +24,14 @@ import (
 var _ publish.Publisher = (*Twitter)(nil)
 
 type Twitter struct {
+	ctx context.Context
+
 	bot  *twitter.Client
 	opts *config.Options
 }
 
 // New returns a twitter client.
-func New(client *http.Client, opts *config.Options) *Twitter {
+func New(ctx context.Context, client *http.Client, opts *config.Options) *Twitter {
 	if !opts.PublishToTwitter() {
 		logger.Debug("Missing required environment variable")
 		return nil
@@ -42,7 +44,7 @@ func New(client *http.Client, opts *config.Options) *Twitter {
 	}
 	bot := twitter.NewClient(client)
 
-	return &Twitter{bot: bot, opts: opts}
+	return &Twitter{ctx: ctx, bot: bot, opts: opts}
 }
 
 // Publish publish tweet to Twitter of given cols and args.

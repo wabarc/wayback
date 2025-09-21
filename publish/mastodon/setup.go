@@ -5,6 +5,7 @@
 package mastodon // import "github.com/wabarc/wayback/publish/mastodon"
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/wabarc/wayback/config"
@@ -15,9 +16,9 @@ func init() {
 	publish.Register(publish.FlagMastodon, setup)
 }
 
-func setup(opts *config.Options) *publish.Module {
+func setup(ctx context.Context, opts *config.Options) *publish.Module {
 	if opts.PublishToMastodon() {
-		publisher := New(http.Client{}, opts)
+		publisher := New(ctx, http.Client{}, opts)
 
 		return &publish.Module{
 			Publisher: publisher,

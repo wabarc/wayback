@@ -48,6 +48,8 @@ mutation SaveUrl($input: SaveUrlInput!) {
 var _ publish.Publisher = (*Omnivore)(nil)
 
 type Omnivore struct {
+	ctx context.Context
+
 	bot  *http.Client
 	opts *config.Options
 }
@@ -68,7 +70,7 @@ type successResponse struct {
 }
 
 // New returns a omnivore client.
-func New(client *http.Client, opts *config.Options) *Omnivore {
+func New(ctx context.Context, client *http.Client, opts *config.Options) *Omnivore {
 	if opts.OmnivoreApikey() == "" {
 		logger.Debug("Onmnivore integration access token is required")
 		return nil
@@ -80,7 +82,7 @@ func New(client *http.Client, opts *config.Options) *Omnivore {
 	}
 	bot.Timeout = defaultClientTimeout
 
-	return &Omnivore{bot: bot, opts: opts}
+	return &Omnivore{ctx: ctx, bot: bot, opts: opts}
 }
 
 // Publish save url to the Omnivore of the given cols and args.
