@@ -112,7 +112,7 @@ func TestNew(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			t.Setenv("WAYBACK_TELEGRAM_CHANNEL", test.channel)
 			opts, _ := config.NewParser().ParseEnvironmentVariables()
-			actual := New(client, opts) == nil
+			actual := New(t.Context(), client, opts) == nil
 			if actual != test.isNil {
 				t.Errorf(`Unexpected new telegram client, got %v instead of %v`, actual, test.isNil)
 			}
@@ -173,7 +173,7 @@ func TestShutdown(t *testing.T) {
 	client, server := testServer()
 	defer server.Close()
 
-	tel := New(client, opts)
+	tel := New(t.Context(), client, opts)
 	go tel.bot.Start()
 	err := tel.Shutdown()
 	if err != nil {

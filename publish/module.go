@@ -5,6 +5,7 @@
 package publish // import "github.com/wabarc/wayback/publish"
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -20,7 +21,7 @@ var (
 // SetupFunc is a function type that takes a pointer
 // to a config.Options struct and returns a pointer
 // to a Module struct.
-type SetupFunc func(*config.Options) *Module
+type SetupFunc func(context.Context, *config.Options) *Module
 
 // Module is a struct embeds the Publisher interface
 // and holds a pointer to config.Options.
@@ -43,9 +44,9 @@ func Register(flag Flag, action SetupFunc) {
 	mu.Unlock()
 }
 
-func parseModule(opts *config.Options) {
+func parseModule(ctx context.Context, opts *config.Options) {
 	for flag, setup := range modules {
-		handler := setup(opts)
+		handler := setup(ctx, opts)
 		if handler != nil {
 			handler.Opts = opts
 			handler.Flag = flag

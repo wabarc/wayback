@@ -44,7 +44,7 @@ func TestToIssues(t *testing.T) {
 		}
 	})
 
-	gh := New(httpClient, opts)
+	gh := New(t.Context(), httpClient, opts)
 	txt := render.ForPublish(&render.GitHub{Cols: publish.Collects, Data: reduxer.BundleExample()}).String()
 	got := gh.toIssues(context.Background(), "", txt)
 	if !got {
@@ -58,7 +58,7 @@ func TestShutdown(t *testing.T) {
 	httpClient, _, server := helper.MockServer()
 	defer server.Close()
 
-	gh := New(httpClient, opts)
+	gh := New(t.Context(), httpClient, opts)
 	err := gh.Shutdown()
 	if err != nil {
 		t.Errorf("Unexpected shutdown: %v", err)

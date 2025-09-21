@@ -39,7 +39,7 @@ func TestPublish(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	o := New(httpClient, opts)
+	o := New(t.Context(), httpClient, opts)
 	got := o.Publish(ctx, reduxer.BundleExample(), publish.Collects)
 	if got != nil {
 		t.Errorf("unexpected save url got %v", got)
@@ -52,7 +52,7 @@ func TestShutdown(t *testing.T) {
 	httpClient, _, server := helper.MockServer()
 	defer server.Close()
 
-	no := New(httpClient, opts)
+	no := New(t.Context(), httpClient, opts)
 	err := no.Shutdown()
 	if err != nil {
 		t.Errorf("Unexpected shutdown: %v", err)

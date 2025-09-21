@@ -25,12 +25,14 @@ import (
 var _ publish.Publisher = (*Telegram)(nil)
 
 type Telegram struct {
+	ctx context.Context
+
 	bot  *telegram.Bot
 	opts *config.Options
 }
 
 // New returns Telegram bot client
-func New(client *http.Client, opts *config.Options) *Telegram {
+func New(ctx context.Context, client *http.Client, opts *config.Options) *Telegram {
 	if !opts.PublishToChannel() {
 		logger.Debug("Missing required environment variable, abort.")
 		return nil
@@ -47,7 +49,7 @@ func New(client *http.Client, opts *config.Options) *Telegram {
 		return nil
 	}
 
-	return &Telegram{bot: bot, opts: opts}
+	return &Telegram{ctx: ctx, bot: bot, opts: opts}
 }
 
 // Publish publish text to the Telegram channel of given cols and args.

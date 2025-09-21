@@ -23,12 +23,14 @@ import (
 var _ publish.Publisher = (*Mastodon)(nil)
 
 type Mastodon struct {
+	ctx context.Context
+
 	client *mastodon.Client
 	opts   *config.Options
 }
 
 // New returns a Mastodon client.
-func New(httpClient http.Client, opts *config.Options) *Mastodon {
+func New(ctx context.Context, httpClient http.Client, opts *config.Options) *Mastodon {
 	if !opts.PublishToMastodon() {
 		logger.Debug("Missing required environment variable")
 		return nil
@@ -42,7 +44,7 @@ func New(httpClient http.Client, opts *config.Options) *Mastodon {
 	})
 	client.Client = httpClient
 
-	return &Mastodon{client: client, opts: opts}
+	return &Mastodon{ctx: ctx, client: client, opts: opts}
 }
 
 // Publish publish toot to the Mastodon of given cols and args.

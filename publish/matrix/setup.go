@@ -5,6 +5,8 @@
 package matrix // import "github.com/wabarc/wayback/publish/matrix"
 
 import (
+	"context"
+
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/publish"
 )
@@ -13,9 +15,9 @@ func init() {
 	publish.Register(publish.FlagMatrix, setup)
 }
 
-func setup(opts *config.Options) *publish.Module {
+func setup(ctx context.Context, opts *config.Options) *publish.Module {
 	if opts.PublishToMatrixRoom() {
-		publisher := New(nil, opts)
+		publisher := New(ctx, nil, opts)
 
 		return &publish.Module{
 			Publisher: publisher,

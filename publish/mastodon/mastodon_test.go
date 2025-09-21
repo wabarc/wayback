@@ -54,7 +54,7 @@ func TestToMastodon(t *testing.T) {
 	t.Setenv("WAYBACK_MASTODON_SERVER", server.URL)
 	opts, _ := config.NewParser().ParseEnvironmentVariables()
 
-	mstdn := New(http.Client{}, opts)
+	mstdn := New(t.Context(), http.Client{}, opts)
 	txt := render.ForPublish(&render.Telegram{Cols: publish.Collects}).String()
 	got := mstdn.toMastodon(context.Background(), txt, "")
 	if !got {
@@ -68,7 +68,7 @@ func TestShutdown(t *testing.T) {
 	httpClient, _, server := helper.MockServer()
 	defer server.Close()
 
-	mstdn := New(*httpClient, opts)
+	mstdn := New(t.Context(), *httpClient, opts)
 	err := mstdn.Shutdown()
 	if err != nil {
 		t.Errorf("Unexpected shutdown: %v", err)

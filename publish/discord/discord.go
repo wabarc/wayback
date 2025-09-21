@@ -25,12 +25,14 @@ import (
 var _ publish.Publisher = (*Discord)(nil)
 
 type Discord struct {
+	ctx context.Context
+
 	bot  *discord.Session
 	opts *config.Options
 }
 
 // New returns Discord bot client
-func New(client *http.Client, opts *config.Options) *Discord {
+func New(ctx context.Context, client *http.Client, opts *config.Options) *Discord {
 	if !opts.PublishToDiscordChannel() {
 		logger.Debug("Missing required environment variable, abort.")
 		return nil
@@ -45,7 +47,7 @@ func New(client *http.Client, opts *config.Options) *Discord {
 		bot.Client = client
 	}
 
-	return &Discord{bot: bot, opts: opts}
+	return &Discord{ctx: ctx, bot: bot, opts: opts}
 }
 
 // Publish publish text to the Discord channel of given cols and args.

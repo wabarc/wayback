@@ -25,12 +25,14 @@ import (
 var _ publish.Publisher = (*Slack)(nil)
 
 type Slack struct {
+	ctx context.Context
+
 	bot  *slack.Client
 	opts *config.Options
 }
 
 // New returns Slack bot client
-func New(client *http.Client, opts *config.Options) *Slack {
+func New(ctx context.Context, client *http.Client, opts *config.Options) *Slack {
 	if !opts.PublishToSlackChannel() {
 		logger.Debug("Missing required environment variable, abort.")
 		return nil
@@ -49,7 +51,7 @@ func New(client *http.Client, opts *config.Options) *Slack {
 		return nil
 	}
 
-	return &Slack{bot: bot, opts: opts}
+	return &Slack{ctx: ctx, bot: bot, opts: opts}
 }
 
 // Publish publish text to the Slack channel of given cols and args.

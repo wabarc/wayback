@@ -5,13 +5,14 @@
 package publish // import "github.com/wabarc/wayback/publish"
 
 import (
+	"context"
 	"testing"
 
 	"github.com/wabarc/wayback/config"
 )
 
 func TestRegister(t *testing.T) {
-	setup := func(opts *config.Options) *Module {
+	setup := func(_ context.Context, opts *config.Options) *Module {
 		return &Module{
 			Opts:      opts,
 			Publisher: nil,

@@ -28,12 +28,14 @@ import (
 var _ publish.Publisher = (*Nostr)(nil)
 
 type Nostr struct {
+	ctx context.Context
+
 	bot  *nostr.Relay
 	opts *config.Options
 }
 
 // New returns a Nostr client.
-func New(_ *http.Client, opts *config.Options) *Nostr {
+func New(ctx context.Context, _ *http.Client, opts *config.Options) *Nostr {
 	if !opts.PublishToNostr() {
 		logger.Debug("Missing required environment variable, abort.")
 		return nil
@@ -41,7 +43,7 @@ func New(_ *http.Client, opts *config.Options) *Nostr {
 	// new bot for publish is needed.
 	bot := &nostr.Relay{}
 
-	return &Nostr{bot: bot, opts: opts}
+	return &Nostr{ctx: ctx, bot: bot, opts: opts}
 }
 
 // Publish publish text to the Nostr of given cols and args.

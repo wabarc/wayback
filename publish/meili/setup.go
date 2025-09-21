@@ -5,6 +5,8 @@
 package meili // import "github.com/wabarc/wayback/publish/meili"
 
 import (
+	"context"
+
 	"github.com/wabarc/logger"
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/publish"
@@ -14,9 +16,9 @@ func init() {
 	publish.Register(publish.FlagMeili, setup)
 }
 
-func setup(opts *config.Options) *publish.Module {
+func setup(ctx context.Context, opts *config.Options) *publish.Module {
 	if opts.EnabledMeilisearch() {
-		publisher := New(nil, opts)
+		publisher := New(ctx, nil, opts)
 
 		// Setup meilisearch
 		err := publisher.setup()

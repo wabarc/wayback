@@ -63,7 +63,7 @@ func TestToNostr(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	nos := New(nil, opts)
+	nos := New(t.Context(), nil, opts)
 	txt := render.ForPublish(&render.Nostr{Cols: publish.Collects}).String()
 	err = nos.publish(ctx, txt)
 	if err != nil {
@@ -81,7 +81,7 @@ func TestShutdown(t *testing.T) {
 	httpClient, _, server := helper.MockServer()
 	defer server.Close()
 
-	nos := New(httpClient, opts)
+	nos := New(t.Context(), httpClient, opts)
 	err := nos.Shutdown()
 	if err != nil {
 		t.Errorf("Unexpected shutdown: %v", err)
