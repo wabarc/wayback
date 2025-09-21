@@ -65,7 +65,7 @@ func (h *Httpd) startOnionService(server *http.Server) error {
 		LocalListener: listener,
 		RemotePorts:   h.opts.OnionRemotePorts(),
 		Version3:      true,
-		NoWait:        true,
+		NoWait:        verbose,
 		Key:           pvk,
 	})
 	if err != nil {
