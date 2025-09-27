@@ -413,7 +413,6 @@ func (t *Telegram) getCommands() []telegram.Command {
 	return commands
 }
 
-// nolint:stylecheck
 func (t *Telegram) setCommands() error {
 	commands := t.getCommands()
 	logger.Debug("got commands: %v", commands)

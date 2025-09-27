@@ -17,8 +17,8 @@ var _ Renderer = (*GitHub)(nil)
 
 // GitHub represents a GitHub template data for render.
 type GitHub struct {
-	Cols []wayback.Collect
 	Data reduxer.Reduxer
+	Cols []wayback.Collect
 }
 
 // ForReply implements the standard Renderer interface:

@@ -17,8 +17,8 @@ var _ Renderer = (*Mastodon)(nil)
 
 // Mastodon represents a Mastodon template data for render.
 type Mastodon struct {
-	Cols []wayback.Collect
 	Data reduxer.Reduxer
+	Cols []wayback.Collect
 }
 
 // ForReply implements the standard Renderer interface:

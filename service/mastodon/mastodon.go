@@ -34,20 +34,17 @@ var ErrServiceClosed = errors.New("mastodon: Service closed")
 
 // Mastodon represents a Mastodon service in the application
 type Mastodon struct {
-	sync.RWMutex
-
-	ctx    context.Context
-	opts   *config.Options
-	pool   *pooling.Pool
-	client *mastodon.Client
-	store  *storage.Storage
-	pub    *publish.Publish
-
+	ctx        context.Context
+	opts       *config.Options
+	pool       *pooling.Pool
+	client     *mastodon.Client
+	store      *storage.Storage
+	pub        *publish.Publish
 	archiving  map[mastodon.ID]bool
 	processing map[mastodon.ID]int
-
-	clearTick *time.Ticker
-	fetchTick *time.Ticker
+	clearTick  *time.Ticker
+	fetchTick  *time.Ticker
+	sync.RWMutex
 }
 
 // New mastodon struct.

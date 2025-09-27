@@ -121,54 +121,49 @@ var (
 
 // Options represents a configuration options in the application.
 type Options struct {
-	debug    bool
-	logTime  bool
-	logLevel string
-	overTor  bool
-	metrics  bool
-
-	// Enabled services
-	services sync.Map
-
-	ipfs     *ipfs
-	slots    map[string]bool
-	telegram *telegram
-	mastodon *mastodon
-	discord  *discord
-	twitter  *twitter
-	github   *github
-	notion   *notion
-	matrix   *matrix
-	slack    *slack
-	nostr    *nostr
-	irc      *irc
-	onion    *onion
-	xmpp     *xmpp
-	omnivore *omnivore
-	meili    *meili
-
+	nostr               *nostr
+	irc                 *irc
+	meili               *meili
+	omnivore            *omnivore
+	xmpp                *xmpp
+	discord             *discord
+	ipfs                *ipfs
+	slots               map[string]bool
+	telegram            *telegram
+	mastodon            *mastodon
+	onion               *onion
+	twitter             *twitter
+	github              *github
+	notion              *notion
+	matrix              *matrix
+	slack               *slack
+	services            sync.Map
+	maxMediaSize        string
+	storageDir          string
+	waybackUserAgent    string
+	proxy               string
+	logLevel            string
 	listenAddr          string
 	chromeRemoteAddr    string
-	enabledChromeRemote bool
 	boltPathname        string
 	poolingSize         int
-	storageDir          string
-	maxMediaSize        string
-	proxy               string
 	waybackTimeout      int
 	waybackMaxRetries   int
-	waybackUserAgent    string
+	enabledChromeRemote bool
+	debug               bool
+	logTime             bool
+	overTor             bool
+	metrics             bool
 	waybackFallback     bool
 }
 
 type ipfs struct {
-	host string
-	port int
-	mode string
-
+	host   string
+	mode   string
 	target string
 	apikey string
 	secret string
+	port   int
 }
 
 type telegram struct {
@@ -182,8 +177,8 @@ type mastodon struct {
 	clientKey    string
 	clientSecret string
 	accessToken  string
-	cw           bool
 	cwText       string
+	cw           bool
 }
 
 type discord struct {
@@ -239,19 +234,17 @@ type irc struct {
 }
 
 type onion struct {
-	pvk string
-
-	localPort   int
+	pvk         string
 	remotePorts []int
-
-	disabled bool
+	localPort   int
+	disabled    bool
 }
 
 type xmpp struct {
 	username string
 	password string
-	noTLS    bool
 	helptext string
+	noTLS    bool
 }
 
 type meili struct {

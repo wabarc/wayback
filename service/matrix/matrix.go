@@ -34,14 +34,13 @@ var ErrServiceClosed = errors.New("matrix: Service closed")
 
 // Matrix represents a Matrix service in the application
 type Matrix struct {
-	sync.RWMutex
-
 	ctx    context.Context
 	opts   *config.Options
 	pool   *pooling.Pool
 	client *matrix.Client
 	store  *storage.Storage
 	pub    *publish.Publish
+	sync.RWMutex
 }
 
 // New Matrix struct.

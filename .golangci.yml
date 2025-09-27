@@ -2,83 +2,110 @@
 # Use of this source code is governed by the GNU GPL v3
 # license that can be found in the LICENSE file.
 #
----
-#########################
-#########################
-## Golang Linter rules ##
-#########################
-#########################
-
-# configure golangci-lint
-# see https://github.com/golangci/golangci-lint/blob/master/.golangci.example.yml
+version: "2"
 run:
-  # default concurrency is a available CPU number.
-  # concurrency: 4 # explicitly omit this value to fully utilize available resources.
-  deadline: 5m
   issues-exit-code: 1
   tests: false
-
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-      - dupl
-      - gosec
-      - goconst
 linters:
-  disable-all: true
+  default: none
   enable:
     - bodyclose
     - errcheck
     - goconst
-    - gocyclo
     - gocritic
-    - gofmt
-    - goimports
+    - gocyclo
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - misspell
     - prealloc
     - staticcheck
-    - stylecheck
-    - typecheck
     - unconvert
     - unparam
     - unused
     - whitespace
-linters-settings:
-  errcheck:
-    # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
-    # default is false: such cases aren't reported by default.
-    check-blank: true
-  govet:
-    # report about shadowed variables
-    check-shadowing: true
-  gocyclo:
-    # minimal code complexity to report, 30 by default
-    min-complexity: 15
-  gosec:
-    # To specify a set of rules to explicitly exclude.
-    # Available rules: https://github.com/securego/gosec#available-rules
-    excludes:
-      - G108
-    # To specify the configuration of rules.
-    # The configuration of rules is not fully documented by gosec:
-    # https://github.com/securego/gosec#configuration
-    # https://github.com/securego/gosec/blob/569328eade2ccbad4ce2d0f21ee158ab5356a5cf/rules/rulelist.go#L60-L102
-    config:
-  misspell:
-    # Correct spellings using locale preferences for US or UK.
-    # Default is to use a neutral variety of English.
-    # Setting locale to US will correct the British spelling of 'colour' to 'color'.
-    locale: US
-    ignore-words:
-      - someword
-  stylecheck:
-    go: "1.16"
-    # https://staticcheck.io/docs/options#checks
-    checks: [ "all", "-ST1003", "-ST1008", "-ST1016" ]
-    # https://staticcheck.io/docs/options#initialisms
-    initialisms: [ "ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "QPS", "RAM", "RPC", "SLA", "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "GID", "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS" ]
+  settings:
+    errcheck:
+      check-blank: true
+    gocyclo:
+      min-complexity: 15
+    gosec:
+      excludes:
+        - G108
+    govet:
+      enable-all: true
+    misspell:
+      locale: US
+      ignore-rules:
+        - someword
+    staticcheck:
+      checks:
+        - all
+        - -ST1003
+        - -ST1008
+        - -ST1016
+      initialisms:
+        - ACL
+        - API
+        - ASCII
+        - CPU
+        - CSS
+        - DNS
+        - EOF
+        - GUID
+        - HTML
+        - HTTP
+        - HTTPS
+        - ID
+        - IP
+        - JSON
+        - QPS
+        - RAM
+        - RPC
+        - SLA
+        - SMTP
+        - SQL
+        - SSH
+        - TCP
+        - TLS
+        - TTL
+        - UDP
+        - UI
+        - GID
+        - UID
+        - UUID
+        - URI
+        - URL
+        - UTF8
+        - VM
+        - XML
+        - XMPP
+        - XSRF
+        - XSS
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - dupl
+          - goconst
+          - gosec
+        path: _test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

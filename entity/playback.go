@@ -9,6 +9,6 @@ const EntityPlayback = "playback"
 
 // Playback represents a Playback in the application.
 type Playback struct {
-	ID     uint64
 	Source string
+	ID     uint64
 }

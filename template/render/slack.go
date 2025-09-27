@@ -17,8 +17,8 @@ var _ Renderer = (*Slack)(nil)
 
 // Slack represents a Slack template data for render.
 type Slack struct {
-	Cols []wayback.Collect
 	Data reduxer.Reduxer
+	Cols []wayback.Collect
 }
 
 // ForReply implements the standard Renderer interface:

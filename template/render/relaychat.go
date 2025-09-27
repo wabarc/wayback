@@ -17,8 +17,8 @@ var _ Renderer = (*Relaychat)(nil)
 
 // Relaychat represents a Relaychat template data for render.
 type Relaychat struct {
-	Cols []wayback.Collect
 	Data reduxer.Reduxer
+	Cols []wayback.Collect
 }
 
 // ForReply implements the standard Renderer interface:

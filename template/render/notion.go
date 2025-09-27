@@ -16,8 +16,8 @@ var _ Renderer = (*Notion)(nil)
 
 // Notion represents a Notion template data for render.
 type Notion struct {
-	Cols []wayback.Collect
 	Data reduxer.Reduxer
+	Cols []wayback.Collect
 }
 
 // ForReply implements the standard Renderer interface:
