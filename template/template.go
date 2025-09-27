@@ -14,6 +14,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/wabarc/logger"
+	"github.com/wabarc/wayback/config"
 )
 
 //go:embed views/*.html
@@ -49,13 +50,15 @@ type funcMap struct {
 type Template struct {
 	templates map[string]*template.Template
 	funcMap   *funcMap
+	opts      *config.Options
 }
 
 // New returns a new template engine.
-func New(router *mux.Router) *Template {
+func New(router *mux.Router, opts *config.Options) *Template {
 	return &Template{
 		templates: make(map[string]*template.Template),
 		funcMap:   &funcMap{router},
+		opts:      opts,
 	}
 }
 
@@ -95,8 +98,15 @@ func (t *Template) Render(name string, data interface{}) ([]byte, bool) {
 		return []byte{}, false
 	}
 
+	input := struct {
+		Collect    any
+		PrivacyURL string
+	}{
+		PrivacyURL: t.opts.PrivacyURL(),
+		Collect:    data,
+	}
 	var b bytes.Buffer
-	if err := tpl.Execute(&b, data); err != nil {
+	if err := tpl.Execute(&b, input); err != nil {
 		logger.Error("execute template failed: %v", err)
 		return []byte{}, false
 	}

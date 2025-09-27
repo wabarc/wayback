@@ -105,6 +105,8 @@ const (
 
 	defOmnivoreApikey = ""
 
+	defPrivacyURL = ""
+
 	maxAttachSizeTelegram = 50000000   // 50MB
 	maxAttachSizeDiscord  = 8000000    // 8MB
 	maxAttachSizeSlack    = 5000000000 // 5GB
@@ -138,7 +140,7 @@ type Options struct {
 	matrix              *matrix
 	slack               *slack
 	services            sync.Map
-	maxMediaSize        string
+	privacyURL          string
 	storageDir          string
 	waybackUserAgent    string
 	proxy               string
@@ -146,6 +148,7 @@ type Options struct {
 	listenAddr          string
 	chromeRemoteAddr    string
 	boltPathname        string
+	maxMediaSize        string
 	poolingSize         int
 	waybackTimeout      int
 	waybackMaxRetries   int
@@ -272,6 +275,7 @@ func NewOptions() *Options {
 		poolingSize:         defPoolingSize,
 		storageDir:          defStorageDir,
 		maxMediaSize:        defMaxMediaSize,
+		privacyURL:          defPrivacyURL,
 		waybackTimeout:      defWaybackTimeout,
 		waybackMaxRetries:   defWaybackMaxRetries,
 		waybackUserAgent:    defWaybackUserAgent,
@@ -978,4 +982,9 @@ func (o *Options) HTTPdEnabled() bool {
 // Proxy returns the proxy server address.
 func (o *Options) Proxy() string {
 	return o.proxy
+}
+
+// PrivacyURL returns the privacy policy URL.
+func (o *Options) PrivacyURL() string {
+	return o.privacyURL
 }

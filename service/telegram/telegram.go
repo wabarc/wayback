@@ -207,12 +207,12 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 
 	command := command(content)
 	switch {
-	case command == "help", command == "start":
+	case command == service.CommandHelp, command == "start":
 		// nolint:errcheck
 		t.reply(message, t.opts.TelegramHelptext())
-	case command == "playback":
+	case command == service.CommandPlayback:
 		return t.playback(message)
-	case command == "metrics":
+	case command == service.CommandMetrics:
 		stats := metrics.Gather.Export("wayback")
 		if t.opts.EnabledMetrics() && stats != "" {
 			if _, err = t.reply(message, stats); err != nil {
@@ -220,6 +220,9 @@ func (t *Telegram) process(message *telegram.Message) (err error) {
 			}
 		}
 		return nil
+	case command == service.CommandPrivacy:
+		// nolint:errcheck
+		t.reply(message, fmt.Sprintf("To read our privacy policy, please visit %s.", t.opts.PrivacyURL()))
 	case command != "":
 		fallback := t.commandFallback()
 		if fallback != "" {
@@ -429,17 +432,23 @@ func (t *Telegram) setCommands() error {
 func (t *Telegram) defaultCommands() []telegram.Command {
 	commands := []telegram.Command{
 		{
-			Text:        "help",
+			Text:        service.CommandHelp,
 			Description: "Show help information",
 		},
 		{
-			Text:        "playback",
+			Text:        service.CommandPlayback,
 			Description: "Playback archived url",
 		},
 	}
+	if t.opts.PrivacyURL() != "" {
+		commands = append(commands, telegram.Command{
+			Text:        service.CommandPrivacy,
+			Description: "Read our privacy policy",
+		})
+	}
 	if t.opts.EnabledMetrics() {
 		commands = append(commands, telegram.Command{
-			Text:        "metrics",
+			Text:        service.CommandMetrics,
 			Description: "Show service metrics",
 		})
 	}
@@ -462,11 +471,13 @@ func command(message string) string {
 
 	switch {
 	case strings.HasPrefix(message, "/help"), strings.HasPrefix(message, "/start"):
-		return "help"
+		return service.CommandHelp
 	case strings.HasPrefix(message, "/playback"):
-		return "playback"
+		return service.CommandPlayback
 	case strings.HasPrefix(message, "/metrics"):
-		return "metrics"
+		return service.CommandMetrics
+	case strings.HasPrefix(message, "/privacy"):
+		return service.CommandPrivacy
 	default:
 		return matchCmd(message)
 	}

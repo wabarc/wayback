@@ -135,7 +135,6 @@
       width: 99%;
       max-width: 630px;
       bottom: 0;
-      padding: 2rem 0;
       left: 0;
       right: 0;
       z-index: 12;
@@ -156,7 +155,6 @@
       border: 1px solid #00000026;
       -webkit-box-shadow: 0 2px 3px #0000000f;
       box-shadow: 0 2px 3px #0000000f;
-      padding-right: 1em;
       margin: 0;
       padding: 0;
     }
@@ -168,6 +166,12 @@
       }
     }
 
+    .box {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding: .55rem;
+    }
+
     textarea {
       visibility: visible;
       font-family: "Proxima Nova", "Helvetica Neue", "Helvetica", "Segoe UI", "Nimbus Sans L", "Liberation Sans", "Open Sans", FreeSans, Arial, sans-serif;
@@ -177,13 +181,12 @@
       appearance: none;
       font-size: 1.1em;
       font-weight: normal;
-      display: block;
+      display: flex;
       background: none;
       outline: none;
       border: none;
       width: 100%;
       height: 8em;
-      padding: .5em;
       z-index: 1;
       resize: none;
       text-align: justify;
@@ -198,43 +201,39 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
+      grid-column-start: 1;
+      grid-column-end: 3;
     }
 
     @media only screen and (max-width: 1012px) {
       textarea {
         height: 17em;
-        font-size: 1.5em;
+        font-size: 1.25em;
         -webkit-text-fill-color: initial;
         line-height: 30px;
         border-right-width: 24px;
         padding: 20px;
-      }
-
-      textarea:focus {
-        outline: none !important;
-        border-color: #6a98c9;
-        -webkit-box-shadow: 0 0 10px #6a98c9;
-        box-shadow: 0 0 10px #6a98c9;
+        padding-bottom: 5.5rem;
       }
 
       textarea::-webkit-input-placeholder {
-        font-size: 1.5em;
+        font-size: 2em;
       }
 
       textarea::-moz-placeholder {
-        font-size: 1.5em;
+        font-size: 2em;
       }
 
       textarea:-ms-input-placeholder {
-        font-size: 1.5em;
+        font-size: 2em;
       }
 
       textarea::-ms-input-placeholder {
-        font-size: 1.5em;
+        font-size: 2em;
       }
 
       textarea::placeholder {
-        font-size: 1.5em;
+        font-size: 2em;
       }
     }
 
@@ -260,21 +259,16 @@
       background: transparent;
       text-align: center;
       border: none;
-      position: absolute;
-      margin: auto;
       z-index: 2;
       outline: none;
       font-size: 1.25em;
       min-height: 1.8em;
-      margin-top: -1px;
-      margin-bottom: -1px;
-      margin-right: -3px;
       line-height: 1.5;
       bottom: .2em;
       height: 1.8em;
       width: 1.8em;
       border-radius: 50%;
-      display: inline-block;
+      display: flex;
       color: #0a0a08;
       background-color: #dee3e79c;
       background-position: 50% 50%;
@@ -298,31 +292,21 @@
     }
 
     input#wayback {
-      right: .3em;
-      left: auto;
+      grid-row-start: 2;
+      grid-column-start: 2;
+      justify-self: end;
       background-image: url({{ route "icon" "filename" "send.svg" }});
     }
 
     input#playback {
-      left: 3px;
+      grid-row-start: 2;
+      grid-column-start: 1;
       background-image: url({{ route "icon" "filename" "search.svg" }});
     }
 
     @media only screen and (max-width: 1012px) {
       input[type="submit"] {
-        font-size: 1.45em;
-        -webkit-transform: translate(2em);
-        -ms-transform: translate(2em);
-        transform: translate(2em);
-      }
-      input#wayback {
-        bottom: -1.6em;
-        right: 50%;
-        height: 4em;
-        width: 4em;
-      }
-      input#playback {
-        margin-left: -46px;
+        font-size: 2.45em;
       }
     }
 
@@ -414,6 +398,60 @@
       height: 35px;
       text-align: center;
     }
+
+    .privacy {
+      position: relative;
+      -webkit-transform: none;
+      -ms-transform: none;
+      transform: none;
+      -webkit-transition: all;
+      -o-transition: all;
+      transition: all;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: center;
+      -ms-flex-pack: center;
+      justify-content: center;
+      border: 0px solid;
+      min-height: auto;
+      min-width: auto;
+      padding: 20px 60px 8px 60px;
+    }
+
+    .privacy > .read {
+      height: 14px;
+      text-align: center;
+      box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      min-width: auto;
+      min-height: auto;
+      font-size: 14px;
+      line-height: 14px;
+      word-spacing: 0px;
+    }
+
+    @media only screen and (max-width: 1012px) {
+      .privacy {
+        padding: calc(.875rem*2);
+      }
+
+      .privacy > .read {
+        font-size: 1.25rem;
+      }
+    }
+
+    .read > a {
+      float: none;
+      text-decoration: underline;
+      cursor: pointer;
+    }
   </style>
   <script src="{{ route "javascript" "name" "index" }}" defer></script>
 </head>
@@ -422,7 +460,7 @@
   <div class="wrapper">
     <button class="add-button">Add to home screen</button>
     <div class="archived" id="archived">
-      {{- range $i, $collect := . -}}
+      {{- range $i, $collect := .Collect -}}
       <ul class="row">
         <li class="src" title="{{ $collect.Src }}">{{ $collect.Src }}</li>
         <li class="dst" title="{{ $collect.Dst }}"><a href="{{ $collect.Dst }}" target="blank">{{ $collect.Dst }}</a></li>
@@ -431,12 +469,22 @@
     </div>
     <div class="form">
       <form method="post">
-        <textarea id="text" name="text" value="" autocapitalize="off" autocorrect="off" spellcheck="false"
-          placeholder="e.g. https://www.eff.org https://www.wikipedia.org" autofocus></textarea>
-        <input type="submit" id="playback" name="action" value="" accesskey="p" formaction="/playback">
-        <input type="submit" id="wayback" name="action" value="" accesskey="s" formaction="/wayback">
+        <div class="box">
+          <textarea id="text" name="text" value="" autocapitalize="off" autocorrect="off" spellcheck="false"
+            placeholder="e.g. https://www.eff.org https://www.wikipedia.org" autofocus></textarea>
+          <input type="submit" id="playback" name="action" value="" accesskey="p" formaction="/playback">
+          <input type="submit" id="wayback" name="action" value="" accesskey="s" formaction="/wayback">
+        </div>
       </form>
     </div>
+    {{if not .PrivacyURL}}
+    <div style="padding-bottom: .375rem;"></div>
+    {{end}}
+    {{if .PrivacyURL}}
+    <div class="privacy">
+      <span class="read">By messaging Wayback Archiver, you have read our <a href="{{- .PrivacyURL -}}" target="_blank" rel="noreferrer">Privacy Policy</a>.</span>
+    </div>
+    {{end}}
   </div>
 </body>
 

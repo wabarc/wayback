@@ -3273,3 +3273,39 @@ func TestProxy(t *testing.T) {
 		})
 	}
 }
+
+func TestPrivacyURL(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		url      string
+		expected string
+	}{
+		{
+			url:      "",
+			expected: defPrivacyURL,
+		},
+		{
+			url:      "http://127.0.0.1",
+			expected: `http://127.0.0.1`,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_PRIVACY_URL", test.url)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.PrivacyURL()
+			if got != test.expected {
+				t.Fatalf(`Unexpected get privacy url, got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}

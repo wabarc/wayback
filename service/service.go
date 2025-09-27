@@ -21,6 +21,7 @@ const (
 	CommandHelp     = "help"
 	CommandMetrics  = "metrics"
 	CommandPlayback = "playback"
+	CommandPrivacy  = "privacy"
 
 	MsgWaybackRetrying = "wayback timeout, retrying."
 	MsgWaybackTimeout  = "wayback timeout, please try later."

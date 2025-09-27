@@ -7,6 +7,7 @@ package relaychat // import "github.com/wabarc/wayback/service/relaychat"
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net/url"
 	"strings"
 	"sync"
@@ -174,6 +175,9 @@ func (i *IRC) process(m *irc.Message) error {
 	case strings.HasPrefix(text, service.CommandPlayback):
 		return i.playback(m, urls)
 
+	case strings.HasPrefix(text, service.CommandPrivacy):
+		return i.reply(m.Name, i.privacy()...)
+
 	default:
 		metrics.IncrementWayback(metrics.ServiceIRC, metrics.StatusRequest)
 		i.reply(m.Name, "I'll help you archive the URL and return the results promptly.") // nolint:errcheck
@@ -262,5 +266,11 @@ func (i *IRC) helper() []string {
 		"    https://docs.wabarc.eu.org",
 		" ",
 		"***** End of Help *****",
+	}
+}
+
+func (i *IRC) privacy() []string {
+	return []string{
+		fmt.Sprintf("To read our privacy policy, please visit %s.", i.opts.PrivacyURL()),
 	}
 }
