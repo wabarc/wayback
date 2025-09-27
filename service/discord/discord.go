@@ -116,13 +116,13 @@ func (d *Discord) Serve() (err error) {
 			return
 		}
 		// Reply message and mention bot on the channel
-		ref := m.Message.MessageReference
+		ref := m.MessageReference
 		if ref != nil {
 			if msg, err := d.bot.ChannelMessage(ref.ChannelID, ref.MessageID); err != nil {
 				logger.Debug("received message reference event error: %v", err)
 			} else {
 				logger.Debug("received message reference event: %#v", msg)
-				m.Message.Content += msg.Content
+				m.Content += msg.Content
 			}
 		}
 		// nolint:errcheck
@@ -310,7 +310,7 @@ func (d *Discord) wayback(ctx context.Context, m *discord.MessageCreate, urls []
 			d.pub.Spread(ctx, rdx, cols, publish.FlagDiscord)
 		}
 
-		msg := &discord.MessageSend{Content: replyText, Reference: stage.Message.Reference()}
+		msg := &discord.MessageSend{Content: replyText, Reference: stage.Reference()}
 		var files []*discord.File
 		for _, u := range urls {
 			if bundle, ok := rdx.Load(reduxer.Src(u.String())); ok {
@@ -403,7 +403,7 @@ func (d *Discord) reply(m *discord.MessageCreate, text string) (*discord.Message
 	}
 
 	var err error
-	m.Message, err = d.bot.ChannelMessageSendReply(m.Message.ChannelID, text, m.Message.Reference())
+	m.Message, err = d.bot.ChannelMessageSendReply(m.ChannelID, text, m.Reference())
 	if err != nil {
 		logger.Error("reply failed: %v", err)
 		return m, err
@@ -418,7 +418,7 @@ func (d *Discord) edit(m *discord.MessageCreate, text string) (*discord.MessageC
 	}
 
 	var err error
-	m.Message, err = d.bot.ChannelMessageEdit(m.ChannelID, m.Message.ID, text)
+	m.Message, err = d.bot.ChannelMessageEdit(m.ChannelID, m.ID, text)
 	if err != nil {
 		logger.Error("edit failed: %v", err)
 		return m, err

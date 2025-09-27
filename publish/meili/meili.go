@@ -38,7 +38,8 @@ var (
 
 // Meili represents a Meilisearch client.
 type Meili struct {
-	ctx context.Context
+	ctx    context.Context
+	client *http.Client
 
 	// Meilisearch server API endpoint.
 	endpoint string
@@ -51,8 +52,6 @@ type Meili struct {
 
 	// Version of the Meilisearch server.
 	version string
-
-	client *http.Client
 }
 
 // New returns a Meilisearch client.
@@ -165,11 +164,11 @@ func (m *Meili) existIndex() error {
 }
 
 type creates struct {
-	UID        int       `json:"uid"`
+	EnqueuedAt time.Time `json:"enqueuedAt"`
 	IndexUID   string    `json:"indexUid"`
 	Status     string    `json:"status"`
 	Type       string    `json:"type"`
-	EnqueuedAt time.Time `json:"enqueuedAt"`
+	UID        int       `json:"uid"`
 }
 
 // createIndex creates an index.

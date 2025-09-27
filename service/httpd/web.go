@@ -137,9 +137,9 @@ func (web *web) showWebManifest(w http.ResponseWriter, r *http.Request) {
 		Description string            `json:"description"`
 		ShortName   string            `json:"short_name"`
 		StartURL    string            `json:"start_url"`
-		Icons       []webManifestIcon `json:"icons"`
 		Display     string            `json:"display"`
 		ThemeColor  string            `json:"theme_color"`
+		Icons       []webManifestIcon `json:"icons"`
 	}
 
 	manifest := &webManifest{

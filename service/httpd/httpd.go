@@ -29,16 +29,16 @@ var ErrServiceClosed = errors.New("httpd: Service closed")
 
 // Httpd represents a http server in the application.
 type Httpd struct {
-	sync.RWMutex
+	ctx context.Context
 
-	ctx   context.Context
-	pub   *publish.Publish
-	opts  *config.Options
-	pool  *pooling.Pool
-	store *storage.Storage
-
+	pub    *publish.Publish
+	opts   *config.Options
+	pool   *pooling.Pool
+	store  *storage.Storage
 	tor    *tor.Tor
 	server *http.Server
+
+	sync.RWMutex
 }
 
 // New a Httpd struct.

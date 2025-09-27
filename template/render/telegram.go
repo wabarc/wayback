@@ -17,8 +17,8 @@ var _ Renderer = (*Telegram)(nil)
 
 // Telegram represents a Telegram template data for render.
 type Telegram struct {
-	Cols []wayback.Collect
 	Data reduxer.Reduxer
+	Cols []wayback.Collect
 }
 
 // ForReply implements the standard Renderer interface:

@@ -17,8 +17,8 @@ var _ Renderer = (*Nostr)(nil)
 
 // Nostr represents a Nostr template data for render.
 type Nostr struct {
-	Cols []wayback.Collect
 	Data reduxer.Reduxer
+	Cols []wayback.Collect
 }
 
 // ForReply implements the standard Renderer interface:

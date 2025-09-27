@@ -37,6 +37,7 @@ jobs:
     uses: wabarc/.github/.github/workflows/reusable-golangci.yml@main
     with:
       egress-policy: audit
+      version: 'v2.5.0'
 
   shellcheck:
     name: ShellCheck

@@ -29,18 +29,18 @@ type resource struct {
 
 // Pool represents a pool of services.
 type Pool struct {
-	mutex    sync.Mutex
+	context  context.Context
 	resource chan *resource
-	timeout  time.Duration
+	closed   chan bool
 	staging  queue.Queue
+	timeout  time.Duration
 
-	closed  chan bool
-	context context.Context
+	maxRetries uint64
+	multiplier float64
+	mutex      sync.Mutex
 
 	waiting    int32
 	processing int32
-	maxRetries uint64
-	multiplier float64
 }
 
 // A Bucket represents a wayback request is sent by a service.
@@ -51,11 +51,11 @@ type Bucket struct {
 	// Fallback defines an optional func to return a failure response for the Request func.
 	Fallback func(context.Context) error
 
-	// Count of retried attempts
-	elapsed uint64
-
 	// An object that will perform exactly one action.
 	once *sync.Once
+
+	// Count of retried attempts
+	elapsed uint64
 }
 
 func newResource(id int) *resource {

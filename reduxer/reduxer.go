@@ -54,9 +54,9 @@ type Reduxer interface {
 
 // bundle represents a bundle data of a webpage.
 type bundle struct {
+	shots    *screenshot.Screenshots[screenshot.Path]
 	artifact Artifact
 	article  readability.Article
-	shots    *screenshot.Screenshots[screenshot.Path]
 }
 
 // Artifact represents the file paths stored on the local disk.
@@ -80,8 +80,8 @@ type Src string
 
 // bundles represents a set of the bundle in a map, and its key is a URL string.
 type bundles struct {
-	mutex sync.RWMutex
 	dirty map[Src]*bundle
+	mutex sync.RWMutex
 }
 
 // NewReduxer returns a Reduxer has been initialized.

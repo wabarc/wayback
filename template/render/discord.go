@@ -17,8 +17,8 @@ var _ Renderer = (*Discord)(nil)
 
 // Discord represents a Discord template data for render.
 type Discord struct {
-	Cols []wayback.Collect
 	Data reduxer.Reduxer
+	Cols []wayback.Collect
 }
 
 // ForReply implements the standard Renderer interface:

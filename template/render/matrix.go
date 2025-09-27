@@ -17,8 +17,8 @@ var _ Renderer = (*Matrix)(nil)
 
 // Matrix represents a Matrix template data for render.
 type Matrix struct {
-	Cols []wayback.Collect
 	Data reduxer.Reduxer
+	Cols []wayback.Collect
 }
 
 // ForReply implements the standard Renderer interface:

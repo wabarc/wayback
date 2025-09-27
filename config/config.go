@@ -7,7 +7,6 @@ package config // import "github.com/wabarc/wayback/config"
 // Opts holds parsed configuration options.
 // var Opts *Options
 
-// nolint:stylecheck
 const (
 	SLOT_IA = "ia" // Internet Archive
 	SLOT_IS = "is" // archive.today

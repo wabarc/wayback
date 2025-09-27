@@ -33,18 +33,17 @@ var ErrServiceClosed = errors.New("twitter: Service closed")
 
 // Twitter represents a Twitter service in the application
 type Twitter struct {
-	sync.RWMutex
-
-	ctx    context.Context
-	opts   *config.Options
-	pool   *pooling.Pool
-	client *twitter.Client
-	store  *storage.Storage
-	pub    *publish.Publish
+	ctx       context.Context
+	opts      *config.Options
+	pool      *pooling.Pool
+	client    *twitter.Client
+	store     *storage.Storage
+	pub       *publish.Publish
+	fetchTick *time.Ticker
 
 	archiving map[string]bool
 
-	fetchTick *time.Ticker
+	sync.RWMutex
 }
 
 // New returns Twitter struct.
@@ -87,7 +86,7 @@ func (t *Twitter) Serve() error {
 	t.fetchTick = time.NewTicker(time.Minute) // Fetch Direct Message event
 	go func() {
 		t.archiving = make(map[string]bool)
-		for { // nolint:gosimple
+		for { //nolint:staticcheck
 			select {
 			case <-t.fetchTick.C:
 				messages, resp, err := t.client.DirectMessages.EventsList(

@@ -16,8 +16,8 @@ var _ Renderer = (*XMPP)(nil)
 
 // XMPP represents a XMPP template data for render.
 type XMPP struct {
-	Cols []wayback.Collect
 	Data interface{}
+	Cols []wayback.Collect
 }
 
 // ForReply implements the standard Renderer interface:

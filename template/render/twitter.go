@@ -17,8 +17,8 @@ var _ Renderer = (*Twitter)(nil)
 
 // Twitter represents a Twitter template data for render.
 type Twitter struct {
-	Cols []wayback.Collect
 	Data reduxer.Reduxer
+	Cols []wayback.Collect
 }
 
 // ForReply implements the standard Renderer interface:

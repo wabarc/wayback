@@ -36,14 +36,13 @@ var ErrServiceClosed = errors.New("irc: Service closed")
 
 // IRC represents an IRC service in the application.
 type IRC struct {
-	sync.RWMutex
-
 	ctx   context.Context
 	opts  *config.Options
 	pool  *pooling.Pool
 	conn  *irc.Client
 	store *storage.Storage
 	pub   *publish.Publish
+	sync.RWMutex
 }
 
 // New IRC struct.
@@ -137,7 +136,7 @@ func (i *IRC) handle(c *irc.Client, m *irc.Message) {
 		return
 	}
 
-	if m.Command == "NOTICE" && m.Prefix.Name == "NickServ" && strings.Contains(m.Trailing(), "dentified") {
+	if m.Command == "NOTICE" && m.Name == "NickServ" && strings.Contains(m.Trailing(), "dentified") {
 		logger.Debug("received command %q skipped", m.Command)
 		return
 	}
