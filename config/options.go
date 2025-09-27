@@ -140,7 +140,7 @@ type Options struct {
 	matrix              *matrix
 	slack               *slack
 	services            sync.Map
-	maxMediaSize        string
+	privacyURL          string
 	storageDir          string
 	waybackUserAgent    string
 	proxy               string
@@ -148,8 +148,8 @@ type Options struct {
 	listenAddr          string
 	chromeRemoteAddr    string
 	boltPathname        string
+	maxMediaSize        string
 	poolingSize         int
-	privacyURL          string
 	waybackTimeout      int
 	waybackMaxRetries   int
 	enabledChromeRemote bool

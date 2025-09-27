@@ -99,8 +99,8 @@ func (t *Template) Render(name string, data interface{}) ([]byte, bool) {
 	}
 
 	input := struct {
-		PrivacyURL string
 		Collect    any
+		PrivacyURL string
 	}{
 		PrivacyURL: t.opts.PrivacyURL(),
 		Collect:    data,
