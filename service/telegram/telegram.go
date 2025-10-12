@@ -153,6 +153,11 @@ func (t *Telegram) Serve() (err error) {
 			}
 			go t.process(update.Message) // nolint:errcheck
 		case update.Message != nil:
+			// Ignore auto-delete timer message
+			if update.Message.AutoDeleteTimer != nil {
+				return false
+			}
+
 			transform(update.Message)
 			logger.Debug("message: %#v", update.Message)
 			go t.process(update.Message) // nolint:errcheck
