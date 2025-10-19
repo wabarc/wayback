@@ -94,7 +94,7 @@ func (web *web) handle() http.Handler {
 
 	web.router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write(helper.String2Byte("User-agent: *\nDisallow: /")) // nolint:errcheck
+		w.Write(helper.String2Byte("User-agent: *\nDisallow:")) // nolint:errcheck
 	})
 
 	return web.router

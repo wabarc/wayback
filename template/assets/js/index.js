@@ -1,5 +1,32 @@
+let policy;
+if (typeof window.trustedTypes !== "undefined") {
+  try {
+    policy = window.trustedTypes.createPolicy('tt-policy', {
+      createScriptURL: (url) => url
+    });
+  } catch (e) {
+    console.warn('Failed to create Trusted Types policy: ', e);
+    policy = null;
+  }
+} else {
+  policy = {
+    createScriptURL: (url) => url
+  };
+}
+
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register('/service-worker.js');
+  const scriptURL = policy.createScriptURL('/service-worker.js');
+
+  try {
+    navigator.serviceWorker.register(scriptURL).catch(error => {
+      console.error('Service Worker registration failed: ', error);
+      if (error.name === 'SecurityError') {
+        console.warn('Service Worker registration failed due to security restrictions');
+      }
+    });
+  } catch (error) {
+    console.error('Failed to register Service Worker: ', error);
+  }
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -27,7 +54,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   }
 });
 
-var unblock = function (collects) {
+const unblock = () => {
   document.querySelector('div.form').style.backgroundColor = '';
   document.querySelector('#wayback').disabled = false;
   document.querySelector('#playback').disabled = false;
@@ -35,37 +62,67 @@ var unblock = function (collects) {
   document.getElementById('text').value = '';
 };
 
-var render = function (collects) {
+const render = (collects) => {
   "use strict";
-  if (typeof collects !== "object") {
+  if (!collects || typeof collects !== 'object') {
     return;
   }
-  var archived = document.getElementById('archived');
-  var html = '';
-  collects.forEach(function (collect, i) {
-    html += '<ul class="row">';
-    html += '<li class="src" title="' + collect.src + '">' + collect.src + '</li>';
-    html += ' <li class="dst" title="' + collect.dst + '">';
+  const archived = document.getElementById('archived');
+  const fragment = document.createDocumentFragment();
+
+  // Generate a light gray color with slight variation
+  const r = Math.floor(240 + Math.random() * 16);  // 240-255
+  const g = Math.floor(240 + Math.random() * 16);  // 240-255
+  const b = Math.floor(240 + Math.random() * 16);  // 240-255
+  const renderColor = `rgb(${r},${g},${b})`;
+
+  collects.forEach((collect) => {
+    const row = document.createElement('ul');
+    row.className = 'row';
+    row.style.backgroundColor = renderColor;
+    row.style.color = '#333';
+
+    const src = document.createElement('li');
+    src.className = 'src';
+    src.title = collect.src;
+    src.textContent = collect.src;
+
+    const dst = document.createElement('li');
+    dst.className = 'dst';
+    dst.title = collect.dst;
+
+    let link;
     try {
-      new URL(collect.dst);
-      html += '<a href="' + collect.dst + '" target="blank">' + collect.dst + '</a>';
+      const url = new URL(collect.dst);
+      link = document.createElement('a');
+      link.href = url.href;
+      link.target = 'blank';
+      link.textContent = collect.dst;
     } catch (_) {
-      html += '<a href="javascript:;">' + collect.dst + '</a>';
+      link = document.createElement('a');
+      link.href = 'javascript:;';
+      link.textContent = collect.dst;
     }
-    html += '</li>';
-    html += '</ul>';
-  })
-  archived.innerHTML = html + archived.innerHTML;
+
+    dst.appendChild(link);
+    row.appendChild(src);
+    row.appendChild(dst);
+    fragment.appendChild(row);
+  });
+  archived.insertBefore(fragment, archived.firstChild);
 };
 
-var post = function (url) {
+const post = (url) => {
   "use strict";
-  var http = new XMLHttpRequest(),
+  const http = new XMLHttpRequest(),
     params = new URLSearchParams(),
     text = document.getElementById('text').value;
   if (!text || text.length === 0) {
     return;
   }
+  http.onload = () => {
+    http.onreadystatechange = null;
+  };
 
   document.getElementById('text').disabled = true;
   document.querySelector('#wayback').disabled = true;
@@ -74,10 +131,10 @@ var post = function (url) {
 
   http.open("POST", url, true);
   http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  http.onreadystatechange = function () {
+  http.onreadystatechange = () => {
     if (http.readyState === 4 && http.status === 200) {
       if (http.response !== undefined && http.response) {
-        var collects = JSON.parse(http.response)
+        const collects = JSON.parse(http.response)
         render(collects);
       }
     }
