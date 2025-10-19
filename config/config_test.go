@@ -256,6 +256,10 @@ func TestDatabaseURL(t *testing.T) {
 			url:      "foo bar",
 			expected: "foo bar",
 		},
+		{
+			url:      "user=username password=passwd host=pg.pooler.com port=6543 dbname=postgres",
+			expected: "user=username password=passwd host=pg.pooler.com port=6543 dbname=postgres",
+		},
 	}
 
 	for i, test := range tests {
