@@ -27,7 +27,7 @@ require (
 	github.com/ipsn/go-libtor v1.0.380
 	github.com/jedib0t/go-pretty/v6 v6.4.0
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-mastodon v0.0.5-0.20210515144304-86627ec7d635
+	github.com/mattn/go-mastodon v0.0.10
 	github.com/nbd-wtf/go-nostr v0.17.1-0.20230426111250-32ca737acf77
 	github.com/phf/go-queue v0.0.0-20170504031614-9abe38d0371d
 	github.com/pkg/errors v0.9.1
