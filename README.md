@@ -232,6 +232,7 @@ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANN
 
 **Note:** These are free hosting options. If you need a quick and simple setup, this method may be ideal.
 
+<a href="https://repl.it/github/wabarc/wayback"><img src="https://repl.it/badge/github/wabarc/wayback" alt="Run on Repl.it" height="32" /></a>
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/wabarc/wayback)
 <a href="https://render.com/deploy?repo=https://github.com/wabarc/on-render">
     <img
