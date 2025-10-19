@@ -119,15 +119,17 @@ Flags:
   -c, --config string      Configuration file path, defaults: ./wayback.conf, ~/wayback.conf, /etc/wayback.conf
   -d, --daemon strings     Run as daemon service, supported services are telegram, web, mastodon, twitter, discord, slack, irc, xmpp
       --debug              Enable debug mode (default mode is false)
+      --ga                 Wayback webpages to Ghostarchive (default true)
   -h, --help               help for wayback
-      --ia                 Wayback webpages to Internet Archive
+      --ia                 Wayback webpages to Internet Archive (default true)
       --info               Show application information
-      --ip                 Wayback webpages to IPFS
+      --ip                 Wayback webpages to IPFS (default true)
       --ipfs-host string   IPFS daemon host, do not require, unless enable ipfs (default "127.0.0.1")
   -m, --ipfs-mode string   IPFS mode (default "pinner")
   -p, --ipfs-port uint     IPFS daemon port (default 5001)
-      --is                 Wayback webpages to Archive Today
-      --ph                 Wayback webpages to Telegraph
+      --is                 Wayback webpages to Archive Today (default true)
+      --migrate            Run SQL migrations
+      --ph                 Wayback webpages to Telegraph (default true)
       --print              Show application configurations
   -t, --token string       Telegram Bot API Token
       --tor                Snapshot webpage via Tor anonymity network

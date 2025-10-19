@@ -5,11 +5,11 @@
 package storage // import "github.com/wabarc/wayback/storage"
 
 import (
+	"context"
+	"database/sql"
 	"encoding/binary"
-
-	"github.com/wabarc/logger"
-	"github.com/wabarc/wayback/config"
-	"github.com/wabarc/wayback/errors"
+	"errors"
+	"time"
 
 	bolt "go.etcd.io/bbolt"
 )
@@ -19,28 +19,34 @@ var ErrDatabaseNotFound = errors.New("database not found")
 // Storage handles all operations related to the database.
 type Storage struct {
 	db *bolt.DB
+	ds *sql.DB
 }
 
-// Open a bolt database on current directory in given path.
-// It is the caller's responsibility to close it.
-func Open(opts *config.Options, path string) (*Storage, error) {
-	if path == "" {
-		path = opts.BoltPathname()
-	}
-	db, err := bolt.Open(path, 0600, nil)
-	if err != nil {
-		logger.Fatal("open bolt database failed: %v", err)
-		return nil, err
-	}
-	return &Storage{db: db}, nil
+// NewStorage returns a new Storage. It is the caller's responsibility to close it.
+func NewStorage(ds *sql.DB, db *bolt.DB) *Storage {
+	return &Storage{db: db, ds: ds}
 }
 
 // Close the bolt database
-func (s *Storage) Close() error {
+func (s *Storage) Close() (err error) {
 	if s.db != nil {
-		return s.db.Close()
+		err = errors.Join(s.db.Close(), err)
 	}
-	return ErrDatabaseNotFound
+	if s.ds != nil {
+		err = errors.Join(s.ds.Close(), err)
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Ping checks if the database connection works.
+func (s *Storage) Ping() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return s.ds.PingContext(ctx)
 }
 
 func itob(v uint64) []byte {

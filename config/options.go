@@ -104,8 +104,13 @@ const (
 	defMeiliApikey   = ""
 
 	defOmnivoreApikey = ""
+	defPrivacyURL     = ""
 
-	defPrivacyURL = ""
+	defRunMigrations              = false
+	defDatabaseURL                = "user=postgres password=postgres dbname=wayback sslmode=disable"
+	defDatabaseMaxConns           = 20
+	defDatabaseMinConns           = 1
+	defDatabaseConnectionLifetime = 5
 
 	maxAttachSizeTelegram = 50000000   // 50MB
 	maxAttachSizeDiscord  = 8000000    // 8MB
@@ -131,6 +136,7 @@ type Options struct {
 	discord             *discord
 	ipfs                *ipfs
 	slots               map[string]bool
+	database            *database
 	telegram            *telegram
 	mastodon            *mastodon
 	onion               *onion
@@ -158,6 +164,13 @@ type Options struct {
 	overTor             bool
 	metrics             bool
 	waybackFallback     bool
+}
+
+type database struct {
+	url                string
+	maxConns           int
+	minConns           int
+	connectionLifetime int
 }
 
 type ipfs struct {
@@ -280,6 +293,12 @@ func NewOptions() *Options {
 		waybackMaxRetries:   defWaybackMaxRetries,
 		waybackUserAgent:    defWaybackUserAgent,
 		waybackFallback:     defWaybackFallback,
+		database: &database{
+			url:                defDatabaseURL,
+			maxConns:           defDatabaseMaxConns,
+			minConns:           defDatabaseMinConns,
+			connectionLifetime: defDatabaseConnectionLifetime,
+		},
 		ipfs: &ipfs{
 			host:   defIPFSHost,
 			port:   defIPFSPort,
@@ -439,6 +458,31 @@ func (o *Options) LogLevel() logger.LogLevel {
 // EnabledMetrics returns true if metrics collector is enabled.
 func (o *Options) EnabledMetrics() bool {
 	return o.metrics
+}
+
+// IsDefaultDatabaseURL returns true if the default database URL is used.
+func (o *Options) IsDefaultDatabaseURL() bool {
+	return o.database.url == defDatabaseURL
+}
+
+// DatabaseURL returns the database URL.
+func (o *Options) DatabaseURL() string {
+	return o.database.url
+}
+
+// DatabaseMaxConns returns the maximum number of database connections.
+func (o *Options) DatabaseMaxConns() int {
+	return o.database.maxConns
+}
+
+// DatabaseMinConns returns the minimum number of database connections.
+func (o *Options) DatabaseMinConns() int {
+	return o.database.minConns
+}
+
+// DatabaseConnectionLifetime returns the maximum amount of time a connection may be reused.
+func (o *Options) DatabaseConnectionLifetime() time.Duration {
+	return time.Duration(o.database.connectionLifetime) * time.Minute
 }
 
 // IPFSHost returns the host of IPFS daemon service.

@@ -243,6 +243,190 @@ func TestIPFSMode(t *testing.T) {
 	}
 }
 
+func TestDatabaseURL(t *testing.T) {
+	var tests = []struct {
+		url      string
+		expected string
+	}{
+		{
+			url:      defDatabaseURL,
+			expected: defDatabaseURL,
+		},
+		{
+			url:      "foo bar",
+			expected: "foo bar",
+		},
+		{
+			url:      "user=username password=passwd host=pg.pooler.com port=6543 dbname=postgres",
+			expected: "user=username password=passwd host=pg.pooler.com port=6543 dbname=postgres",
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_DATABASE_URL", test.url)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			expected := test.expected
+			got := opts.DatabaseURL()
+
+			if got != expected {
+				t.Errorf(`Unexpected database URL, got %v instead of %s`, got, expected)
+			}
+		})
+	}
+}
+
+func TestIsDefaultDatabaseURL(t *testing.T) {
+	var tests = []struct {
+		url      string
+		expected bool
+	}{
+		{
+			url:      defDatabaseURL,
+			expected: true,
+		},
+		{
+			url:      "foo bar",
+			expected: false,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_DATABASE_URL", test.url)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			expected := test.expected
+			got := opts.IsDefaultDatabaseURL()
+
+			if got != expected {
+				t.Errorf(`Unexpected default database URL, got %t instead of %t`, got, expected)
+			}
+		})
+	}
+}
+
+func TestDatabaseMaxConns(t *testing.T) {
+	var tests = []struct {
+		maxConns int
+		expected int
+	}{
+		{
+			maxConns: defDatabaseMaxConns,
+			expected: defDatabaseMaxConns,
+		},
+		{
+			maxConns: 100,
+			expected: 100,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_DATABASE_MAX_CONNS", strconv.Itoa(test.maxConns))
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			expected := test.expected
+			got := opts.DatabaseMaxConns()
+
+			if got != expected {
+				t.Errorf(`Unexpected maxConns, got %v instead of %d`, got, expected)
+			}
+		})
+	}
+}
+
+func TestDatabaseMinConns(t *testing.T) {
+	var tests = []struct {
+		minConns int
+		expected int
+	}{
+		{
+			minConns: defDatabaseMinConns,
+			expected: defDatabaseMinConns,
+		},
+		{
+			minConns: 100,
+			expected: 100,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_DATABASE_MIN_CONNS", strconv.Itoa(test.minConns))
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			expected := test.expected
+			got := opts.DatabaseMinConns()
+
+			if got != expected {
+				t.Errorf(`Unexpected minConns, got %v instead of %d`, got, expected)
+			}
+		})
+	}
+}
+
+func TestDatabaseConnectionLifetime(t *testing.T) {
+	var tests = []struct {
+		connectionLifetime int
+		expected           time.Duration
+	}{
+		{
+			connectionLifetime: defDatabaseConnectionLifetime,
+			expected:           defDatabaseConnectionLifetime * time.Minute,
+		},
+		{
+			connectionLifetime: 100,
+			expected:           100 * time.Minute,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_DATABASE_CONNECTION_LIFETIME", strconv.Itoa(test.connectionLifetime))
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			expected := test.expected
+			got := opts.DatabaseConnectionLifetime()
+
+			if got != expected {
+				t.Errorf(`Unexpected connection lifetime, got %v instead of %d`, got, expected)
+			}
+		})
+	}
+}
+
 func TestIPFSTarget(t *testing.T) {
 	var tests = []struct {
 		token      string // managed ipfs token

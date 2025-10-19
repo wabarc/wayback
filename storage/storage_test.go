@@ -12,7 +12,7 @@ import (
 	"github.com/wabarc/wayback/config"
 )
 
-func TestOpen(t *testing.T) {
+func TestNewStorage(t *testing.T) {
 	tests := []struct {
 		name string
 		path string
@@ -34,9 +34,13 @@ func TestOpen(t *testing.T) {
 			}
 			defer os.Remove(opts.BoltPathname())
 
-			s, err := Open(opts, file)
+			db, err := Open(opts, file)
 			if err != nil {
 				t.Fatalf("failed to open database: %v", err)
+			}
+			s := NewStorage(nil, db)
+			if err != nil {
+				t.Fatalf("failed to new storage: %v", err)
 			}
 			defer s.db.Close()
 
@@ -53,9 +57,13 @@ func TestOpen(t *testing.T) {
 func TestClose(t *testing.T) {
 	file := path.Join(t.TempDir(), "bolt.db")
 	opts := &config.Options{}
-	s, err := Open(opts, file)
+	db, err := Open(opts, file)
 	if err != nil {
 		t.Fatalf("failed to open database: %v", err)
+	}
+	s := NewStorage(nil, db)
+	if err != nil {
+		t.Fatalf("failed to new storage: %v", err)
 	}
 
 	err = s.Close()

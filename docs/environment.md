@@ -41,6 +41,10 @@ Use the `-c` / `--config` option to specify the build definition file to use.
 | -                   | `WAYBACK_MEILI_INDEXING`          | `capsules`                 | Meilisearch indexing name                                    |
 | -                   | `WAYBACK_MEILI_APIKEY`            | -                          | Meilisearch admin API key                                    |
 | -                   | `WAYBACK_OMNIVORE_APIKEY`         | -                          | Omnivore API key                                             |
+| -                   | `WAYBACK_DATABASE_URL`            | -                          | The URL of the Postgres database                             |
+| -                   | `WAYBACK_DATABASE_MAX_CONNS`      | `20`                       | Maximum connections of the Postgres database                 |
+| -                   | `WAYBACK_DATABASE_MIN_CONNS`      | `1`                        | Minimum connections of the Postgres database                 |
+| -                   | `WAYBACK_DATABASE_CONNECTION_LIFETIME` | `5`                   | Connection lifetime of the Postgres database                 |
 | `-d`, `--daemon`    | -                                 | -                          | Run as daemon service, e.g. `telegram`, `web`, `mastodon`, `twitter`, `discord` |
 | `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                     | Wayback webpages to **Internet Archive**                     |
 | `--is`              | `WAYBACK_ENABLE_IS`               | `true`                     | Wayback webpages to **Archive Today**                        |

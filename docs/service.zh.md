@@ -40,6 +40,8 @@ Wayback的集成服务提供了将存档结果发布到各种消息和协作平�
 - [Meilisearch](integrations/meilisearch.md)
 - [Nostr](integrations/nostr.md)
 - [Notion](integrations/notion.md)
+- [Omnivore](integrations/omnivore.md)
+- [Postgres](integrations/datastore.md)
 - [Slack](integrations/slack.md)
 - [Telegram](integrations/telegram.md)
 - [Twitter](integrations/twitter.md)

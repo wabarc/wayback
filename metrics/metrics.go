@@ -38,6 +38,7 @@ const (
 	PublishNostr    = "nostr"
 	PublishMeili    = "meili"
 	PublishOmnivore = "omnivore"
+	PublishDatabase = "database"
 
 	StatusRequest = "request"
 	StatusSuccess = "success"
