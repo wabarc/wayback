@@ -21,12 +21,14 @@ import (
 var _ publish.Publisher = (*Datastore)(nil)
 
 type Datastore struct {
+	ctx context.Context
+
 	bot  *storage.Storage
 	opts *config.Options
 }
 
 // New returns a Datastore struct.
-func New(store *storage.Storage, opts *config.Options) *Datastore {
+func New(ctx context.Context, store *storage.Storage, opts *config.Options) *Datastore {
 	if opts.IsDefaultDatabaseURL() {
 		logger.Debug("Datastore integration WAYBACK_DATABASE_URL is required")
 		return nil
@@ -46,7 +48,7 @@ func New(store *storage.Storage, opts *config.Options) *Datastore {
 		store = storage.NewStorage(db, nil)
 	}
 
-	return &Datastore{bot: store, opts: opts}
+	return &Datastore{ctx: ctx, bot: store, opts: opts}
 }
 
 // Publish save url to the datastore of the given cols and args.
