@@ -2,6 +2,8 @@
 title: Interactive with XMPP
 ---
 
+![XMPP](../assets/xmpp.png)
+
 ## How to build a XMPP Service
 
 To create an XMPP account, you need to find a client and a public server. Here are some recommended collections of XMPP servers to help you get started.

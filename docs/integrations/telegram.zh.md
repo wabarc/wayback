@@ -2,6 +2,8 @@
 title: Telegram
 ---
 
+![Telegram Bot](../assets/telegram.png)
+
 ## 如何构建一个Telegram机器人
 
 创建新机器人的步骤如下：

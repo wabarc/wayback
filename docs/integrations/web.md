@@ -2,6 +2,8 @@
 title: Interactive with Web Service
 ---
 
+![Web](../assets/web.png)
+
 ## How to build a Web Service
 
 Wayback supports serving both **Clear Web** and **Onion Service**. If the Tor binary is missing, the Onion Service feature will be ignored.

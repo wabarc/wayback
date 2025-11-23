@@ -2,6 +2,8 @@
 title: Interactive with Mastodon
 ---
 
+![Mastodon](../assets/mastodon.png)
+
 ## How to build a Mastodon Bot
 
 You can choose any Mastodon instance. Here, we will be using Mastodon.social as an example.

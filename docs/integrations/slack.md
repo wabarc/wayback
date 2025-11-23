@@ -2,6 +2,8 @@
 title: Interactive with Slack
 ---
 
+![Slack Channel](../assets/slack-channel.png)
+
 ## How to build a Slack App
 
 Steps to create a new app:

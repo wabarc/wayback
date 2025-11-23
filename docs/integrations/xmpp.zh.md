@@ -2,6 +2,8 @@
 title: XMPP
 ---
 
+![XMPP](../assets/xmpp.png)
+
 ## 如何构建XMPP服务
 
 创建 XMPP 账户，您需要找到一个客户端和一个公共服务器。以下是一些推荐的 XMPP 服务器集合，可帮助您入门。

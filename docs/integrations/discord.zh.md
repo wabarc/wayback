@@ -2,6 +2,8 @@
 title: Discord
 ---
 
+![Discord](../assets/discord-server.png)
+
 ## 如何构建一个Discord机器人
 
 构建一个Discord机器人，您需要按照以下步骤进行：

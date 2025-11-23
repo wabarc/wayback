@@ -2,6 +2,8 @@
 title: Interactive with Telegram
 ---
 
+![Telegram Bot](../assets/telegram.png)
+
 ## How to build a Telegram Bot
 
 Steps to create a new bot:

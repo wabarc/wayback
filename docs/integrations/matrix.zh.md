@@ -2,6 +2,8 @@
 title: Matrix
 ---
 
+![Matrix Room](../assets/matrix-room.png)
+
 ## 如何构建Matrix机器人
 
 您可以选择任何Matrix服务器。这里，我们将使用**matrix.org**和**Element**作为示例。

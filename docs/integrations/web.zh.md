@@ -2,6 +2,8 @@
 title: Web Service
 ---
 
+![Web](../assets/web.png)
+
 ## 如何构建Web服务
 
 Wayback支持服务于**明文Web**和**Onion服务**。如果缺少Tor二进制文件，则将忽略Onion服务功能。
