@@ -272,7 +272,6 @@ func Playback(ctx context.Context, cfg *config.Options, urls ...*url.URL) (cols 
 		config.SLOT_PH,
 		config.SLOT_GA,
 		config.SLOT_TT,
-		config.SLOT_GC,
 	}
 	for _, input := range urls {
 		for _, slot := range slots {
@@ -293,8 +292,6 @@ func Playback(ctx context.Context, cfg *config.Options, urls ...*url.URL) (cols 
 					col.Dst = playback.Playback(ctx, playback.GA{URL: input})
 				case config.SLOT_TT:
 					col.Dst = playback.Playback(ctx, playback.TT{URL: input})
-				case config.SLOT_GC:
-					col.Dst = playback.Playback(ctx, playback.GC{URL: input})
 				}
 				col.Src = input.String()
 				col.Arc = slot
