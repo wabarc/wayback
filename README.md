@@ -219,6 +219,7 @@ Look at the [full list of configuration options](docs/environment.md).
 - [wabarc/on-heroku](https://github.com/wabarc/on-heroku)
 - [wabarc/on-github](https://github.com/wabarc/on-github)
 - [wabarc/on-render](https://github.com/wabarc/on-render)
+- [wabarc/on-vercel](https://github.com/wabarc/on-vercel)
 
 ### Docker/Podman
 
@@ -237,7 +238,8 @@ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANN
     <img
     src="https://render.com/images/deploy-to-render-button.svg"
     alt="Deploy to Render"
-    width="155px"
+    width="147px"
+    height="32px"
     />
 </a>
 
