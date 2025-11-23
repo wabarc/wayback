@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for datastore publish ([#569](https://github.com/wabarc/wayback/pull/569))
 - Add support publish to Omnivore
 - Add privacy notes ([#669](https://github.com/wabarc/wayback/pull/669))
+- SEO enhancement ([#712](https://github.com/wabarc/wayback/pull/712))
 
 ### Changed
 - Do not upload files to anonfiles
