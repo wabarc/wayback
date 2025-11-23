@@ -14,7 +14,6 @@ const (
 	SLOT_PH = "ph" // Telegraph
 	SLOT_GA = "ga" // Ghostarchive
 	SLOT_TT = "tt" // Time Travel
-	SLOT_GC = "gc" // Google Cache
 
 	PB_SLUG = "/playback" // Identity for playback
 	UNKNOWN = "unknown"
@@ -70,7 +69,6 @@ func SlotName(s string) string {
 		SLOT_PH: "Telegraph",
 		SLOT_GA: "Ghostarchive",
 		SLOT_TT: "Time Travel",
-		SLOT_GC: "Google Cache",
 	}
 
 	if _, exist := slots[s]; exist {
@@ -89,7 +87,6 @@ func SlotExtra(s string) string {
 		SLOT_PH: "https://telegra.ph/",
 		SLOT_GA: "https://ghostarchive.org/",
 		SLOT_TT: "http://timetravel.mementoweb.org/",
-		SLOT_GC: "https://webcache.googleusercontent.com/",
 	}
 
 	if _, exist := extra[s]; exist {
