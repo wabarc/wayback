@@ -2,6 +2,8 @@
 title: Mastodon
 ---
 
+![Mastodon](../assets/mastodon.png)
+
 ## 如何构建Mastodon机器人
 
 您可以选择任何Mastodon实例。这里，我们将使用Mastodon.social作为示例。

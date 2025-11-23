@@ -2,6 +2,8 @@
 title: IRC
 ---
 
+![IRC](../assets/irc.png)
+
 ## 如何构建IRC机器人
 
 要创建一个IRC帐户，您可以访问Libera.Chat的[昵称注册](https://libera.chat/guides/registration)页面以获取说明。

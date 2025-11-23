@@ -2,6 +2,8 @@
 title: Interactive with Discord
 ---
 
+![Discord](../assets/discord-server.png)
+
 ## How to build a Discord Bot
 
 To build a Discord bot, you will need to follow these steps:

@@ -2,6 +2,8 @@
 title: Slack
 ---
 
+![Slack Channel](../assets/slack-channel.png)
+
 ## 如何构建一个Slack App
 
 创建新应用的步骤如下：

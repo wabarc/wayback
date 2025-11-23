@@ -2,6 +2,8 @@
 title: Interactive with Matrix
 ---
 
+![Matrix Room](../assets/matrix-room.png)
+
 ## How to build a Matrix Bot
 
 You can choose any Matrix server. Here, we will be using **matrix.org** and **Element** as an example.

@@ -2,6 +2,8 @@
 title: Interactive with IRC
 ---
 
+![IRC](../assets/irc.png)
+
 ## How to build a IRC Bot
 
 To create an IRC account, you can visit the [Nickname Registration](https://libera.chat/guides/registration) page on Libera.Chat for instructions.
