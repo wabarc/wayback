@@ -56,9 +56,9 @@ require (
 	gopkg.in/irc.v4 v4.0.0
 	gopkg.in/telebot.v3 v3.0.0-20220130115853-f0291132d3c3
 	maunium.net/go/mautrix v0.25.1
-	mellium.im/sasl v0.3.1
+	mellium.im/sasl v0.3.2
 	mellium.im/xmlstream v0.15.4
-	mellium.im/xmpp v0.21.4
+	mellium.im/xmpp v0.22.0
 )
 
 require (
