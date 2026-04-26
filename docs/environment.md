@@ -32,7 +32,6 @@ Use the `-c` / `--config` option to specify the build definition file to use.
 | -                   | `WAYBACK_BOLT_PATH`               | `./wayback.db`             | File path of bolt database                                   |
 | -                   | `WAYBACK_STORAGE_DIR`             | -                          | Directory to store binary file, e.g. PDF, html file          |
 | -                   | `WAYBACK_MAX_MEDIA_SIZE`          | `512MB`                    | Max size to limit download stream media                      |
-| -                   | `WAYBACK_COHERE_APIKEY`           | ``                         | Cohere API key                                               |
 | -                   | `WAYBACK_MEDIA_SITES`             | -                          | Extra media websites wish to be supported, separate with comma |
 | -                   | `WAYBACK_TIMEOUT`                 | `300`                      | Timeout for single wayback request, defaults to 300 second   |
 | -                   | `WAYBACK_MAX_RETRIES`             | `2`                        | Max retries for single wayback request, defaults to 2        |
@@ -103,6 +102,9 @@ Use the `-c` / `--config` option to specify the build definition file to use.
 | -                   | `WAYBACK_ONION_LOCAL_PORT`        | `8964`                     | Local port for Tor Hidden Service, also support for a **reverse proxy**. This is ignored if `WAYBACK_LISTEN_ADDR` is set. |
 | -                   | `WAYBACK_ONION_REMOTE_PORTS`      | `80`                       | Remote ports for Tor Hidden Service, e.g. `WAYBACK_ONION_REMOTE_PORTS=80,81` |
 | -                   | `WAYBACK_ONION_DISABLED`          | `false`                    | Disable onion service                                        |
+| -                   | `WAYBACK_LLM_PROVIDER`            | ``                         | Enables AI-enhanced summary                                  |
+| -                   | `WAYBACK_LLM_APIKEY`              | ``                         | LLM API key                                                  |
+| -                   | `WAYBACK_LLM_MODEL`               | ``                         | LLM model. Each provider has a sensible default: cohere: command-a-03-2025 \| openrouter: openrouter/auto. |
 | -                   | `WAYBACK_SLOT`                    | -                          | Pinning service for IPFS mode of pinner, see [ipfs-pinner](https://github.com/wabarc/ipfs-pinner#supported-pinning-services) |
 | -                   | `WAYBACK_APIKEY`                  | -                          | API key for pinning service                                  |
 | -                   | `WAYBACK_SECRET`                  | -                          | API secret for pinning service                               |

@@ -7,8 +7,8 @@ package summary // import "github.com/wabarc/wayback/summary"
 import (
 	"testing"
 
-	"github.com/cohere-ai/cohere-go"
 	"github.com/wabarc/helper"
+	"github.com/wabarc/wayback/config"
 )
 
 func TestSummarize(t *testing.T) {
@@ -17,39 +17,40 @@ func TestSummarize(t *testing.T) {
 
 	mux.HandleFunc("/", handleFunc)
 
-	cohereClient := &cohere.Client{Client: *httpClient, BaseURL: server.URL + "/"}
-	coh := &Cohere{client: cohereClient}
+	t.Setenv("WAYBACK_LLM_PROVIDER", "cohere")
+	t.Setenv("WAYBACK_LLM_APIKEY", "test-key")
+
+	parser := config.NewParser()
+	opts, err := parser.ParseEnvironmentVariables()
+	if err != nil {
+		t.Fatalf("Parse environment variables or flags failed, error: %v", err)
+	}
+
+	coh := NewCohere(httpClient, opts)
 
 	tests := []struct {
 		name       string
-		handler    interface{}
+		handler    Summarizer
 		input      string
 		wantErr    bool
 		errMessage string
 	}{
 		{
-			name:       "valid Cohere handler",
+			name:       "Valid Cohere handler",
 			handler:    coh,
 			input:      "This is a test string.",
 			wantErr:    false,
 			errMessage: "",
 		},
 		{
-			name:       "valid Locally handler",
+			name:       "Valid Locally handler",
 			handler:    NewLegacy(),
 			input:      "This is a test string.",
 			wantErr:    false,
 			errMessage: "",
 		},
 		{
-			name:       "invalid handler",
-			handler:    "invalid-handler",
-			input:      "This is a test string.",
-			wantErr:    true,
-			errMessage: "invalid handler",
-		},
-		{
-			name:       "empty input",
+			name:       "Empty input",
 			handler:    coh,
 			input:      "",
 			wantErr:    true,
@@ -59,9 +60,7 @@ func TestSummarize(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sum := &Summary{Handler: tt.handler}
-
-			_, err := sum.Summarize(tt.input)
+			_, err := tt.handler.Summarize(tt.input)
 
 			if (err != nil) != tt.wantErr {
 				t.Fatalf(`Unexpected error status. Got "%v", but wanted error="%v"`, err, tt.wantErr)

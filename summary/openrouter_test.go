@@ -1,4 +1,4 @@
-// Copyright 2023 Wayback Archiver. All rights reserved.
+// Copyright 2026 Wayback Archiver. All rights reserved.
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
@@ -6,9 +6,7 @@ package summary // import "github.com/wabarc/wayback/summary"
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 
@@ -16,26 +14,17 @@ import (
 	"github.com/wabarc/wayback/config"
 )
 
-var (
-	apiKey            = os.Getenv("WAYBACK_LLM_APIKEY")
-	summarized        = "This is a summary of the test input."
-	summarizeResponse = []byte(fmt.Sprintf(`{
-    "summary": "%s"
-}`, summarized))
-
-	handleFunc = func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		switch r.URL.Path {
-		case "/v2/chat":
-			w.Write(summarizeResponse)
-		}
-	}
-)
-
-func TestNewCohere(t *testing.T) {
+func TestNewOpenRouter(t *testing.T) {
 	httpClient, mux, server := helper.MockServer()
 	defer server.Close()
 
+	handleFunc := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/api/v1/chat/completions":
+			w.Write(summarizeResponse)
+		}
+	}
 	mux.HandleFunc("/", handleFunc)
 
 	tests := []struct {
@@ -79,15 +68,15 @@ func TestNewCohere(t *testing.T) {
 				t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 			}
 
-			cohere := NewCohere(tt.client, opts)
+			cohere := NewOpenRouter(tt.client, opts)
 			if !tt.expectNil && cohere == nil {
-				t.Errorf("Unexpected nil value for Cohere instance")
+				t.Errorf("Unexpected nil value for OpenRouter instance")
 			}
 		})
 	}
 }
 
-func TestCohereSummarize(t *testing.T) {
+func TestOpenRouterSummarize(t *testing.T) {
 	tests := []struct {
 		name        string
 		input       string
@@ -128,7 +117,7 @@ func TestCohereSummarize(t *testing.T) {
 	defer server.Close()
 
 	// Register handler at expected endpoint path used by the client.
-	mux.HandleFunc("/v2/chat", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/v1/chat/completions", func(w http.ResponseWriter, r *http.Request) {
 		// optional: assert method and headers
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -169,7 +158,7 @@ func TestCohereSummarize(t *testing.T) {
 				t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 			}
 
-			coh := NewCohere(httpClient, opts)
+			coh := NewOpenRouter(httpClient, opts)
 
 			actual, actualErr := coh.Summarize(tt.input)
 

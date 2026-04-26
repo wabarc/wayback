@@ -5,8 +5,10 @@
 package summary // import "github.com/wabarc/wayback/summary"
 
 import (
-	"fmt"
 	"strings"
+
+	"github.com/wabarc/wayback/config"
+	"github.com/wabarc/wayback/ingress"
 )
 
 // Summarizer is the interface that wraps the basic Summarize method.
@@ -16,29 +18,23 @@ type Summarizer interface {
 	Summarize(s string) (string, error)
 }
 
-// Interface guard
-var _ Summarizer = (*Summary)(nil)
-
 // Summary provides a high-level interface for generating text summaries using
 // different summarization methods.
 type Summary struct {
 	Handler interface{}
 }
 
-// Summarize generates a summary of the input text using the selected summarization method.
-// It returns the summary as a string and any error that occurred during summarization.
-func (sum *Summary) Summarize(s string) (string, error) {
-	s = strings.TrimSpace(s)
-	if s == "" {
-		return "", fmt.Errorf("text not found")
+// NewSummary creates and returns a Summarizer based on the configured LLM provider.
+// It inspects opts.LLMProvider() (case-insensitive) and constructs a provider-specific
+// handler. It falls back to the legacy summarizer implementation.
+// The returned Summarizer wraps the chosen handler.
+func NewSummary(opts *config.Options) Summarizer {
+	switch strings.ToLower(opts.LLMProvider()) {
+	case "cohere":
+		return NewCohere(ingress.Client(), opts)
+	case "openrouter":
+		return NewOpenRouter(ingress.Client(), opts)
 	}
 
-	switch handler := sum.Handler.(type) {
-	case *Cohere:
-		return handler.Summarize(s)
-	case *Legacy:
-		return handler.Summarize(s)
-	default:
-		return "", fmt.Errorf("invalid handler")
-	}
+	return NewLegacy()
 }

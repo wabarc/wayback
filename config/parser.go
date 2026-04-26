@@ -223,8 +223,6 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.storageDir = parseString(val, defStorageDir)
 		case "WAYBACK_MAX_MEDIA_SIZE":
 			p.opts.maxMediaSize = parseString(val, defMaxMediaSize)
-		case "WAYBACK_COHERE_APIKEY":
-			p.opts.cohereApiKey = parseString(val, defCohereApiKey)
 		case "WAYBACK_TIMEOUT":
 			p.opts.waybackTimeout = parseInt(val, defWaybackTimeout)
 		case "WAYBACK_MAX_RETRIES":
@@ -239,6 +237,12 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.meili.indexing = parseString(val, defMeiliIndexing)
 		case "WAYBACK_MEILI_APIKEY":
 			p.opts.meili.apikey = parseString(val, defMeiliApikey)
+		case "WAYBACK_LLM_PROVIDER":
+			p.opts.llm.provider = parseString(val, defLLMProvider)
+		case "WAYBACK_LLM_APIKEY":
+			p.opts.llm.apikey = parseString(val, defLLMApiKey)
+		case "WAYBACK_LLM_MODEL":
+			p.opts.llm.model = parseString(val, defLLMModel)
 		case "WAYBACK_OMNIVORE_APIKEY":
 			p.opts.omnivore.apikey = parseString(val, defOmnivoreApikey)
 		case "WAYBACK_PRIVACY_URL":

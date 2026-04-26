@@ -1,4 +1,4 @@
-// Copyright 2023 Wayback Archiver. All rights reserved.
+// Copyright 2026 Wayback Archiver. All rights reserved.
 // Use of this source code is governed by the GNU GPL v3
 // license that can be found in the LICENSE file.
 
@@ -16,37 +16,37 @@ import (
 )
 
 // Interface guard
-var _ Summarizer = (*Cohere)(nil)
+var _ Summarizer = (*OpenRouter)(nil)
 
-// Cohere represents a text summarization algorithm powered by Cohere's AI models.
-type Cohere struct {
+// OpenRouter represents a text summarization client for OpenRouter LLM service.
+type OpenRouter struct {
 	client *http.Client
 	apiKey string
 	model  string
 }
 
-// NewCohere creates a `Cohere` instance with the specified `http.Client` instance and API key.
+// NewOpenRouter creates a `OpenRouter` instance with the specified `http.Client` and options.
 // If the `http.Client` instance is `nil`, the default client is used. This function returns a pointer
-// to the newly created `Cohere` instance and an error, if any.
-func NewCohere(c *http.Client, opts *config.Options) *Cohere {
+// to the newly created `OpenRouter` instance and an error, if any.
+func NewOpenRouter(c *http.Client, opts *config.Options) *OpenRouter {
 	if c == nil {
 		c = ingress.Client()
 	}
 	model := opts.LLMModel()
 	if model == "" {
-		model = "command-a-03-2025"
+		model = "openrouter/auto"
 	}
 
-	return &Cohere{
+	return &OpenRouter{
 		client: c,
 		apiKey: opts.LLMApiKey(),
 		model:  model,
 	}
 }
 
-// Summarize generates a summary of the input text using Cohere's AI models.
+// Summarize generates a summary of the input text using OpenRouter's AI models.
 // Returns the generated summary as a string and an error, if any.
-func (coh *Cohere) Summarize(s string) (string, error) {
+func (coh *OpenRouter) Summarize(s string) (string, error) {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return "", fmt.Errorf("text not found")
@@ -64,13 +64,12 @@ func (coh *Cohere) Summarize(s string) (string, error) {
 		return "", fmt.Errorf("failed to marshal json: %v", err)
 	}
 
-	endpoint := "https://api.cohere.ai/v2/chat"
+	endpoint := "https://openrouter.ai/api/v1/chat/completions"
 	req, err := http.NewRequest(http.MethodPost, endpoint, bytes.NewReader(buf))
 	if err != nil {
 		return "", fmt.Errorf("failed to make request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "Bearer "+coh.apiKey)
 
 	res, err := coh.client.Do(req)
@@ -88,8 +87,8 @@ func (coh *Cohere) Summarize(s string) (string, error) {
 		return "", fmt.Errorf("failed to decode body: %v", err)
 	}
 
-	if len(cr.Message.Contents) > 0 && strings.TrimSpace(cr.Message.Contents[0].Text) != "" {
-		return strings.TrimSpace(cr.Message.Contents[0].Text), nil
+	if len(cr.Choices) > 0 && strings.TrimSpace(cr.Choices[0].Message.Content) != "" {
+		return strings.TrimSpace(cr.Choices[0].Message.Content), nil
 	}
 
 	return s, nil

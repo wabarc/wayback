@@ -230,11 +230,11 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 			}
 
 			// Generate summary
-			tldr := &summary.Summary{Handler: summary.NewLegacy()}
-			if coh, err := summary.NewCohere(ingress.Client(), opts.CohereApiKey()); err == nil {
-				tldr = &summary.Summary{Handler: coh}
+			summarizer := summary.NewSummary(opts)
+			sum, err := summarizer.Summarize(article.TextContent)
+			if err != nil {
+				logger.Error("sumarize failed: %v", err)
 			}
-			sum, _ := tldr.Summarize(article.TextContent) // nolint:errcheck
 
 			// Upload files to third-party server
 			if err = remotely(ctx, artifact); err != nil {
