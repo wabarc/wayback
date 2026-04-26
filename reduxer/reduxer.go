@@ -230,7 +230,7 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 			}
 
 			// Generate summary
-			tldr := &summary.Summary{Handler: summary.NewLocally()}
+			tldr := &summary.Summary{Handler: summary.NewLegacy()}
 			if coh, err := summary.NewCohere(ingress.Client(), opts.CohereApiKey()); err == nil {
 				tldr = &summary.Summary{Handler: coh}
 			}

@@ -36,7 +36,7 @@ func (sum *Summary) Summarize(s string) (string, error) {
 	switch handler := sum.Handler.(type) {
 	case *Cohere:
 		return handler.Summarize(s)
-	case *Locally:
+	case *Legacy:
 		return handler.Summarize(s)
 	default:
 		return "", fmt.Errorf("invalid handler")

@@ -36,7 +36,7 @@ func TestSummarize(t *testing.T) {
 		},
 		{
 			name:       "valid Locally handler",
-			handler:    NewLocally(),
+			handler:    NewLegacy(),
 			input:      "This is a test string.",
 			wantErr:    false,
 			errMessage: "",

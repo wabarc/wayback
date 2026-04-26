@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestLocally(t *testing.T) {
+func TestLegacy(t *testing.T) {
 	// Define test cases as a slice of structs.
 	tests := []struct {
 		name       string
@@ -33,7 +33,7 @@ func TestLocally(t *testing.T) {
 		},
 	}
 
-	local := NewLocally()
+	local := NewLegacy()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

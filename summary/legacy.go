@@ -8,28 +8,28 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/JesusIslam/tldr"
+	"github.com/didasy/tldr"
 )
 
 const maxCharacters = 128
 
 // Interface guard
-var _ Summarizer = (*Locally)(nil)
+var _ Summarizer = (*Legacy)(nil)
 
-// Locally implements the Summarizer interface using the tldr.Bag package to
+// Legacy implements the Summarizer interface using the tldr.Bag package to
 // perform local summarization.
-type Locally struct {
+type Legacy struct {
 	*tldr.Bag
 }
 
-// NewLocally creates a new instance of the Locally struct with a new tldr.Bag instance.
-func NewLocally() *Locally {
-	return &Locally{tldr.New()}
+// NewLegacy creates a new instance of the Legacy struct with a new tldr.Bag instance.
+func NewLegacy() *Legacy {
+	return &Legacy{tldr.New()}
 }
 
-// Summarize generates a summary of the input text using local summarization.
+// Summarize generates a summary of the input text using legacy summarization.
 // It returns the summary as a string and any error that occurred during summarization.
-func (l *Locally) Summarize(s string) (string, error) {
+func (l *Legacy) Summarize(s string) (string, error) {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return "", fmt.Errorf("text not found")
