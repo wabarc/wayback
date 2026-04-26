@@ -35,7 +35,7 @@ func (l *Legacy) Summarize(s string) (string, error) {
 		return "", fmt.Errorf("text not found")
 	}
 
-	l.Bag.MaxCharacters = maxCharacters
+	l.MaxCharacters = maxCharacters
 	res, err := l.Bag.Summarize(s, 1)
 	if err != nil {
 		return "", fmt.Errorf("summarize failed: %v", err)

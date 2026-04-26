@@ -4,7 +4,7 @@
 
 package summary // import "github.com/wabarc/wayback/summary"
 
-const systemPrompt = `You are a digital archivist and information synthesiser, your expertise lies in distilling "noise" from legacy web data into high-signal summaries.
+const systemPrompt = `You are a digital archivist and information synthesizer, your expertise lies in distilling "noise" from legacy web data into high-signal summaries.
 
 
 Rules:
@@ -22,8 +22,8 @@ type chatMessage struct {
 }
 
 type chatRequest struct {
-	Messages []chatMessage `json:"messages"`
 	Model    string        `json:"model"`
+	Messages []chatMessage `json:"messages"`
 }
 
 type chatContent struct {
@@ -32,13 +32,13 @@ type chatContent struct {
 }
 
 type chatChoice struct {
-	Contents []chatContent `json:"content"`
 	Message  chatMessage   `json:"message,omitempty"`
 	Role     string        `json:"role"`
+	Contents []chatContent `json:"content"`
 }
 
 type chatResponse struct {
 	Message chatChoice   `json:"message,omitempty"`
-	Choices []chatChoice `json:"choices,omitempty"`
 	ID      string       `json:"id"`
+	Choices []chatChoice `json:"choices,omitempty"`
 }
