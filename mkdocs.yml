@@ -66,6 +66,7 @@ nav:
     - 'Archive.today': 'integrations/archive-today.md'
     - 'Telegraph': 'integrations/telegraph.md'
     - 'IPFS': 'integrations/ipfs.md'
+    - 'Ghost Archive': 'integrations/ghost-archive.md'
     - Metrics: 'integrations/metrics.md'
   - Resources: 'resources.md'
   - Changelog: 'changelog.md'

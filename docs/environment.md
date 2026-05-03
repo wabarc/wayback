@@ -49,7 +49,8 @@ Use the `-c` / `--config` option to specify the build definition file to use.
 | `--ia`              | `WAYBACK_ENABLE_IA`               | `true`                     | Wayback webpages to **Internet Archive**                     |
 | `--is`              | `WAYBACK_ENABLE_IS`               | `true`                     | Wayback webpages to **Archive Today**                        |
 | `--ip`              | `WAYBACK_ENABLE_IP`               | `false`                    | Wayback webpages to **IPFS**                                 |
-| `--ph`              | `WAYBACK_ENABLE_PH`               | `false`                    | Wayback webpages to **[Telegra.ph](https://telegra.ph)**, required Chrome/Chromium |
+| `--ph`              | `WAYBACK_ENABLE_PH`               | `true`                     | Wayback webpages to **[Telegra.ph](https://telegra.ph)**, required Chrome/Chromium |
+| `--ga`              | `WAYBACK_ENABLE_GA`               | `true`                     | Wayback webpages to **[Ghost Archive](https://ghostarchive.org/)** |
 | `--ipfs-host`       | `WAYBACK_IPFS_HOST`               | `127.0.0.1`                | IPFS daemon service host                                     |
 | `-p`, `--ipfs-port` | `WAYBACK_IPFS_PORT`               | `5001`                     | IPFS daemon service port                                     |
 | `-m`, `--ipfs-mode` | `WAYBACK_IPFS_MODE`               | `pinner`                   | IPFS mode for preserve webpage, e.g. `daemon`, `pinner`      |

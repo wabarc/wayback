@@ -67,7 +67,7 @@ func SlotName(s string) string {
 		SLOT_IS: "archive.today",
 		SLOT_IP: "IPFS",
 		SLOT_PH: "Telegraph",
-		SLOT_GA: "Ghostarchive",
+		SLOT_GA: "Ghost Archive",
 		SLOT_TT: "Time Travel",
 	}
 

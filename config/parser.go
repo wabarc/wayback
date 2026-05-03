@@ -125,6 +125,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.slots[SLOT_IP] = parseBool(val, defEnabledIP)
 		case "WAYBACK_ENABLE_PH":
 			p.opts.slots[SLOT_PH] = parseBool(val, defEnabledPH)
+		case "WAYBACK_ENABLE_GA":
+			p.opts.slots[SLOT_GA] = parseBool(val, defEnabledGA)
 		case "WAYBACK_TELEGRAM_TOKEN":
 			p.opts.telegram.token = parseString(val, defTelegramToken)
 		case "WAYBACK_TELEGRAM_CHANNEL":

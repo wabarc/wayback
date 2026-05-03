@@ -5,7 +5,7 @@
 wayback \- easy and fast to wayback webpage.
 
 .SH SYNOPSIS
-\fBwayback\fR [--chatid] [-d|--daemon] [--debug] [-h|--help] [--ia] [--ip] [--is]
+\fBwayback\fR [--chatid] [-d|--daemon] [--debug] [-h|--help] [--ia] [--ip] [--is] [--ga]
         [--ipfs-host] [-m|--ipfs-mode] [-p|--ipfs-port]
         [-t|--token] [--tor] [--tor-key]
         [-c|--config] [--info] [--print]
@@ -169,6 +169,12 @@ Enable Archive Today (archive.is)\&.
 .TP
 .B WAYBACK_ENABLE_IP
 Enable IPFS\&.
+.TP
+.B WAYBACK_ENABLE_PH
+Enable Telegra.ph\&.
+.TP
+.B WAYBACK_ENABLE_GA
+Enable Ghost Archive\&.
 .TP
 .B WAYBACK_POOLING_SIZE
 Number of worker pool for wayback at once. default 3\&.
