@@ -613,15 +613,15 @@ func TestDefaultSlots(t *testing.T) {
 	}
 
 	expected := map[string]bool{
-		SLOT_IA: true,
-		SLOT_IS: true,
+		SLOT_IA: false,
+		SLOT_IS: false,
 		SLOT_IP: false,
-		SLOT_PH: true,
-		SLOT_GA: true,
+		SLOT_PH: false,
+		SLOT_GA: false,
 	}
 	got := opts.Slots()
 
-	if got == nil || !got[SLOT_IA] || !got[SLOT_IS] || got[SLOT_IP] || !got[SLOT_PH] || !got[SLOT_GA] {
+	if got == nil || got[SLOT_IA] || got[SLOT_IS] || got[SLOT_IP] || got[SLOT_PH] || got[SLOT_GA] {
 		t.Fatalf(`Unexpected default slots, got %v instead of %v`, got, expected)
 	}
 }
