@@ -168,6 +168,8 @@ func TestWayback(t *testing.T) {
 		t.Skip("Skip test in short mode.")
 	}
 
+	setenv(t, "foo-bar")
+
 	opts := parseOpts(t)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -212,6 +214,8 @@ func TestPlayback(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skip test in short mode.")
 	}
+
+	setenv(t, "foo-bar")
 
 	opts := parseOpts(t)
 

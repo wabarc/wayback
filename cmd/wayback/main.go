@@ -72,11 +72,11 @@ func main() {
 }
 
 func init() {
-	rootCmd.Flags().BoolVarP(&ia, "ia", "", true, "Wayback webpages to Internet Archive")
-	rootCmd.Flags().BoolVarP(&is, "is", "", true, "Wayback webpages to Archive Today")
-	rootCmd.Flags().BoolVarP(&ip, "ip", "", true, "Wayback webpages to IPFS")
-	rootCmd.Flags().BoolVarP(&ph, "ph", "", true, "Wayback webpages to Telegraph")
-	rootCmd.Flags().BoolVarP(&ga, "ga", "", true, "Wayback webpages to Ghostarchive")
+	rootCmd.Flags().BoolVarP(&ia, "ia", "", false, "Wayback webpages to Internet Archive")
+	rootCmd.Flags().BoolVarP(&is, "is", "", false, "Wayback webpages to Archive Today")
+	rootCmd.Flags().BoolVarP(&ip, "ip", "", false, "Wayback webpages to IPFS")
+	rootCmd.Flags().BoolVarP(&ph, "ph", "", false, "Wayback webpages to Telegraph")
+	rootCmd.Flags().BoolVarP(&ga, "ga", "", false, "Wayback webpages to Ghost Archive")
 	rootCmd.Flags().StringSliceVarP(&daemon, "daemon", "d", []string{}, "Run as daemon service, supported services are telegram, web, mastodon, twitter, discord, slack, irc, xmpp")
 	rootCmd.Flags().StringVarP(&host, "ipfs-host", "", "127.0.0.1", "IPFS daemon host, do not require, unless enable ipfs")
 	rootCmd.Flags().UintVarP(&port, "ipfs-port", "p", 5001, "IPFS daemon port")
@@ -162,10 +162,10 @@ func setToEnv(cmd *cobra.Command) {
 // nolint:gocyclo
 func run(cmd *cobra.Command, args []string) {
 	if !ia && !is && !ip && !ph && !ga {
-		ia, is, ip = true, true, true
+		ia, is, ph, ga = true, true, true, true
 		os.Setenv("WAYBACK_ENABLE_IA", "true")
 		os.Setenv("WAYBACK_ENABLE_IS", "true")
-		os.Setenv("WAYBACK_ENABLE_IP", "true")
+		os.Setenv("WAYBACK_ENABLE_PH", "true")
 		os.Setenv("WAYBACK_ENABLE_GA", "true")
 	}
 
