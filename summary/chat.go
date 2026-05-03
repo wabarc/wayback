@@ -13,6 +13,12 @@ Rules:
 - Summary must be in the same language as the source content
 - Do NOT repeat ideas from previous snapshots unless conditions have materially changed
 
+FORMATTING RULES (STRICT):
+- STRICTOR PROHIBITION: Do not use Markdown bolding (**text**)
+- Use ONLY plain text without any formatting
+- Use simple line breaks to separate points
+- Do NOT use headers or bold labels
+
 The output should be a maximum of 280 plain paragraphs.`
 
 type chatMessage struct {
