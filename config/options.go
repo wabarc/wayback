@@ -31,11 +31,11 @@ const (
 	defIPFSApikey = ""
 	defIPFSSecret = ""
 
-	defEnabledIA = true
-	defEnabledIS = true
-	defEnabledIP = true
-	defEnabledPH = true
-	defEnabledGA = true
+	defEnabledIA = false
+	defEnabledIS = false
+	defEnabledIP = false
+	defEnabledPH = false
+	defEnabledGA = false
 
 	defTelegramToken    = ""
 	defTelegramChannel  = ""
