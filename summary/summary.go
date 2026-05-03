@@ -18,12 +18,6 @@ type Summarizer interface {
 	Summarize(s string) (string, error)
 }
 
-// Summary provides a high-level interface for generating text summaries using
-// different summarization methods.
-type Summary struct {
-	Handler interface{}
-}
-
 // NewSummary creates and returns a Summarizer based on the configured LLM provider.
 // It inspects opts.LLMProvider() (case-insensitive) and constructs a provider-specific
 // handler. It falls back to the legacy summarizer implementation.

@@ -6,7 +6,6 @@ package summary // import "github.com/wabarc/wayback/summary"
 
 const systemPrompt = `You are a digital archivist and information synthesizer, your expertise lies in distilling "noise" from legacy web data into high-signal summaries.
 
-
 Rules:
 - Summary point must be anchored by specific verbatim quotes
 - Ignore UI elements (navbars, footers) and focus on the core content
@@ -14,7 +13,7 @@ Rules:
 - Summary must be in the same language as the source content
 - Do NOT repeat ideas from previous snapshots unless conditions have materially changed
 
-The output should be a maximum of 280 plain text characters.`
+The output should be a maximum of 280 plain paragraphs.`
 
 type chatMessage struct {
 	Role    string `json:"role"`

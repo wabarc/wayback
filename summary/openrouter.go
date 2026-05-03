@@ -46,14 +46,14 @@ func NewOpenRouter(c *http.Client, opts *config.Options) *OpenRouter {
 
 // Summarize generates a summary of the input text using OpenRouter's AI models.
 // Returns the generated summary as a string and an error, if any.
-func (coh *OpenRouter) Summarize(s string) (string, error) {
+func (or *OpenRouter) Summarize(s string) (string, error) {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return "", fmt.Errorf("text not found")
 	}
 
 	body := chatRequest{
-		Model: coh.model,
+		Model: or.model,
 		Messages: []chatMessage{
 			{Role: "system", Content: systemPrompt},
 			{Role: "user", Content: s},
@@ -70,16 +70,16 @@ func (coh *OpenRouter) Summarize(s string) (string, error) {
 		return "", fmt.Errorf("failed to make request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+coh.apiKey)
+	req.Header.Set("Authorization", "Bearer "+or.apiKey)
 
-	res, err := coh.client.Do(req)
+	res, err := or.client.Do(req)
 	if err != nil {
 		return "", err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusMultipleChoices {
-		return "", fmt.Errorf("cohere api error: status %d", res.StatusCode)
+		return "", fmt.Errorf("openrouter api error: status %d", res.StatusCode)
 	}
 
 	var cr chatResponse
