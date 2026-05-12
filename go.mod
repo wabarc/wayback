@@ -37,10 +37,10 @@ require (
 	github.com/slack-go/slack v0.11.2
 	github.com/spf13/cobra v1.6.1
 	github.com/wabarc/archive.is v1.4.0
-	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
+	github.com/wabarc/archive.org v1.2.1-0.20240906132526-5c8066def044
 	github.com/wabarc/ghostarchive v0.1.1
 	github.com/wabarc/go-catbox v0.1.0
-	github.com/wabarc/helper v0.0.0-20230418130954-be7440352bcb
+	github.com/wabarc/helper v0.0.0-20240906105554-3673068835d4
 	github.com/wabarc/imgbb v1.0.0
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20230502052510-dc378f9e202b
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792
@@ -88,7 +88,7 @@ require (
 	github.com/dghubble/sling v1.3.0 // indirect
 	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/dop251/goja v0.0.0-20221115122301-6c0d9883792e // indirect
-	github.com/fatih/color v1.16.0 // indirect
+	github.com/fatih/color v1.17.0 // indirect
 	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/go-shiori/dom v0.0.0-20210627111528-4e4722cd0d65 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
