@@ -40,7 +40,7 @@ require (
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
 	github.com/wabarc/ghostarchive v0.1.1
 	github.com/wabarc/go-catbox v0.1.0
-	github.com/wabarc/helper v0.0.0-20230418130954-be7440352bcb
+	github.com/wabarc/helper v0.0.0-20240906105554-3673068835d4
 	github.com/wabarc/imgbb v1.0.0
 	github.com/wabarc/ipfs-pinner v1.1.1-0.20230502052510-dc378f9e202b
 	github.com/wabarc/logger v0.0.0-20210730133522-86bd3f31e792

@@ -489,6 +489,8 @@ github.com/wabarc/helper v0.0.0-20210701193643-e0fe0a807cb9/go.mod h1:TuTZtoiOu9
 github.com/wabarc/helper v0.0.0-20210718171053-59c70d0b20c2/go.mod h1:uS6mimKlWkGvEZXkJ6JoW7LYnnB2JP6dLU9q7pgDaWQ=
 github.com/wabarc/helper v0.0.0-20230418130954-be7440352bcb h1:psEAY4wXvhXp/Hp5CJWgAOKWqhvAom+/hOjK+Qscx7o=
 github.com/wabarc/helper v0.0.0-20230418130954-be7440352bcb/go.mod h1:S1N1F/2lwcHYqCowYTrR6i0DZ/1lcXKU+s+7rv5dUno=
+github.com/wabarc/helper v0.0.0-20240906105554-3673068835d4 h1:5nIcMUxU8jyYqj4FLFzqzeoU51lEQ8NRHQq/7H0ivsM=
+github.com/wabarc/helper v0.0.0-20240906105554-3673068835d4/go.mod h1:Nk0YTTPE4bA5yePxS35ARZUMGhjYhwAjGzr39Is6bh4=
 github.com/wabarc/imgbb v1.0.0 h1:vNud9qY4dRGp1nikb+GHIrc/sE3WOdNq5gfT/vhWEUQ=
 github.com/wabarc/imgbb v1.0.0/go.mod h1:piz6QXkVfFpQbaQHx70/rPDwaICkW5Ew3lShTzbnVt0=
 github.com/wabarc/ipfs-pinner v1.1.1-0.20230502052510-dc378f9e202b h1:GhmOE3qTmrPKAtu92E3wXvRwukbvO59roGs/D0jKcNc=
