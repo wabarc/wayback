@@ -136,6 +136,8 @@ github.com/fatih/color v1.12.0/go.mod h1:ELkj/draVOlAH/xkhN6mQ50Qd0MPOk5AAr3maGE
 github.com/fatih/color v1.13.0/go.mod h1:kLAiJbzzSOZDVNGyDpeOxJ47H46qBXwg5ILebYFFOfk=
 github.com/fatih/color v1.16.0 h1:zmkK9Ngbjj+K0yRhTVONQh1p/HknKYSlNT+vZCzyokM=
 github.com/fatih/color v1.16.0/go.mod h1:fL2Sau1YI5c0pdGEVCbKQbLXB6edEj1ZgiY4NijnWvE=
+github.com/fatih/color v1.17.0 h1:GlRw1BRJxkpqUCBKzKOw098ed57fEsKeNjpTe3cSjK4=
+github.com/fatih/color v1.17.0/go.mod h1:YZ7TlrGPkiz6ku9fK3TLD/pl3CpsiFyu8N92HLgmosI=
 github.com/fortytw2/leaktest v1.3.0 h1:u8491cBMTQ8ft8aeV+adlcytMZylmA5nnwwkRZjI8vw=
 github.com/fortytw2/leaktest v1.3.0/go.mod h1:jDsjWgpAGjm2CA7WthBh/CdZYEPF31XHquHwclZch5g=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
@@ -479,6 +481,8 @@ github.com/wabarc/archive.is v1.4.0 h1:gXOpYokaLjGz6gh5P+mtxA31G3lqlEm8I2T9LCXbM
 github.com/wabarc/archive.is v1.4.0/go.mod h1:7LhCeNRE0hzSjop2qfMarjCSsyQnbPH6bVGqikPzYuM=
 github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896 h1:c3uD+IKXpNhtAHC2/fTt7R9dXnNhw1Q6sQrHUX3xo64=
 github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896/go.mod h1:yEmUMlNO2PPAxIvo/Hf/VxOrCS5SBwL2/vCW8pyTWjA=
+github.com/wabarc/archive.org v1.2.1-0.20240906132526-5c8066def044 h1:mPjenMy5Xk8EPZqxjaTtMDonWL1SDiWExmJu18dWFo8=
+github.com/wabarc/archive.org v1.2.1-0.20240906132526-5c8066def044/go.mod h1:2JdddHdjFZR6jh6R2AFQ2zS/PD4hkeKfZzJykVN2ZHc=
 github.com/wabarc/ghostarchive v0.1.1 h1:iGnDwvUixynKGlUTtxGfWAD1p6QRtCj7pAYCqgZNZTQ=
 github.com/wabarc/ghostarchive v0.1.1/go.mod h1:+HB72/CrKK4at+QhWDKRZYB6WLLyE/xlXr6/LgfqFro=
 github.com/wabarc/go-catbox v0.1.0 h1:/UhV9md3MJrjZtm+EToSyFjawXgPiHSExLNRqsWNisg=
@@ -489,6 +493,8 @@ github.com/wabarc/helper v0.0.0-20210701193643-e0fe0a807cb9/go.mod h1:TuTZtoiOu9
 github.com/wabarc/helper v0.0.0-20210718171053-59c70d0b20c2/go.mod h1:uS6mimKlWkGvEZXkJ6JoW7LYnnB2JP6dLU9q7pgDaWQ=
 github.com/wabarc/helper v0.0.0-20230418130954-be7440352bcb h1:psEAY4wXvhXp/Hp5CJWgAOKWqhvAom+/hOjK+Qscx7o=
 github.com/wabarc/helper v0.0.0-20230418130954-be7440352bcb/go.mod h1:S1N1F/2lwcHYqCowYTrR6i0DZ/1lcXKU+s+7rv5dUno=
+github.com/wabarc/helper v0.0.0-20240906105554-3673068835d4 h1:5nIcMUxU8jyYqj4FLFzqzeoU51lEQ8NRHQq/7H0ivsM=
+github.com/wabarc/helper v0.0.0-20240906105554-3673068835d4/go.mod h1:Nk0YTTPE4bA5yePxS35ARZUMGhjYhwAjGzr39Is6bh4=
 github.com/wabarc/imgbb v1.0.0 h1:vNud9qY4dRGp1nikb+GHIrc/sE3WOdNq5gfT/vhWEUQ=
 github.com/wabarc/imgbb v1.0.0/go.mod h1:piz6QXkVfFpQbaQHx70/rPDwaICkW5Ew3lShTzbnVt0=
 github.com/wabarc/ipfs-pinner v1.1.1-0.20230502052510-dc378f9e202b h1:GhmOE3qTmrPKAtu92E3wXvRwukbvO59roGs/D0jKcNc=
