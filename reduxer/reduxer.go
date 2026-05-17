@@ -230,8 +230,9 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 			}
 
 			// Generate summary
+			var sum string
 			summarizer := summary.NewSummary(opts)
-			sum, err := summarizer.Summarize(article.TextContent)
+			sum, err = summarizer.Summarize(article.TextContent)
 			if err != nil {
 				logger.Error("sumarize failed: %v", err)
 			}
