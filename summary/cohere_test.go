@@ -108,7 +108,7 @@ func TestCohereSummarize(t *testing.T) {
 			mockStatus: 200,
 			mockBody: `{
 				"messages":[
-					{"role":"user","content":"This is the summary."}
+					{"role":"user","content":"This is a test input for summarization."}
 				]
 			}`,
 			expected:    "This is the summary.",
@@ -147,14 +147,14 @@ func TestCohereSummarize(t *testing.T) {
 		switch {
 		case strings.Contains(req.Messages[1].Content, "This is a test input for summarization."):
 			w.WriteHeader(200)
-			w.Write([]byte(`{"messages":[{"role":"assistant","content":"This is the summary."}]}`))
+			w.Write([]byte(`{"message":{"content":[{"role":"assistant","text":"This is the summary."}]}}`))
 		case strings.Contains(req.Messages[1].Content, "Non-empty"):
 			w.WriteHeader(500)
 			w.Write([]byte("server error"))
 		default:
 			// default success
 			w.WriteHeader(200)
-			w.Write([]byte(`{"messages":[{"role":"assistant","content":"ok"}]}`))
+			w.Write([]byte(`{"message":{"content":[{"role":"assistant","text":"ok"}]}}`))
 		}
 	})
 

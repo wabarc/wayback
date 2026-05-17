@@ -59,7 +59,7 @@ func TestNewOpenRouter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			t.Setenv("WAYBACK_LLM_PROVIDER", "cohere")
+			t.Setenv("WAYBACK_LLM_PROVIDER", "openrouter")
 			t.Setenv("WAYBACK_LLM_APIKEY", tt.key)
 
 			parser := config.NewParser()
@@ -68,8 +68,8 @@ func TestNewOpenRouter(t *testing.T) {
 				t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 			}
 
-			cohere := NewOpenRouter(tt.client, opts)
-			if !tt.expectNil && cohere == nil {
+			op := NewOpenRouter(tt.client, opts)
+			if !tt.expectNil && op == nil {
 				t.Errorf("Unexpected nil value for OpenRouter instance")
 			}
 		})
@@ -109,7 +109,7 @@ func TestOpenRouterSummarize(t *testing.T) {
 			mockStatus:  500,
 			mockBody:    `{"error":"server"}`,
 			expected:    "",
-			expectedErr: "cohere api error: status 500",
+			expectedErr: "openrouter api error: status 500",
 		},
 	}
 
@@ -136,20 +136,20 @@ func TestOpenRouterSummarize(t *testing.T) {
 		switch {
 		case strings.Contains(req.Messages[1].Content, "This is a test input for summarization."):
 			w.WriteHeader(200)
-			w.Write([]byte(`{"messages":[{"role":"assistant","content":"This is the summary."}]}`))
+			w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"This is the summary."}}]}`))
 		case strings.Contains(req.Messages[1].Content, "Non-empty"):
 			w.WriteHeader(500)
 			w.Write([]byte("server error"))
 		default:
 			// default success
 			w.WriteHeader(200)
-			w.Write([]byte(`{"messages":[{"role":"assistant","content":"ok"}]}`))
+			w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"ok"}}]}`))
 		}
 	})
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("WAYBACK_LLM_PROVIDER", "cohere")
+			t.Setenv("WAYBACK_LLM_PROVIDER", "openrouter")
 			t.Setenv("WAYBACK_LLM_APIKEY", "test-key")
 
 			parser := config.NewParser()
@@ -158,9 +158,9 @@ func TestOpenRouterSummarize(t *testing.T) {
 				t.Fatalf("Parse environment variables or flags failed, error: %v", err)
 			}
 
-			coh := NewOpenRouter(httpClient, opts)
+			op := NewOpenRouter(httpClient, opts)
 
-			actual, actualErr := coh.Summarize(tt.input)
+			actual, actualErr := op.Summarize(tt.input)
 
 			if tt.expectedErr != "" {
 				if actualErr == nil {
