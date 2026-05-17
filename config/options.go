@@ -93,7 +93,6 @@ const (
 	defBoltPathname        = "wayback.db"
 	defPoolingSize         = 3
 	defMaxMediaSize        = "512MB"
-	defCohereApiKey        = ""
 	defWaybackTimeout      = 300
 	defWaybackMaxRetries   = 2
 	defWaybackUserAgent    = "WaybackArchiver/1.0"
