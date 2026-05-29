@@ -1,0 +1,14 @@
+run = "while :; do set -ex; curl -fsSL https://github.com/wabarc/wayback/raw/main/install.sh | sh -s -- -b ~/.local/bin; wayback ${WAYBACK_ARGS}; sleep 1; done"
+language = "bash"
+
+[nix]
+channel = "stable-21_11"
+
+[env]
+WAYBACK_ARGS = "-d web"
+ENABLE_METRICS = "true"
+WAYBACK_ENABLE_IA = "true"
+WAYBACK_ENABLE_IS = "true"
+WAYBACK_ENABLE_IP = "true"
+WAYBACK_ENABLE_PH = "true"
+WAYBACK_STORAGE_DIR = "/tmp/reduxer"
