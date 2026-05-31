@@ -124,7 +124,7 @@ func (t *Telegram) toChannel(art reduxer.Artifact, head, body string) (ok bool) 
 
 // Shutdown shuts down the Telegram service.
 func (t *Telegram) Shutdown() error {
-	t.bot.Stop()
-
+	// Bot is only used for sending messages, no long-running polling to stop.
+	// The HTTP client will be cleaned up automatically on process exit.
 	return nil
 }
