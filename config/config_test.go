@@ -2970,6 +2970,150 @@ func TestMaxMediaSize(t *testing.T) {
 	}
 }
 
+func TestLLMProvider(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		provider string
+		expected string
+	}{
+		{
+			provider: "",
+			expected: "",
+		},
+		{
+			provider: "foo",
+			expected: "foo",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.provider, func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_LLM_PROVIDER", test.provider)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.LLMProvider()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set LLM provider got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}
+
+func TestLLMBaseURL(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		baseurl  string
+		expected string
+	}{
+		{
+			baseurl:  "",
+			expected: "",
+		},
+		{
+			baseurl:  "http://localhost",
+			expected: "http://localhost",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.baseurl, func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_LLM_BASE_URL", test.baseurl)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.LLMBaseURL()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set LLM base URL got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}
+
+func TestLLMApiKey(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		apikey   string
+		expected string
+	}{
+		{
+			apikey:   "",
+			expected: "",
+		},
+		{
+			apikey:   "foo-bar",
+			expected: "foo-bar",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.apikey, func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_LLM_APIKEY", test.apikey)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.LLMApiKey()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set LLM apikey got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}
+
+func TestLLMModel(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		model    string
+		expected string
+	}{
+		{
+			model:    "",
+			expected: "",
+		},
+		{
+			model:    "foo-bar",
+			expected: "foo-bar",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.model, func(t *testing.T) {
+			os.Clearenv()
+			os.Setenv("WAYBACK_LLM_MODEL", test.model)
+
+			parser := NewParser()
+			opts, err := parser.ParseEnvironmentVariables()
+			if err != nil {
+				t.Fatalf(`Parsing environment variables failed: %v`, err)
+			}
+
+			got := opts.LLMModel()
+			if got != test.expected {
+				t.Fatalf(`Unexpected set LLM model got %s instead of %s`, got, test.expected)
+			}
+		})
+	}
+}
+
 func TestMaxAttachSize(t *testing.T) {
 	parser := NewParser()
 	opts, _ := parser.ParseEnvironmentVariables()

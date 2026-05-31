@@ -17,6 +17,7 @@ Whether you need to archive a single web page or a large collection of web sites
 - Supports publishing wayback results to Telegram channel, Mastodon, and GitHub Issues for sharing
 - Supports storing archived files to disk for offline use
 - Download streaming media (requires [FFmpeg](https://ffmpeg.org/)) for convenient media archiving.
+- Supports AI-powered summarization to publishing.
 
 ## How it works
 

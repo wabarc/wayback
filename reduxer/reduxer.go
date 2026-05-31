@@ -27,6 +27,7 @@ import (
 	"github.com/wabarc/wayback/config"
 	"github.com/wabarc/wayback/errors"
 	"github.com/wabarc/wayback/ingress"
+	"github.com/wabarc/wayback/summary"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -57,6 +58,7 @@ type bundle struct {
 	shots    *screenshot.Screenshots[screenshot.Path]
 	artifact Artifact
 	article  readability.Article
+	summary  string
 }
 
 // Artifact represents the file paths stored on the local disk.
@@ -133,6 +135,11 @@ func (b *bundle) Artifact() Artifact {
 // Article returns a readability.Article from bundle.
 func (b *bundle) Article() readability.Article {
 	return b.article
+}
+
+// Summary returns a summary of article.
+func (b *bundle) Summary() string {
+	return b.summary
 }
 
 // Do executes secreenshot, print PDF and export html of given URLs
@@ -221,11 +228,20 @@ func Do(ctx context.Context, opts *config.Options, urls ...*url.URL) (Reduxer, e
 			if err = os.WriteFile(fp, helper.String2Byte(article.TextContent), filePerm); err == nil && article.TextContent != "" {
 				artifact.Txt.Local = fp
 			}
+
+			// Generate summary
+			var sum string
+			summarizer := summary.NewSummary(opts)
+			sum, err = summarizer.Summarize(article.TextContent)
+			if err != nil {
+				logger.Error("sumarize failed: %v", err)
+			}
+
 			// Upload files to third-party server
 			if err = remotely(ctx, artifact); err != nil {
 				logger.Error("upload files to remote server failed: %v", err)
 			}
-			bundle := &bundle{shots: shot, artifact: *artifact, article: article}
+			bundle := &bundle{shots: shot, artifact: *artifact, article: article, summary: sum}
 			bs.Store(Src(shot.URL), bundle)
 			return nil
 		})

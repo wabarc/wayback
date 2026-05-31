@@ -102,6 +102,10 @@ Use the `-c` / `--config` option to specify the build definition file to use.
 | -                   | `WAYBACK_ONION_LOCAL_PORT`        | `8964`                     | Local port for Tor Hidden Service, also support for a **reverse proxy**. This is ignored if `WAYBACK_LISTEN_ADDR` is set. |
 | -                   | `WAYBACK_ONION_REMOTE_PORTS`      | `80`                       | Remote ports for Tor Hidden Service, e.g. `WAYBACK_ONION_REMOTE_PORTS=80,81` |
 | -                   | `WAYBACK_ONION_DISABLED`          | `false`                    | Disable onion service                                        |
+| -                   | `WAYBACK_LLM_PROVIDER`            | ``                         | Enables AI-enhanced summary, supported: `cohere`, `openrouter` |
+| -                   | `WAYBACK_LLM_BASE_URL`            | ``                         | LLM API base URL                                             |
+| -                   | `WAYBACK_LLM_APIKEY`              | ``                         | LLM API key                                                  |
+| -                   | `WAYBACK_LLM_MODEL`               | ``                         | LLM model. Each provider has a sensible default: cohere: command-a-03-2025 \| openrouter: openrouter/auto. |
 | -                   | `WAYBACK_SLOT`                    | -                          | Pinning service for IPFS mode of pinner, see [ipfs-pinner](https://github.com/wabarc/ipfs-pinner#supported-pinning-services) |
 | -                   | `WAYBACK_APIKEY`                  | -                          | API key for pinning service                                  |
 | -                   | `WAYBACK_SECRET`                  | -                          | API secret for pinning service                               |

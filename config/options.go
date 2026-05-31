@@ -112,6 +112,11 @@ const (
 	defDatabaseMinConns           = 1
 	defDatabaseConnectionLifetime = 5
 
+	defLLMProvider = ""
+	defLLMBaseURL  = ""
+	defLLMApiKey   = ""
+	defLLMModel    = ""
+
 	maxAttachSizeTelegram = 50000000   // 50MB
 	maxAttachSizeDiscord  = 8000000    // 8MB
 	maxAttachSizeSlack    = 5000000000 // 5GB
@@ -145,6 +150,7 @@ type Options struct {
 	notion              *notion
 	matrix              *matrix
 	slack               *slack
+	llm                 *llm
 	services            sync.Map
 	privacyURL          string
 	storageDir          string
@@ -269,6 +275,13 @@ type meili struct {
 	apikey   string
 }
 
+type llm struct {
+	provider string
+	baseURL  string
+	apikey   string
+	model    string
+}
+
 type omnivore struct {
 	apikey string
 }
@@ -385,6 +398,12 @@ func NewOptions() *Options {
 			endpoint: defMeiliEndpoint,
 			indexing: defMeiliIndexing,
 			apikey:   defMeiliApikey,
+		},
+		llm: &llm{
+			provider: defLLMProvider,
+			baseURL:  defLLMBaseURL,
+			apikey:   defLLMApiKey,
+			model:    defLLMModel,
 		},
 		omnivore: &omnivore{
 			apikey: defOmnivoreApikey,
@@ -949,6 +968,26 @@ func (o *Options) MaxMediaSize() uint64 {
 		return 0
 	}
 	return size
+}
+
+// LLMProvider returns the LLM provider.
+func (o *Options) LLMProvider() string {
+	return o.llm.provider
+}
+
+// LLMApiKey returns the base URL of LLM provider.
+func (o *Options) LLMBaseURL() string {
+	return o.llm.baseURL
+}
+
+// LLMApiKey returns the apikey of LLM provider.
+func (o *Options) LLMApiKey() string {
+	return o.llm.apikey
+}
+
+// LLMModel returns the model of LLM provider.
+func (o *Options) LLMModel() string {
+	return o.llm.model
 }
 
 // MaxAttachSize returns max attach size limits for several services.
