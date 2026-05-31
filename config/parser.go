@@ -239,6 +239,8 @@ func (p *Parser) parseLines(lines []string) (err error) {
 			p.opts.meili.apikey = parseString(val, defMeiliApikey)
 		case "WAYBACK_LLM_PROVIDER":
 			p.opts.llm.provider = parseString(val, defLLMProvider)
+		case "WAYBACK_LLM_BASE_URL":
+			p.opts.llm.baseURL = parseString(val, defLLMBaseURL)
 		case "WAYBACK_LLM_APIKEY":
 			p.opts.llm.apikey = parseString(val, defLLMApiKey)
 		case "WAYBACK_LLM_MODEL":

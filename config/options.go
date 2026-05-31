@@ -113,6 +113,7 @@ const (
 	defDatabaseConnectionLifetime = 5
 
 	defLLMProvider = ""
+	defLLMBaseURL  = ""
 	defLLMApiKey   = ""
 	defLLMModel    = ""
 
@@ -276,6 +277,7 @@ type meili struct {
 
 type llm struct {
 	provider string
+	baseURL  string
 	apikey   string
 	model    string
 }
@@ -399,6 +401,7 @@ func NewOptions() *Options {
 		},
 		llm: &llm{
 			provider: defLLMProvider,
+			baseURL:  defLLMBaseURL,
 			apikey:   defLLMApiKey,
 			model:    defLLMModel,
 		},
@@ -970,6 +973,11 @@ func (o *Options) MaxMediaSize() uint64 {
 // LLMProvider returns the LLM provider.
 func (o *Options) LLMProvider() string {
 	return o.llm.provider
+}
+
+// LLMApiKey returns the base URL of LLM provider.
+func (o *Options) LLMBaseURL() string {
+	return o.llm.baseURL
 }
 
 // LLMApiKey returns the apikey of LLM provider.

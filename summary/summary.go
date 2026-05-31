@@ -28,6 +28,8 @@ func NewSummary(opts *config.Options) Summarizer {
 		return NewCohere(ingress.Client(), opts)
 	case "openrouter":
 		return NewOpenRouter(ingress.Client(), opts)
+	case "ollama":
+		return NewOllama(ingress.Client(), opts)
 	}
 
 	return NewLegacy()
