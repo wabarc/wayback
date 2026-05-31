@@ -249,7 +249,7 @@ jobs:
             api.github.com:443
 
       - name: Dispatch repository in wabarc/aur
-        uses: peter-evans/repository-dispatch@11ba7d3f32dc7cc919d1c43f1fec1c05260c26b5 # v2.0.0
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           repository: wabarc/aur
           event-type: publish
@@ -257,7 +257,7 @@ jobs:
           client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
 
       - name: Dispatch repository in wabarc/homebrew-wayback
-        uses: peter-evans/repository-dispatch@11ba7d3f32dc7cc919d1c43f1fec1c05260c26b5 # v2.0.0
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           repository: wabarc/homebrew-wayback
           event-type: publish
@@ -265,7 +265,7 @@ jobs:
           client-payload: '{"from": "${{ github.repository }}", "channel": "stable"}'
 
       - name: Dispatch repository in flathub/org.eu.wabarc.wayback
-        uses: peter-evans/repository-dispatch@11ba7d3f32dc7cc919d1c43f1fec1c05260c26b5 # v2.0.0
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4.0.1
         with:
           repository: wabarc/org.eu.wabarc.wayback
           event-type: publish
