@@ -12,16 +12,18 @@ description: |
   A toolkit for snapshot webpage to the Wayback Machine.
   Website https://github.com/wabarc/wayback
 
-base: core20
+base: core26
 grade: stable
 confinement: strict
 compression: lzo
 
-architectures:
-  - amd64
-  - arm64
-  - armhf
-  - i386
+platforms:
+  amd64:
+  arm64:
+  armhf:
+  s390x:
+  ppc64el:
+  riscv64:
 
 parts:
   wayback:
@@ -34,6 +36,8 @@ parts:
       if [ ! -e $SNAPCRAFT_PART_INSTALL/bin/wayback ]; then
         ln -s $SNAPCRAFT_PART_INSTALL/bin/wayback $SNAPCRAFT_PART_INSTALL/bin/wayback
       fi
+    build-snaps:
+      - go/latest/stable
     build-packages:
       - build-essential
 

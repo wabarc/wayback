@@ -56,7 +56,6 @@ PLATFORM_LIST = \
 WINDOWS_ARCH_LIST = \
 	windows-386 \
 	windows-amd64 \
-	windows-arm \
 	windows-arm64
 
 .PHONY: \

@@ -221,7 +221,7 @@ func TestIPFSPort(t *testing.T) {
 	got := opts.IPFSPort()
 
 	if got != expected {
-		t.Fatalf(`Unexpected IPFS port, got %v instead of %q`, got, expected)
+		t.Fatalf(`Unexpected IPFS port, got %v instead of %d`, got, expected)
 	}
 }
 
@@ -855,7 +855,7 @@ func TestOnionLocalPort(t *testing.T) {
 	got := opts.OnionLocalPort()
 
 	if got != expected {
-		t.Fatalf(`Unexpected Tor local port, got %v instead of %q`, got, expected)
+		t.Fatalf(`Unexpected Tor local port, got %v instead of %d`, got, expected)
 	}
 }
 
@@ -872,7 +872,7 @@ func TestDefaultOnionLocalPortValue(t *testing.T) {
 	got := opts.OnionLocalPort()
 
 	if got != expected {
-		t.Fatalf(`Unexpected Tor local port, got %v instead of %q`, got, expected)
+		t.Fatalf(`Unexpected Tor local port, got %v instead of %d`, got, expected)
 	}
 }
 

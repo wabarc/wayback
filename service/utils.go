@@ -148,11 +148,11 @@ func UploadToSlack(client *slack.Client, opts *config.Options, art reduxer.Artif
 			err = errors.Wrap(err, e.Error())
 			continue
 		}
-		params := slack.FileUploadParameters{
+		params := slack.UploadFileParameters{
 			Filename:        fp,
 			Reader:          rd,
 			Title:           caption,
-			Channels:        []string{channel},
+			Channel:         channel,
 			ThreadTimestamp: timestamp,
 		}
 		file, e := client.UploadFile(params)
@@ -160,12 +160,12 @@ func UploadToSlack(client *slack.Client, opts *config.Options, art reduxer.Artif
 			err = errors.Wrap(err, e.Error())
 			continue
 		}
-		file, _, _, e = client.ShareFilePublicURL(file.ID)
+		shared, _, _, e := client.ShareFilePublicURL(file.ID)
 		if e != nil {
 			err = errors.Wrap(err, e.Error())
 			continue
 		}
-		logger.Info("slack external file permalink: %s", file.PermalinkPublic)
+		logger.Info("slack external file permalink: %s", shared.PermalinkPublic)
 	}
 
 	return nil
