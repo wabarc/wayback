@@ -83,7 +83,6 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20240202021202-6d0b6a386732 // indirect
 	github.com/chromedp/chromedp v0.9.5 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
-	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
 	github.com/decred/dcrd/crypto/blake256 v1.0.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
@@ -139,8 +138,7 @@ require (
 	github.com/oliamb/cutter v0.2.2 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	github.com/quic-go/quic-go v0.51.0 // indirect
-	github.com/refraction-networking/utls v1.6.3 // indirect
+	github.com/refraction-networking/utls v1.8.2 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/robertkrimen/otto v0.0.0-20211024170158-b87d35c0b86f // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
