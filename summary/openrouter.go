@@ -55,8 +55,8 @@ func (or *OpenRouter) Summarize(s string) (string, error) {
 	body := chatRequest{
 		Model: or.model,
 		Messages: []chatMessage{
-			{Role: "system", Content: systemPrompt},
-			{Role: "user", Content: s},
+			{Role: "system", Content: systemPrompt}, // nolint: goconst
+			{Role: "user", Content: s},              // nolint: goconst
 		},
 	}
 	buf, err := json.Marshal(body)
