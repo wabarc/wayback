@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- markdownlint-disable -->
 ## [Unreleased]
 
+## [0.21.0] - 2026-07-05
+
 ### Added
 - Add support for placing ipfs variables
 - Add support for AI-powered summarization ([#394](https://github.com/wabarc/wayback/pull/394))
@@ -17,12 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Do not upload files to anonfiles
+- Humanize metrics uptime
+- Ignore auto-delete timer message
+- Remove google cache
+- Update Cosign installer to version 4.1.2
+- Drop support for Windows/ARM architectures
 
 ### Fixed
 - Fix playback from discord no response
 - Improve IRC publish
 - Improve type conversion ([#628](https://github.com/wabarc/wayback/pull/628))
 - Upgrade golangci-lint ([#711](https://github.com/wabarc/wayback/pull/711))
+- Fix archives selection
 
 ## [0.20.1] - 2024-07-02
 
