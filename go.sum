@@ -425,6 +425,8 @@ github.com/wabarc/archive.is v1.4.0 h1:gXOpYokaLjGz6gh5P+mtxA31G3lqlEm8I2T9LCXbM
 github.com/wabarc/archive.is v1.4.0/go.mod h1:7LhCeNRE0hzSjop2qfMarjCSsyQnbPH6bVGqikPzYuM=
 github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896 h1:c3uD+IKXpNhtAHC2/fTt7R9dXnNhw1Q6sQrHUX3xo64=
 github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896/go.mod h1:yEmUMlNO2PPAxIvo/Hf/VxOrCS5SBwL2/vCW8pyTWjA=
+github.com/wabarc/archive.org v1.2.1-0.20240906132526-5c8066def044 h1:mPjenMy5Xk8EPZqxjaTtMDonWL1SDiWExmJu18dWFo8=
+github.com/wabarc/archive.org v1.2.1-0.20240906132526-5c8066def044/go.mod h1:2JdddHdjFZR6jh6R2AFQ2zS/PD4hkeKfZzJykVN2ZHc=
 github.com/wabarc/ghostarchive v0.2.0 h1:P3+easSM+t7jJS/pXMcpLj38fDhiDKXWU2wlDIQsptk=
 github.com/wabarc/ghostarchive v0.2.0/go.mod h1:RPnfoifWPQPgwaP1+GKGx1vZuf28UWEspTQdkdZ3Z10=
 github.com/wabarc/go-catbox v0.1.0 h1:/UhV9md3MJrjZtm+EToSyFjawXgPiHSExLNRqsWNisg=
