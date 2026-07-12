@@ -38,7 +38,7 @@ require (
 	github.com/slack-go/slack v0.27.0
 	github.com/spf13/cobra v1.10.2
 	github.com/wabarc/archive.is v1.4.0
-	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
+	github.com/wabarc/archive.org v1.2.1-0.20240906132526-5c8066def044
 	github.com/wabarc/ghostarchive v0.2.0
 	github.com/wabarc/go-catbox v0.1.0
 	github.com/wabarc/helper v0.0.0-20240906105554-3673068835d4
