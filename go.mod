@@ -20,7 +20,7 @@ require (
 	github.com/goccy/go-json v0.10.6
 	github.com/google/go-github/v40 v40.0.0
 	github.com/google/uuid v1.6.0
-	github.com/gookit/color v1.5.3
+	github.com/gookit/color v1.6.1
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/hashicorp/go-version v1.6.0
@@ -168,7 +168,7 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/tomnomnom/linkheader v0.0.0-20250811210735-e5fe3b51442e // indirect
 	github.com/wabarc/memento v0.0.0-20221023035729-e42d0fe1cefb // indirect
-	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
+	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/ybbus/httpretry v1.0.2 // indirect
 	go.mau.fi/util v0.9.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
