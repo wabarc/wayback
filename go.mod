@@ -14,7 +14,7 @@ require (
 	github.com/didasy/tldr v0.7.0
 	github.com/dstotijn/go-notion v0.11.0
 	github.com/dustin/go-humanize v1.0.1
-	github.com/gabriel-vasile/mimetype v1.4.13
+	github.com/gabriel-vasile/mimetype v1.4.15
 	github.com/go-shiori/go-readability v0.0.0-20251205110129-5db1dc9836f0
 	github.com/go-shiori/obelisk v0.0.0-20251018085940-a77acb503b85
 	github.com/goccy/go-json v0.10.6
