@@ -55,7 +55,7 @@ require (
 	golang.org/x/net v0.56.0
 	golang.org/x/sync v0.21.0
 	gopkg.in/irc.v4 v4.0.0
-	gopkg.in/telebot.v3 v3.0.0-20220130115853-f0291132d3c3
+	gopkg.in/telebot.v3 v3.4.2-beta
 	maunium.net/go/mautrix v0.25.1
 	mellium.im/sasl v0.3.2
 	mellium.im/xmlstream v0.15.4
