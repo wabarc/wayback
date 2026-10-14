@@ -299,10 +299,8 @@ This software is released under the terms of the GNU General Public License v3.0
 
 ## Credits
 
-Thanks to DigitalOcean for supporting open-source software.
+Thanks to DartNode for supporting open-source software.
 
-<p>
-  <a href="https://m.do.co/c/cb27a8691d73">
-    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width="201px" alt="DigitalOcean">
-  </a>
-</p>
+[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
+<!-- Verified on DartNode: DNOS-4917530F -->
+
