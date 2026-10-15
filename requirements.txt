@@ -1,4 +1,4 @@
-mkdocs-material==9.5.19
+mkdocs-material==9.7.7
 mkdocs==1.6.0
 
 # Python Markdown Extensions
