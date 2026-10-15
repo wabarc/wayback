@@ -26,7 +26,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0
 	github.com/iawia002/lux v0.24.1
 	github.com/ipsn/go-libtor v1.0.380
-	github.com/jedib0t/go-pretty/v6 v6.8.1
+	github.com/jedib0t/go-pretty/v6 v6.8.3
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-mastodon v0.0.11
 	github.com/nbd-wtf/go-nostr v0.17.1-0.20230426111250-32ca737acf77
