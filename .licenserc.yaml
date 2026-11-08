@@ -43,6 +43,8 @@ header:
     - 'cosign.pub'
     - 'codecov.yml'
     - 'mkdocs.yml'
+    - '.replit'
+    - 'replit.nix'
 
   comment: on-failure
 
