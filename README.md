@@ -299,8 +299,9 @@ This software is released under the terms of the GNU General Public License v3.0
 
 ## Credits
 
-Thanks to DartNode for supporting open-source software.
+| <a href="https://fyrastack.com"><img src="https://fyrastack.com/logo.svg" width="50" height="50"></a> | **Virtual machines provided by [Fyra Stack](https://fyrastack.com/)** |
+| ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| <img src="https://github.com/DartNode-com.png" width="50">                      | **Hosted on [DartNode](https://dartnode.com) for development**   |
 
-[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
+<!-- https://dartnode.com/branding/DN-Open-Source-sm.png -->
 <!-- Verified on DartNode: DNOS-4917530F -->
-
