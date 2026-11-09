@@ -251,6 +251,14 @@ docker run -d wabarc/wayback wayback -d telegram -t YOUR-BOT-TOKEN -c YOUR-CHANN
     height="32px"
     />
 </a>
+<a href="https://zop.dev/zopday/app/deploy?image=wabarc/wayback&port=8964">
+    <img
+    src="https://zop.dev/deploytozopday-inkhard.svg"
+    alt="Deploy to ZopDay"
+    width="165px"
+    height="32px"
+    />
+</a>
 
 ## Screenshots
 
