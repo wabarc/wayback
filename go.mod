@@ -123,7 +123,7 @@ require (
 	github.com/kallydev/telegraph-go v1.0.1-0.20230318133700-df034d9eed50 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/kkdai/youtube/v2 v2.10.6 // indirect
-	github.com/klauspost/compress v1.18.6 // indirect
+	github.com/klauspost/compress v1.18.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
