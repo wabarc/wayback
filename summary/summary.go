@@ -30,6 +30,8 @@ func NewSummary(opts *config.Options) Summarizer {
 		return NewOpenRouter(ingress.Client(), opts)
 	case "requesty":
 		return NewRequesty(ingress.Client(), opts)
+	case "cheaperinference":
+		return NewCheaperInference(ingress.Client(), opts)
 	case "ollama":
 		return NewOllama(ingress.Client(), opts)
 	}
