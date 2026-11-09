@@ -35,7 +35,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/prometheus/common v0.67.5
 	github.com/rs/xid v1.6.0
-	github.com/slack-go/slack v0.27.0
+	github.com/slack-go/slack v0.30.1
 	github.com/spf13/cobra v1.10.2
 	github.com/wabarc/archive.is v1.4.0
 	github.com/wabarc/archive.org v1.2.1-0.20210708220121-cb9b83ff9896
