@@ -26,7 +26,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0
 	github.com/iawia002/lux v0.24.1
 	github.com/ipsn/go-libtor v1.0.380
-	github.com/jedib0t/go-pretty/v6 v6.8.1
+	github.com/jedib0t/go-pretty/v6 v6.9.1
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-mastodon v0.0.11
 	github.com/nbd-wtf/go-nostr v0.17.1-0.20230426111250-32ca737acf77
@@ -153,6 +153,7 @@ require (
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/procfs v0.20.1 // indirect
 	github.com/refraction-networking/utls v1.8.2 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/robertkrimen/otto v0.5.1 // indirect
 	github.com/rogpeppe/go-internal v1.15.0 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
